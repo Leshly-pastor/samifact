@@ -4,11 +4,15 @@
 soporte@facturaperu.com.pe<br>
 [WhatsApp: 977 860 500](https://walink.co/0c870c "Clic")<br>
 
-## Instalación
+## Instalación Video
 
 [YouTube](https://www.youtube.com/watch?v=wPuCsre30S0 "Clic")<br>
 [Install.txt](https://facturaperu.com.pe/install.txt "Clic")<br>
 [Smart.txt](https://facturaperu.com.pe/smart.txt "Clic")<br>
+
+## Instalación PDF
+
+[Manual PDF](https://facturaperu.com.pe/manual-de-instalaci%C3%B3n.pdf "Clic")<br>
 
 ## Importante
 
