@@ -586,7 +586,7 @@ class Person extends ModelTenant
             'number' => $this->number,
             'identity_document_type_id' => $this->identity_document_type_id,
             'identity_document_type_code' => $this->identity_document_type->code,
-            'address' => $this->address,
+            'address' => $this->address ? $this->address : '-',
             'internal_code' => $this->internal_code,
             'barcode' => $this->barcode,
             'observation' => $this->observation,

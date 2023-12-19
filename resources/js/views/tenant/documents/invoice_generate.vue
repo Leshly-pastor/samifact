@@ -56,15 +56,6 @@
                                             >{{ establishment.address }}
                                         </span>
                                         <br />
-                                        <span v-if="establishment.email != '-'"
-                                            >{{ establishment.email }} </span
-                                        ><span
-                                            v-if="
-                                                establishment.telephone != '-'
-                                            "
-                                            >-
-                                            {{ establishment.telephone }}</span
-                                        >
                                     </address>
                                 </div>
                                 <div
@@ -101,7 +92,7 @@
                                                 class="form-group"
                                             >
                                                 <label class="control-label"
-                                                    >Fec. Emisión</label
+                                                    >Fec. emisión</label
                                                 >
                                                 <el-date-picker
                                                     v-model="form.date_of_issue"
@@ -132,7 +123,7 @@
                                                 class="form-group"
                                             >
                                                 <label class="control-label"
-                                                    >Fec. Vencimiento</label
+                                                    >Fec. vencimiento</label
                                                 >
                                                 <el-date-picker
                                                     v-model="form.date_of_due"
@@ -158,9 +149,7 @@
                                     class="col-xl-2 col-md-2 col-12 align-self-end"
                                 >
                                     <div class="form-group">
-                                        <label
-                                            class="control-label font-weight-bold text-info"
-                                        >
+                                        <label class="control-label">
                                             {{ form.quotations_optional }}
                                         </label>
                                         <el-input
@@ -173,7 +162,9 @@
                             </div>
                             <div class="card-body no-gutters">
                                 <div class="row">
-                                    <div class="col-6 col-md-6 col-lg-4 align-self-end">
+                                    <div
+                                        class="col-6 col-md-6 col-lg-4 align-self-end"
+                                    >
                                         <div
                                             :class="{
                                                 'has-danger':
@@ -181,8 +172,7 @@
                                             }"
                                             class="form-group"
                                         >
-                                            <label
-                                                class="control-label font-weight-bold text-info"
+                                            <label class="control-label"
                                                 >Tipo comprobante</label
                                             >
                                             <el-select
@@ -285,7 +275,7 @@
                                             class="form-group"
                                         >
                                             <label class="control-label"
-                                                >Tipo Operación
+                                                >Tipo de operación
                                                 <template
                                                     v-if="
                                                         (form.operation_type_id ==
@@ -411,9 +401,7 @@
                                         }"
                                         class="form-group col-sm-6 mb-0"
                                     >
-                                        <label
-                                            class="control-label font-weight-bold text-info"
-                                        >
+                                        <label class="control-label">
                                             Cliente
                                             <a
                                                 href="#"
@@ -458,8 +446,7 @@
                                         v-if="customer_addresses.length > 0"
                                         class="form-group col-sm-6 mb-0"
                                     >
-                                        <label
-                                            class="control-label font-weight-bold text-info"
+                                        <label class="control-label"
                                             >Dirección</label
                                         >
                                         <el-select
@@ -647,7 +634,7 @@
                                             class="btn btn-outline-primary mb-1"
                                             @click.prevent="clickAddItemInvoice"
                                         >
-                                            + Agregar Producto
+                                            + Agregar producto
                                         </button>
                                     </el-popover>
                                 </div>
@@ -1151,7 +1138,18 @@
                                                         <label
                                                             class="control-label"
                                                             >Orden de
-                                                            Compra</label
+                                                            Compra
+                                                             <el-tooltip
+                                                        class="item"
+                                                        content="El formato no debe llevar ningun tipo de caracteres como (-./_*)"
+                                                        effect="dark"
+                                                        placement="top-start"
+                                                    >
+                                                    <i
+                                                        class="fa fa-info-circle"
+                                                    ></i>
+                                                    </el-tooltip>
+                                                            </label
                                                         >
                                                         <el-input
                                                             v-model="
@@ -1453,11 +1451,21 @@
                                                     "
                                                 >
                                                     {{ currency_type.symbol }}
-                                                    {{
-                                                        getFormatUnitPriceRow(
-                                                            row.unit_value
-                                                        )
-                                                    }}
+                                                    <template v-if="row.meter">
+                                                        {{
+                                                            getFormatUnitPriceRow(
+                                                                row.unit_price /
+                                                                    row.meter
+                                                            )
+                                                        }}
+                                                    </template >
+                                                    <template v-else>
+                                                        {{
+                                                            getFormatUnitPriceRow(
+                                                                row.unit_value
+                                                            )
+                                                        }}
+                                                    </template>
                                                 </td>
                                                 <td
                                                     class="text-end"
@@ -1650,6 +1658,32 @@
                                                                             height: 40px !important;
                                                                         "
                                                                     >
+                                                                        <el-tooltip
+                                                                            class="item"
+                                                                            content="
+                                                                              Aplicar 18% de IGV al descuento global
+                                                                            "
+                                                                            effect="dark"
+                                                                            placement="top"
+                                                                        >
+                                                                            <i
+                                                                                class="fa fa-info-circle"
+                                                                            ></i>
+                                                                        </el-tooltip>
+                                                                        <el-checkbox
+                                                                            :disabled="
+                                                                                !is_amount ||
+                                                                                total_global_discount ==
+                                                                                    0
+                                                                            "
+                                                                            v-model="
+                                                                                split_base
+                                                                            "
+                                                                            class="ml-1 mr-1"
+                                                                            @change="
+                                                                                splitBase
+                                                                            "
+                                                                        ></el-checkbox>
                                                                         <el-input-number
                                                                             v-model="
                                                                                 total_global_discount
@@ -3157,6 +3191,7 @@ export default {
     ],
     data() {
         return {
+            split_base: false,
             loading: false,
             person_type_id: null,
             cash_id: null,
@@ -3363,6 +3398,10 @@ export default {
                 this.document_types.length > 0
                     ? this.document_types[0].id
                     : null;
+            console.log(
+                "🚀 ~ file: invoice_generate.vue:3373 ~ created ~ this.form.document_type_id:",
+                this.form.document_type_id
+            );
             this.form.operation_type_id =
                 this.operation_types.length > 0
                     ? this.operation_types[0].id
@@ -3383,7 +3422,6 @@ export default {
         } finally {
             this.loading = false;
         }
-        console.log("Pasó");
         // this.default_document_type = response.data.document_id;
         // this.default_series_type = response.data.series_id;
         this.selectDocumentType();
@@ -3411,6 +3449,10 @@ export default {
             await this.$http
                 .get(`/documents/${this.documentId}/show`)
                 .then((response) => {
+                    console.log(
+                        "🚀 ~ file: invoice_generate.vue:3413 ~ .then ~ response:",
+                        response
+                    );
                     this.onSetFormData(response.data.data);
                 })
                 .finally(() => (this.loading_submit = false));
@@ -3454,6 +3496,9 @@ export default {
                             this.percentage_igv
                         );
                     });
+                    console.log(
+                        "🚀 ~ file: invoice_generate.vue:3458 ~ .then ~ .:"
+                    );
                 });
         }
 
@@ -3472,6 +3517,9 @@ export default {
                         return this.setItemFromResponse(i, itemsParsed);
                     });
                     this.form.items = itemsResponse.map((i) => {
+                        console.log(
+                            "🚀 ~ file: invoice_generate.vue:3476 ~ this.form.items=itemsResponse.map ~ .:"
+                        );
                         return calculateRowItem(
                             i,
                             this.form.currency_type_id,
@@ -3522,6 +3570,19 @@ export default {
         this.formatTooltip(20);
     },
     methods: {
+        splitBase() {
+            if (this.total_global_discount == 0 || !this.is_amount) return;
+            if (this.split_base) {
+                this.total_global_discount = this.total_global_discount / 1.18;
+            } else {
+                this.total_global_discount = this.total_global_discount * 1.18;
+            }
+            this.total_global_discount = Math.round(
+                this.total_global_discount * 100
+            );
+            this.total_global_discount = this.total_global_discount / 100;
+            this.calculateTotal();
+        },
         async changeSeller() {
             let { seller_id } = this.form;
             await this.getCash(seller_id);
@@ -3589,6 +3650,9 @@ export default {
         formatItems(item) {
             let oldItem = this.createItem(item);
 
+            console.log(
+                "🚀 ~ file: invoice_generate.vue:3595 ~ formatItems ~ row:"
+            );
             let row = calculateRowItem(oldItem, "PEN", 1, 0.18);
 
             this.addRow(row);
@@ -3738,6 +3802,7 @@ export default {
             this.monthCollege = [];
             this.collegeYear = 20;
             this.errors = {};
+            this.split_base = false;
             this.form = {
                 child_id: null,
                 no_stock: this.configuration.document_no_stock || false,
@@ -3873,6 +3938,9 @@ export default {
                 );
             }
 
+            console.log(
+                "🚀 ~ file: invoice_generate.vue:3879 ~ changeRowFreeAffectationIgv ~ .:"
+            );
             this.form.items[index] = await calculateRowItem(
                 row,
                 this.form.currency_type_id,
@@ -4035,6 +4103,10 @@ export default {
             }
         },
         async onSetFormData(data) {
+            console.log(
+                "🚀 ~ file: invoice_generate.vue:4078 ~ onSetFormData ~ data:",
+                data
+            );
             this.currency_type = await _.find(this.currency_types, {
                 id: data.currency_type_id,
             });
@@ -4044,7 +4116,11 @@ export default {
             }
             this.form.establishment_id = data.establishment_id;
             this.form.document_type_id = data.document_type_id;
+            if (this.company.is_rus) {
+                this.form.document_type_id = "03";
+            }
             this.changeDocumentType();
+
             this.form.id = data.id;
             this.form.hash = data.hash;
             this.form.number = data.number;
@@ -4087,7 +4163,7 @@ export default {
             this.form.items = this.onPrepareItems(data.items);
 
             // this.form.series = data.series; //form.series no llena el selector
-            if (this.table !== "quotations") {
+            if (this.table !== "quotations" && !this.company.is_rus) {
                 this.$store.commit(
                     "setSeries",
                     this.onSetSeries(data.document_type_id, data.series)
@@ -4119,10 +4195,13 @@ export default {
             this.form.total = parseFloat(data.total);
             this.form.subtotal = parseFloat(data.subtotal);
             this.form.total_igv_free = parseFloat(data.total_igv_free);
-            this.form.series_id = this.onSetSeriesId(
-                data.document_type_id,
-                data.series
-            );
+            if (!this.company.is_rus) {
+                this.form.series_id = this.onSetSeriesId(
+                    data.document_type_id,
+                    data.series
+                );
+            }
+
             this.form.operation_type_id = data.invoice
                 ? data.invoice.operation_type_id
                 : data.operation_type_id;
@@ -4509,6 +4588,9 @@ export default {
             this.form.document_type_id = this.select_first_document_type_03
                 ? "03"
                 : "01";
+            if (this.company.is_rus) {
+                this.form.document_type_id = "03";
+            }
         },
         keyupCustomer() {
             if (this.input_person.number) {
@@ -4889,6 +4971,11 @@ export default {
         async ediItem(row, index) {
             row.indexi = index;
             this.recordItem = row;
+
+            if (row.item.meter && row.item.meter > 0) {
+                this.recordItem.unit_price /= row.item.meter;
+                this.recordItem.input_unit_price_value /= row.item.meter;
+            }
             this.showDialogAddItem = true;
         },
         async searchRemoteChildren(input, fromParent = false) {
@@ -5424,7 +5511,8 @@ export default {
                         row,
                         this.form.currency_type_id,
                         this.form.exchange_rate_sale,
-                        this.percentage_igv
+                        this.percentage_igv,
+                        this.documentId !== null
                     )
                 );
             });
@@ -5773,6 +5861,7 @@ export default {
                 amount: amount,
                 base: base,
                 is_amount: this.is_amount,
+                is_split: this.split_base,
             });
         },
         discountGlobal() {
@@ -5885,9 +5974,15 @@ export default {
         validatePaymentDestination() {
             let error_by_item = 0;
 
-            console.log("🚀 ~ file: invoice_generate.vue:5894 ~ this.form.payments.forEach ~ this.form.payments:", this.form.payments)
+            console.log(
+                "🚀 ~ file: invoice_generate.vue:5894 ~ this.form.payments.forEach ~ this.form.payments:",
+                this.form.payments
+            );
             this.form.payments.forEach((item) => {
-                console.log("🚀 ~ file: invoice_generate.vue:5889 ~ this.form.payments.forEach ~ item:", item)
+                console.log(
+                    "🚀 ~ file: invoice_generate.vue:5889 ~ this.form.payments.forEach ~ item:",
+                    item
+                );
                 if (!["05", "08", "09"].includes(item.payment_method_type_id)) {
                     if (item.payment_destination_id == null) error_by_item++;
                 }
@@ -5937,7 +6032,10 @@ export default {
                     return this.$message.error(error_prepayment.message);
             }
 
-                console.log("🚀 ~ file: invoice_generate.vue:5940 ~ submit ~ this.is_receivable:", this.is_receivable)
+            console.log(
+                "🚀 ~ file: invoice_generate.vue:5940 ~ submit ~ this.is_receivable:",
+                this.is_receivable
+            );
             if (this.is_receivable) {
                 this.form.payments = [];
             } else {

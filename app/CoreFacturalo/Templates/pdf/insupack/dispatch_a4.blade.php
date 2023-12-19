@@ -283,7 +283,7 @@ $establishment = $document->establishment;
                     @endif
                 </td>
                 <td class="p-1 text-center align-top desc cell-solid-rl">
-                    {{ $total_weight_line }}
+                    {{ $row->item->weight }}
                 </td>
             </tr>
 

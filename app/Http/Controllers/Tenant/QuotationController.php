@@ -201,7 +201,7 @@ class QuotationController extends Controller
         $customers = $this->table('customers');
         $establishments = Establishment::where('id', auth()->user()->establishment_id)->get();
         $currency_types = CurrencyType::whereActive()->get();
-        // $document_types_invoice = DocumentType::whereIn('id', ['01', '03'])->get();
+        // $document_types_invoice = DocumentType::whereIn('id', ['01', '03'])->where('active',true)->get();
         $discount_types = ChargeDiscountType::whereType('discount')->whereLevel('item')->get();
         $charge_types = ChargeDiscountType::whereType('charge')->whereLevel('item')->get();
         $company = Company::active();
@@ -262,7 +262,7 @@ class QuotationController extends Controller
     {
         $establishment = Establishment::where('id', auth()->user()->establishment_id)->first();
         $series = Series::where('establishment_id', $establishment->id)->get();
-        $document_types_invoice = DocumentType::whereIn('id', ['01', '03'])->get();
+        $document_types_invoice = DocumentType::whereIn('id', ['01', '03'])->where('active',true)->get();
         // $payment_method_types = PaymentMethodType::all();
         $payment_method_types = PaymentMethodType::getPaymentMethodTypes();
         $payment_destinations = $this->getPaymentDestinations();
@@ -507,8 +507,14 @@ class QuotationController extends Controller
     {
         // return $request->id;
         $configuration = Configuration::first();
+        $get_last_quotation = Quotation::orderBy('id', 'desc')->first();
+        $number = $get_last_quotation->number + 1;
+        if(!$number){
+            $number = $get_last_quotation->id + 1;
+        }
         $obj = Quotation::find($request->id);
         $this->quotation = $obj->replicate();
+        $this->quotation->number = $number;
         $this->quotation->external_id = Str::uuid()->toString();
         $this->quotation->state_type_id = '01';
         $is_project = $configuration->quotation_projects == 1;

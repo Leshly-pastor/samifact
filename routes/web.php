@@ -296,6 +296,7 @@ if ($hostname) {
             Route::get('items/export_migration', 'Tenant\ItemController@export_migration');
             Route::get('items/export/wp', 'Tenant\ItemController@exportWp')->name('tenant.items.export.wp');
             Route::get('items/export/digemid', 'Tenant\ItemController@exportDigemid');
+            Route::get('items/export/digemid-csv', 'Tenant\ItemController@exportDigemidCsv');
             Route::get('items/search-items', 'Tenant\ItemController@searchItems');
             Route::get('items/search/item/{item}', 'Tenant\ItemController@searchItemById');
             Route::get('items/item/tables', 'Tenant\ItemController@item_tables');
@@ -347,6 +348,7 @@ if ($hostname) {
             Route::get('documents/voided_pse/{id}', 'Tenant\DocumentController@anulatePse');
             Route::get('documents/voided_check_pse/{id}', 'Tenant\DocumentController@anulatePseCheck');
             Route::get('documents/json_pse/{id}', 'Tenant\DocumentController@jsonPse');
+            Route::get('documents/voided_pdf/{id}', 'Tenant\DocumentController@voidedPdf');
             Route::post('documents/categories', 'Tenant\DocumentController@storeCategories');
             Route::post('documents/brands', 'Tenant\DocumentController@storeBrands');
             Route::get('documents/ind/{id}', 'Tenant\DocumentController@sendInd');
@@ -489,6 +491,9 @@ if ($hostname) {
                 Route::get('/record/{id}', 'Tenant\DispatchController@record');
                 Route::post('/sendSunat/{document}', 'Tenant\DispatchController@sendDispatchToSunat');
                 Route::post('/email', 'Tenant\DispatchController@email');
+                Route::get('/check_pse/{id}', 'Tenant\DispatchController@download_file');
+                Route::get('/send_pse/{id}', 'Tenant\DispatchController@send_pse');
+                Route::get('/json_pse/{id}', 'Tenant\DispatchController@json_pse');
                 Route::get('/generate/{sale_note}', 'Tenant\DispatchController@generate');
                 Route::get('/record/{id}/tables', 'Tenant\DispatchController@generateDocumentTables');
                 Route::post('/record/{id}/set-document-id', 'Tenant\DispatchController@setDocumentId');

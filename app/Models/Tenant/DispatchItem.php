@@ -32,7 +32,7 @@ class DispatchItem extends ModelTenant
         'item',
         'quantity',
         'name_product_pdf',
-        'additional_data'
+        'additional_data',
     ];
 
     public function getAdditionalDataAttribute($value)

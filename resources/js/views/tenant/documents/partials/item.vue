@@ -76,9 +76,32 @@
                                             ></el-option>
                                         </el-tooltip>
                                     </el-select>
-                                    <div class="el-input-group__append" >
+                                    <div class="el-input-group__append">
                                         <el-tooltip
-                                        v-if="configuration.select_warehouse_to_sell"
+                                            v-if="
+                                                configuration.search_by_factory_code
+                                            "
+                                            slot="append"
+                                            :disabled="recordItem != null"
+                                            class="item"
+                                            content="Buscar productos que compartan código de fábrica"
+                                            effect="dark"
+                                            placement="bottom"
+                                        >
+                                            <el-button
+                                                @click.prevent="
+                                                    clickFactoryCodeDetail()
+                                                "
+                                            >
+                                                <i
+                                                    class="fas fa-layer-group"
+                                                ></i>
+                                            </el-button>
+                                        </el-tooltip>
+                                        <el-tooltip
+                                            v-if="
+                                                configuration.select_warehouse_to_sell
+                                            "
                                             slot="append"
                                             :disabled="recordItem != null"
                                             class="item"
@@ -586,6 +609,10 @@
                         </div>
                         <div class="col-md-4 col-sm-4">
                             <div
+                                v-if="
+                                    (form.item && form.item.meter == null) ||
+                                    form.item.meter == 0
+                                "
                                 :class="{
                                     'has-danger': errors.unit_price_value,
                                 }"
@@ -601,6 +628,44 @@
                                     @input="calculateUnitPrice"
                                 ></el-input>
                             </div>
+                            <div
+                                v-else
+                                :class="{
+                                    'has-danger': errors.unit_price_value,
+                                }"
+                                class="form-group"
+                            >
+                                <label class="control-label">
+                                    Total Importe</label
+                                >
+                                <el-input
+                                    type="number"
+                                    step="any"
+                                    v-model="readonly_total_meter"
+                                ></el-input>
+                                <small v-text="`${form.meter} mts`"></small>
+                            </div>
+                        </div>
+                          <div class="col-md-4 col-sm-4">
+                            <div
+                                v-if="
+                                    (form.item && form.item.meter) 
+                                  
+                                "
+                              
+                                class="form-group"
+                            >
+                                <label class="control-label">
+                                    Cantidad de metros</label
+                                >
+                                <el-input
+                                    type="number"
+                                    step="any"
+                                    readonly
+                                    v-model="readonly_meters"
+                                ></el-input>
+                            </div>
+                          
                         </div>
                     </template>
                     <!------------------------------------------------------->
@@ -769,20 +834,32 @@
                                                                 row.description
                                                             "
                                                         ></el-input>
+                                                        <br>
+                                                           <el-tooltip
+                                                                            class="item"
+                                                                            content="
+                                                                              Aplicar 18% de IGV al descuento global
+                                                                            "
+                                                                            effect="dark"
+                                                                            placement="top"
+                                                                        >
+                                                                            <i
+                                                                                class="fa fa-info-circle"
+                                                                            ></i>
+                                                                        </el-tooltip>
+                                                                        <el-checkbox
+                                                                            :disabled="!row.is_amount || row.amount == 0"
+                                                                            v-model="
+                                                                                row.is_split
+                                                                            "
+                                                                            class="ml-1 mr-1"
+                                                                            @change="
+                                                                                splitBase(index)
+                                                                            "
+                                                                        ></el-checkbox>
                                                     </td>
                                                     <td>
-                                                        <el-checkbox
-                                                            v-model="
-                                                                row.is_amount
-                                                            "
-                                                            @change="
-                                                                changeIsDiscountAmount(
-                                                                    index
-                                                                )
-                                                            "
-                                                            >Ingresar monto fijo
-                                                        </el-checkbox>
-                                                        <br />
+                                                      
                                                         <template
                                                             v-if="row.is_amount"
                                                         >
@@ -799,6 +876,18 @@
                                                                 "
                                                             ></el-input>
                                                         </template>
+                                                        <br>
+                                                          <el-checkbox
+                                                            v-model="
+                                                                row.is_amount
+                                                            "
+                                                            @change="
+                                                                changeIsDiscountAmount(
+                                                                    index
+                                                                )
+                                                            "
+                                                            >Ingresar monto fijo
+                                                        </el-checkbox>
                                                     </td>
                                                     <td>
                                                         <button
@@ -1008,6 +1097,11 @@
             :warehouses="warehousesDetail"
         >
         </warehouses-detail>
+        <factory-code-detail
+            :showDialog.sync="showFactoryCodeDetail"
+            :item="currentItem"
+        >
+        </factory-code-detail>
         <history-sales-form
             :showDialog.sync="showDialogHistorySales"
             :item_id="history_item_id"
@@ -1064,6 +1158,7 @@ import LotsGroup from "./lots_group.vue";
 
 import { calculateRowItem } from "../../../../helpers/functions";
 import WarehousesDetail from "./select_warehouses.vue";
+import FactoryCodeDetail from "./select_factory_code.vue";
 import SelectLotsForm from "./lots.vue";
 import SelectSizesForm from "./sizes.vue";
 
@@ -1098,6 +1193,7 @@ export default {
         "percentageIgv",
         "isCreditNoteAndType03",
         "isUpdateDocument",
+        "documentId",
     ],
     components: {
         ItemForm,
@@ -1107,10 +1203,14 @@ export default {
         SelectLotsForm,
         SelectSizesForm,
         HistorySalesForm,
+        FactoryCodeDetail,
         "vue-ckeditor": VueCkeditor.component,
     },
     data() {
         return {
+            temp_qty:null,
+            readonly_meters: 0,
+            hasTables: false,
             showDialogSelectSizes: false,
             showDiscounts: true,
             extra_temp: undefined,
@@ -1143,6 +1243,7 @@ export default {
             item_unit_types: [],
             item_unit_type: {},
             showWarehousesDetail: false,
+            showFactoryCodeDetail: false,
             warehousesDetail: [],
             showListStock: false,
             search_item_by_barcode: false,
@@ -1155,6 +1256,7 @@ export default {
             },
             value1: "hello",
             readonly_total: 0,
+            readonly_total_meter: 0,
             itemLastPrice: null,
             search_item_by_barcode_presentation: false,
             showDialogHistorySales: false,
@@ -1163,6 +1265,7 @@ export default {
             validate_stock_add_item: false,
             itemsCategories: [],
             itemsBrands: [],
+            currentItem: null,
             //item_unit_type: {}
         };
     },
@@ -1178,8 +1281,8 @@ export default {
             }
         }
     },
-    mounted() {
-        this.getTables();
+    async mounted() {
+        await this.getTables();
         this.$eventHub.$on("reloadDataItems", (item_id) => {
             this.reloadDataItems(item_id);
         });
@@ -1321,17 +1424,35 @@ export default {
         },
     },
     methods: {
-        reChangeItem(bonus_items,random_key) {
+        splitBase(index){
+            let row = this.form.discounts[index];
+            if(row.is_split){
+                row.amount  = row.amount / 1.18;
+            }else{
+                row.amount  = row.amount * 1.18;
+            }
+            //round two decimals
+            row.amount = Math.round(row.amount * 100) / 100;
+
+            this.calculateTotal();
+        },
+        reChangeItem(bonus_items, random_key,qty=1) {
+            if(qty < 1){
+                return;
+            }
             bonus_items = bonus_items.map((b) => b.item_bonus);
             let temp = [...this.items];
             this.items = bonus_items;
+            this.temp_qty = qty;
             bonus_items.forEach((bonus) => {
                 let { id } = bonus;
                 this.form.item_id = id;
                 this.changeItem();
                 this.clickAddItem(random_key);
             });
+            this.temp_qty = null;
             this.items = temp;
+
         },
         getUnitPriceByTotal() {
             let { total, quantity } = this.form;
@@ -1365,8 +1486,12 @@ export default {
         ItemOptionDescriptionView(item) {
             return ItemOptionDescription(item);
         },
-        getTables() {
-            this.$http.get(`/${this.resource}/item/tables`).then((response) => {
+        async getTables() {
+            try {
+                this.loading_dialog = true;
+                const response = await this.$http.get(
+                    `/${this.resource}/item/tables`
+                );
                 let data = response.data;
                 this.all_items = data.items;
                 this.itemsCategories = data.categories;
@@ -1411,7 +1536,10 @@ export default {
                 }
                 this.$store.commit("setConfiguration", data.configuration);
                 this.filterItems();
-            });
+            } catch (e) {
+            } finally {
+                this.loading_dialog = false;
+            }
         },
         canCreateProduct() {
             if (this.typeUser === "admin") {
@@ -1570,6 +1698,14 @@ export default {
                 this.changeItem();
             }
         },
+        clickFactoryCodeDetail() {
+            if (!this.form.item_id) {
+                return this.$message.error("Seleccione un item");
+            }
+            let item = _.find(this.items, { id: this.form.item_id });
+            this.currentItem = item;
+            this.showFactoryCodeDetail = true;
+        },
         clickWarehouseDetail() {
             if (!this.form.item_id) {
                 return this.$message.error("Seleccione un item");
@@ -1629,8 +1765,26 @@ export default {
         // initializeFields() {
         //     this.form.affectation_igv_type_id = this.affectation_igv_types[0].id
         // },
+
+        waitForTrueCondition() {
+            return new Promise((resolve) => {
+                const checkCondition = () => {
+                    if (this.loading_dialog == false) {
+                        resolve();
+                    } else {
+                        setTimeout(checkCondition, 100); // Verifica de nuevo después de 100 milisegundos
+                    }
+                };
+                checkCondition();
+            });
+        },
         async create() {
-            
+            // if (this.operation_types.length == 0) {
+            //     await this.getTables();
+            // }
+            //no avanzar hasta que loading_dialog sea false
+            await this.waitForTrueCondition();
+            //
             this.extra_temp = undefined;
 
             this.titleDialog = this.recordItem
@@ -1693,7 +1847,7 @@ export default {
                     this.form.item.lots = this.recordItem.item.lots;
                     this.form.item.sizes_selected =
                         this.recordItem.sizes_selected;
-                    this.sizes = this.recordItem.sizes_selected;
+                    this.sizes = this.recordItem.sizes_selected || [];
                     this.lots = this.form.item.lots;
                 }
 
@@ -1706,7 +1860,6 @@ export default {
                 // if(this.recordItem.name_product_pdf){
                 //     this.form.name_product_pdf = this.recordItem.name_product_pdf
                 // }
-
                 if (this.recordItem.item.change_free_affectation_igv) {
                     this.form.affectation_igv_type_id = "15";
                     this.form.item.change_free_affectation_igv = true;
@@ -1717,7 +1870,6 @@ export default {
                     }
                 }
                 this.calculateQuantity();
-
                 if (this.recordItem.item.exchanged_for_points)
                     this.form.item.exchanged_for_points =
                         this.recordItem.item.exchanged_for_points;
@@ -1773,6 +1925,7 @@ export default {
                 base: 0,
                 is_amount: false,
                 use_input_amount: true,
+                is_split: false,
             });
         },
         clickRemoveDiscount(index) {
@@ -1850,7 +2003,6 @@ export default {
             this.clearExtraInfoItem();
 
             this.form.item = _.find(this.items, { id: this.form.item_id });
-        
 
             if (this.person_type_id) {
                 let { item_customer_prices } = this.form.item;
@@ -1878,6 +2030,7 @@ export default {
                 }
             }
             this.form.unit_price_value = this.form.item.sale_unit_price;
+            this.form.meter = this.form.item.meter;
             this.lots = this.form.item.lots;
 
             this.form.has_igv = this.form.item.has_igv;
@@ -1893,7 +2046,7 @@ export default {
                     this.affectation_igv_types[0].id;
             }
 
-            this.form.quantity = 1;
+            this.form.quantity = this.temp_qty || 1;
             this.cleanTotalItem();
             this.showListStock = true;
 
@@ -1955,6 +2108,18 @@ export default {
                 this.form.quantity * this.form.unit_price_value,
                 4
             );
+            if (this.form.meter && this.form.meter > 0) {
+                    this.readonly_meters = _.round(
+                        this.form.quantity * this.form.meter,
+                        4
+                    );
+                    this.readonly_total_meter = _.round(
+                        this.form.quantity *
+                            this.form.unit_price_value *
+                            this.form.meter,
+                        4
+                    );
+            }
         },
         calculateUnitPrice() {
             this.form.unit_price_value = _.round(
@@ -2067,7 +2232,9 @@ export default {
 
             this.form.unit_price = unit_price;
             this.form.item.unit_price = unit_price;
+            // this.form.item.meter =
             this.form.item.presentation = this.item_unit_type;
+       
             this.form.affectation_igv_type = _.find(
                 this.affectation_igv_types,
                 { id: affectation_igv_type_id }
@@ -2079,10 +2246,11 @@ export default {
                 this.form,
                 this.currencyTypeIdActive,
                 this.exchangeRateSale,
-                this.percentageIgv
+                this.percentageIgv,
+                
             );
             this.row.update_price = this.form.update_price;
-
+     this.row.meter = this.form.item.meter;
             this.row.item.name_product_pdf = this.row.name_product_pdf || "";
             if (this.recordItem) {
                 this.row.indexi = this.recordItem.indexi;
@@ -2120,10 +2288,9 @@ export default {
             }
             // this.row.depend_key = this.form.item.depend_key;
             //si key no es nulo y es string
-            if (key && typeof key === "string"){
+            if (key && typeof key === "string") {
                 this.row.depend_key = key;
             }
-       
 
             // this.row.edit = false;
             this.initForm();
@@ -2145,7 +2312,7 @@ export default {
                 this.cleanItems();
             }
             if (has_bonus_item) {
-                this.reChangeItem(bonus_items,general_random_key);
+                this.reChangeItem(bonus_items, general_random_key,this.row.quantity);
             }
             if (this.recordItem) {
                 this.close();

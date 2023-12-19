@@ -174,6 +174,25 @@
                                 ></small>
                             </div>
                         </div>
+                             <div class="col-md-3" v-if="isMajolica">
+                            <div
+                                :class="{ 'has-danger': errors.meter }"
+                                class="form-group"
+                            >
+                                <label class="control-label">Metraje</label>
+                                <el-input
+                                    type="number"
+                                    step="any"
+                                    v-model="form.meter"
+                                    dusk="meter"
+                                ></el-input>
+                                <small
+                                    v-if="errors.meter"
+                                    class="text-danger"
+                                    v-text="errors.meter[0]"
+                                ></small>
+                            </div>
+                        </div>
                         <div class="col-md-3">
                             <div
                                 :class="{
@@ -536,7 +555,7 @@
                                 <label class="control-label">
                                     Nombre DIGEMID
                                 </label>
-                                <el-input readonly :value="form.name_digemid">
+                                <el-input :value="form.name_digemid">
                                 </el-input>
                             </div>
                         </div>
@@ -556,7 +575,7 @@
                                         <i class="fa fa-info-circle"></i>
                                     </el-tooltip>
                                 </label>
-                                <el-input readonly :value="form.sanitary">
+                                <el-input :value="form.sanitary">
                                 </el-input>
                                 <small
                                     v-if="errors.sanitary"
@@ -571,7 +590,7 @@
                                 <label class="control-label">
                                     Laboratorio
                                 </label>
-                                <el-input readonly :value="form.laboratory">
+                                <el-input :value="form.laboratory">
                                 </el-input>
                             </div>
                         </div>
@@ -2430,6 +2449,7 @@ export default {
             inventory_configuration: null,
             digemidCodes: [],
             isClothesShoes: false,
+            isMajolica: false,
         };
     },
     async created() {
@@ -2453,6 +2473,7 @@ export default {
             this.categories = data.categories;
             this.brands = data.brands;
             this.attribute_types = data.attribute_types;
+            this.isMajolica = data.is_majolica;
             // this.config = data.configuration
             if (this.canShowExtraData) {
                 this.$store.commit("setColors", data.colors);

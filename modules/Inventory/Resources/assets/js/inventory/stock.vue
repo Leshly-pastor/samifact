@@ -211,10 +211,7 @@ export default {
                 .then((response) => {
                     let data = response.data.data;
                     this.form = _.clone(data);
-                    console.log(
-                        "🚀 ~ file: stock.vue:207 ~ .then ~ this.form:",
-                        this.form
-                    );
+                
                     this.form.lots = [];
                     this.form.lots_group = []; //Object.values(response.data.data.lots)
                     this.lotsAll = data.lots;

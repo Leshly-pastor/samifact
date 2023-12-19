@@ -224,7 +224,7 @@ class OrderNoteController extends Controller
         if ($serie) {
             $serie = $serie->number;
         }
-        // $document_types_invoice = DocumentType::whereIn('id', ['01', '03'])->get();
+        // $document_types_invoice = DocumentType::whereIn('id', ['01', '03'])->where('active',true)->get();
         $discount_types = ChargeDiscountType::whereType('discount')->whereLevel('item')->get();
         $charge_types = ChargeDiscountType::whereType('charge')->whereLevel('item')->get();
         $company = Company::active();

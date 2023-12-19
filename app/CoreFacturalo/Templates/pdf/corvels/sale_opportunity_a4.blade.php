@@ -52,7 +52,7 @@ $establishment = $document->establishment;
             </div>
         </td>
         <td width="30%" class="border-box py-4 px-2 text-center">
-            <h5 class="text-center">OPORTUnidad DE VENTA</h5>
+            <h5 class="text-center">Oportunidad de venta</h5>
             <h3 class="text-center">{{ $tittle }}</h3>
         </td>
     </tr>

@@ -15,6 +15,7 @@ class EstablishmentResource extends JsonResource
     public function toArray($request)
     {
         return [
+            'print_format' => $this->print_format,
             'id' => $this->id,
             'description' => $this->description,
             'country_id' => $this->country_id,

@@ -20,12 +20,7 @@
                         <div class="col-sm-6 text-left mt-3 mb-0">
                             <address class="ib mr-2">
                                 <span class="font-weight-bold d-block"
-                                    >COTIZACIÓN</span
-                                >
-                                <span
-                                    class="font-weight-bold d-block"
-                                    v-if="!isProject"
-                                    >{{ serie ? serie : "COT" }}-XXX</span
+                                    >Cotización</span
                                 >
                                 <span class="font-weight-bold">{{
                                     company.name
@@ -39,10 +34,6 @@
                                 {{ establishment.department.description }} -
                                 {{ establishment.country.description }}
                                 <br />
-                                {{ establishment.email }} -
-                                <span v-if="establishment.telephone != '-'">{{
-                                    establishment.telephone
-                                }}</span>
                             </address>
                         </div>
                     </div>

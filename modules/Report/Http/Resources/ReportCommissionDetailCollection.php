@@ -24,7 +24,7 @@ class ReportCommissionDetailCollection extends ResourceCollection
             $type_document = '';
             $quantity = $row->quantity;
             $purchase_unit_price = $items->purchase_unit_price * $quantity;
-            $unit_price = $row->unit_price;
+            $unit_price = $row->unit_price * $quantity;
             $presentation_name = null;
             $relation = $row->document_id ? $row->document : $row->sale_note;
             if ($row->document_id) {
@@ -77,9 +77,9 @@ class ReportCommissionDetailCollection extends ResourceCollection
                 'quantity' => $quantity,
                 'presentation_name' => $presentation_name,
                 'purchase_unit_price' => number_format($purchase_unit_price,2),
-                'unit_price' => $unit_price,
-                'unit_gain' => ( $unit_price -   $purchase_unit_price),
-                'overall_profit' => (( $unit_price * $quantity) - ($purchase_unit_price * $quantity)),
+                'unit_price' => $unit_price ,
+                'unit_gain' => number_format(($unit_price - $purchase_unit_price)/$quantity,2),
+                'overall_profit' => (( $unit_price) - ($purchase_unit_price)),
             ];
         });
     }

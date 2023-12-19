@@ -831,13 +831,18 @@ class SaleNoteController extends Controller
             $this->createPdf($this->sale_note, "a4", $this->sale_note->filename);
             $this->regularizePayments($data['payments']);
             DB::connection('tenant')->commit();
-
+            $base_url = url('/');
+            $external_id = $this->sale_note->external_id;
+            $establishment = Establishment::where('id', auth()->user()->establishment_id)->first();
+            $print_format = $establishment->print_format??'ticket';
+            $url_print = "{$base_url}/sale-notes/print/{$external_id}/$print_format";
             return [
                 'success' => true,
                 'data' => [
                     'id' => $this->sale_note->id,
                     'printer'  => $this->printerName(auth()->user()->id),
                     'number_full' => $this->sale_note->number_full,
+                    'url_print' => $url_print,
                 ],
             ];
         } catch (Exception $e) {
@@ -1642,7 +1647,7 @@ class SaleNoteController extends Controller
     {
         $establishment = Establishment::where('id', auth()->user()->establishment_id)->first();
         $series = Series::where('establishment_id', $establishment->id)->get();
-        $document_types_invoice = DocumentType::whereIn('id', ['01', '03'])->get();
+        $document_types_invoice = DocumentType::whereIn('id', ['01', '03'])->where('active',true)->get();
         $payment_method_types = PaymentMethodType::all();
         $payment_destinations = $this->getPaymentDestinations();
         $sellers = User::GetSellers(false)->get();

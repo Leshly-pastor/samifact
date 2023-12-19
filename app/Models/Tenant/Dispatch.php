@@ -536,14 +536,18 @@ class Dispatch extends ModelTenant
         if ($this->generate_document) $documents[] = ['description' => $this->generate_document->number_full];
         if ($this->reference_document) $documents[] = ['description' => $this->reference_document->number_full];
 
-
         $btn_pdf = true;
         $btn_send = false;
         $btn_options = false;
         $btn_status_ticket = false;
         $btn_edit = false;
+        $btn_is_tesla = true;
         $btn_generate_document = config('tenant.internal_dispatch') ? config('tenant.internal_dispatch') : false;
-
+        $company = Company::active();
+        $is_pse = $company->pse;
+        // if($company->number == '20604665966'){
+        //     $btn_is_tesla = true;
+        // }
         if ($this->state_type_id === '01') {
             $btn_send = true;
         }
@@ -587,6 +591,8 @@ class Dispatch extends ModelTenant
         }
         $reference = optional($this->inventory_reference)->description;
         return [
+            'is_pse' => $is_pse,
+            'btn_is_tesla' => $btn_is_tesla,
             'reference' => $reference,
             'id' => $this->id,
             'external_id' => $this->external_id,

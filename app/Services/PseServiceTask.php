@@ -165,6 +165,7 @@ class PseServiceTask
         $series = $data['sersun'];
         $document = Document::where('number', $number)
             ->where('series', $series)
+            ->where('soap_type_id', '02')
             ->first();
         return $document;
     }
@@ -191,7 +192,6 @@ class PseServiceTask
 
         $status = $response->status();
         $body = $response->json();
-
         if ($status == 200) {
             $datas = $body['data'];
             if (!isset($datas) || count($datas) == 0) {
@@ -364,12 +364,40 @@ class PseServiceTask
         }
         return;
     }
+    public function checkSignature($xmlString)
+    {
+      
+        $pass = true;
+        $xml = new \SimpleXMLElement($xmlString);
+        $xml->registerXPathNamespace('ar', 'urn:oasis:names:specification:ubl:schema:xsd:ApplicationResponse-2');
+        $xml->registerXPathNamespace('ext', 'urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2');
+        $xml->registerXPathNamespace('ds', 'http://www.w3.org/2000/09/xmldsig#');
+        $xml->registerXPathNamespace('cbc', 'urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2');
+        $xml->registerXPathNamespace('cac', 'urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2');
+
+        $signatureValue = $xml->xpath('//ds:Signature/ds:SignatureValue');
+
+        if (!empty($signatureValue)) {
+            $signatureValue = (string)$signatureValue[0];
+            Log::info($signatureValue);
+            if (strpos($signatureValue, 'BetaPublicCert') !== false) {
+                $pass = false;
+            }
+        } 
+
+
+        return $pass;
+    }
     function extractCdrInfo($zip)
     {
         $this->decompressor = new ZipFileDecompress();
         $this->cdrReader = new DomCdrReader();
         $xml = $this->getXmlResponse($zip);
         $cdr = $this->cdrReader->getCdrResponse($xml);
+        $not_has_beta_signature = $this->checkSignature($xml);
+        if(!$not_has_beta_signature){
+            return;
+        }
         $description = $cdr->getDescription();
         $code = $cdr->getCode();
         $this->response = [

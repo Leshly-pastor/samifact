@@ -118,6 +118,7 @@ class Item extends ModelTenant
     public const SERVICE_UNIT_TYPE = 'ZZ';
 
     protected $fillable = [
+        'meter',
         'has_sizes',
         'info_link',
         'warehouse_id',
@@ -190,6 +191,7 @@ class Item extends ModelTenant
     ];
 
     protected $casts = [
+        'meter' => 'float',
         'date_of_due' => 'date',
         'is_for_production' => 'boolean',
         'purchase_has_isc' => 'boolean',
@@ -817,7 +819,7 @@ class Item extends ModelTenant
         $detail = $this->getFullDescription($warehouse, $extended_description);
         $realtion_item_unit_types = $this->item_unit_types;
         $lots_grp = $this->lots_group;
-
+        // $this->restoreStockSizes();
         $lots = $this->getLotsBySerie($warehouse, $series, $search_item_by_series);
         $blank = [];
         $currentColors = collect($blank);
@@ -829,7 +831,6 @@ class Item extends ModelTenant
         $ItemStatus = collect($blank);
         $ItemSize = collect($blank);
         $ItemUnitBusiness = collect($blank);
-
         if ($aditional_data === true) {
             $currentColors = $this->getItemColor()->transform(function ($row) {
                 return $row->cat_colors_item_id;
@@ -862,7 +863,6 @@ class Item extends ModelTenant
                 return $row->cat_item_size_id;
             });
         }
-
         if ($with_lots_has_sale == true) {
             $lots = $this->item_lots->where('has_sale', false)->transform(function ($row) {
                 return [
@@ -918,7 +918,9 @@ class Item extends ModelTenant
                 return $row->getCollectionData();
             });
         }
+   
         $data = [
+            'meter' => $this->meter,
             'bonus_items' => $itemBonus,
             'disponibilidad' => $disponibilidad,
             'header' => $header,
@@ -1050,7 +1052,6 @@ class Item extends ModelTenant
             'restrict_sale_cpe' => $this->restrict_sale_cpe,
 
         ];
-
         // El nombre de producto, por defecto, sera la misma descripcion.
         $data['name_product_pdf'] = "<p>" . $data['description'] . "</p>";
 
@@ -1070,6 +1071,7 @@ class Item extends ModelTenant
     {
         return CatDigemid::where('item_id', $this->id)->first();
     }
+    
     public static function AffectationIgvTypesExoneratedUnaffected()
     {
         return ['20', '21', '30', '31', '32', '33', '34', '35', '36', '37'];
@@ -1104,6 +1106,7 @@ class Item extends ModelTenant
         $name_disa = '';
         $laboratory = '';
         $reg_san = '';
+        $date_due = null;
         $currentColors = ItemColor::where('item_id', $this->id)->get()->transform(function ($row) {
             return $row->TransformDatatoEdit();
         });
@@ -1115,6 +1118,7 @@ class Item extends ModelTenant
                 $name_disa = $digemid->getNomProd();
                 $laboratory = $digemid->getNomTitular();
                 $reg_san = $digemid->getNumRegSan();
+                $date_due = $digemid->getFechaVencimiento();
             }
         }
 
@@ -1145,12 +1149,14 @@ class Item extends ModelTenant
         $itemwarehouse = ItemWarehouse::where('warehouse_id', $this->warehouse_id)->where('item_id', $this->id)->first();
 
         return [
+            'meter' => $this->meter,
             'has_sizes' => (bool)$this->has_sizes,
             'info_link' => $this->info_link,
             'name_disa' => $name_disa,
             'is_set' => false,
             'favorite'     => $this->favorite,
             'laboratory' => $laboratory,
+            'date_due' => $date_due,
             'exportable_pharmacy' => $digemid_exportable,
             'colors' => $currentColors,
             'shared' =>  $itemwarehouse != null ? (bool) $itemwarehouse->shared : false,
@@ -2856,5 +2862,26 @@ class Item extends ModelTenant
                 'compromise_quantity' => 0
             ];
         });
+    }
+
+
+    public function restoreStockSizes(){
+
+        $has_sizes = (bool) $this->has_sizes;
+        if($has_sizes){
+            $item_id = $this->id;
+            $warehouses_id = Warehouse::all()->pluck('id');
+            foreach($warehouses_id as $w_id){
+                $stock = ItemSizeStock::where([['item_id', $item_id], ['warehouse_id', $w_id]])->sum('stock');
+                $item_warehouse = ItemWarehouse::where([['item_id', $item_id], ['warehouse_id', $w_id]])->first();
+                if($item_warehouse){
+                    $item_warehouse->stock = $stock;
+                    $item_warehouse->save();
+                }
+
+            } 
+           
+        }
+
     }
 }

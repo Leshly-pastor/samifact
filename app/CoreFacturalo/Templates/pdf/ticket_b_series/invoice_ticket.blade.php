@@ -893,16 +893,6 @@ $balance = ($document->total - $total_payment) - $document->payments->sum('chang
             </td>
         </tr>
         @endif
-         @if ($company->footer_logo)
-        @php
-            $footer_logo = "storage/uploads/logos/{$company->footer_logo}";
-        @endphp
-        <tr>
-            <td class="text-center pt-5">
-                <img  style="max-height: 35px;" src="data:{{mime_content_type(public_path("{$footer_logo}"))}};base64, {{base64_encode(file_get_contents(public_path("{$footer_logo}")))}}" alt="{{$company->name}}">
-            </td>
-        </tr>
-        @endif
         @if($company->footer_text_template)
         <tr>
             <td class="text-center desc pt-5">

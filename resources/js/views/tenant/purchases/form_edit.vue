@@ -309,10 +309,48 @@
                             </el-select>
                         </div>
                         </template>
-                        <div      class="col-sm-12 col-md-6 col-lg-8">
+            
+                          <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="const_detraccion">
+                                    Const. Detracción
+                                </label>
+                                <el-input
+                                    v-model="form.const_detraccion"
+                                    placeholder="Const. Detracción"
+                                ></el-input>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="date_detraccion">
+                                    Fecha Detracción
+                                </label>
+                                <el-date-picker
+                                    v-model="form.date_detraccion"
+                                    placeholder="Fecha Detracción"
+                                    type="date"
+                                    value-format="yyyy-MM-dd"
+                                >
+                                </el-date-picker>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="percentage_detraccion">
+                                    Porcentaje Detracción
+                                </label>
+                                <el-input
+                                    type="number"
+                                    v-model="form.percentage_detraccion"
+                                    placeholder="Porcentaje Detracción"
+                                ></el-input>
+                            </div>
+                        </div>
+                                    <div      class="col-sm-12 col-md-6 col-lg-8">
 
                         </div>
-     <div class="col-md-8 mt-4">
+     <div class="col-md-3 mt-4">
                             <div class="form-group">
                                 <el-checkbox
                                     v-model="form.purchase_period"
@@ -1506,6 +1544,10 @@ export default {
                     this.form.series = dato.series;
                     this.form.number = dato.number;
                     this.form.license_id = dato.license_id;
+                    this.form.date_detraccion = dato.date_detraccion;
+                    this.form.percentage_detraccion =
+                        dato.percentage_detraccion;
+                    this.form.const_detraccion = dato.const_detraccion;
                     this.form.responsible_id = dato.responsible_id;
                     this.form.date_of_due = dato.date_of_due;
                     this.form.date_of_issue = dato.date_of_issue;
@@ -1641,6 +1683,9 @@ export default {
         initForm() {
             this.errors = {};
             this.form = {
+                        const_detraccion: null,
+                date_detraccion: null,
+                percentage_detraccion: null,
                 license_id: null,
                 responsible_id: null,
                 purchase_period: false,

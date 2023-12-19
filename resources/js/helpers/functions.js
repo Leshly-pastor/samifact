@@ -1,8 +1,11 @@
-function calculateRowItem(row_old, currency_type_id_new, exchange_rate_sale, pigv) {
+function calculateRowItem(row_old, currency_type_id_new, exchange_rate_sale, pigv,isEdit) {
     // console.log(currency_type_id_new, exchange_rate_sale)
 
     let currency_type_id_old = row_old.item.currency_type_id
     let unit_price = parseFloat(row_old.item.unit_price)
+    if(row_old.item.meter && row_old.item.meter > 0 && !isEdit){
+        unit_price = parseFloat(row_old.item.unit_price) * parseFloat(row_old.item.meter)
+    }
     // } else {
     //     unit_price = parseFloat(row_old.item.unit_price) * 1.18
     // }
@@ -18,7 +21,7 @@ function calculateRowItem(row_old, currency_type_id_new, exchange_rate_sale, pig
         unit_price = unit_price * exchange_rate_sale;
     }
 
-    // unit_price = _.round(unit_price, 4);
+    // unit_price = _.round(unit_price, 4); 
 
 
     // fixed for update sale_note
@@ -87,8 +90,6 @@ function calculateRowItem(row_old, currency_type_id_new, exchange_rate_sale, pig
 
     if (row.affectation_igv_type_id === '10') {
         unit_value = row.unit_price / (1 + percentage_igv / 100)
-        console.log("🚀 ~ file: functions.js:90 ~ percentage_igv:", percentage_igv)
-        console.log("🚀 ~ file: functions.js:90 ~ unit_value:", unit_value)
     }
 
     // row.unit_value = _.round(unit_value, 4)

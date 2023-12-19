@@ -53,22 +53,22 @@ class PseCheckStatus extends Command
 
         return str_pad($number, $zeros, '0', STR_PAD_LEFT);
     }
-    function format_to_check($documents)
-    {
-        $xml = new SimpleXMLElement('<NewDataSet></NewDataSet>');
-        foreach ($documents as $document) {
-            $table1 = $xml->addChild('Table1');
-            $table1->addChild('numruc', $this->company->number);
-            $table1->addChild('altido', $document->document_type_id);
-            $table1->addChild('sersun', $document->series);
-            $table1->addChild('numsun',  $this->formatNumber($document->number));
-        }
-        $xmlString = $xml->asXML();
-        $xml_string = str_replace("\n", "", $xmlString);
-        $startIndex = strpos($xml_string, '<NewDataSet>');
-        $newDataSetXml = substr($xml_string, $startIndex);
-        return $newDataSetXml;
-    }
+    // function format_to_check($documents)
+    // {
+    //     $xml = new SimpleXMLElement('<NewDataSet></NewDataSet>');
+    //     foreach ($documents as $document) {
+    //         $table1 = $xml->addChild('Table1');
+    //         $table1->addChild('numruc', $this->company->number);
+    //         $table1->addChild('altido', $document->document_type_id);
+    //         $table1->addChild('sersun', $document->series);
+    //         $table1->addChild('numsun',  $this->formatNumber($document->number));
+    //     }
+    //     $xmlString = $xml->asXML();
+    //     $xml_string = str_replace("\n", "", $xmlString);
+    //     $startIndex = strpos($xml_string, '<NewDataSet>');
+    //     $newDataSetXml = substr($xml_string, $startIndex);
+    //     return $newDataSetXml;
+    // }
     function get_documents($state_type_id)
     {
        try{

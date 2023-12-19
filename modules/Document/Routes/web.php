@@ -33,6 +33,7 @@ if ($current_hostname) {
                 Route::get('data-table/customers', 'DocumentController@dataTableCustomers');
                 Route::get('prepayments/{type}', 'DocumentController@prepayments');
                 Route::get('search-items', 'DocumentController@searchItems');
+                Route::get('search-items-factory-codes/{id}', 'DocumentController@searchItemsFactoryCode');
                 Route::get('search/item/{item}', 'DocumentController@searchItemById');
                 Route::get('consult_cdr/{document}', 'DocumentController@consultCdr');
 

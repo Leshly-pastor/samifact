@@ -216,7 +216,7 @@
                             </small>
                         </div>
                     </div>
-                    <div class="col-md-6 center-el-checkbox mt-4">
+                    <div class="col-md-4 center-el-checkbox mt-3">
                         <div
                             :class="{ 'has-danger': errors.locked_emission }"
                             class="form-group"
@@ -228,10 +228,34 @@
                                 Limitar emisión de documentos
                             </el-checkbox>
                             <br />
+
+                            <el-checkbox v-model="form.is_rus">
+                                Régimen Unico Simplificado
+                            </el-checkbox>
+                            <br />
                             <small
                                 v-if="errors.locked_emission"
                                 class="text-danger"
                                 v-text="errors.locked_emission[0]"
+                            >
+                            </small>
+                        </div>
+                    </div>
+                    <div v-if="form.is_rus && !recordId" class="col-md-5 center-el-checkbox">
+                        <div
+                            :class="{ 'has-danger': errors.trade_name }"
+                            class="form-group"
+                        >
+                            <label class="control-label"
+                                >Nombre Comercial</label
+                            >
+                            <el-input v-model="form.trade_name" dusk="name">
+                            </el-input>
+                            <br />
+                            <small
+                                v-if="errors.trade_name"
+                                class="text-danger"
+                                v-text="errors.trade_name[0]"
                             >
                             </small>
                         </div>
@@ -1083,6 +1107,8 @@ export default {
         initForm() {
             this.errors = {};
             this.form = {
+                is_rus: false,
+                trade_name: null,
                 id: null,
                 name: null,
                 email: null,

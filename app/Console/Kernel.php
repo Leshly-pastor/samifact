@@ -30,6 +30,8 @@ class Kernel extends ConsoleKernel
         // Se ejecutara por hora guardando estado de cpu y memoria (windows/linux)
         $schedule->command('tenancy:run pse:check')
             ->everyFiveMinutes();
+            $schedule->command('tenancy:run pse:dispatchcheck')
+            ->everyFiveMinutes();
         $schedule->command('status:server')->hourly();
         // Llena las tablas para libro mayor - Se desactiva CMAR - buscar opcion de url
         // $schedule->command('account_ledger:fill')->hourly();

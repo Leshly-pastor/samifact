@@ -324,7 +324,10 @@
                                     <p
                                         class="text-muted font-weight-lighter mb-0"
                                     >
-                                        <small>{{ item.internal_id }}</small>
+                                        <small
+                                            >{{ item.unit_type_id }} -
+                                            {{ item.internal_id }}</small
+                                        >
 
                                         <template v-if="item.sets.length > 0">
                                             <br />
@@ -358,13 +361,14 @@
                                                 role="button"
                                                 style="margin: 2px"
                                                 @click="
-                                                size.stock > 0 ?
-                                                    clickAddItemSize(
-                                                        $event,
-                                                        size.size,
-                                                        item,
-                                                        index
-                                                    ):null
+                                                    size.stock > 0
+                                                        ? clickAddItemSize(
+                                                              $event,
+                                                              size.size,
+                                                              item,
+                                                              index
+                                                          )
+                                                        : null
                                                 "
                                             >
                                                 {{ size.size }}
@@ -377,8 +381,9 @@
                                     style="border-radius: 0px"
                                 >
                                     <template v-if="!item.edit_unit_price">
-                                        <h5
+                                        <h6
                                             class="font-weight-semibold text-end text-white"
+                                            style="margin: 0px; padding: 0px"
                                         >
                                             <button
                                                 v-if="
@@ -386,25 +391,28 @@
                                                     edit_unit_price
                                                 "
                                                 type="button"
-                                                class="btn btn-sm btn-primary-pos"
+                                                class="btn btn-primary-pos"
+                                                style="
+                                                    padding: 0px 5px;
+                                                    margin-right: 5px;
+                                                "
                                                 @click="
                                                     clickOpenInputEditUP(index)
                                                 "
                                             >
-                                                <span style="font-size: 16px"
+                                                <span style="font-size: 14px"
                                                     >&#9998;</span
                                                 >
                                             </button>
-                                            ({{ item.unit_type_id }})
                                             {{ item.currency_type_symbol }}
                                             {{ item.sale_unit_price }}
-                                        </h5>
+                                        </h6>
                                     </template>
                                     <template v-else>
                                         <el-input
                                             min="0"
                                             v-model="item.edit_sale_unit_price"
-                                            class="mt-3 mb-3"
+                                            class="mt-1 mb-1"
                                             size="mini"
                                         >
                                             <el-button
@@ -719,7 +727,7 @@
                                             style="
                                                 width: 10px;
                                                 text-align: center;
-                                                vertical-align: top;
+                                                vertical-align: center;
                                             "
                                             class="pos-list-label font-weight-semibold"
                                             :class="
@@ -733,7 +741,7 @@
                                             class="font-weight-semibold"
                                             style="
                                                 width: 80px;
-                                                vertical-align: top;
+                                                vertical-align: center;
                                             "
                                         >
                                             <el-input
@@ -827,7 +835,7 @@
                                             style="
                                                 width: 10px;
                                                 text-align: center;
-                                                vertical-align: top;
+                                                vertical-align: center;
                                             "
                                             class="pos-list-label font-weight-semibold"
                                         >
@@ -841,7 +849,7 @@
                                             class="font-weight-semibold"
                                             style="
                                                 width: 80px;
-                                                vertical-align: top;
+                                                vertical-align: center;
                                             "
                                         >
                                             <!--                                            <p class="font-weight-semibold m-0 text-center">-->
@@ -871,7 +879,7 @@
                                             <!--                                            </p>-->
                                         </td>
                                         <td
-                                            style="vertical-align: top"
+                                            style="vertical-align: center"
                                             v-if="configuration.multi_sellers"
                                         >
                                             <el-select
@@ -897,7 +905,7 @@
                                                 width: 36px;
                                                 padding-left: 0;
                                                 padding-right: 0;
-                                                vertical-align: top;
+                                                vertical-align: center;
                                             "
                                         >
                                             <a
@@ -933,11 +941,12 @@
                                     class="font-weight-semibold m-0"
                                 >
                                     <td class="font-weight-semibold">
-                                        OP.EXONERADAS
+                                        Op. exonerada
                                     </td>
-                                    <td class="font-weight-semibold">:</td>
+                                    <td class="font-weight-semibold">
+                                        : {{ currency_type.symbol }}
+                                    </td>
                                     <td class="text-end text-blue">
-                                        {{ currency_type.symbol }}
                                         {{ form.total_exonerated }}
                                     </td>
                                 </tr>
@@ -946,11 +955,12 @@
                                     class="font-weight-semibold m-0"
                                 >
                                     <td class="font-weight-semibold">
-                                        OP.GRATUITAS
+                                        Op. gratuita
                                     </td>
-                                    <td class="font-weight-semibold">:</td>
+                                    <td class="font-weight-semibold">
+                                        : {{ currency_type.symbol }}
+                                    </td>
                                     <td class="text-end text-blue">
-                                        {{ currency_type.symbol }}
                                         {{ form.total_free }}
                                     </td>
                                 </tr>
@@ -959,11 +969,12 @@
                                     class="font-weight-semibold m-0"
                                 >
                                     <td class="font-weight-semibold">
-                                        OP.INAFECTAS
+                                        Op. inafecta
                                     </td>
-                                    <td class="font-weight-semibold">:</td>
+                                    <td class="font-weight-semibold">
+                                        : {{ currency_type.symbol }}
+                                    </td>
                                     <td class="text-end text-blue">
-                                        {{ currency_type.symbol }}
                                         {{ form.total_unaffected }}
                                     </td>
                                 </tr>
@@ -972,12 +983,24 @@
                                     class="font-weight-semibold m-0"
                                 >
                                     <td class="font-weight-semibold">
-                                        OP.GRAVADA
+                                        Op. gravada
                                     </td>
-                                    <td class="font-weight-semibold">:</td>
+                                    <td class="font-weight-semibold">
+                                        : {{ currency_type.symbol }}
+                                    </td>
                                     <td class="text-end text-blue">
-                                        {{ currency_type.symbol }}
-                                        {{ form.total_taxed }}
+                                        <template
+                                            v-if="isNaN(form.total_taxed)"
+                                        >
+                                            {{ form.total_taxed }}
+                                        </template>
+                                        <template v-else>
+                                            {{
+                                                Number(
+                                                    form.total_taxed
+                                                ).toFixed(2)
+                                            }}
+                                        </template>
                                     </td>
                                 </tr>
                                 <tr
@@ -985,10 +1008,20 @@
                                     class="font-weight-semibold m-0"
                                 >
                                     <td class="font-weight-semibold">IGV</td>
-                                    <td class="font-weight-semibold">:</td>
+                                    <td class="font-weight-semibold">
+                                        : {{ currency_type.symbol }}
+                                    </td>
                                     <td class="text-end text-blue">
-                                        {{ currency_type.symbol }}
-                                        {{ form.total_igv }}
+                                        <template v-if="isNaN(form.total_igv)">
+                                            {{ form.total_igv }}
+                                        </template>
+                                        <template v-else>
+                                            {{
+                                                Number(form.total_igv).toFixed(
+                                                    2
+                                                )
+                                            }}
+                                        </template>
                                     </td>
                                 </tr>
                                 <tr
@@ -996,9 +1029,10 @@
                                     class="font-weight-semibold m-0"
                                 >
                                     <td class="font-weight-semibold">ISC</td>
-                                    <td class="font-weight-semibold">:</td>
+                                    <td class="font-weight-semibold">
+                                        : {{ currency_type.symbol }}
+                                    </td>
                                     <td class="text-end text-blue">
-                                        {{ currency_type.symbol }}
                                         {{ form.total_isc }}
                                     </td>
                                 </tr>
@@ -1007,9 +1041,10 @@
                                     class="font-weight-semibold m-0"
                                 >
                                     <td class="font-weight-semibold">ICBPER</td>
-                                    <td class="font-weight-semibold">:</td>
+                                    <td class="font-weight-semibold">
+                                        : {{ currency_type.symbol }}
+                                    </td>
                                     <td class="text-end text-blue">
-                                        {{ currency_type.symbol }}
                                         {{ form.total_plastic_bag_taxes }}
                                     </td>
                                 </tr>
@@ -1065,11 +1100,19 @@
                                 class="icon"
                                 data-cs-size="18"
                             ></i>
-                            <span class="font-weight h5 text-white">PAGO</span>
+                            <span class="font-weight h5 text-white"
+                                >Total a pagar</span
+                            >
                         </div>
                         <div class="col-6 text-center">
                             <h5 class="font-weight h5 text-white">
-                                {{ currency_type.symbol }} {{ form.total }}
+                                {{ currency_type.symbol }}
+                                <template v-if="isNaN(form.total)">
+                                    {{ form.total }}
+                                </template>
+                                <template v-else>
+                                    {{ Number(form.total).toFixed(2) }}
+                                </template>
                             </h5>
                         </div>
                     </div>
@@ -1119,6 +1162,7 @@
                 ref="payment"
                 :is_payment.sync="is_payment"
                 :form="form"
+                :company="company"
                 :currency-type-id-active="form.currency_type_id"
                 :currency-type-active="currency_type"
                 :exchange-rate-sale="form.exchange_rate_sale"
@@ -1333,9 +1377,11 @@ export default {
             searchFromBarcode: false,
             sellers: [],
             keys: {},
+            company: null,
         };
     },
     async created() {
+       
         this.loadConfiguration();
         this.$store.commit("setConfiguration", this.configuration2);
         await this.initForm();
@@ -2728,7 +2774,10 @@ export default {
 
             let pos = this.form.items.indexOf(exist_item);
             let response = null;
-
+            let { group_items } = this.configuration;
+            if (exist_item && !group_items) {
+                exist_item = null;
+            }
             if (exist_item) {
                 if (input) {
                     response = await this.getStatusStock(
@@ -3098,7 +3147,7 @@ export default {
                         response.data.affectation_igv_types;
                     this.all_customers = response.data.customers;
                     this.sellers = response.data.sellers;
-
+                    this.company = response.data.company;
                     this.establishment = response.data.establishment;
                     this.currency_types = response.data.currency_types;
                     this.user = response.data.user;

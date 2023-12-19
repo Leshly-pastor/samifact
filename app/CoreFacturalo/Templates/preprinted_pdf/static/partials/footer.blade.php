@@ -103,24 +103,35 @@
         </tr>
     </table>
     <table class="full-width border-box my-2">
-            @foreach($accounts as $account)
-                <tr>
-                    <th class="p-1">Banco</th>
-                    <th class="p-1">Moneda</th>
-                    <th class="p-1">Código de Cuenta Interbancaria</th>
-                    <th class="p-1">Código de Cuenta</th>
-                </tr>
-                <tr>
-                    <td class="text-center">{{$account->bank->description}}</td>
-                    <td class="text-center text-upp">{{$account->currency_type->description}}</td>
-                    <td class="text-center">
-                        @if($account->cci)
-                            {{$account->cci}}
-                        @endif
-                    </td>
-                    <td class="text-center">{{$account->number}}</td>
-                </tr>
-            @endforeach
+        <tr>
+            <th class="p-1" width="25%">Banco</th>
+            <th class="p-1">Moneda</th>
+            <th class="p-1" width="30%">Código de Cuenta Interbancaria</th>
+            <th class="p-1" width="25%">Código de Cuenta</th>
+        </tr>
+        @foreach($accounts as $account)
+        <tr>
+            <td class="text-center">{{$account->bank->description}}</td>
+            <td class="text-center text-upp">{{$account->currency_type->description}}</td>
+            <td class="text-center">
+                @if($account->cci)
+                {{$account->cci}}
+                @endif
+            </td>
+            <td class="text-center">{{$account->number}}</td>
+        </tr>
+        @endforeach
+    </table>
+    @endif
+    @if ($document->terms_condition)
+    <br>
+    <table class="full-width">
+        <tr>
+            <td>
+                <h6 style="font-size: 12px; font-weight: bold;">Términos y condiciones del servicio</h6>
+                {!! $document->terms_condition !!}
+            </td>
+        </tr>
     </table>
 @endif
 <table class="full-width">

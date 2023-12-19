@@ -676,9 +676,29 @@ if ($logo) {
                 </td>
             </tr>
             @endif
+            @php
+                $document_description = null;
+                 if (is_object($document)) {
+                    if ($document && $document->prefix == 'NV') {
+                        $document_description = 'NOTA DE VENTA ELECTRÓNICA';
+                    }
+                    if ($document && $document->document_type_id) {
+                        $document_description = $document->document_type->description;
+                    }
+                }
+
+            @endphp
+            @if ($document_description)
             <tr>
-                <td class="text-center desc-9 pt-2">Representación impresa del Comprobante de Pago Electrónico. <br/>Esta puede ser consultada en {!! url('/buscar') !!}</td>
+                <td class="text-center desc">Representación impresa de la {{ $document_description }} <br />Esta puede
+                    ser consultada en {!! url('/buscar') !!}</td>
             </tr>
+            @else
+            <tr>
+                <td class="text-center desc">Representación impresa del Comprobante de Pago Electrónico. <br />Esta
+                    puede ser consultada en {!! url('/buscar') !!}</td>
+            </tr>
+            @endif
 </table>
 
 </body>

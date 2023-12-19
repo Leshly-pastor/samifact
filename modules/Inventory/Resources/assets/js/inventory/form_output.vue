@@ -253,6 +253,7 @@
             :showDialog.sync="showDialogSizes"
             :sizes="form.sizes"
             @addRowSize="addRowSize"
+            :type="type"
         >
         </form-size>
     </el-dialog>

@@ -29,7 +29,7 @@ class DriverController extends Controller
     public function records(Request $request)
     {
         $records = Driver::where($request->column, 'like', "%{$request->value}%")
-                            ->orderBy('name');
+            ->orderBy('name');
 
         return new DriverCollection($records->paginate(config('tenant.items_per_page')));
     }
@@ -53,7 +53,7 @@ class DriverController extends Controller
     {
         $id = $request->input('id');
         $is_default = $request->input('is_default');
-        if($is_default) {
+        if ($is_default) {
             Driver::query()->update([
                 'is_default' => false
             ]);
@@ -65,7 +65,7 @@ class DriverController extends Controller
 
         return [
             'success' => true,
-            'message' => ($id)?'Conductor editado con éxito':'Conductor registrado con éxito',
+            'message' => ($id) ? 'Conductor editado con éxito' : 'Conductor registrado con éxito',
             'id' => $record->id
         ];
     }
@@ -81,11 +81,43 @@ class DriverController extends Controller
         ];
     }
 
+    public function getDrivers(Request $request)
+    {
+        $value = $request->input('value');
+
+        $drivers = Driver::query()
+            ->where('is_active', true);
+        if ($value) {
+            $drivers = $drivers->where('number', 'like', "%{$value}%")
+                ->orWhere(function ($query) use ($value) {
+                    $query->where('name', 'like', "%{$value}%")
+                    ->orWhere('license', 'like', "%{$value}%")
+                    ;
+                });
+        }
+        $drivers = $drivers->get()
+            ->transform(function ($row) {
+                return [
+                    'id' => $row->id,
+                    'identity_document_type_id' => $row->identity_document_type_id,
+                    'number' => $row->number,
+                    'name' => $row->name,
+                    'license' => $row->license,
+                    'telephone' => $row->telephone,
+                    'is_default' => $row->is_default,
+                ];
+            });
+
+        return $drivers;
+    }
     public function getOptions()
     {
+
         return Driver::query()
             ->where('is_active', true)
+            ->take(20)
             ->get()
+            
             ->transform(function ($row) {
                 return [
                     'id' => $row->id,

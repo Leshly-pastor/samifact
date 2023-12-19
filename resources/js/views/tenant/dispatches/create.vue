@@ -451,9 +451,7 @@
                                 }"
                                 class="form-group"
                             >
-                                <label class="control-label"
-                                    >Referencia
-                                </label>
+                                <label class="control-label">Referencia </label>
                                 <el-select
                                     v-model="form.inventory_reference_id"
                                 >
@@ -650,6 +648,9 @@
                                     <el-select
                                         v-model="form.driver_id"
                                         clearable
+                                        remote
+                                        filterable
+                                        :remote-method="searchRemoteDrivers"
                                         placeholder="Seleccionar conductor"
                                     >
                                         <el-option
@@ -741,10 +742,19 @@
                                         <th class="font-weight-bold">
                                             Descripción
                                         </th>
-                                        <th class="text-end font-weight-bold">
+                                        <th
+                                            class="text-end font-weight-bold"
+                                            width="100px"
+                                        >
                                             Cantidad
                                         </th>
-                                        <th class="text-end">
+                                        <th
+                                            class="text-end font-weight-bold"
+                                            width="100px"
+                                        >
+                                            Peso
+                                        </th>
+                                        <th class="text-end" width="100px">
                                             <button
                                                 class="btn waves-effect waves-light btn-primary"
                                                 type="button"
@@ -767,9 +777,40 @@
                                             class="text-dark"
                                         ></td>
                                         <td class="text-end">
-                                            {{
+                                            <el-input-number
+                                                v-model="row.quantity"
+                                                :max="99999999"
+                                                :min="0"
+                                                :precision="4"
+                                                :step="1"
+                                                :value="
+                                                    getFormatQuantity(
+                                                        row.quantity
+                                                    )
+                                                "
+                                                placeholder="Cantidad"
+                                                @change="onChangeQuality(index)"
+                                            ></el-input-number>
+
+                                            <!-- {{
                                                 getFormatQuantity(row.quantity)
-                                            }}
+                                            }} -->
+                                        </td>
+                                        <td class="text-end">
+                                            <el-input-number
+                                                v-model="row.weight"
+                                                :max="99999999"
+                                                :min="0"
+                                                :precision="4"
+                                                :step="1"
+                                                :value="row.weight"
+                                                placeholder="Cantidad"
+                                                @change="verifyWeightItems"
+                                            ></el-input-number>
+
+                                            <!--  {{
+                                                row.weight
+                                            }} -->
                                         </td>
                                         <!-- <td class="text-end">{{ row.quantity }}</td> -->
                                         <td class="text-end">
@@ -1066,6 +1107,7 @@ export default {
             series: [],
             current_item: null,
             quantity: 1,
+            weight: 1,
             errors: {},
             form: {},
             recordId: null,
@@ -1184,6 +1226,24 @@ export default {
         });
     },
     methods: {
+        searchRemoteDrivers(input) {
+            this.loading_search = true;
+            if (input.length < 3) return;
+            let value = input;
+            this.$http
+                .get(`/drivers/get_drivers?value=${value || ""}`)
+                .then((response) => {
+                    console.log(
+                        "🚀 ~ file: create.vue:1218 ~ .then ~ response:",
+                        response
+                    );
+                    this.drivers = response.data;
+                    // this.customers = response.data.customers;
+                    this.loading_search = false;
+                    // this.input_person.number =
+                    //     this.customers.length == 0 ? input : null;
+                });
+        },
         setItemFromResponse(item, itemsParsed) {
             /* Obtiene el igv del item, si no existe, coloca el gravado*/
             if (item.sale_affectation_igv_type !== undefined) {
@@ -1463,6 +1523,7 @@ export default {
                 this.addItem({
                     item: item,
                     quantity: this.quantity,
+                    weight: this.weight,
                 });
                 this.$store.commit("setItem", {});
                 this.quantity = 1;
@@ -1610,10 +1671,11 @@ export default {
                     return item.id == it.id;
                 }
             });
-            console.log(
-                "🚀 ~ file: create.vue:1093 ~ addItem ~ this.form.items:",
-                this.form.items
-            );
+
+            // console.log(
+            //     "🚀 ~ file: create.vue:1093 ~ addItem ~ this.form.items:",
+            //     this.form.items
+            // );
             let attributes = null;
             if (it.attributes) {
                 attributes = it.attributes;
@@ -1638,6 +1700,7 @@ export default {
                 description: it.description,
                 internal_id: it.internal_id,
                 quantity: form.quantity,
+                weight: form.weight,
                 item_id: it.id,
                 unit_type_id: it.unit_type_id,
                 id: it.id,
@@ -1645,6 +1708,7 @@ export default {
                 lot_group: lot_group || null,
             });
             this.currentItem = null;
+            this.verifyWeightItems();
         },
         keyupCustomer() {
             if (this.input_person.number) {
@@ -1865,6 +1929,13 @@ export default {
         close() {
             location.href = "/dispatches";
         },
+        verifyWeightItems() {
+            this.weight = 0;
+            this.form.items.forEach((element) => {
+                this.weight += parseFloat(element.weight);
+            });
+            this.form.total_weight = this.weight;
+        },
         verifyQuantityItems() {
             let validate = true;
             let v = 0;
@@ -1930,6 +2001,44 @@ export default {
                 .then((response) => {
                     this.delivery_addresses = response.data;
                 });
+        },
+        onChangeQuality(index) {
+            console.log(this.form.items);
+            console.log(this.form.items[index]);
+            console.log(this.hasAttributes());
+            if (this.hasAttributes(index)) {
+                this.updateQW(index);
+            } else {
+                this.form.weight = 1;
+            }
+        },
+        updateQW(index) {
+            const contex = this;
+            this.form.items[index].attributes.forEach((row) => {
+                console.log("adentro");
+                if (row.attribute_type_id == "5031") {
+                    this.form.items[index].weight =
+                        row.value *
+                        (this.form.items[index].quantity
+                            ? this.form.items[index].quantity
+                            : 1);
+                }
+                console.log(this.form.items[index].quantity);
+                console.log(this.form.items[index].weight);
+            });
+            this.verifyWeightItems();
+        },
+        hasAttributes(index) {
+            if (
+                this.form.items[index] !== undefined &&
+                this.form.items[index].attributes !== undefined &&
+                this.form.items[index].attributes !== null &&
+                this.form.items[index].attributes.length > 0
+            ) {
+                return true;
+            }
+
+            return false;
         },
     },
 };

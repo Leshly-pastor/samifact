@@ -77,7 +77,7 @@
                                 $items = Item::find($row->item_id); 
                                 $quantity = $row->quantity;
                                 $purchase_unit_price = $items->purchase_unit_price * $quantity;
-                                $unit_price = $row->unit_price;
+                                $unit_price = $row->unit_price * $quantity;
                                 $type_document = '';
                                 $presentation_name = null;
                                 $relation = $row->document_id ? $row->document : $row->sale_note;
@@ -119,8 +119,8 @@
                                 //     }
                                 // }
                                 
-                                $unit_gain = (float) $unit_price - (float) $purchase_unit_price;
-                                $overall_profit = (float) $unit_price * $quantity - (float) $purchase_unit_price * $quantity;
+                                $unit_gain = ((float) $unit_price - (float) $purchase_unit_price)/  $quantity;
+                                $overall_profit = (float) $unit_price  - (float) $purchase_unit_price ;
                                 
                                 $acum_unit_gain += (float) $unit_gain;
                                 $acum_overall_profit += (float) $overall_profit;
@@ -149,7 +149,7 @@
                                 <td class="celda">{{ $purchase_unit_price }}</td>
                                 <td class="celda">{{ $unit_price }}</td>
 
-                                <td class="celda">{{ $unit_gain }}</td>
+                                <td class="celda">{{ number_format($unit_gain,2) }}</td>
                                 <td class="celda">{{ $overall_profit }}</td>
                             </tr>
                         @endforeach

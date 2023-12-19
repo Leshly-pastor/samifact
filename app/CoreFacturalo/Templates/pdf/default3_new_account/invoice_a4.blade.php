@@ -93,7 +93,6 @@ if ($logo) {
             <td width="40%" class="pl-3">
                 <div class="text-left">
                     <h4 class="">{{ $company->name }}</h4>
-                    <h5>{{ 'RUC '.$company->number }}</h5>
                     <h6 style="text-transform: uppercase;">
                         {{ ($establishment->address !== '-')? $establishment->address : '' }}
                         {{ ($establishment->district_id !== '-')? ', '.$establishment->district->description : '' }}
@@ -468,13 +467,13 @@ if ($logo) {
     @if($document != null)
 
     <table class="full-width border-box my-2">
-        @foreach($accounts as $account)
         <tr>
-            <th class="p-1">Banco</th>
+            <th class="p-1" width="25%">Banco</th>
             <th class="p-1">Moneda</th>
-            <th class="p-1">Código de Cuenta Interbancaria</th>
-            <th class="p-1">Código de Cuenta</th>
+            <th class="p-1" width="30%">Código de Cuenta Interbancaria</th>
+            <th class="p-1" width="25%">Código de Cuenta</th>
         </tr>
+        @foreach($accounts as $account)
         <tr>
             <td class="text-center">{{$account->bank->description}}</td>
             <td class="text-center text-upp">{{$account->currency_type->description}}</td>

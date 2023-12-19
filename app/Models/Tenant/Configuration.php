@@ -141,6 +141,8 @@ use App\Models\Tenant\Skin;
 class Configuration extends ModelTenant
 {
     protected $fillable = [
+        'group_items',
+        'search_by_factory_code',
         'purchase_affectation_igv_type_id',
         'purchases_control',
         'select_warehouse_to_sell',
@@ -332,6 +334,8 @@ class Configuration extends ModelTenant
     ];
 
     protected $casts = [
+        'group_items' => 'boolean',
+        'search_by_factory_code' => 'boolean',
         'purchases_control' => 'boolean',
         'select_warehouse_to_sell' => 'boolean',
         'all_products' => 'boolean',
@@ -581,6 +585,8 @@ class Configuration extends ModelTenant
         $currency = CurrencyType::all();
         $skins = Skin::all();
         return [
+            'group_items' => (bool)$this->group_items,
+            'search_by_factory_code' => (bool)$this->search_by_factory_code,
             'purchase_affectation_igv_type_id' => $this->purchase_affectation_igv_type_id,
             'purchases_control' => (bool)$this->purchases_control,
             'select_warehouse_to_sell' => (bool)$this->select_warehouse_to_sell,

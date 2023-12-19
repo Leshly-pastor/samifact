@@ -2924,7 +2924,18 @@
                                                 class="form-group"
                                             >
                                                 <label class="control-label"
-                                                    >Orden de Compra</label
+                                                    >Orden de Compra
+                                                    <el-tooltip
+                                                        class="item"
+                                                        content="El formato no debe llevar ningun tipo de caracteres como (-./_*)"
+                                                        effect="dark"
+                                                        placement="top-start"
+                                                    >
+                                                    <i
+                                                        class="fa fa-info-circle"
+                                                    ></i>
+                                                    </el-tooltip>
+                                                    </label
                                                 >
                                                 <el-input
                                                     v-model="

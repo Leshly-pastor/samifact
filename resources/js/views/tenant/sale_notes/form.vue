@@ -24,10 +24,7 @@
                         <div class="col-sm-10 text-left mt-3 mb-0">
                             <address class="ib mr-2">
                                 <span class="font-weight-bold d-block"
-                                    >NOTA DE VENTA</span
-                                >
-                                <span class="font-weight-bold d-block"
-                                    >NV-XXX</span
+                                    >Nota de venta</span
                                 >
                                 <span class="font-weight-bold">{{
                                     company.name
@@ -41,10 +38,6 @@
                                 {{ establishment.department.description }} -
                                 {{ establishment.country.description }}
                                 <br />
-                                {{ establishment.email }} -
-                                <span v-if="establishment.telephone != '-'">{{
-                                    establishment.telephone
-                                }}</span>
                             </address>
                         </div>
                     </div>

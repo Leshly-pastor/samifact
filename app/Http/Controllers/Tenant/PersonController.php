@@ -124,7 +124,7 @@ class PersonController extends Controller
     {
         $column = $request->column;
         $value = $request->value;
-        $order = $request->order;
+        $order = $request->order ?? 'asc';
         $driver = filter_var($request->driver ?? "false", FILTER_VALIDATE_BOOLEAN);
         $records = Person::where('type', $type);
         if ($column == 'zone_id' || $column == 'department_id' || $column == 'province_id' || $column == 'district_id') {
@@ -249,7 +249,7 @@ class PersonController extends Controller
         foreach ($addresses as $row) {
             $person->addresses()->updateOrCreate(['id' => $row['id']], $row);
         }
-        $dispatch_addresses = $request->input('dispatch_addresses');
+        $dispatch_addresses = $request->input('dispatch_addresses')  ?? [];
         foreach ($dispatch_addresses as $row) {
             $person->dispatch_addresses()->updateOrCreate(['id' => $row['id']], $row);
         }

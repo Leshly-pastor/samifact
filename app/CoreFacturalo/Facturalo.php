@@ -48,6 +48,7 @@ use App\Models\Tenant\ItemUnitType;
 use App\Models\Tenant\ItemWarehousePrice;
 use App\Services\PseService;
 use App\Models\Tenant\NoStockDocument;
+use App\Services\PseServiceDispatch;
 use Carbon\Carbon;
 use GuzzleHttp\Client;
 use Illuminate\Support\Facades\Log;
@@ -104,6 +105,16 @@ class Facturalo
     public function sendPseNew()
     {
         $new_pse = new PseService($this->document);
+        $this->response = $new_pse->sendToPse();
+    }
+
+    public function sendPseNewDispatch()
+    {
+        $new_pse = new PseServiceDispatch($this->document);
+        $this->response = $new_pse->sendToPse();
+    }
+    public function sendPseDispatch(){
+        $new_pse = new PseServiceDispatch($this->document);
         $this->response = $new_pse->sendToPse();
     }
     public function sendPse()
@@ -537,7 +548,7 @@ class Facturalo
         $pdf_margin_bottom = 15;
         $pdf_margin_left = 15;
 
-        if (in_array($base_pdf_template, ['personalizada_gonzalo_diseno', 'personalizada_famavet','famavet', 'personalizada_trujillosalud', 'personalizada_gonzalo_hercold', 'personalizada_gonzalo_ultramix', 'personalizada_gonzalo_concremix', 'full_height', 'personalizada_drogueria', 'custom', 'personalizada_impacto', 'personalizada_default3_banks_valor', 'personalizada_default3_banks_precio', 'personalizada_pack_pro', 'personalizada_custom', 'perzonalizada_gonzalo_full_dorado', 'perzonalizada_gonzalo_full_negro', 'rounded'])) {
+        if (in_array($base_pdf_template, ['personalizada_gonzalo_diseno', 'personalizada_famavet','famavet', 'personalizada_trujillosalud', 'hercold', 'personalizada_gonzalo_ultramix', 'personalizada_gonzalo_concremix', 'full_height', 'personalizada_drogueria', 'custom', 'personalizada_impacto', 'personalizada_default3_banks_valor', 'personalizada_default3_banks_precio', 'personalizada_pack_pro', 'personalizada_custom', 'perzonalizada_gonzalo_full_dorado', 'perzonalizada_gonzalo_full_negro', 'rounded'])) {
             $pdf_margin_top = 5;
             $pdf_margin_right = 5;
             $pdf_margin_bottom = 5;
@@ -689,7 +700,7 @@ class Facturalo
                 'margin_bottom' => 0,
                 'margin_left' => 1
             ]);
-        } else if ($format_pdf === 'a5') {
+        } else if ($format_pdf === 'a5' && $this->type !== 'dispatch') {
 
             $company_name      = (strlen($this->company->name) / 20) * 10;
             $company_address   = (strlen($this->document->establishment->address) / 30) * 10;
@@ -747,7 +758,61 @@ class Facturalo
                 'margin_bottom' => 0,
                 'margin_left' => 5
             ]);
-        } else {
+    } else if ($format_pdf === 'a5' && $this->type == 'dispatch') {
+
+        $company_name      = (strlen($this->company->name) / 20) * 10;
+        $company_address   = (strlen($this->document->establishment->address) / 30) * 10;
+        $company_number    = $this->document->establishment->telephone != '' ? '10' : '0';
+        
+
+        $total_exportation = $this->document->total_exportation != '' ? '10' : '0';
+        $total_free        = $this->document->total_free != '' ? '10' : '0';
+        $total_unaffected  = $this->document->total_unaffected != '' ? '10' : '0';
+        $total_exonerated  = $this->document->total_exonerated != '' ? '10' : '0';
+        $total_taxed       = $this->document->total_taxed != '' ? '10' : '0';
+        $total_plastic_bag_taxes       = $this->document->total_plastic_bag_taxes != '' ? '10' : '0';
+        $quantity_rows     = count($this->document->items);
+
+        $extra_by_item_description = 0;
+        $discount_global = 0;
+        foreach ($this->document->items as $it) {
+
+            if (strlen($it->item->description) > 100) {
+                $extra_by_item_description += 24;
+            }
+            if ($it->discounts) {
+                $discount_global = $discount_global + 1;
+            }
+        }
+        $legends = $this->document->legends != '' ? '10' : '0';
+
+
+        $height = ($quantity_rows * 8) +
+            ($discount_global * 3) +
+            $company_name +
+            $company_address +
+            $company_number +
+     
+            $legends +
+            $total_exportation +
+            $total_free +
+            $total_unaffected +
+            $total_exonerated +
+            $total_taxed;
+        $diferencia = 148 - (float)$height;
+
+        $pdf = new Mpdf([
+            'mode' => 'utf-8',
+            'format' => [
+                210,
+                $diferencia + $height
+            ],
+            'margin_top' => 2,
+            'margin_right' => 5,
+            'margin_bottom' => 0,
+            'margin_left' => 5
+        ]);
+    } else {
 
             if ($base_pdf_template === 'brand') {
                 $pdf_margin_top = 93.7;
@@ -798,7 +863,7 @@ class Facturalo
             }
         }
         $pdf->shrink_tables_to_fit = 1;
-        if (in_array($base_pdf_template, ['personalizada_gonzalo_diseno', 'personalizada_gonzalo_hercold'])) {
+        if (in_array($base_pdf_template, ['personalizada_gonzalo_diseno', 'hercold','maite'])) {
 
             $path_css = app_path('CoreFacturalo' . DIRECTORY_SEPARATOR . 'Templates' .
                 DIRECTORY_SEPARATOR . 'pdf' .

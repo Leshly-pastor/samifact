@@ -330,6 +330,36 @@
                                         ></el-option>
                                     </el-select>
                                 </div>
+                                <br>
+                                    <div class="form-group">
+                                    <label class="control-label">
+                                        Formato por defecto
+                                        <el-tooltip
+                                            class="item"
+                                            effect="dark"
+                                            content="Para la impresión directa"
+                                            placement="top"
+                                        >
+                                            <i class="fa fa-info-circle"></i>
+                                        </el-tooltip>
+                                    </label>
+
+                                    <el-select
+                                        v-model="form.print_format"
+                                        filterable
+                                        remote
+                                        popper-class="el-select-customers"
+                                        clearable
+                                        placeholder="Formato de impresión"
+                                    >
+                                        <el-option
+                                            v-for="option in [{id: 'ticket', description: 'TICKET'},{id: 'a4', description: 'A4'},  {id: 'a5', description: 'A5'}]"
+                                            :key="option.id"
+                                            :value="option.id"
+                                            :label="option.description"
+                                        ></el-option>
+                                    </el-select>
+                                </div>
                             </div>
                             <div
                                 class="col-lg-6 col-md-6 form-group"

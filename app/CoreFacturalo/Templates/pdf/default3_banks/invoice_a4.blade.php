@@ -320,6 +320,19 @@ if ($logo) {
                     @else
                     {!!$row->item->description!!}
                     @endif
+                    
+                    @isset($row->item->lots)
+                    @foreach ($row->item->lots as $lot)
+                        @if (isset($lot->has_sale) && $lot->has_sale)
+                            <span style="font-size: 9px">
+                                {{ $lot->series }}
+                                @if (!$loop->last)
+                                    -
+                                @endif
+                            </span>
+                        @endif
+                    @endforeach
+                    @endisset
 
                     @if (!empty($row->item->presentation)) {!!$row->item->presentation->description!!} @endif
 
@@ -333,12 +346,6 @@ if ($logo) {
                     <br /><span style="font-size: 9px">{!! $attr->description !!} : {{ $attr->value }}</span>
                     @endforeach
                     @endif
-                    {{-- @if($row->discounts)
-                    @foreach($row->discounts as $dtos)
-                        <br/><span style="font-size: 9px">{{ $dtos->factor * 100 }}% {{$dtos->description }}</span>
-                    @endforeach
-                    @endif --}}
-
                     @if($row->item->is_set == 1)
                     <br>
                     @inject('itemSet', 'App\Services\ItemSetService')

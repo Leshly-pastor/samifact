@@ -89,12 +89,12 @@
                         <thead>
                             <th class="text-center">Servicio</th>
                             <th class="text-center">F. Emisión</th>
-                            <th
-                            
-                             class="text-left">
-                             <template v-if="type=='sale'">Cliente</template>
-                             <template>Proveedor</template>
-                             </th>
+                            <th class="text-left">
+                                <template v-if="type == 'sale'"
+                                    >Cliente</template
+                                >
+                                <template>Proveedor</template>
+                            </th>
 
                             <th class="text-center">Tipo Documento</th>
                             <th class="text-center">Serie</th>
@@ -130,7 +130,7 @@
                                 >
                                     {{ document.date }}
                                 </td>
-                                     <td
+                                <td
                                     :class="
                                         document.label == 'DANGER'
                                             ? 'text-danger'
@@ -141,8 +141,8 @@
                                     class="text-left"
                                 >
                                     {{ document.name_company }}
-                                    <br>
-                                    <small>{{document.number_company}}</small>
+                                    <br />
+                                    <small>{{ document.number_company }}</small>
                                 </td>
                                 <td
                                     :class="
@@ -194,22 +194,18 @@
                                 </td>
                             </tr>
                             <tr>
-                              <td colspan="4"></td>
-                              <td>
-                                Total Sunat ({{ totals.count_sunat }})
-                              </td>
-                              <td class="text-end">
-                                {{ totals.sunat.toFixed(2) }}
-                              </td>
+                                <td colspan="4"></td>
+                                <td>Total Sunat ({{ totals.count_sunat }})</td>
+                                <td class="text-end">
+                                    {{ totals.sunat.toFixed(2) }}
+                                </td>
                             </tr>
                             <tr>
-                              <td colspan="4"></td>
-                              <td>
-                                Total Smart ({{ totals.count_smart }})
-                              </td>
-                              <td class="text-end">
-                                {{ totals.smart.toFixed(2) }}
-                              </td>
+                                <td colspan="4"></td>
+                                <td>Total Smart ({{ totals.count_smart }})</td>
+                                <td class="text-end">
+                                    {{ totals.smart.toFixed(2) }}
+                                </td>
                             </tr>
                         </tbody>
                     </table>
@@ -280,7 +276,6 @@
                         <el-button
                             type="success"
                             class=""
-                         
                             :disabled="documents.length <= 0"
                             @click="sendAccept"
                             :loading="loading_accept"
@@ -294,14 +289,13 @@
     </div>
 </template>
 <style>
-.text-strong{
+.text-strong {
     font-weight: bolder;
 }
 </style>
 <script>
-
-
 export default {
+    props: ["company"],
     components: {},
     data() {
         return {
@@ -310,11 +304,11 @@ export default {
             period_year: [],
             period_month: [],
             form: {},
-            totals:{
-              sunat:0,
-              smart:0,
-              count_sunat:0,
-              count_smart:0,
+            totals: {
+                sunat: 0,
+                smart: 0,
+                count_sunat: 0,
+                count_smart: 0,
             },
             code_ticket: null,
             states: {
@@ -349,7 +343,11 @@ export default {
             this.$http
                 .get(`/${this.resource}/${this.type}/tables`)
                 .then((response) => {
-                    this.setPeriodsData(response.data.data);
+                    if (response.data.success) {
+                        this.setPeriodsData(response.data.data);
+                    } else {
+                        this.$message.error(response.data.message);
+                    }
                 })
                 .catch((error) => {
                     console.error(error);
@@ -371,33 +369,37 @@ export default {
             this.period_month = record.periods;
         },
         sendPeriod() {
-            localStorage.setItem(this.type + "_sire_period", this.form.period);
+            localStorage.setItem(this.type + "_sire_period_" + this.company.number, this.form.period);
             this.period_current = this.form.period;
             this.$http
                 .get(
                     `/${this.resource}/${this.type}/${this.form.period}/ticket`
                 )
                 .then((response) => {
-                    this.code_ticket = response.data.data.numTicket;
-                    this.status_ticket = "00";
-                    localStorage.setItem(
-                        this.type + "_sire_ticket",
-                        this.code_ticket
-                    );
-                    localStorage.setItem(this.type + "_sire_status", "00");
+                    if (response.data.success) {
+                        this.code_ticket = response.data.data.numTicket;
+                        this.status_ticket = "00";
+                        localStorage.setItem(
+                            this.type + "_sire_ticket_"+this.company.number,
+                            this.code_ticket
+                        );
+                        localStorage.setItem(this.type + "_sire_status_"+this.company.number, "00");
+                    } else {
+                        this.$message.error(response.data.message);
+                    }
                 })
                 .catch((error) => {
                     console.error(error);
                 });
         },
         getData() {
-            let sire_ticket = localStorage.getItem(this.type + "_sire_ticket");
+            let sire_ticket = localStorage.getItem(this.type + "_sire_ticket_"+this.company.number);
             this.code_ticket = sire_ticket !== null ? sire_ticket : null;
-            let sire_status = localStorage.getItem(this.type + "_sire_status");
+            let sire_status = localStorage.getItem(this.type + "_sire_status_"+this.company.number);
             this.status_ticket = sire_status !== null ? sire_status : "00";
             if (sire_ticket != null) {
                 let sire_period = localStorage.getItem(
-                    this.type + "_sire_period"
+                    this.type + "_sire_period_"+this.company.number
                 );
                 this.period_current = sire_period !== null ? sire_period : null;
             }
@@ -417,11 +419,13 @@ export default {
                     if (response.data.success) {
                         this.status_ticket = response.data.data.status_code;
                         localStorage.setItem(
-                            this.type + "_sire_status",
+                            this.type + "_sire_status_"+this.company.number,
                             this.status_ticket
                         );
                         this.documents = response.data.data.documents;
                         this.getTotals();
+                    } else {
+                        this.$message.error(response.data.message);
                     }
                 })
                 .catch((error) => {
@@ -429,18 +433,23 @@ export default {
                     console.error(error);
                 });
         },
-        getTotals(){
-          let sunat = this.documents.filter(d=>d.service == "Sunat");
-          let count_sunat = sunat.length;
-          let total_sunat = sunat.reduce((a,b)=>a+parseFloat(b.total.replace(',','')),0);
-          let smart = this.documents.filter(d=>d.service != "Sunat");
-          let count_smart = smart.length;
-          let total_smart = smart.reduce((a,b)=>a+parseFloat(b.total.replace(',','')),0);
-          this.totals.sunat = total_sunat;
-          this.totals.smart = total_smart;
-          this.totals.count_sunat = count_sunat;
-          this.totals.count_smart = count_smart;
-          
+        getTotals() {
+            let sunat = this.documents.filter((d) => d.service == "Sunat");
+            let count_sunat = sunat.length;
+            let total_sunat = sunat.reduce(
+                (a, b) => a + parseFloat(b.total.replace(",", "")),
+                0
+            );
+            let smart = this.documents.filter((d) => d.service != "Sunat");
+            let count_smart = smart.length;
+            let total_smart = smart.reduce(
+                (a, b) => a + parseFloat(b.total.replace(",", "")),
+                0
+            );
+            this.totals.sunat = total_sunat;
+            this.totals.smart = total_smart;
+            this.totals.count_sunat = count_sunat;
+            this.totals.count_smart = count_smart;
         },
         diffRows({ row, rowIndex }) {
             if (rowIndex < this.documents.length - 1) {
@@ -459,7 +468,7 @@ export default {
         },
         sendAccept() {
             this.loading_accept = true;
-            let sire_period = localStorage.getItem(this.type + "_sire_period");
+            let sire_period = localStorage.getItem(this.type + "_sire_period_"+this.company.number);
             this.$http
                 .get(`/${this.resource}/${this.type}/${sire_period}/accept`)
                 .then((response) => {

@@ -81,7 +81,7 @@ class DispatchAddressController extends Controller
             });
             //insertar address en primer lugar
         //buscar en $addresses si existe address 
-        if($address['location_id']!=null){
+        if($address['location_id']!=null && $address['address']!=null){
             $address_exist = $addresses->where('address', $address['address'])
             ->where('location_id', $address['location_id'])
             ->first();

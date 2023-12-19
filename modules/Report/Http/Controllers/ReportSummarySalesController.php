@@ -30,7 +30,7 @@ class ReportSummarySalesController extends Controller
     public function filter()
     {
 
-        $document_types = DocumentType::whereIn('id', ['01', '03'])->get();
+        $document_types = DocumentType::whereIn('id', ['01', '03'])->where('active',true)->get();
 
         $establishments = Establishment::all()->transform(function ($row) {
             return [

@@ -693,6 +693,21 @@
                             >
                                 PSE
                             </button> -->
+                            <el-tooltip
+                                v-if="row.btn_pdf_voided"
+                                effect="dark"
+                                placement="top-start"
+                                content="PDF, comunicación de baja."
+                            >
+                                <button
+                                    type="button"
+                                    style="min-width: 41px"
+                                    class="btn btn-danger mb-1"
+                                    @click.prevent="voidedPdf(row.id)"
+                                >
+                                    PDF
+                                </button>
+                            </el-tooltip>
                             <button
                                 type="button"
                                 style="min-width: 41px"
@@ -1275,6 +1290,9 @@ export default {
         this.getUsers();
     },
     methods: {
+        voidedPdf(id){
+            window.open(`documents/voided_pdf/${id}`, "_blank");
+        },
         async updateUser(user_id, document) {
             let { id } = document;
             try {

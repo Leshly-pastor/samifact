@@ -9,6 +9,7 @@ use App\Models\Tenant\ItemSupply;
 use App\Models\Tenant\ItemUnitType;
 use App\Models\Tenant\ItemWarehouse;
 use App\Models\Tenant\Warehouse;
+use Carbon\Carbon;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -130,6 +131,7 @@ class SearchItemController extends Controller
         $search_item_by_series = Configuration::first()->isSearchItemBySeries();
         $production = (bool)($request->production ?? false);
         $filter_categorie = $request->input('filter_categorie');
+        $factory_codes = $request->input('factory_codes');
         $filter_brand = $request->input('filter_brand');
         $order_search_price = $request->input('order_search_price');
         $order_search_stock = $request->input('order_search_stock');
@@ -164,7 +166,7 @@ class SearchItemController extends Controller
             $item->where('brand_id', $filter_brand);
             $ItemToSearchBySeries->where('brand_id', $filter_brand);
         }
-
+    
 
         if ($production !== false) {
             // busqueda de insumos, no se lista por codigo de barra o por series

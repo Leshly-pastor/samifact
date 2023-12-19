@@ -2,6 +2,7 @@
 
 namespace Modules\Inventory\Http\Controllers;
 
+use App\CoreFacturalo\Requests\Inputs\Functions;
 use App\Models\Tenant\Item;
 use App\Models\Tenant\Series;
 use Barryvdh\DomPDF\PDF;
@@ -240,6 +241,7 @@ class InventoryController extends Controller
                 ->select('id', 'description')
                 ->where('id', $item_id)
                 ->first();
+            $itm->restoreStockSizes();
             $guide_items[] = [
                 'id' => $item_id,
                 'name' => $itm->description,
@@ -267,15 +269,40 @@ class InventoryController extends Controller
 
             if ($type == 'input') {
                 foreach ($sizes as $size) {
-                        //encuentra elitemsizestock y agregarle la cantidad
+                    //encuentra elitemsizestock y agregarle la cantidad
+                    $original_size = Functions::valueKeyInArray($size, 'originalSize', null);
+                    $size_ = $size['size'];
+                    $is_edit = $original_size != $size_;
+
+                    if ($is_edit) {
+                        $item_size_stock = ItemSizeStock::where('item_id', $item_id)->where('warehouse_id', $warehouse_id)->where('size', $original_size)->first();
+                        if ($item_size_stock) {
+                            $item_size_stock->size = $size_;
+                            $item_size_stock->stock = $item_size_stock->stock +  $size['quantity'];
+                            $item_size_stock->update();
+                        }else{
+                            $new = new ItemSizeStock();
+                            $new->item_id = $item_id;
+                            $new->warehouse_id = $warehouse_id;
+                            $new->size = $size_;
+                            $new->stock = $size['quantity'];
+                            $new->save();
+                        }
+
+                    } else {
                         $exit = ItemSizeStock::where('item_id', $item_id)->where('warehouse_id', $warehouse_id)->where('size', $size['size'])->first();
-                        if($exit){
+                        if ($exit) {
                             $exit->stock = $exit->stock + $size['quantity'];
                             $exit->update();
-                        }                
-                    
-
-                    
+                        } else {
+                            $new = new ItemSizeStock();
+                            $new->item_id = $item_id;
+                            $new->warehouse_id = $warehouse_id;
+                            $new->size = $size['size'];
+                            $new->stock = $size['quantity'];
+                            $new->save();
+                        }
+                    }
                 }
                 foreach ($lots as $lot) {
                     /*$inventory->lots()->create([
@@ -306,16 +333,25 @@ class InventoryController extends Controller
                 }
             } else {
                 foreach ($sizes as $size) {
+                    $original_size = Functions::valueKeyInArray($size, 'originalSize', null);
+                    $size_ = $size['size'];
+                    $is_edit = $original_size != $size_;
                     //encuentra elitemsizestock y agregarle la cantidad
-                    $exit = ItemSizeStock::where('item_id', $item_id)->where('warehouse_id', $warehouse_id)->where('size', $size['size'])->first();
-                    if($exit){
-                        $exit->stock = $exit->stock - $size['quantity'];
-                        $exit->update();
+                    if ($is_edit) {
+                        $item_size_stock = ItemSizeStock::where('item_id', $item_id)->where('warehouse_id', $warehouse_id)->where('size', $original_size)->first();
+                        if ($item_size_stock) {
+                            $item_size_stock->size = $size_;
+                            $item_size_stock->stock = $item_size_stock->stock -  $size['quantity'];
+                            $item_size_stock->update();
+                        }
+                    } else {
+                        $exit = ItemSizeStock::where('item_id', $item_id)->where('warehouse_id', $warehouse_id)->where('size', $size['size'])->first();
+                        if ($exit) {
+                            $exit->stock = $exit->stock - $size['quantity'];
+                            $exit->update();
+                        }
                     }
-                
-
-                
-            }
+                }
                 foreach ($lots as $lot) {
                     if ($lot['has_sale']) {
                         $item_lot = ItemLot::findOrFail($lot['id']);
@@ -538,13 +574,13 @@ class InventoryController extends Controller
             $quantity_real = $request->input('quantity_real');
             $lots = ($request->has('lots')) ? $request->input('lots') : [];
             $sizes = ($request->has('sizes')) ? $request->input('sizes') : [];
-            foreach($sizes as $size){
-                if(array_key_exists('qty',$size)){
+            foreach ($sizes as $size) {
+                if (array_key_exists('qty', $size)) {
                     $exit = ItemSizeStock::where('item_id', $item_id)->where('warehouse_id', $warehouse_id)->where('size', $size['size'])->first();
-                    if($exit){
+                    if ($exit) {
                         $exit->stock = $size['qty'];
                         $exit->update();
-                    }else{
+                    } else {
                         $new = new ItemSizeStock();
                         $new->item_id = $item_id;
                         $new->warehouse_id = $warehouse_id;
@@ -770,7 +806,7 @@ class InventoryController extends Controller
                 }
             }
 
-          
+
 
             DB::connection('tenant')->commit();
             return [

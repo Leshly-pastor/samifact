@@ -16,6 +16,7 @@ class Company extends ModelTenant
 {
     protected $with = ['identity_document_type'];
     protected $fillable = [
+        'is_rus',
         'footer_text_template',
         'mtc_auth',
         'user_id',
@@ -61,6 +62,7 @@ class Company extends ModelTenant
     protected $casts = [
         'send_document_to_pse' => 'bool',
         'pse' => 'bool',
+        'is_rus' => 'bool',
     ];
 
     /**

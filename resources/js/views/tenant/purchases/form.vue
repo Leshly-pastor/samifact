@@ -278,80 +278,84 @@
                             >
                             </el-date-picker>
                         </div>
-                       <template v-if="config.purchases_control">
-                         <div
-                            class="form-group col-sm-12 col-md-6 col-lg-4"
-                            :class="{ 'has-danger': errors.purchase_license }"
-                        >
-                            <label>
-                                Placa
-
-                                <a
-                                    href="#"
-                                    @click.prevent="showPurchaseLicenseModal"
-                                >
-                                    [+ Nuevo]
-                                </a>
-                            </label>
-
-                            <el-select
-                                v-model="form.license_id"
-                                filterable
-                                remote
-                                popper-class="el-select-customers"
-                                clearable
-                                placeholder="Buscar producto"
-                                :remote-method="searchRemoteLicense"
-                                :loading="loading_search"
+                        <template v-if="config.purchases_control">
+                            <div
+                                class="form-group col-sm-12 col-md-6 col-lg-4"
+                                :class="{
+                                    'has-danger': errors.purchase_license,
+                                }"
                             >
-                                <el-option
-                                    v-for="option in licenses"
-                                    :key="option.id"
-                                    :value="option.id"
-                                    :label="option.license"
-                                ></el-option>
-                            </el-select>
-                        </div>
-                        <div
-                            class="form-group col-sm-12 col-md-6 col-lg-4"
-                            :class="{
-                                'has-danger': errors.purchase_responsible,
-                            }"
-                        >
-                            <label>
-                                Responsable
+                                <label>
+                                    Placa
 
-                                <a
-                                    href="#"
-                                    @click.prevent="
-                                        showPurchaseResponsibleModal
-                                    "
+                                    <a
+                                        href="#"
+                                        @click.prevent="
+                                            showPurchaseLicenseModal
+                                        "
+                                    >
+                                        [+ Nuevo]
+                                    </a>
+                                </label>
+
+                                <el-select
+                                    v-model="form.license_id"
+                                    filterable
+                                    remote
+                                    popper-class="el-select-customers"
+                                    clearable
+                                    placeholder="Buscar producto"
+                                    :remote-method="searchRemoteLicense"
+                                    :loading="loading_search"
                                 >
-                                    [+ Nuevo]
-                                </a>
-                            </label>
-                          <el-select
-                                v-model="form.responsible_id"
-                                filterable
-                                remote
-                                popper-class="el-select-customers"
-                                clearable
-                                placeholder="Buscar producto"
-                                :remote-method="searchRemoteResponsible"
-                                :loading="loading_search"
+                                    <el-option
+                                        v-for="option in licenses"
+                                        :key="option.id"
+                                        :value="option.id"
+                                        :label="option.license"
+                                    ></el-option>
+                                </el-select>
+                            </div>
+                            <div
+                                class="form-group col-sm-12 col-md-6 col-lg-4"
+                                :class="{
+                                    'has-danger': errors.purchase_responsible,
+                                }"
                             >
-                                <el-option
-                                    v-for="option in responsibles"
-                                    :key="option.id"
-                                    :value="option.id"
-                                    :label="`${option.number}-${option.name}`"
-                                ></el-option>
-                            </el-select>
-                        </div>
-                       </template>
+                                <label>
+                                    Responsable
+
+                                    <a
+                                        href="#"
+                                        @click.prevent="
+                                            showPurchaseResponsibleModal
+                                        "
+                                    >
+                                        [+ Nuevo]
+                                    </a>
+                                </label>
+                                <el-select
+                                    v-model="form.responsible_id"
+                                    filterable
+                                    remote
+                                    popper-class="el-select-customers"
+                                    clearable
+                                    placeholder="Buscar producto"
+                                    :remote-method="searchRemoteResponsible"
+                                    :loading="loading_search"
+                                >
+                                    <el-option
+                                        v-for="option in responsibles"
+                                        :key="option.id"
+                                        :value="option.id"
+                                        :label="`${option.number}-${option.name}`"
+                                    ></el-option>
+                                </el-select>
+                            </div>
+                        </template>
                         <div class="col-12">&nbsp;</div>
 
-                        <div class="col-md-8 mt-2 mb-2">
+                        <div class="col-md-3 mt-2 mb-2">
                             <div class="form-group">
                                 <el-checkbox
                                     v-model="form.purchase_period"
@@ -360,6 +364,44 @@
                                 </el-checkbox>
                             </div>
                         </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="const_detraccion">
+                                    Const. Detracción
+                                </label>
+                                <el-input
+                                    v-model="form.const_detraccion"
+                                    placeholder="Const. Detracción"
+                                ></el-input>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="date_detraccion">
+                                    Fecha Detracción
+                                </label>
+                                <el-date-picker
+                                    v-model="form.date_detraccion"
+                                    placeholder="Fecha Detracción"
+                                    type="date"
+                                    value-format="yyyy-MM-dd"
+                                >
+                                </el-date-picker>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="percentage_detraccion">
+                                    Porcentaje Detracción
+                                </label>
+                                <el-input
+                                    type="number"
+                                    v-model="form.percentage_detraccion"
+                                    placeholder="Porcentaje Detracción"
+                                ></el-input>
+                            </div>
+                        </div>
+
                         <div class="col-md-8 mt-2 mb-2">
                             <div class="form-group">
                                 <el-checkbox
@@ -1271,10 +1313,11 @@
             :external="true"
             :showDialog.sync="showResponsibleDialog"
         ></responsible-modal>
-        <license-modal 
-        @reloadDataLicense="reloadDataLicense"
-        :external="true"
-        :showDialog.sync="showLicenseDialog"></license-modal>
+        <license-modal
+            @reloadDataLicense="reloadDataLicense"
+            :external="true"
+            :showDialog.sync="showLicenseDialog"
+        ></license-modal>
     </div>
 </template>
 
@@ -1404,7 +1447,7 @@ export default {
 
                 this.charges_types = data.charges_types;
                 this.$store.commit("setConfiguration", data.configuration);
-                
+
                 this.$store.commit("setEstablishment", data.establishment);
                 this.form.currency_type_id =
                     this.currency_types.length > 0
@@ -1438,8 +1481,8 @@ export default {
         this.changeHasPayment();
         this.changeHasClient();
     },
-  async  created() {
-          await this.$eventHub.$on("reloadDataPersons", (responsible_id) => {
+    async created() {
+        await this.$eventHub.$on("reloadDataPersons", (responsible_id) => {
             this.reloadDataResponsible(responsible_id);
         });
         this.loadConfiguration();
@@ -1454,12 +1497,12 @@ export default {
         this.initGlobalIgv();
     },
     methods: {
-        reloadDataLicense(license){
-            let {id} = license;
+        reloadDataLicense(license) {
+            let { id } = license;
             this.licenses.push(license);
             this.form.license_id = id;
         },
-          reloadDataResponsible(responsible_id) {
+        reloadDataResponsible(responsible_id) {
             this.$http
                 .get(`/purchases-responsible/record/${responsible_id}`)
                 .then((response) => {
@@ -1472,21 +1515,21 @@ export default {
                 const response = await this.$http.get(
                     `/purchases-license/records?value=${input}&column=license`
                 );
-                if(response.status == 200){
+                if (response.status == 200) {
                     this.licenses = response.data.data;
                 }
             }
         },
-       async searchRemoteResponsible(input) {
-          if (input.length >= 2) {
+        async searchRemoteResponsible(input) {
+            if (input.length >= 2) {
                 const response = await this.$http.get(
                     `/purchases-responsible/records?value=${input}`
                 );
-                if(response.status == 200){
+                if (response.status == 200) {
                     this.responsibles = response.data.data;
                 }
             }
-       },
+        },
         showPurchaseResponsibleModal() {
             this.showResponsibleDialog = true;
         },
@@ -1882,6 +1925,9 @@ export default {
         initForm() {
             this.errors = {};
             this.form = {
+                const_detraccion: null,
+                date_detraccion: null,
+                percentage_detraccion: null,
                 establishment_id: null,
                 document_type_id: null,
                 series: null,

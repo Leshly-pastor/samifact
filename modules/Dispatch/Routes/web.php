@@ -16,6 +16,7 @@ if ($current_hostname) {
                 Route::post('/', 'DriverController@store');
                 Route::delete('/{id}', 'DriverController@destroy');
                 Route::get('get_options', 'DriverController@getOptions');
+                Route::get('get_drivers', 'DriverController@getDrivers');
             });
 
             Route::prefix('dispatchers')->group(function () {

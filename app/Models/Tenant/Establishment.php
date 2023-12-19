@@ -12,6 +12,7 @@ class Establishment extends ModelTenant
 {
     protected $with = ['country', 'department', 'province', 'district'];
     protected $fillable = [
+        'print_format',
         'yape_owner',
         'yape_number',
         'yape_logo',

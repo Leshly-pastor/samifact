@@ -6,6 +6,7 @@ use App\CoreFacturalo\Requests\Inputs\Common\ActionInput;
 use App\CoreFacturalo\Requests\Inputs\Common\EstablishmentInput;
 use App\CoreFacturalo\Requests\Inputs\Common\LegendInput;
 use App\CoreFacturalo\Requests\Inputs\Common\PersonInput;
+use App\Models\Tenant\Catalogs\IdentityDocumentType;
 use App\Models\Tenant\Company;
 use App\Models\Tenant\Dispatch;
 use App\Models\Tenant\Item;
@@ -240,7 +241,14 @@ class DispatchInput
             if (array_key_exists('sender_data', $inputs)) {
                 $sender = $inputs['sender_data'];
                 $identity_document_type_id = $sender['identity_document_type_id'];
-                $identity_document_type_description = $sender['identity_document_type_description'];
+                $identity_document_type_description = Functions::valueKeyInArray($sender, 'identity_document_type_description');
+                if ($identity_document_type_description == null) {
+                    $identity_document_type = IdentityDocumentType::find($identity_document_type_id);
+                    if ($identity_document_type) {
+                        $identity_document_type_description = $identity_document_type->description;
+                    }
+                }
+                // $identity_document_type_description = $sender['identity_document_type_description'];
                 $number = $sender['number'];
                 $name = $sender['name'];
 
@@ -262,7 +270,14 @@ class DispatchInput
             if (array_key_exists('receiver_data', $inputs)) {
                 $receiver = $inputs['receiver_data'];
                 $identity_document_type_id = $receiver['identity_document_type_id'];
-                $identity_document_type_description = $receiver['identity_document_type_description'];
+                $identity_document_type_description = Functions::valueKeyInArray($receiver, 'identity_document_type_description');
+                if ($identity_document_type_description == null) {
+                    $identity_document_type = IdentityDocumentType::find($identity_document_type_id);
+                    if ($identity_document_type) {
+                        $identity_document_type_description = $identity_document_type->description;
+                    }
+                }
+                // $identity_document_type_description = $receiver['identity_document_type_description'];
                 $number = $receiver['number'];
                 $name = $receiver['name'];
 
@@ -320,23 +335,29 @@ class DispatchInput
             $items = [];
             foreach ($inputs['items'] as $row) {
                 $item = Item::find($row['item_id']);
+                $unit_type_id = isset($row['unit_type_id']) ? $row['unit_type_id'] : $item->unit_type_id;
+                $weight = isset($row['weight']) ? $row['weight'] : 1;
                 $itemDispatch = $row['item'] ?? [];
-
-
-
-
+                $lots = [];
                 $row['IdLoteSelected'] = $row['IdLoteSelected'] ?? $itemDispatch['IdLoteSelected'] ?? null;
+                $itemReDispatch = isset($itemDispatch['item']) ? $itemDispatch['item'] : [];
+                if(count($itemReDispatch) > 0){
+                    $lots = isset($itemReDispatch['lots']) ? $itemReDispatch['lots'] : [];
 
+
+                }
                 $temp = [
                     'item_id' => $item->id,
                     'item' => [
+                        'lots' => $lots,
                         'description' => $item->description,
                         'model' => $item->model,
                         'item_type_id' => $item->item_type_id,
                         'internal_id' => $item->internal_id,
                         'item_code' => $item->item_code,
                         'item_code_gs1' => $item->item_code_gs1,
-                        'unit_type_id' => $item->unit_type_id,
+                        'unit_type_id' => $unit_type_id,
+                        'weight' => $weight,
                         'IdLoteSelected' => $row['IdLoteSelected'] ?? null,
                         'lot_group' => $row['lot_group'] ?? null,
                         'attributes' => $itemDispatch['attributes'] ?? Functions::valueKeyInArray($row, 'attributes')

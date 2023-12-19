@@ -115,7 +115,7 @@
                                     class="form-group"
                                 >
                                     <el-switch
-                                    :disabled="useDacta"
+                                        :disabled="useDacta"
                                         v-model="form.ticket_single_shipment"
                                         active-text="Si"
                                         inactive-text="No"
@@ -1593,8 +1593,8 @@
                                     ></small>
                                 </div>
                             </div>
-                            
-                             <div class="col-md-6 mt-4">
+
+                            <div class="col-md-6 mt-4">
                                 <label class="control-label">
                                     Cotización proyectos
                                     <!-- <el-tooltip
@@ -1626,7 +1626,7 @@
                                     ></small>
                                 </div>
                             </div>
-                                 <div class="col-md-6 mt-4">
+                            <div class="col-md-6 mt-4">
                                 <label class="control-label">
                                     Tickets de encomienda
                                     <el-tooltip
@@ -1658,7 +1658,7 @@
                                     ></small>
                                 </div>
                             </div>
-                               <div class="col-md-6 mt-4">
+                            <div class="col-md-6 mt-4">
                                 <label class="control-label">
                                     Re-abrir caja
                                     <el-tooltip
@@ -1690,7 +1690,7 @@
                                     ></small>
                                 </div>
                             </div>
-                               <div class="col-md-6 mt-4">
+                            <div class="col-md-6 mt-4">
                                 <label class="control-label">
                                     Bloquear edición de notas de venta
                                     <el-tooltip
@@ -1705,25 +1705,33 @@
 
                                 <div
                                     :class="{
-                                        'has-danger': errors.block_seller_sale_note_edit,
+                                        'has-danger':
+                                            errors.block_seller_sale_note_edit,
                                     }"
                                     class="form-group"
                                 >
                                     <el-switch
-                                        v-model="form.block_seller_sale_note_edit"
+                                        v-model="
+                                            form.block_seller_sale_note_edit
+                                        "
                                         active-text="Si"
                                         inactive-text="No"
                                         @change="submit"
                                     ></el-switch>
                                     <small
-                                        v-if="errors.block_seller_sale_note_edit"
+                                        v-if="
+                                            errors.block_seller_sale_note_edit
+                                        "
                                         class="text-danger"
-                                        v-text="errors.block_seller_sale_note_edit[0]"
+                                        v-text="
+                                            errors
+                                                .block_seller_sale_note_edit[0]
+                                        "
                                     ></small>
                                 </div>
                             </div>
 
-                                  <div class="col-md-6 mt-4">
+                            <div class="col-md-6 mt-4">
                                 <label class="control-label">
                                     Todos los vendedores
                                     <el-tooltip
@@ -1756,7 +1764,7 @@
                                 </div>
                             </div>
 
-                                  <div class="col-md-6 mt-4">
+                            <div class="col-md-6 mt-4">
                                 <label class="control-label">
                                     Mostrar todos los productos
                                     <el-tooltip
@@ -1789,9 +1797,10 @@
                                 </div>
                             </div>
 
-                                    <div class="col-md-6 mt-4">
+                            <div class="col-md-6 mt-4">
                                 <label class="control-label">
-                                    Cambiar de establecimiento al seleccionar producto
+                                    Cambiar de establecimiento al seleccionar
+                                    producto
                                     <el-tooltip
                                         class="item"
                                         content="Poder seleccionar otro almacén para el producto al momento de vender"
@@ -1804,7 +1813,8 @@
 
                                 <div
                                     :class="{
-                                        'has-danger': errors.select_warehouse_to_sell,
+                                        'has-danger':
+                                            errors.select_warehouse_to_sell,
                                     }"
                                     class="form-group"
                                 >
@@ -1817,11 +1827,13 @@
                                     <small
                                         v-if="errors.select_warehouse_to_sell"
                                         class="text-danger"
-                                        v-text="errors.select_warehouse_to_sell[0]"
+                                        v-text="
+                                            errors.select_warehouse_to_sell[0]
+                                        "
                                     ></small>
                                 </div>
                             </div>
-                                   <div class="col-md-6 mt-4">
+                            <div class="col-md-6 mt-4">
                                 <label class="control-label">
                                     Responsable y placa en compras
                                     <el-tooltip
@@ -1850,6 +1862,42 @@
                                         v-if="errors.purchases_control"
                                         class="text-danger"
                                         v-text="errors.purchases_control[0]"
+                                    ></small>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mt-4">
+                                <label class="control-label">
+                                    Buscar productos con similar código de
+                                    fábrica
+                                    <el-tooltip
+                                        class="item"
+                                        content="Poder seleccionar otro almacén para el producto al momento de vender"
+                                        effect="dark"
+                                        placement="top-start"
+                                    >
+                                        <i class="fa fa-info-circle"></i>
+                                    </el-tooltip>
+                                </label>
+
+                                <div
+                                    :class="{
+                                        'has-danger':
+                                            errors.search_by_factory_code,
+                                    }"
+                                    class="form-group"
+                                >
+                                    <el-switch
+                                        v-model="form.search_by_factory_code"
+                                        active-text="Si"
+                                        inactive-text="No"
+                                        @change="submit"
+                                    ></el-switch>
+                                    <small
+                                        v-if="errors.search_by_factory_code"
+                                        class="text-danger"
+                                        v-text="
+                                            errors.search_by_factory_code[0]
+                                        "
                                     ></small>
                                 </div>
                             </div>
@@ -1932,7 +1980,7 @@
                                     ></small>
                                 </div>
                             </div>
-                                <div class="col-md-6 mt-4">
+                            <div class="col-md-6 mt-4">
                                 <div
                                     :class="{
                                         'has-danger':
@@ -1952,7 +2000,9 @@
                                         </el-tooltip>
                                     </label>
                                     <el-select
-                                        v-model="form.purchase_affectation_igv_type_id"
+                                        v-model="
+                                            form.purchase_affectation_igv_type_id
+                                        "
                                         filterable
                                         @change="submit"
                                     >
@@ -1964,10 +2014,13 @@
                                         ></el-option>
                                     </el-select>
                                     <small
-                                        v-if="errors.purchase_affectation_igv_type_id"
+                                        v-if="
+                                            errors.purchase_affectation_igv_type_id
+                                        "
                                         class="text-danger"
                                         v-text="
-                                            errors.purchase_affectation_igv_type_id[0]
+                                            errors
+                                                .purchase_affectation_igv_type_id[0]
                                         "
                                     ></small>
                                 </div>
@@ -4236,6 +4289,44 @@
                                     </div>
                                 </div>
                             </div>
+                            <div class="col-6 mt-4">
+                                <div class="form-group">
+                                    <label>
+                                        Agrupar productos
+                                        <el-tooltip
+                                            class="item"
+                                            effect="dark"
+                                            placement="top-start"
+                                        >
+                                            <div slot="content">
+                                                Al escoger dos o más productos
+                                                iguales, se agruparán en una
+                                                sola línea con la cantidad total
+                                                de productos seleccionados
+                                            </div>
+                                            <i class="fa fa-info-circle"></i>
+                                        </el-tooltip>
+                                    </label>
+                                    <div
+                                        :class="{
+                                            'has-danger': errors.group_items,
+                                        }"
+                                        class="form-group"
+                                    >
+                                        <el-switch
+                                            v-model="form.group_items"
+                                            active-text="Si"
+                                            inactive-text="No"
+                                            @change="submit"
+                                        ></el-switch>
+                                        <small
+                                            v-if="errors.group_items"
+                                            class="text-danger"
+                                            v-text="errors.group_items[0]"
+                                        ></small>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </el-tab-pane>
                     <el-tab-pane class="mb-3" name="nine">
@@ -4794,7 +4885,7 @@ import ReportConfigurationsIndex from "./partials/report_configurations_index.vu
 import PdfFooterImages from "./partials/pdf_footer_images.vue";
 
 export default {
-    props: ["typeUser", "configuration","company"],
+    props: ["typeUser", "configuration", "company"],
     components: {
         TermsCondition,
         TermsConditionSale,
@@ -4807,7 +4898,7 @@ export default {
     },
     data() {
         return {
-            useDacta:false,
+            useDacta: false,
             headers: headers_token,
             showDialogTermsCondition: false,
             showDialogTermsConditionSales: false,
@@ -4835,8 +4926,8 @@ export default {
         this.form = this.config;
     },
     mounted() {
-        let {pse} = this.company;
-        if(pse){
+        let { pse } = this.company;
+        if (pse) {
             this.useDacta = true;
         }
         this.loadTables();

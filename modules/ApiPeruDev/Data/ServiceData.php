@@ -49,7 +49,6 @@ class ServiceData
         $this->trackApi = $trackApi;
         $this->company = $company;
 
-
         $this->client = new Client(['base_uri' => $url]);
         $this->parameters = [
             'http_errors' => false,

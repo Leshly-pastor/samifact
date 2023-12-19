@@ -256,6 +256,7 @@ class DocumentInput
                 $arayItem = [
                     'item_id' => $item->id,
                     'item' => [
+                        'meter' => $item->meter,
                         'description' => trim($item->description),
                         'item_type_id' => $item->item_type_id,
                         'internal_id' => $item->internal_id,
@@ -478,6 +479,7 @@ class DocumentInput
                     $factor = $row['factor'];
                     $amount = $row['amount'];
                     $base = $row['base'];
+                    $is_split = Functions::valueKeyInArray($row, 'is_split', false);
                     $is_amount = $row['is_amount'] ?? null; //registra si el descuento fue por monto o porcentaje
 
                     $discounts[] = [
@@ -487,7 +489,9 @@ class DocumentInput
                         'amount' => $amount,
                         'base' => $base,
                         'is_amount' => $is_amount,
+                        'is_split' => $is_split,
                     ];
+
                 }
                 return $discounts;
             }

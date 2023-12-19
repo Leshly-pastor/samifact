@@ -1506,7 +1506,7 @@ export default {
             if (this.recordItem.sizes_selected) {
                 this.form.sale_note_item_id = this.recordItem.record_id;
                 this.form.item.sizes_selected = this.recordItem.sizes_selected;
-                this.sizes = this.recordItem.sizes_selected;
+                this.sizes = this.recordItem.sizes_selected || [];
             }
         },
         setNameProductPdf() {

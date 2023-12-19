@@ -45,13 +45,13 @@ class SireService
 
     public function getToken($force = false)
     {
-        if ($force || !($token = Cache::get('sire_token'))) {
-            $queryToken = $this->queryToken();
-            if (!$queryToken['success']) {
-                return $queryToken;
-            }
-            $token = $queryToken['access_token'];
+        // if ($force || !($token = Cache::get('sire_token'))) {
+        $queryToken = $this->queryToken();
+        if (!$queryToken['success']) {
+            return $queryToken;
         }
+        $token = $queryToken['access_token'];
+        // }
 
         return [
             'success' => true,
@@ -105,9 +105,30 @@ class SireService
     {
         Cache::put('sire_token', $token, now()->addSeconds($expire));
     }
-
+    function checkSire()
+    {
+        $company = $this->getCompany();
+        if (
+            !$company->sire_client_id ||
+            !$company->sire_client_secret ||
+            !$company->sire_username ||
+            !$company->sire_password
+        ) {
+            return [
+                'success' => false,
+                'code' => 500,
+                'message' => 'No se ha configurado el servicio SIRE'
+            ];
+        }
+        return null;
+    }
     public function getPeriods($type)
     {
+        $fail = $this->checkSire();
+        if ($fail) {
+            return $fail;
+        }
+
         switch ($type) {
             case 'sale':
                 $cod_libro = '140000';
@@ -151,6 +172,10 @@ class SireService
 
     public function getTicket($type, $period)
     {
+        $fail =  $this->checkSire();
+        if ($fail) {
+            return $fail;
+        }
         $get_token = $this->getToken();
         $token = $get_token['token'];
 
@@ -195,6 +220,10 @@ class SireService
 
     public function queryTicket($page, $period, $ticket, $type)
     {
+        $fail =  $this->checkSire();
+        if ($fail) {
+            return $fail;
+        }
         $get_token = $this->getToken();
         $token = $get_token['token'];
 
@@ -277,7 +306,7 @@ class SireService
             ],
             'verify' => false,
         ]);
-
+        
         $statusCode = $response->getStatusCode();
 
         if ($statusCode !== 200) {
@@ -314,19 +343,19 @@ class SireService
                     if ($type == 'sale') {
                         foreach ($lines as $line) {
                             $values = explode('|', $line);
-                            $serie = $values[3];
-                            $number = (int) $values[4];
-                            $number_company = $values[7];
-                            $name_company = $values[8];
+                            $serie = $values[7];
+                            $number = (int) $values[8];
+                            $number_company = $values[11];
+                            $name_company = $values[12];
                             $proSmartRow = [
                                 'service' => 'Sunat',
-                                'date' => $values[0], // 2023/05/01
-                                'document_type' => $values[2],
+                                'date' => $values[4], // 2023/05/01
+                                'document_type' => $values[6],
                                 'serie' => $serie,
                                 'number' => $number,
                                 'number_company' => $number_company,
                                 'name_company' => $name_company,
-                                'total' => number_format($values[21], 2)
+                                'total' => number_format($values[25], 2)
                             ];
                             $document = Document::where('series', $serie)
                                 ->where('number', $number)
@@ -335,15 +364,15 @@ class SireService
                             if ($document) {
                                 $total = $document->total;
                                 $currency_type_id = $document->currency_type_id;
-                                if($currency_type_id!="PEN"){
+                                if ($currency_type_id != "PEN") {
                                     $total = $document->total * $document->exchange_rate_sale;
                                 }
                                 $number_company = $document->customer->number;
                                 $name_company = $document->customer->name;
                                 $document_total = $document->state_type_id == '05' ? $document->total : 0;
                                 $document_total = $document->document_type_id == '07' ? $document_total * -1 : $document_total;
-                                $total = (string) $total;
-                                $total_prosmart = (string) $values[21];
+                                $total = (string) $document_total;
+                                $total_prosmart = (string) $values[25];
 
                                 if ($total != $total_prosmart) {
                                     $diff = true;
@@ -359,7 +388,7 @@ class SireService
                                     'number' => $document->number,
                                     'total' => number_format($document_total, 2),
                                 ]);
-                            }else{
+                            } else {
                                 $proSmartRow['label'] = 'DANGER';
                             }
                             if ($diff) {
@@ -393,7 +422,7 @@ class SireService
                             if ($purchase) {
                                 $total = $purchase->total;
                                 $currency_type_id = $purchase->currency_type_id;
-                                if($currency_type_id!="PEN"){
+                                if ($currency_type_id != "PEN") {
                                     $total = $purchase->total * $purchase->exchange_rate_sale;
                                 }
                                 $total = (string) $total;
@@ -413,9 +442,9 @@ class SireService
                                     'document_type' => $purchase->document_type_id,
                                     'serie' => $purchase->series,
                                     'number' => $purchase->number,
-                                    'total' => number_format( $purchase->total,2)
+                                    'total' => number_format($purchase->total, 2)
                                 ]);
-                            }else{
+                            } else {
                                 $proSmartRow['label'] = 'DANGER';
                             }
                             if ($diff) {

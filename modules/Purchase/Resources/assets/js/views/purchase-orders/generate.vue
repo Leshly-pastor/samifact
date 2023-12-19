@@ -20,10 +20,7 @@
                         <div class="col-sm-10 text-left mt-3 mb-0">
                             <address class="ib mr-2">
                                 <span class="font-weight-bold d-block"
-                                    >ORDEN DE COMPRA</span
-                                >
-                                <span class="font-weight-bold d-block"
-                                    >OC-XXX</span
+                                    >Orden de compra</span
                                 >
                                 <span class="font-weight-bold">{{
                                     company.name
@@ -37,10 +34,7 @@
                                 {{ establishment.department.description }} -
                                 {{ establishment.country.description }}
                                 <br />
-                                {{ establishment.email }} -
-                                <span v-if="establishment.telephone != '-'">{{
-                                    establishment.telephone
-                                }}</span>
+
                             </address>
                         </div>
                     </div>

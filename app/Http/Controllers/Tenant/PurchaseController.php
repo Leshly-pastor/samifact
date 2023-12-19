@@ -385,6 +385,7 @@ class PurchaseController extends Controller
         try {
             $purchase =  DB::connection('tenant')->transaction(function () use ($data) {
                 $doc = Purchase::create($data);
+                $is_credit_note = ($doc->document_type_id === '07') ? true : false;
                 foreach ($data['items'] as $row) {
                     $p_item = new PurchaseItem();
                     $p_item->fill($row);

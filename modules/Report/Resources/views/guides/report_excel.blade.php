@@ -190,7 +190,7 @@
                         <td class="celda">{{ $date_of_shipping }}</td>
                         <td class="celda"> {{$item_description}} </td>
                         <td class="celda"> {{$value->getQtyFormated()}} </td>
-                        <td class="celda">{{$transfer_reason}}</td>
+                        <td class="celda">{{$transfer_reason ?? "Venta"}}</td>
                         <td class="celda">{{$transfer_description}}</td>
                         <td class="celda">{{$type_doc}}</td>
                         <td class="celda">{{$num_doc}}</td>

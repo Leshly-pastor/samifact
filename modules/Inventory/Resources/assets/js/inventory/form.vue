@@ -146,6 +146,7 @@
             @addRowOutputLot="addRowOutputLot">
         </output-lots-form>
         <form-size
+            :type="type"
             :showDialog.sync="showDialogSizes"
             :sizes="form.sizes"
             @addRowSize="addRowSize">
@@ -190,6 +191,7 @@ export default {
     methods: {
         addRowSize(sizes){
             this.form.sizes = sizes
+            console.log("🚀 ~ file: form.vue:194 ~ addRowSize ~ this.form.sizes:", this.form.sizes)
             this.form.quantity = sizes.reduce((a, b) => a + Number(b['quantity'] || 0), 0)
         },
         clickSizes(){
@@ -227,6 +229,7 @@ export default {
                 map(x => {
                     return {
                        ...x,
+                       originalSize: x.size,
                        quantity: 0,
                     }
                 })

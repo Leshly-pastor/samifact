@@ -161,6 +161,8 @@ class PosController extends Controller
     }
     public function tables()
     {
+
+        $company = Company::active();
         $affectation_igv_types = AffectationIgvType::whereActive()->get();
         $establishment = Establishment::where('id', auth()->user()->establishment_id)->first();
         $currency_types = CurrencyType::whereActive()->get();
@@ -174,6 +176,7 @@ class PosController extends Controller
         $categories = Category::all();
         $payment_method_types = PaymentMethodType::getPaymentMethodTypes();
         return compact(
+            'company',
             'configuration',
             'sellers',
             'items',

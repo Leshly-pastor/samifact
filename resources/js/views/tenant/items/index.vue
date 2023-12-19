@@ -216,6 +216,7 @@
                             <th class="text-center">Historial</th>
                         </template>
                         <th class="text-left">Stock</th>
+                        <th class="text-left" v-if="isMajolica">Metraje</th>
                         <th
                             v-if="
                                 columns.extra_data !== undefined &&
@@ -376,6 +377,9 @@
                             </template> -->
 
                             <!-- <br/>Mín:{{ row.stock_min }} -->
+                        </td>
+                        <td  v-if="isMajolica">
+                            {{row.meter}}
                         </td>
                         <td
                             v-if="
@@ -701,6 +705,7 @@ export default {
     },
     data() {
         return {
+            isMajolica:false,
             showImporUpdatePricePersonType: false,
             showImportListSizeDialog: false,
             isClotheShoes: false,
@@ -770,6 +775,7 @@ export default {
                     title: "Stock Por datos extra",
                     visible: false,
                 },
+         
             },
             item_unit_types: [],
             titleTopBar: "",
@@ -988,6 +994,7 @@ export default {
             this.$http.get(`/${this.resource}/item/tables`).then((response) => {
                 let data = response.data;
                 this.isClotheShoes = data.clothesShoes;
+                this.isMajolica = data.is_majolica;
                 if (this.config.show_extra_info_to_item) {
                     this.$store.commit("setColors", data.colors);
                     this.$store.commit("setCatItemSize", data.CatItemSize);

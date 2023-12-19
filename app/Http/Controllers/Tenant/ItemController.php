@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Tenant;
 
+use App\Exports\DigemidItemCsvExport;
 use Exception;
 use Mpdf\Mpdf;
 use Carbon\Carbon;
@@ -86,6 +87,7 @@ use App\Models\Tenant\Promotion;
 use App\Models\Tenant\QuotationItem;
 use App\Models\Tenant\SaleNoteItem;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Intervention\Image\Facades\Image;
 use Modules\BusinessTurn\Models\BusinessTurn;
 use Modules\Inventory\Models\CostAverage;
@@ -395,6 +397,12 @@ class ItemController extends Controller
         $categories = Category::all();
         $brands = Brand::all();
         $configuration = Configuration::first();
+        $is_majolica = false;
+        $business_turn = BusinessTurn::where('value', 'majolica')->first();
+        if($business_turn){
+            
+            $is_majolica = (bool) $business_turn->active;
+        }
         /** Informacion adicional */
         $colors = collect([]);
         $CatItemStatus = $colors;
@@ -428,6 +436,7 @@ class ItemController extends Controller
         */
         $clothesShoes = BusinessTurn::isClothesShoes();
         return compact(
+            'is_majolica',
             'customer_types',
             'clothesShoes',
             'areas',
@@ -884,6 +893,11 @@ class ItemController extends Controller
                 'id' => $item->id
             ];
         } catch (Exception $e) {
+            //imprime el archivo y la linea del error
+            Log::error($e->getMessage() . ' ' . $e->getLine());
+            //el traceback del error
+            Log::error($e->getTraceAsString());
+
             DB::connection('tenant')->rollBack();
             return [
                 'success' => false,
@@ -1506,6 +1520,29 @@ class ItemController extends Controller
      *
      * @return \Illuminate\Http\Response|\Symfony\Component\HttpFoundation\BinaryFileResponse
      */
+    public function exportDigemidCsv(){
+        ini_set('max_execution_time', 0);
+        $company = Company::first();
+        $company_cod_digemid = $company->cod_digemid;
+        if ($company_cod_digemid == null) {
+            return [
+                "success" => false,
+                "message" => "Debe registrar un codigo de Digemid"
+            ];
+        }
+
+        $records = CatDigemid::where('active', 1);
+        $max_prices = $records->max('max_prices');
+        if ($max_prices == null) {
+            $max_prices = 0;
+        }
+        $records = $records->get();
+        $export = new DigemidItemCsvExport();
+
+        $export->setRecords($records)->setCompanyCodDigemid($company_cod_digemid);
+
+        return $export->download('Reporte_Items_Digemid_' . Carbon::now() . '.csv', Excel::CSV);
+    }
     public function exportDigemid(Request $request)
     {
         ini_set('max_execution_time', 0);
@@ -1689,6 +1726,7 @@ class ItemController extends Controller
         $attribute_types = AttributeType::whereActive()->orderByDescription()->get();
         $is_client = $this->getIsClient();
         $clothesShoes = BusinessTurn::isClothesShoes();
+        $is_majolica = BusinessTurn::isMajolica();
         $configuration = Configuration::first();
 
         /** Informacion adicional */
@@ -1718,6 +1756,7 @@ class ItemController extends Controller
         /** Informacion adicional */
 
         return compact(
+            'is_majolica',
             'clothesShoes',
             'items',
             'categories',

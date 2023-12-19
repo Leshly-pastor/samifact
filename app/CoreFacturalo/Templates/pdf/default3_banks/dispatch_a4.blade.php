@@ -242,12 +242,12 @@ if ($logo) {
 <table class="full-width mt-0 mb-0" >
     <thead >
         <tr class="">
-            <th class="border-top-bottom text-center py-1 desc" class="cell-solid"  width="8%">ITEM</th>
+            <th class="border-top-bottom text-center py-1 desc" class="cell-solid"  width="8%">Item</th>
             <th class="border-top-bottom text-center py-1 desc" class="cell-solid"  width="12%">Código</th>
-            <th class="border-top-bottom text-center py-1 desc" class="cell-solid"  width="8%">CANTIDAD</th>
+            <th class="border-top-bottom text-center py-1 desc" class="cell-solid"  width="8%">Cantidad</th>
             <th class="border-top-bottom text-center py-1 desc" class="cell-solid"  width="8%">U.M.</th>
             <th class="border-top-bottom text-center py-1 desc" class="cell-solid"  width="40%">Descripción</th>
-            <th class="border-top-bottom text-right py-1 desc" class="cell-solid"  width="12%">PESO</th>
+            <th class="border-top-bottom text-right py-1 desc" class="cell-solid"  width="12%">Peso</th>
         </tr>
     </thead>
     <tbody class=""> 
@@ -281,9 +281,23 @@ if ($logo) {
                             <br/><span style="font-size: 9px">{!! $attr->description !!} : {{ $attr->value }}</span>
                         @endforeach
                     @endif
+                    @isset($row->item->lots)
+                    <br>
+                    @foreach ($row->item->lots as $lot)
+                        @if (isset($lot->has_sale) && $lot->has_sale)
+                            <span style="font-size: 9px">
+                                {{ $lot->series }}
+                                @if (!$loop->last)
+                                    -
+                                @endif
+                            </span>
+                        @endif
+                    @endforeach
+                @endisset
+
                 </td> 
                 <td class="p-1 text-center align-top desc cell-solid-rl">
-                    {{ $total_weight_line }}
+                    {{ $row->item->weight }}
                 </td>
             </tr>
 

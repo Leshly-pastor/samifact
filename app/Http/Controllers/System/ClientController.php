@@ -405,6 +405,7 @@ class ClientController extends Controller
         $client->soap_url = $company->soap_url;
         $client->certificate = $company->certificate;
         $client->number = $company->number;
+        $client->is_rus = $company->is_rus;
 
 
         return new ClientResource($client);
@@ -471,6 +472,7 @@ class ClientController extends Controller
         $smtp_port = ($request->has('smtp_port')) ? $request->smtp_port : null;
         $smtp_user = ($request->has('smtp_user')) ? $request->smtp_user : null;
         $smtp_encryption = ($request->has('smtp_encryption')) ? $request->smtp_encryption : null;
+        $is_rus = ($request->has('is_rus')) ? $request->is_rus : false;
         try {
 
             $temp_path = $request->input('temp_path');
@@ -508,7 +510,7 @@ class ClientController extends Controller
                     $name = 'certificate_smart.pem';
                     if (file_exists(storage_path('app' . DIRECTORY_SEPARATOR . 'certificates' . DIRECTORY_SEPARATOR . $name))) {
                         $name_certificate = $name;
-                    }else{
+                    } else {
                         $path_smart = storage_path('smart' . DIRECTORY_SEPARATOR . 'certificate_smart.pem');
                         if (file_exists($path_smart)) {
                             $pem = file_get_contents($path_smart);
@@ -572,10 +574,25 @@ class ClientController extends Controller
                     'soap_username' => $request->soap_username,
                     'soap_password' =>  $request->soap_send_id == '03' ? $this->soap_password : $request->soap_password,
                     'soap_url' => $request->soap_send_id == '03' ? $this->soap_url : $request->soap_url,
-                    'certificate' => $name_certificate
+                    'certificate' => $name_certificate,
+                    'is_rus' => $is_rus,
                 ]);
 
-
+            if($is_rus){
+                DB::connection('tenant')
+                    ->table('cat_document_types')
+                    ->where('id', '01')
+                    ->update([
+                        'active' => false,
+                    ]);
+            }else{
+                DB::connection('tenant')
+                    ->table('cat_document_types')
+                    ->where('id', '01')
+                    ->update([
+                        'active' => true,
+                    ]);
+            }
             //modules
             DB::connection('tenant')
                 ->table('module_user')
@@ -746,7 +763,7 @@ class ClientController extends Controller
         $configuration = Configuration::first();
 
         $name_certificate = $configuration->certificate;
-
+        $is_rus = $request->input('is_rus');
         if ($temp_path) {
 
             try {
@@ -860,12 +877,18 @@ class ClientController extends Controller
                 'message' => $e->getMessage()
             ];
         }
-
+        $name = $request->input('name');
+        $trade_name = $request->input('trade_name');
+        if ($is_rus && $trade_name) {
+            $name = $trade_name;
+        }
         DB::connection('tenant')->table('companies')->insert([
             'identity_document_type_id' => '6',
             'number' => $request->input('number'),
             'name' => $request->input('name'),
-            'trade_name' => $request->input('name'),
+            'trade_name' => $name,
+            'is_rus' => $is_rus,
+
             'soap_type_id' => $request->soap_type_id,
             'soap_send_id' => $request->soap_send_id,
             'soap_username' => $request->soap_username,
@@ -995,6 +1018,30 @@ class ClientController extends Controller
             'permission_edit_cpe' => true,
             'last_password_update' => date('Y-m-d H:i:s'),
         ]);
+
+        if ($is_rus) {
+            $serie = DB::connection('tenant')->table('series')->where('document_type_id', '03')
+                ->where('establishment_id', $establishment_id)
+                ->first();
+            if ($serie) {
+                DB::connection('tenant')->table('users')->where('id', $user_id)->update([
+                    'document_id' => '03',
+                    'series_id' => $serie->id,
+                ]);
+            }
+            DB::connection('tenant')->table('establishments')->
+            where('id', $establishment_id)
+            ->update([
+               'template_pdf' => 'rus',
+               'template_ticket_pdf' => 'rus',
+            ]);
+            DB::connection('tenant')->table('cat_document_types')
+            ->where('id', '01')
+            ->update([
+                'active' => false,
+            ]);
+        }
+
 
         DB::connection('tenant')->table('cash')->insert([
             'user_id' => $user_id,

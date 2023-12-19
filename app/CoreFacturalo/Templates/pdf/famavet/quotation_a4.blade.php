@@ -326,7 +326,7 @@
             </div>
 
            {{--  <div class="div-table-col w-100 text-left mt-2 mb-2">
-                Representación impresa de la {{ $document->document_type->description }}. <br>
+                Representación impresa del Comprobante de Pago Electrónico.. <br>
                 Consulte el documento en https://famavet.e.org.pe/buscar
             </div>
 

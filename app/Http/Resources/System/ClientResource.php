@@ -31,6 +31,7 @@ class ClientResource extends JsonResource
         // }
 
         return [
+            'is_rus'  => (bool)$this->is_rus,
             'id' => $this->id,
             'hostname' => $this->hostname->fqdn,
             'cert_smart' => (bool)$this->cert_smart,

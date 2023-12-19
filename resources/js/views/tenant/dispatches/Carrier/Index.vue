@@ -129,16 +129,46 @@
                             >
                                 Opciones
                             </button>
-                            <button
-                                type="button"
-                                class="btn waves-effect waves-light btn-sm btn-info"
-                                @click.prevent="sendSunat(row.external_id)"
-                                v-if="row.btn_send"
-                            >
-                                Enviar a Sunat
-                            </button>
-                            <!--                            <a :href="`/dispatches/create_new/dispatch/${row.id}`"-->
-                            <!--                               class="btn waves-effect waves-light btn-sm btn-warning m-1__2" v-if="row.btn_edit">Editar</a>-->
+                            <template v-if="row.is_pse && row.btn_is_tesla">
+                                <button
+                                    type="button"
+                                    class="btn waves-effect waves-light btn-sm btn-success"
+                                    @click.prevent="checkPse(row.id)"
+                                    v-if="
+                                        row.btn_is_tesla &&
+                                        row.state_type_id == '03'
+                                    "
+                                >
+                                    Consultar PSE
+                                </button>
+                                <button
+                                    type="button"
+                                    class="btn waves-effect waves-light btn-sm btn-info"
+                                    @click.prevent="sendPse(row.id)"
+                                    v-if="
+                                        row.btn_is_tesla &&
+                                        row.state_type_id == '01'
+                                    "
+                                >
+                                    Enviar PSE
+                                </button>
+                            </template>
+                            <template v-else>
+                                <button
+                                    type="button"
+                                    class="btn waves-effect waves-light btn-sm btn-info"
+                                    @click.prevent="sendSunat(row.external_id)"
+                                    v-if="row.btn_send"
+                                >
+                                    Enviar a Sunat
+                                </button>
+                                <a
+                                    :href="`/dispatch_carrier/create_new/dispatch/${row.id}`"
+                                    class="btn waves-effect waves-light btn-sm btn-warning m-1__2"
+                                    v-if="row.btn_edit"
+                                    >Editar</a
+                                >
+                            </template>
                         </td>
                     </tr>
                 </data-table>
@@ -157,8 +187,9 @@
             :showGenerate="true"
             :configuration="configuration"
         ></FormGenerateDocument>
-        <ModalGenerateCPE :show.sync="showModalGenerateCPE"
-        :isCarrier="true"
+        <ModalGenerateCPE
+            :show.sync="showModalGenerateCPE"
+            :isCarrier="true"
         ></ModalGenerateCPE>
     </div>
 </template>
@@ -191,6 +222,46 @@ export default {
         this.$setStorage("configuration", this.configuration);
     },
     methods: {
+        async checkPse(id) {
+            try {
+                const response = await this.$http.get(
+                    `/dispatches/check_pse/${id}`
+                );
+                if (response.status == 200) {
+                    this.$refs.dataTable.getRecords();
+                }
+                console.log(
+                    "🚀 ~ file: index.vue:227 ~ checkPse ~ response:",
+                    response
+                );
+            } catch (e) {
+                console.log(e);
+            } finally {
+            }
+        },
+        async sendPse(id) {
+            try {
+                const response = await this.$http.get(
+                    `/dispatches/send_pse/${id}`
+                );
+                let { data } = response;
+                if (data.sent) {
+                    let message = data.message || data.description;
+                    this.$message.success(message);
+                    this.$refs.dataTable.getRecords();
+                } else {
+                    let message = data.message || data.description;
+                    this.$message.error(message);
+                }
+            } catch (e) {
+                console.log(e);
+            } finally {
+            }
+        },
+
+        async jsonPse(id) {
+            window.open(`/dispatches/json_pse/${id}`, "_blank");
+        },
         showSentSunat(row) {
             let data = row.soap_shipping_response;
             if (this.configuration.auto_send_dispatchs_to_sunat === true)

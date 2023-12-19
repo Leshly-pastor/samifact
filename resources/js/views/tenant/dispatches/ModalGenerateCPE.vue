@@ -117,7 +117,6 @@
 export default {
     props: {
         isCarrier: {
-            required: true,
             type: Boolean,
             default: false,
         },

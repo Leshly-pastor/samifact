@@ -59,6 +59,11 @@ class InventoryKardexServiceProvider extends ServiceProvider
     private function purchase()
     {
         PurchaseItem::created(function (PurchaseItem $purchase_item) {
+            $purchase = $purchase_item->purchase;
+            $factor = 1;
+            if($purchase->is_note_credit()){
+                $factor = -1;
+            }
 
             $presentationQuantity = (!empty($purchase_item->item->presentation)) ? $purchase_item->item->presentation->quantity_unit : 1;
 
@@ -66,8 +71,8 @@ class InventoryKardexServiceProvider extends ServiceProvider
             // $warehouse = $this->findWarehouse($this->findWarehouseById($purchase_item->warehouse_id)->establishment_id);
             // $warehouse = $this->findWarehouse();
             //$this->createInventory($purchase_item->item_id, $purchase_item->quantity, $warehouse->id);
-            $this->createInventoryKardex($purchase_item->purchase, $purchase_item->item_id, /*$purchase_item->quantity*/ ($purchase_item->quantity * $presentationQuantity), $warehouse->id);
-            $this->updateStock($purchase_item->item_id, ($purchase_item->quantity * $presentationQuantity), $warehouse->id);
+            $this->createInventoryKardex($purchase_item->purchase, $purchase_item->item_id, /*$purchase_item->quantity*/ ($purchase_item->quantity * $presentationQuantity * $factor), $warehouse->id);
+            $this->updateStock($purchase_item->item_id, ($purchase_item->quantity * $presentationQuantity*$factor), $warehouse->id);
         });
     }
 
