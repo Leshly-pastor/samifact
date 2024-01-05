@@ -50,14 +50,14 @@
             </div>
         </td>
         <td width="30%" class="border-box py-4 px-2 text-center">
-            <h5 class="text-center">COTIZACIÓN</h5>
+            <h5 class="text-center">Quotation</h5>
             <h3 class="text-center">{{ $tittle }}</h3>
         </td>
     </tr>
 </table>
 <table class="full-width mt-5 mb-4">
     <tr>
-        <td class="align-top">Vendedor:</td>
+        <td class="align-top">Seller:</td>
         <td colspan="3" class="text-left">
             {{ $document->user->name }}
         </td>
@@ -68,9 +68,9 @@
 <table class="full-width mt-10 mb-10">
     <thead class="">
     <tr class="bg-grey">
-        <th class="border-top-bottom text-center py-2" width="10%">CANT.</th>
-        <th class="border-top-bottom text-center py-2" width="10%">UNIDAD</th>
-        <th class="border-top-bottom text-left py-2" width="80%">DESCRIPCIÓN</th>
+        <th class="border-top-bottom text-center py-2" width="10%">QTY</th>
+        <th class="border-top-bottom text-center py-2" width="10%">UNIT</th>
+        <th class="border-top-bottom text-left py-2" width="80%">DESCRIPTION</th>
     </tr>
     </thead>
     <tbody>

@@ -41,36 +41,18 @@ $establishment = $document->establishment;
         <td width="70%" class="pl-3">
         @if ($establishment->logo ?? false)
             <div class="company_logo_box">
-                <img src="{{ public_path($establishment->logo) }}" alt="{{$company->name}}" class="company_logo" style="max-width: 150px;"> 
+                <img src="{{ public_path($establishment->logo) }}" alt="{{$company->name}}" class="company_logo" style="max-width: 440px;"> 
             </div>
         @else
             @if($company->logo)
                     <div class="company_logo_box">
-                        <img src="{{ public_path("storage/uploads/logos/{$company->logo}") }}" alt="{{$company->name}}" class="company_logo" style="max-width: 150px;">
+                        <img src="{{ public_path("storage/uploads/logos/{$company->logo}") }}" alt="{{$company->name}}" class="company_logo" style="max-width: 440px;">
                     </div>
             @else
-                    <img src="{{ asset('logo/logo.jpg') }}" class="company_logo" style="max-width: 150px">
+                    <img src="{{ asset('logo/logo.jpg') }}" class="company_logo" style="max-width: 440px">
             @endif
         @endif
-            <div class="text-left">
-                <h6 class="text-center font-bold">{{ $company->name }}</h6>
-                
-                <h6 style="text-transform: uppercase;">
-                    {{ ($establishment->address !== '-')? $establishment->address : '' }}
-                    {{ ($establishment->district_id !== '-')? ', '.$establishment->district->description : '' }}
-                    {{ ($establishment->province_id !== '-')? ', '.$establishment->province->description : '' }}
-                    {{ ($establishment->department_id !== '-')? '- '.$establishment->department->description : '' }}
-                </h6>
 
-                @isset($establishment->trade_address)
-                    <h6>{{ ($establishment->trade_address !== '-')? 'D. Comercial: '.$establishment->trade_address : '' }}</h6>
-                @endisset
-
-                <h6>{{ ($establishment->telephone !== '-')? ' '.$establishment->telephone : '' }}  -  {{ ($establishment->email !== '-')? 'Email: '.$establishment->email : '' }}
-                @isset($establishment->web_address)
-                    {{ ($establishment->web_address !== '-')? ' -  Web: '.$establishment->web_address : '' }}
-                @endisset
-            </h6>
 
                 
 
@@ -350,7 +332,7 @@ $establishment = $document->establishment;
     @endif
     @if ($document->purchase_order)
         <tr>
-            <td width="120px">Orden de compra</td>
+            <td width="120px">Orden de compra o servicio</td>
             <td width="8px">:</td>
             <td>{{ $document->purchase_order }}</td>
         </tr>

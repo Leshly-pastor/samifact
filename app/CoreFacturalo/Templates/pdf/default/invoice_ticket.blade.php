@@ -644,6 +644,14 @@
                             @endforeach
                         @endif
 
+                        @isset($row->item->sizes_selected)
+                            @if (count($row->item->sizes_selected) > 0)
+                                @foreach ($row->item->sizes_selected as $size)
+                                    <small> Característica {{ $size->size }} | {{ $size->qty }} und.</small> <br>
+                                @endforeach
+                            @endif
+                         @endisset
+
                         @if ($row->charges)
                             @foreach ($row->charges as $charge)
                                 <br /><small>{{ $document->currency_type->symbol }} {{ $charge->amount }}

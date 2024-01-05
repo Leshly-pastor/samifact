@@ -3007,6 +3007,10 @@
                                     </div>
                                 </el-collapse-item>
                             </el-collapse>
+                            <div
+                            v-if="configuration.enabled_dispatch_ticket_pdf"
+                            >
+                            </div>
                             <div v-if="isActiveBussinessTurn('hotel')" class="">
                                 <el-tooltip
                                     class="item my-2"
@@ -3289,7 +3293,6 @@ export default {
     async created() {
         this.loadConfiguration();
         this.$store.commit("setConfiguration", this.configuration);
-
         await this.initForm();
         await this.$http.get(`/${this.resource}/tables`).then((response) => {
             this.document_types = response.data.document_types_invoice;
@@ -3598,10 +3601,11 @@ export default {
             }
         },
         async onSetFormData(data) {
+            console.log("🚀 ~ file: invoice.vue:3604 ~ onSetFormData ~ data:", data)
             this.currency_type = await _.find(this.currency_types, {
                 id: data.currency_type_id,
             });
-
+    
             this.form.establishment_id = data.establishment_id;
             this.form.document_type_id = data.document_type_id;
             this.form.id = data.id;
@@ -3614,6 +3618,10 @@ export default {
             this.form.customer_id = data.customer_id;
             this.form.currency_type_id = data.currency_type_id;
             this.form.exchange_rate_sale = data.exchange_rate_sale;
+            this.form.reference_data = data.reference_data;
+            this.form.dispatch_ticket_pdf = data.dispatch_ticket_pdf;
+            this.form.dispatch_ticket_pdf_quantity = data.dispatch_ticket_pdf_quantity;
+
             this.form.additional_information =
                 this.onPrepareAdditionalInformation(
                     data.additional_information

@@ -70,6 +70,7 @@ class PseService
     protected $mopedo = 0;
     protected $mongra = 0;
     protected $totant = 0;
+    protected $is_export = false;
 
 
     public function __construct($document)
@@ -738,6 +739,9 @@ class PseService
         $items = $this->document->items;
         if (count($items) != 0) {
             foreach ($items as $item) {
+                if($item->affectation_igv_type_id == '40'){
+                    $this->is_export = true;
+                }
                 $this->dsct_item += floatval($item->total_discount);
                 $this->total_value += $item->unit_value * $item->quantity;
                 $this->total_igv += $item->total_igv;
@@ -915,7 +919,11 @@ class PseService
         $xml->facelecab->addChild('horemi', $this->document->date_of_issue->format('H:i:s'));
         // $xml->facelecab->addChild('horemi', $this->document->date_of_issue->format('09:09:09'));
         $xml->facelecab->addChild('tidosu', "01");
-        $xml->facelecab->addChild('tidoid', $this->document->customer->identity_document_type->id);
+        $tidoid = $this->document->customer->identity_document_type->id;
+        if($this->is_export){
+            $tidoid = '0';
+        }
+        $xml->facelecab->addChild('tidoid', $tidoid);
         $xml->facelecab->addChild('numidn', $this->document->customer->number);
         $xml->facelecab->addChild('nomcli', $this->format_characters($this->document->customer->name, 50));
         $this->add_guides($xml->facelecab);

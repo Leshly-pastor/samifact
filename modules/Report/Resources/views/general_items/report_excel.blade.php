@@ -87,17 +87,18 @@ function getLocationData($value, $type = 'sale')
                                     // }
                                     $total_item_purchase = \Modules\Report\Http\Resources\GeneralItemCollection::getPurchaseUnitPrice($value);
                                     // $total_item_purchase = $purchase_unit_price * $value->quantity;
-                     
-            if (isset($row->item->presentation)) {
-                if (is_object($row->item->presentation)) {
-                                        $quantity_unit = $value->item->presentation->quantity_unit;
-                                        $total_item_purchase *= $quantity_unit * $value->quantity;
-                                    }}
+                                    
+                                    if (isset($row->item->presentation)) {
+                                        if (is_object($row->item->presentation)) {
+                                            $quantity_unit = $value->item->presentation->quantity_unit;
+                                            $total_item_purchase *= $quantity_unit * $value->quantity;
+                                        }
+                                    }
                                     $apply_conversion_to_pen = $request_apply_conversion_to_pen == 'true';
                                     $purchase_total_general += round($total_item_purchase, 2);
                                     $gain_general += round($value->getConvertTotalToPen() - $total_item_purchase, 2);
-
-                                    if(!$apply_conversion_to_pen && $value->isCurrencyTypeUsd()){
+                                    
+                                    if (!$apply_conversion_to_pen && $value->isCurrencyTypeUsd()) {
                                         $total_item_purchase /= $value->getExchangeRateSale();
                                     }
                                     $utility_item = $value->total - $total_item_purchase;
@@ -164,25 +165,25 @@ function getLocationData($value, $type = 'sale')
                                         $series = implode(' - ', $series_data);
                                     }
                                     $total_item_purchase = \Modules\Report\Http\Resources\GeneralItemCollection::getPurchaseUnitPrice($value);
-       
+                                    
                                     if (isset($row->item->presentation)) {
-                if (is_object($row->item->presentation)) {
-                                        $quantity_unit = $value->item->presentation->quantity_unit;
-
-                                        $total_item_purchase *= $quantity_unit * $value->quantity;
+                                        if (is_object($row->item->presentation)) {
+                                            $quantity_unit = $value->item->presentation->quantity_unit;
+                                    
+                                            $total_item_purchase *= $quantity_unit * $value->quantity;
+                                        }
                                     }
-                                }
                                     $purchase_total_general += round($total_item_purchase, 2);
                                     $gain_general += round($value->getConvertTotalToPen() - $total_item_purchase, 2);
-
+                                    
                                     $apply_conversion_to_pen = $request_apply_conversion_to_pen == 'true';
-                                    if(!$apply_conversion_to_pen && $value->isCurrencyTypeUsd()){
+                                    if (!$apply_conversion_to_pen && $value->isCurrencyTypeUsd()) {
                                         $total_item_purchase /= $value->getExchangeRateSale();
                                     }
                                     $utility_item = $value->total - $total_item_purchase;
                                     $item = $value->getModelItem();
                                     $qty_general += $value->quantity;
-                                   
+                                    
                                     $total_general += round($value->getConvertTotalToPen(), 2);
                                     $model = $item->model;
                                     /** @var  \App\Models\Tenant\Document $document */
@@ -251,23 +252,23 @@ function getLocationData($value, $type = 'sale')
                                     }
                                     $total_item_purchase = \Modules\Report\Http\Resources\GeneralItemCollection::getPurchaseUnitPrice($value);
                                     if (isset($row->item->presentation)) {
-                if (is_object($row->item->presentation)) {
-                                        $quantity_unit = $value->item->presentation->quantity_unit;
-
-                                        $total_item_purchase *= $quantity_unit * $value->quantity;
+                                        if (is_object($row->item->presentation)) {
+                                            $quantity_unit = $value->item->presentation->quantity_unit;
+                                    
+                                            $total_item_purchase *= $quantity_unit * $value->quantity;
+                                        }
                                     }
-                                }
                                     $purchase_total_general += round($total_item_purchase, 2);
                                     $gain_general += round($value->getConvertTotalToPen() - $total_item_purchase, 2);
-
+                                    
                                     $apply_conversion_to_pen = $request_apply_conversion_to_pen == 'true';
-                                    if(!$apply_conversion_to_pen && $value->isCurrencyTypeUsd()){
+                                    if (!$apply_conversion_to_pen && $value->isCurrencyTypeUsd()) {
                                         $total_item_purchase /= $value->getExchangeRateSale();
                                     }
                                     $utility_item = $value->total - $total_item_purchase;
                                     $item = $value->getModelItem();
                                     $qty_general += $value->quantity;
-                                   
+                                    
                                     $total_general += round($value->getConvertTotalToPen(), 2);
                                     
                                     $model = $item->model;

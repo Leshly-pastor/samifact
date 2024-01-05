@@ -46,24 +46,31 @@ if ($logo) {
         @endif
     </div>
     <div class="text-left float-left header-company">
-        <div class="text-uppercase font-bold" style="font-size: 25px; color: #33436a">{{ $company->name }}</div>
+        <img src="{{ app_path('CoreFacturalo'.DIRECTORY_SEPARATOR.'Templates'.DIRECTORY_SEPARATOR.'pdf'.DIRECTORY_SEPARATOR.''.$establishment__->template_pdf.''.DIRECTORY_SEPARATOR.'datos.png') }}" style="max-height: 180px" />
+        {{-- <div class="text-uppercase font-bold" style="font-size: 17px; color: #3a628c">{{ $company->name }}</div>
         <div class="text-uppercase mayus">
-            {{ ($establishment->address !== '-')? $establishment->address.'' : '' }}
+            Oficina Principal: {{ ($establishment->address !== '-')? $establishment->address.'' : '' }}
         </div>
         <div class="text-uppercase mayus">
             {{ ($establishment->district_id !== '-')? ' '.$establishment->district->description : '' }}
             {{ ($establishment->province_id !== '-')? ', '.$establishment->province->description : '' }}
             {{ ($establishment->department_id !== '-')? '- '.$establishment->department->description : '' }}
         </div>
+        @isset($establishment->trade_address)
+        <div class="text-uppercase mayus">
+        {{ $establishment->trade_address !== '-' ? 'Sucursal: ' . $establishment->trade_address : '' }}
+        </div>
+        @endisset
         <div>
             {{ ($establishment->telephone !== '-')? ''.$establishment->telephone : '' }}
+            {{ $establishment->email !== '-' ? ' ' . $establishment->email : '' }}
         </div>
         <div class="text-left">
             {{ ($establishment->web_address !== '-')? ''.$establishment->web_address : '' }}
         </div>
         @isset($establishment->aditional_information)
             <div>{{ ($establishment->aditional_information !== '-')? $establishment->aditional_information : '' }}</div>
-        @endisset
+        @endisset --}}
     </div>
     <div  class="text-center float-left header-number py-3 font-bold ">
         <div style="margin-top: 5px" class="font-lg">RUC {{$company->number }}</div>
@@ -83,7 +90,10 @@ if ($logo) {
                 @endif
             @endif
         </td>
-        <td class="font-xs font-bold pt-1 pb-1" width="20%">O/C. : </td>
+        <td class="font-xs font-bold pt-1 pb-1" width="20%">O/C. : 
+{{$document->purchase_order}}
+
+        </td>
     </tr>
 </table>
 <table class="full-width border-box mt-2">

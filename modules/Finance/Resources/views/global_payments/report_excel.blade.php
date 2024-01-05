@@ -48,8 +48,6 @@
 <br>
 @if(!empty($records))
     
-        
-    @endif
     <div class="">
         <div class=" ">
             <table class="">

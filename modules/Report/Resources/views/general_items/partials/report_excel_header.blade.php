@@ -24,6 +24,7 @@
 <th> DOC ENTIDAD TIPO DNI RUC</th>
 <th> DOC ENTIDAD NÚMERO</th>
 <th> DENOMINACIÓN ENTIDAD</th>
+<th> TIPO ENTIDAD</th>
 @if($type == 'sale')
     <th> VENDEDOR</th>
     <th> OBSERVACIÓN </th>

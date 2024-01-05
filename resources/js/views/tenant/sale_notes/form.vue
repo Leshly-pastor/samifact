@@ -491,6 +491,34 @@
                                     ></small>
                                 </div>
                             </div>
+                               <div
+                                    class="col-xl-12 col-md-12"
+                                    v-if="
+                                        configuration.enabled_dispatch_ticket_pdf
+                                    "
+                                >
+                                    <div class="row">
+                                        <div class="col-3">
+                                            <label for="quantity">Número de tickets de
+                                            despacho</label>
+                                                   <el-input
+                                            v-model="
+                                                form.dispatch_ticket_pdf_quantity
+                                            "
+                                            type="number"
+                                        ></el-input>
+                                        </div>
+                                    </div>
+                                    <div class="row mt-2">
+                                        <div class="col-12">
+                                            Datos de referencia
+                                              <el-input
+                                            v-model="form.reference_data"
+                                            type="textarea"
+                                        ></el-input>
+                                        </div>
+                                    </div>
+                                </div>
                             <!-- Pagos -->
                             <div class="col-12 pt-3">
                                 <table>
@@ -1829,6 +1857,8 @@ export default {
             this.collegeYear = [];
             this.errors = {};
             this.form = {
+                    dispatch_ticket_pdf_quantity:1, 
+                dispatch_ticket_pdf:false, 
                 id: null,
                 series_id: null,
                 prefix: "NV",
@@ -2302,6 +2332,9 @@ export default {
             };
         },
         async submit() {
+              if(this.configuration.enabled_dispatch_ticket_pdf){
+                this.form.dispatch_ticket_pdf = true;
+            }
             if (!this.hasCashOpen()) {
                 this.$message.error("Debe abrir caja para realizar la venta");
                 return false;

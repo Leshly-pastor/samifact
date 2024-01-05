@@ -72,6 +72,7 @@ class Dispatch extends ModelTenant
     ];
 
     protected $fillable = [
+        'purchase_order',
         'inventory_reference_id',
         'user_id',
         'external_id',
@@ -329,6 +330,18 @@ class Dispatch extends ModelTenant
         return $this->belongsTo(Document::class, 'reference_document_id');
     }
 
+    public function reference_check(){
+        if($this->reference_document_id){
+           $document =  Document::find($this->reference_document_id);
+           return $document->number_full;
+        }
+        if($this->sale_note){
+            $sale_note = SaleNote::find($this->reference_sale_note_id);
+            return $sale_note->number_full;
+        }   
+
+        return "-";
+    }
     /**
      * @return BelongsTo
      */
@@ -591,6 +604,7 @@ class Dispatch extends ModelTenant
         }
         $reference = optional($this->inventory_reference)->description;
         return [
+            'purchase_order' => $this->purchase_order,
             'is_pse' => $is_pse,
             'btn_is_tesla' => $btn_is_tesla,
             'reference' => $reference,

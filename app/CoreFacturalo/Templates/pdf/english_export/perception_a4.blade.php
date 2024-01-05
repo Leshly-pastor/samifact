@@ -37,7 +37,7 @@
     <tr>
         <td width="25%">Señor(es):</td>
         <td width="45%">{{ $customer->name }}</td>
-        <td width="15%">Fecha de emisión:</td>
+        <td width="15%">Date of issue:</td>
         <td width="15%">{{ $document->date_of_issue->format('d/m/Y') }}</td>
     </tr>
     <tr>
@@ -47,7 +47,7 @@
         <td>{{ $document->currency_type_id }}</td>
     </tr>
     <tr>
-        <td>Dirección:</td>
+        <td>Address:</td>
         <td colspan="3">{{ $customer->address }}</td>
     </tr>
     <tr>

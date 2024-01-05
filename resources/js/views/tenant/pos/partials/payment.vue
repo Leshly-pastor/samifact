@@ -651,7 +651,26 @@
                                         @changeAgent="changeAgent"
                                     ></search-agent>
                                 </div>
-
+                                <div
+                                    class="col-md-12 col-lg-12"
+                                    v-if="configuration.enabled_dispatch_ticket_pdf"
+                                >
+                                    <div class="form-group">
+                                        <label class="control-label"
+                                            >Número de tickets de
+                                            despacho
+                                            
+                                            
+                                           </label
+                                        >
+                                        <el-input
+                                            v-model="
+                                                dispatch_ticket_pdf_quantity
+                                            "
+                                            type="number"
+                                        ></el-input>
+                                    </div>
+                                </div>
                                 <div class="col-md-12 col-lg-12">
                                     <div class="form-group">
                                         <label class="control-label"
@@ -773,6 +792,7 @@ export default {
 
     data() {
         return {
+            dispatch_ticket_pdf_quantity: 1,
             enabled_discount: false,
             discount_amount: 0,
             type_id: null,
@@ -1608,7 +1628,7 @@ export default {
                     "El establecimiento no tiene series disponibles para el comprobante"
                 );
             }
-
+            this.form.dispatch_ticket_pdf_quantity = this.dispatch_ticket_pdf_quantity;
             if (this.form.document_type_id === "80") {
                 this.form.prefix = "NV";
                 this.form.paid = 1;
@@ -1730,10 +1750,13 @@ export default {
             await this.sleep(400);
             var configg = getUpdatedConfig();
             var opts = getUpdatedConfig();
-                console.log("🚀 ~ file: payment.vue:1735 ~ printticket ~ this.form.datahtml:", link)
+            console.log(
+                "🚀 ~ file: payment.vue:1735 ~ printticket ~ this.form.datahtml:",
+                link
+            );
             var printData = [
                 {
-                      type: "pdf",
+                    type: "pdf",
                     format: "file",
                     // type: "html",
                     // format: "plain",

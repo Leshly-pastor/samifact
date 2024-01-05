@@ -17,6 +17,8 @@ class TransportResource extends JsonResource
         return [
             'id' => $this->id,
             'plate_number' => $this->plate_number,
+            'secondary_plate_number' => $this->secondary_plate_number,
+            'tuc' => $this->tuc,
             'model' => $this->model,
             'brand' => $this->brand,
             'is_default' => $this->is_default,

@@ -57,9 +57,9 @@
 </table>
 <table class="full-width mt-5">
     <tr>
-        <td width="15%">Cliente:</td>
+        <td width="15%">Customer:</td>
         <td width="45%">{{ $customer->name }}</td>
-        <td width="25%">Fecha de emisión:</td>
+        <td width="25%">Date of issue:</td>
         <td width="15%">{{ $document->date_of_issue->format('Y-m-d') }}</td>
     </tr>
     <tr>
@@ -69,7 +69,7 @@
     </tr>
     @if ($customer->address !== '')
     <tr>
-        <td class="align-top">Dirección:</td>
+        <td class="align-top">Address:</td>
         <td colspan="">
             {{ $customer->address }}
             {{ ($customer->district_id !== '-')? ', '.$customer->district->description : '' }}
@@ -95,7 +95,7 @@
 
 <table class="full-width mt-4 mb-5">
     <tr>
-        <td ><b>Descripción:</b></td>
+        <td ><b>Description:</b></td>
     </tr>
     <tr>
         <td>{{ $document->description }}</td>

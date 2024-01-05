@@ -234,7 +234,11 @@ class InventoryValuedKardex
 
             if ($key == 0) {
                 if ($temp_data['type'] == 'input') {
-                    $unit_cost =  round($temp_data['total']  / $temp_data['quantity'], 4);
+                    if($temp_data['quantity'] != 0){
+                        $unit_cost =  round($temp_data['total']   / $temp_data['quantity'], 4);
+                    }else{
+                        $unit_cost = 0;
+                    }
                 } else {
                     $unit_cost =  $balance_unit_cost;
                     $cost_average = $unit_cost;
@@ -243,7 +247,11 @@ class InventoryValuedKardex
                 $balance_total_cost += $temp_data['quantity'] * $unit_cost * $temp_data['factor'];
             } else {
                 if ($temp_data['type'] == 'input') {
+                    if($temp_data['quantity'] != 0){
                     $cost_average = round(($balance_total_cost + $temp_data['total']) / ($balance_quantity + $temp_data['quantity']), 4);
+                    }else{
+                        $cost_average = 0;
+                    }
                 } else {
                     $cost_average = $balance_unit_cost;
                 }

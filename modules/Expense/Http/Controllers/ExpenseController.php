@@ -48,6 +48,7 @@ class ExpenseController extends Controller
     public function columns()
     {
         return [
+            'supplier_id' => 'Proveedor',
             'date_of_issue' => 'Fecha de emisión',
             'number' => 'Número',
         ];
@@ -74,7 +75,7 @@ class ExpenseController extends Controller
         $date_end = $request['date_end'];
         $month_start = $request['month_start'];
         $month_end = $request['month_end'];
-
+        $person_id = $request['person_id'];
         $d_start = null;
         $d_end = null;
     
@@ -98,15 +99,21 @@ class ExpenseController extends Controller
                 break;
         }
 
-        $records = $this->data($d_start, $d_end, $model);
+        $records = $this->data($d_start, $d_end, $model,$person_id);
 
         return $records;
 
     }
 
-    private function data($date_start, $date_end, $model)
-    {
-        $data = $model::with('state_type')->whereBetween('date_of_issue', [$date_start, $date_end])->whereTypeUser()->latest();
+    private function data($date_start, $date_end, $model,$person_id = null)
+    {   
+        if($person_id){
+
+            $data = $model::with('state_type')->whereBetween('date_of_issue', [$date_start, $date_end])->where('supplier_id', $person_id)->whereTypeUser()->latest();
+        }else{
+
+            $data = $model::with('state_type')->whereBetween('date_of_issue', [$date_start, $date_end])->whereTypeUser()->latest();
+        }
         return $data;
     }
 

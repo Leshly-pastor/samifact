@@ -12,9 +12,7 @@
                                 url="/"
                                 :path_logo="
                                     company.logo != null
-                                        ? `/storage/uploads/logos/${
-                                              company.logo
-                                          }`
+                                        ? `/storage/uploads/logos/${company.logo}`
                                         : ''
                                 "
                             ></logo>
@@ -50,7 +48,7 @@
                                 <div
                                     class="form-group"
                                     :class="{
-                                        'has-danger': errors.customer_id
+                                        'has-danger': errors.customer_id,
                                     }"
                                 >
                                     <label
@@ -95,7 +93,7 @@
                                 <div
                                     class="form-group"
                                     :class="{
-                                        'has-danger': errors.date_of_issue
+                                        'has-danger': errors.date_of_issue,
                                     }"
                                 >
                                     <!--<label class="control-label">Fecha de emisión</label>-->
@@ -120,7 +118,7 @@
                                 <div
                                     class="form-group"
                                     :class="{
-                                        'has-danger': errors.date_of_due
+                                        'has-danger': errors.date_of_due,
                                     }"
                                 >
                                     <label class="control-label"
@@ -143,7 +141,7 @@
                                 <div
                                     class="form-group"
                                     :class="{
-                                        'has-danger': errors.delivery_date
+                                        'has-danger': errors.delivery_date,
                                     }"
                                 >
                                     <label class="control-label"
@@ -183,7 +181,7 @@
                                     class="form-group"
                                     :class="{
                                         'has-danger':
-                                            errors.payment_method_type_id
+                                            errors.payment_method_type_id,
                                     }"
                                 >
                                     <label class="control-label">
@@ -195,8 +193,9 @@
                                         @change="changePaymentMethodType"
                                     >
                                         <el-option
-                                            v-for="(option,
-                                            idx) in payment_method_types"
+                                            v-for="(
+                                                option, idx
+                                            ) in payment_method_types"
                                             :key="idx"
                                             :value="option.id"
                                             :label="option.description"
@@ -215,7 +214,7 @@
                                 <div
                                     class="form-group"
                                     :class="{
-                                        'has-danger': errors.currency_type_id
+                                        'has-danger': errors.currency_type_id,
                                     }"
                                 >
                                     <label class="control-label">Moneda</label>
@@ -224,8 +223,9 @@
                                         @change="changeCurrencyType"
                                     >
                                         <el-option
-                                            v-for="(option,
-                                            idx) in currency_types"
+                                            v-for="(
+                                                option, idx
+                                            ) in currency_types"
                                             :key="idx"
                                             :value="option.id"
                                             :label="option.description"
@@ -242,7 +242,7 @@
                                 <div
                                     class="form-group"
                                     :class="{
-                                        'has-danger': errors.exchange_rate_sale
+                                        'has-danger': errors.exchange_rate_sale,
                                     }"
                                 >
                                     <label class="control-label"
@@ -289,7 +289,7 @@
                                 <div
                                     class="form-group"
                                     :class="{
-                                        'has-danger': errors.observation
+                                        'has-danger': errors.observation,
                                     }"
                                 >
                                     <label class="control-label"
@@ -354,8 +354,9 @@
                                     </thead>
                                     <tbody>
                                         <tr
-                                            v-for="(row,
-                                            index) in form.additional_data"
+                                            v-for="(
+                                                row, index
+                                            ) in form.additional_data"
                                             :key="index"
                                             width="100%"
                                         >
@@ -370,8 +371,9 @@
                                                         allow-create
                                                     >
                                                         <el-option
-                                                            v-for="(item,
-                                                            idx) in aditional_titles"
+                                                            v-for="(
+                                                                item, idx
+                                                            ) in aditional_titles"
                                                             :key="idx"
                                                             :label="item.label"
                                                             :value="item.value"
@@ -391,7 +393,7 @@
                                                                 'has-danger':
                                                                     errors[
                                                                         `additional_data.${index}.title`
-                                                                    ]
+                                                                    ],
                                                             }"
                                                         >
                                                             <small
@@ -429,7 +431,7 @@
                                                                 'has-danger':
                                                                     errors[
                                                                         `additional_data.${index}.description`
-                                                                    ]
+                                                                    ],
                                                             }"
                                                         >
                                                             <small
@@ -465,7 +467,33 @@
                                 </table>
                             </div>
                         </div>
-
+                        <div
+                            class="col-xl-12 col-md-12"
+                            v-if="configuration.enabled_dispatch_ticket_pdf"
+                        >
+                            <div class="row">
+                                <div class="col-3">
+                                    <label for="quantity"
+                                        >Número de tickets de despacho</label
+                                    >
+                                    <el-input
+                                        v-model="
+                                            form.dispatch_ticket_pdf_quantity
+                                        "
+                                        type="number"
+                                    ></el-input>
+                                </div>
+                            </div>
+                            <div class="row mt-2">
+                                <div class="col-12">
+                                    Datos de referencia
+                                    <el-input
+                                        v-model="form.reference_data"
+                                        type="textarea"
+                                    ></el-input>
+                                </div>
+                            </div>
+                        </div>
                         <div class="row mt-3">
                             <div class="col-md-12">
                                 <div class="table-responsive">
@@ -521,8 +549,9 @@
                                         </thead>
                                         <tbody v-if="form.items.length > 0">
                                             <tr
-                                                v-for="(row,
-                                                index) in form.items"
+                                                v-for="(
+                                                    row, index
+                                                ) in form.items"
                                                 :key="index"
                                             >
                                                 <td>{{ index + 1 }}</td>
@@ -758,7 +787,7 @@ export default {
         PersonForm,
         OrderNoteOptions,
         Logo,
-        SelectLotsGroup
+        SelectLotsGroup,
     },
     mixins: [functions, exchangeRate],
     data() {
@@ -793,33 +822,33 @@ export default {
             aditional_titles: [
                 {
                     value: "INGRESO",
-                    label: "INGRESO"
+                    label: "INGRESO",
                 },
                 {
                     value: "ENTREGA",
-                    label: "ENTREGA"
+                    label: "ENTREGA",
                 },
                 {
                     value: "DOCUMENTO",
-                    label: "DOCUMENTO"
+                    label: "DOCUMENTO",
                 },
                 {
                     value: "CONTACTO",
-                    label: "CONTACTO"
+                    label: "CONTACTO",
                 },
                 {
                     value: "CELULAR",
-                    label: "CELULAR"
+                    label: "CELULAR",
                 },
                 {
                     value: "TRANSPORTE",
-                    label: "TRANSPORTE"
+                    label: "TRANSPORTE",
                 },
                 {
                     value: "FORMA DE PAGO",
-                    label: "FORMA DE PAGO"
-                }
-            ]
+                    label: "FORMA DE PAGO",
+                },
+            ],
         };
     },
     created() {
@@ -830,7 +859,7 @@ export default {
     },
     async mounted() {
         this.initForm();
-        this.$eventHub.$on("reloadDataPersons", customer_id => {
+        this.$eventHub.$on("reloadDataPersons", (customer_id) => {
             this.reloadDataCustomers(customer_id);
         });
         this.$eventHub.$on("initInputPerson", () => {
@@ -838,7 +867,7 @@ export default {
         });
         await this.$http
             .get(`/${this.resource}/tables`)
-            .then(response => {
+            .then((response) => {
                 this.currency_types = response.data.currency_types;
                 this.establishments = response.data.establishments;
                 this.all_customers = response.data.customers;
@@ -879,7 +908,7 @@ export default {
 
                     this.$http
                         .post(`/${this.resource}/Quotation/get/${q}`)
-                        .then(response => {
+                        .then((response) => {
                             let data = response.data;
                             if (data !== undefined) {
                                 this.reloadDataCustomers(data.customer_id);
@@ -893,7 +922,7 @@ export default {
                                 this.form.quotation_id = data.id;
                             }
                         })
-                        .catch(error => {
+                        .catch((error) => {
                             console.log(
                                 "Error intentando crear un pedido desde cotizacion."
                             );
@@ -914,21 +943,20 @@ export default {
         clickAddAdditionalData() {
             this.form.additional_data.push({
                 title: null,
-                description: null
+                description: null,
             });
         },
         clickDeleteAdditionalData(index) {
             this.form.additional_data.splice(index, 1);
         },
         addRowLotGroup(lots_selecteds) {
-            this.form.items[
-                this.current_index_item
-            ].IdLoteSelected = lots_selecteds;
+            this.form.items[this.current_index_item].IdLoteSelected =
+                lots_selecteds;
             this.current_index_item = -1;
         },
         regularizeCompromiseQuantity(row) {
             if (row.IdLoteSelected) {
-                this.lots_group.forEach(l_group => {
+                this.lots_group.forEach((l_group) => {
                     const lot = _.find(row.IdLoteSelected, { id: l_group.id });
 
                     if (lot)
@@ -941,7 +969,7 @@ export default {
 
             await this.$http
                 .get(`/item-lots-group/available-data/${item_id}`)
-                .then(response => {
+                .then((response) => {
                     this.lots_group = response.data;
                 })
                 .then(() => {
@@ -958,14 +986,14 @@ export default {
         ...mapActions([
             "loadConfiguration",
             "loadCompany",
-            "loadEstablishment"
+            "loadEstablishment",
         ]),
         changeCustomer() {
             this.setAddressByCustomer();
         },
         setAddressByCustomer() {
             let customer = _.find(this.customers, {
-                id: this.form.customer_id
+                id: this.form.customer_id,
             });
 
             if (customer) {
@@ -978,7 +1006,7 @@ export default {
         },
         async changePaymentMethodType(flag_submit = true) {
             let payment_method_type = await _.find(this.payment_method_types, {
-                id: this.form.payment_method_type_id
+                id: this.form.payment_method_type_id,
             });
             if (payment_method_type) {
                 if (payment_method_type.number_days) {
@@ -1002,7 +1030,7 @@ export default {
 
                 this.$http
                     .get(`/${this.resource}/search/customers?${parameters}`)
-                    .then(response => {
+                    .then((response) => {
                         this.customers = response.data.customers;
                         this.loading_search = false;
                         /* if (this.customers.length == 0) {
@@ -1019,6 +1047,9 @@ export default {
         initForm() {
             this.errors = {};
             this.form = {
+                reference_data: null,
+                dispatch_ticket_pdf_quantity: 1,
+                dispatch_ticket_pdf: false,
                 observation: null,
                 prefix: "PD",
                 establishment_id: null,
@@ -1057,9 +1088,9 @@ export default {
                 additional_information: null,
                 shipping_address: null,
                 actions: {
-                    format_pdf: "a4"
+                    format_pdf: "a4",
                 },
-                additional_data: []
+                additional_data: [],
             };
 
             this.is_generate_from_quotation = false;
@@ -1084,7 +1115,7 @@ export default {
         },
         changeEstablishment() {
             let establishment = _.find(this.establishments, {
-                id: this.form.establishment_id
+                id: this.form.establishment_id,
             });
             this.$store.commit("setEstablishment", establishment);
         },
@@ -1094,7 +1125,7 @@ export default {
         async changeDateOfIssue() {
             // this.form.date_of_due = this.form.date_of_issue > this.form.date_of_due ? this.form.date_of_issue:null
             await this.searchExchangeRateByDate(this.form.date_of_issue).then(
-                response => {
+                (response) => {
                     this.form.exchange_rate_sale = response;
                 }
             );
@@ -1115,10 +1146,10 @@ export default {
         },
         changeCurrencyType() {
             this.currency_type = _.find(this.currency_types, {
-                id: this.form.currency_type_id
+                id: this.form.currency_type_id,
             });
             let items = [];
-            this.form.items.forEach(row => {
+            this.form.items.forEach((row) => {
                 items.push(
                     calculateRowItem(
                         row,
@@ -1144,7 +1175,7 @@ export default {
             let total = 0;
             let total_igv_free = 0;
 
-            this.form.items.forEach(row => {
+            this.form.items.forEach((row) => {
                 total_discount += parseFloat(row.total_discount);
                 total_charge += parseFloat(row.total_charge);
 
@@ -1213,7 +1244,7 @@ export default {
         async validateQuantityLotsGroup() {
             let error_lots_group = 0;
 
-            await this.form.items.forEach(element => {
+            await this.form.items.forEach((element) => {
                 if (element.item.lots_enabled) {
                     if (!element.IdLoteSelected) error_lots_group++;
                 }
@@ -1223,7 +1254,7 @@ export default {
                 return {
                     success: false,
                     message:
-                        "Las cantidades y lotes seleccionados deben ser iguales."
+                        "Las cantidades y lotes seleccionados deben ser iguales.",
                 };
             }
 
@@ -1234,7 +1265,9 @@ export default {
             if (this.serie) {
                 this.form.prefix = this.serie;
             }
-
+            if (this.configuration.enabled_dispatch_ticket_pdf) {
+                this.form.dispatch_ticket_pdf = true;
+            }
             if (this.form.date_of_issue > this.form.date_of_due)
                 return this.$message.error(
                     "La fecha de emisión no puede ser posterior a la de vencimiento"
@@ -1256,7 +1289,7 @@ export default {
             // await this.changePaymentMethodType(false)
             await this.$http
                 .post(`/${this.resource}`, this.form)
-                .then(response => {
+                .then((response) => {
                     if (response.data.success) {
                         this.resetForm();
                         this.orderNoteNewId = response.data.data.id;
@@ -1265,7 +1298,7 @@ export default {
                         this.$message.error(response.data.message);
                     }
                 })
-                .catch(error => {
+                .catch((error) => {
                     if (error.response.status === 422) {
                         this.errors = error.response.data;
                     } else {
@@ -1282,7 +1315,7 @@ export default {
         reloadDataCustomers(customer_id) {
             this.$http
                 .get(`/${this.resource}/search/customer/${customer_id}`)
-                .then(response => {
+                .then((response) => {
                     this.customers = response.data.customers;
                     this.form.customer_id = customer_id;
                     this.setAddressByCustomer();
@@ -1315,22 +1348,22 @@ export default {
         initInputPerson() {
             this.input_person = {
                 number: null,
-                identity_document_type_id: null
+                identity_document_type_id: null,
             };
-        }
+        },
     },
     computed: {
         ...mapState(["config", "company", "establishment"]),
-        computedStablishment: function() {
+        computedStablishment: function () {
             return this.config.establishment;
         },
-        computedLogo: function() {
+        computedLogo: function () {
             let picture = "";
             if (this.company.logo != null) {
                 picture`/storage/uploads/logos/${this.company.logo}`;
             }
             return picture;
-        }
-    }
+        },
+    },
 };
 </script>

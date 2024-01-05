@@ -754,7 +754,7 @@ class Configuration extends ModelTenant
             'change_affectation_exonerated_igv' => $this->change_affectation_exonerated_igv,
             'show_load_voucher' => $this->show_load_voucher,
             'search_factory_code_items' => $this->search_factory_code_items,
-            'enabled_dispatch_ticket_pdf' => $this->enabled_dispatch_ticket_pdf,
+            'enabled_dispatch_ticket_pdf' => (bool) $this->enabled_dispatch_ticket_pdf,
             'register_series_invoice_xml' => $this->register_series_invoice_xml,
             'enable_discount_by_customer' => $this->enable_discount_by_customer,
             'show_price_barcode_ticket' => $this->show_price_barcode_ticket,

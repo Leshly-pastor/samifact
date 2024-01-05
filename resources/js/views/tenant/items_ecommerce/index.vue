@@ -62,7 +62,9 @@
               <!--<img :src="row.image_url_medium"  width="40" height="40" class="img-thumbail img-custom" /> -->
             </td>
             <td>
-              <el-tag style="margin:1px" v-for="tag in row.tags" :key="tag.id">{{tag.tag.name}}</el-tag>
+              <span v-for="tag in row.tags" :key="tag.id">
+              <el-tag style="margin:1px" v-if="tag.tag" >{{tag.tag.name}}</el-tag>
+              </span>
             </td>
             <td class="text-center">
               <el-checkbox

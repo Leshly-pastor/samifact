@@ -1296,6 +1296,7 @@ export default {
         },
         initForm() {
             this.form = {
+                  dispatch_ticket_pdf_quantity: 1,
                 establishment_id: null,
                 document_type_id: "03",
                 series_id: null,

@@ -30,6 +30,7 @@
             </div>
             <div class="card-body">
                 <data-table
+                    ref="dataTableRef"
                     :suscriptionames="suscriptionames"
                     :type="type"
                     :extraquery="{ users: type }"
@@ -470,7 +471,7 @@ export default {
             window.open(`https://api.whatsapp.com/send?phone=51${number}`);
         },
         viewPayments(month, student) {
-            let year = new Date().getFullYear();
+            let year = this.$refs.dataTableRef.getYear();
             this.currentStudenMonth = { month, year, student };
             this.showPayments = true;
         },

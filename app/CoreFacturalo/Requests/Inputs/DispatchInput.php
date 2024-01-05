@@ -42,6 +42,7 @@ class DispatchInput
         $customer = PersonInput::set($inputs['customer_id']);
         $inputs['type'] = 'dispatch';
         $data = [
+            'purchase_order' => Functions::valueKeyInArray($inputs, 'purchase_order'),
             'id' => Functions::valueKeyInArray($inputs, 'id'),
             'type' => $inputs['type'],
             'inventory_reference_id' => Functions::valueKeyInArray($inputs, 'inventory_reference_id'),
@@ -193,8 +194,9 @@ class DispatchInput
 
     private static function driver($inputs)
     {
-        if (($inputs['document_type_id'] === '09' && $inputs['transport_mode_type_id'] === '02') || $inputs['document_type_id'] === '31') {
-            if (array_key_exists('driver', $inputs)) {
+        // if (($inputs['document_type_id'] === '09' && $inputs['transport_mode_type_id'] === '02') || $inputs['document_type_id'] === '31') {
+        if ($inputs['document_type_id'] === '09' || $inputs['document_type_id'] === '31') {
+            if (array_key_exists('driver', $inputs) && $inputs['driver'] != null) {
                 $driver = $inputs['driver'];
                 $identity_document_type_id = $driver['identity_document_type_id'];
                 $number = $driver['number'];
@@ -217,10 +219,13 @@ class DispatchInput
 
     private static function transport($inputs)
     {
-        if (($inputs['document_type_id'] === '09' && $inputs['transport_mode_type_id'] === '02') || $inputs['document_type_id'] === '31') {
-            if (array_key_exists('transport', $inputs)) {
+        // if (($inputs['document_type_id'] === '09' && $inputs['transport_mode_type_id'] === '02') || $inputs['document_type_id'] === '31') {
+        if ($inputs['document_type_id'] === '09' || $inputs['document_type_id'] === '31') {
+            if (array_key_exists('transport', $inputs) && $inputs['transport'] != null) {
                 $transport = $inputs['transport'];
                 $plate_number = $transport['plate_number'];
+                $secondary_plate_number = Functions::valueKeyInArray($transport, 'secondary_plate_number');
+                $tuc = Functions::valueKeyInArray($transport, 'tuc');
                 $model = $transport['model'];
                 $brand = $transport['brand'];
 
@@ -228,6 +233,8 @@ class DispatchInput
                     'plate_number' => $plate_number,
                     'model' => $model,
                     'brand' => $brand,
+                    'secondary_plate_number' => $secondary_plate_number,
+                    'tuc' => $tuc,
                 ];
             }
         }
@@ -334,13 +341,14 @@ class DispatchInput
         if (array_key_exists('items', $inputs)) {
             $items = [];
             foreach ($inputs['items'] as $row) {
+                
                 $item = Item::find($row['item_id']);
                 $unit_type_id = isset($row['unit_type_id']) ? $row['unit_type_id'] : $item->unit_type_id;
                 $weight = isset($row['weight']) ? $row['weight'] : 1;
                 $itemDispatch = $row['item'] ?? [];
                 $lots = [];
                 $row['IdLoteSelected'] = $row['IdLoteSelected'] ?? $itemDispatch['IdLoteSelected'] ?? null;
-                $itemReDispatch = isset($itemDispatch['item']) ? $itemDispatch['item'] : [];
+                $itemReDispatch = isset($itemDispatch['item']) ? $itemDispatch['item'] : $itemDispatch;
                 if(count($itemReDispatch) > 0){
                     $lots = isset($itemReDispatch['lots']) ? $itemReDispatch['lots'] : [];
 
@@ -415,7 +423,8 @@ class DispatchInput
 
     private static function getDriverId($inputs)
     {
-        if (($inputs['document_type_id'] === '09' && $inputs['transport_mode_type_id'] === '02') || $inputs['document_type_id'] === '31') {
+        // if (($inputs['document_type_id'] === '09' && $inputs['transport_mode_type_id'] === '02') || $inputs['document_type_id'] === '31') {
+        if ($inputs['document_type_id'] === '09'  || $inputs['document_type_id'] === '31') {
             //            if (key_exists('driver_id', $inputs)) {
             return $inputs['driver_id'];
             //            }
@@ -437,7 +446,8 @@ class DispatchInput
 
     private static function getTransportId($inputs)
     {
-        if (($inputs['document_type_id'] === '09' && $inputs['transport_mode_type_id'] === '02')  || $inputs['document_type_id'] === '31') {
+        // if (($inputs['document_type_id'] === '09' && $inputs['transport_mode_type_id'] === '02')  || $inputs['document_type_id'] === '31') {
+        if ($inputs['document_type_id'] === '09'   || $inputs['document_type_id'] === '31') {
             //            if (key_exists('transport_id', $inputs)) {
             return $inputs['transport_id'];
             //            }

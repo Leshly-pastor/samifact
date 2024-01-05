@@ -22,6 +22,7 @@ use App\Models\Tenant\SaleNote;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Modules\FullSuscription\Models\Tenant\UserRelSuscriptionPlan;
+use Modules\Suscription\Export\ClientSuscriptionExport;
 use Modules\Suscription\Models\Tenant\SuscriptionNames;
 use Modules\Suscription\Models\Tenant\SuscriptionPayment;
 
@@ -42,7 +43,8 @@ class ClientSuscriptionController extends SuscriptionController
         ];
     }
 
-    public function set_date(Request $request){
+    public function set_date(Request $request)
+    {
         $date = $request->date;
         $person_id = $request->person_id;
         $person = Person::find($person_id);
@@ -53,7 +55,8 @@ class ClientSuscriptionController extends SuscriptionController
             'message' => 'Se guardo correctamente'
         ];
     }
-    public function set_color(Request $request){
+    public function set_color(Request $request)
+    {
         $color = $request->color;
         $person_id = $request->person_id;
         $person = Person::find($person_id);
@@ -64,13 +67,14 @@ class ClientSuscriptionController extends SuscriptionController
             'message' => 'Se guardo correctamente'
         ];
     }
-    public function get_child_from_document($document_id, $parent_id,$type){
+    public function get_child_from_document($document_id, $parent_id, $type)
+    {
         $type_document = $type == '80' ? 'sale_note_id' : 'document_id';
         $record = SuscriptionPayment::where($type_document, $document_id)
-        ->where('client_id', $parent_id)
-        ->first();
+            ->where('client_id', $parent_id)
+            ->first();
 
-        if($record){
+        if ($record) {
             return [
                 'success' => true,
                 'child_id' => $record->child_id
@@ -124,17 +128,18 @@ class ClientSuscriptionController extends SuscriptionController
             'message' => 'Periodos guardados correctamente'
         ];
     }
-    
-    public function itemPlan(Request $request){
+
+    public function itemPlan(Request $request)
+    {
         $parent_customer_id = $request->parent_customer_id;
         $children_customer_id = $request->children_customer_id;
         $suscription = UserRelSuscriptionPlan::where('parent_customer_id', $parent_customer_id)
             ->where('children_customer_id', $children_customer_id)
             ->first();
         $items = [];
-        if($suscription){
+        if ($suscription) {
             $plan = $suscription->suscription_plan;
-            if($plan){
+            if ($plan) {
                 $items = $plan->items;
             }
         }
@@ -143,7 +148,6 @@ class ClientSuscriptionController extends SuscriptionController
             'success' => true,
             'items' => $items
         ];
-        
     }
     public function Record(Request $request)
     {
@@ -164,36 +168,36 @@ class ClientSuscriptionController extends SuscriptionController
     {
         $currentYear = date('Y');
         $months = [];
-    
+
         for ($i = 0; $i < 12; $i++) {
             $month = $i + 1;
             $date = Carbon::createFromDate($currentYear, $month, 1)->format('Y-m-d');
-    
+
             $payments = SuscriptionPayment::with('document', 'sale_note')
                 ->where('period', $date)
                 ->get();
-    
+
             $total = $payments->sum(function ($payment) {
-                 $document = $payment->document ?? $payment->sale_note;
-                if($payment->document){
+                $document = $payment->document ?? $payment->sale_note;
+                if ($payment->document) {
                     $periods = SuscriptionPayment::where('document_id', $payment->document_id)
-                
-                    ->count();
-                }else{
+
+                        ->count();
+                } else {
                     $periods = SuscriptionPayment::where('sale_note_id', $payment->sale_note_id)
-                    ->count();
+                        ->count();
                 }
-          
-    
+
+
                 return $document->total / $periods;
             });
-    
+
             $months[] = $total;
         }
-    
+
         return $months;
     }
-    
+
     // function getTotals()
     // {
     //     $currentYear = date('Y');
@@ -209,24 +213,48 @@ class ClientSuscriptionController extends SuscriptionController
     //             if($payment->document_id != null){
     //                 $document = Document::find($payment->document_id);
     //                 $periods = SuscriptionPayment::where('document_id', $payment->document_id)->count();
-                    
-                
-                
+
+
+
     //         }else{
     //             $document = SaleNote::find($payment->sale_note_id);
     //             $periods = SuscriptionPayment::where('sale_note_id', $payment->sale_note_id)->count();
-              
+
     //         }
     //         $total = $document->total / $periods;
 
     //         }
-          
+
     //         $months[] = $total;
     //     }
 
     //     return $months;
     // }
 
+    public function ExcelRecords(Request $request)
+    {
+        $records = SearchCustomerController::getCustomersToSuscriptionList($request);
+        // getCustomersToSuscriptionList(Request $request = null, ?int $id = 0, $onlyParent = true){
+        if ($request->has('users')) {
+            if ($request->users == 'parent') {
+                $records->where('parent_id', 0);
+            } elseif ($request->users == 'children') {
+                $records->where('parent_id', '!=', 0);
+            }
+        }
+        $currentYear = $request->year ?? date('Y');
+        // users
+        $data = new PersonCollection($records->get());
+
+
+
+        return (new ClientSuscriptionExport())
+        ->records($data)
+        ->currentYear($currentYear)
+        ->download('Suscripciones_'.Carbon::now().'_.xlsx')
+
+        ;
+    }
     public function Records(Request $request)
     {
         $page = $request->input('page') ?? 1;
@@ -241,9 +269,9 @@ class ClientSuscriptionController extends SuscriptionController
         }
         // users
         $paginate = $request->users == 'children' ? 20 : config('tenant.items_per_page');
-         $data = new PersonCollection($records->paginate($paginate));
-         
-         $data->additional([
+        $data = new PersonCollection($records->paginate($paginate));
+
+        $data->additional([
             'totals' => $page == 1 || $request->value ? $this->getTotals() : null,
         ]);
         return $data;
@@ -297,8 +325,8 @@ class ClientSuscriptionController extends SuscriptionController
     public function suscription_name_records(Request $request)
     {
         $records = SuscriptionNames::create_new();
-        
-        
+
+
         return [
             'success' => true,
             'data' => $records
@@ -306,10 +334,10 @@ class ClientSuscriptionController extends SuscriptionController
     }
     public function upload_files($person_id, Request $request)
     {
-        
+
 
         $file = $request->file('file');
-        $original_name= $file->getClientOriginalName();
+        $original_name = $file->getClientOriginalName();
         //random name
         $path = 'app/public/uploads/person_files';
         $name = uniqid() . '.' . $file->getClientOriginalExtension();
@@ -323,20 +351,19 @@ class ClientSuscriptionController extends SuscriptionController
             'success' => true,
             'message' => 'El archivo se guardo correctamente'
         ];
-       
-
-}
+    }
 
 
 
 
 
-    public function delete_file($id){
+    public function delete_file($id)
+    {
         $file = PersonFiles::find($id);
-        $file_to_delete =$file->file;
+        $file_to_delete = $file->file;
         $path = 'app/public/uploads/person_files';
-        $file_path = storage_path($path).'/'.$file_to_delete;
-        if(file_exists($file_path)){
+        $file_path = storage_path($path) . '/' . $file_to_delete;
+        if (file_exists($file_path)) {
             unlink($file_path);
         }
         $file->delete();
@@ -344,19 +371,19 @@ class ClientSuscriptionController extends SuscriptionController
             'success' => true,
             'message' => 'El archivo se elimino correctamente'
         ];
-
     }
-    public function get_files($person_id){
+    public function get_files($person_id)
+    {
 
         $files = PersonFiles::where('person_id', $person_id)->get()
-        ->transform(function($row){
-            return [
-                'id' => $row->id,
-                'file' => $row->file,
-                'original_name' => $row->original_name,
-                'url' => url('storage/uploads/person_files/'.$row->file),
-            ];
-        });
+            ->transform(function ($row) {
+                return [
+                    'id' => $row->id,
+                    'file' => $row->file,
+                    'original_name' => $row->original_name,
+                    'url' => url('storage/uploads/person_files/' . $row->file),
+                ];
+            });
         return [
             'success' => true,
             'data' => $files
@@ -443,7 +470,7 @@ class ClientSuscriptionController extends SuscriptionController
      */
     public function store(PersonRequest $request)
     {
-        
+
         $personController = new PersonController();
         $data  =  $personController->store($request);
         $childrens = $request->childrens;
@@ -453,18 +480,17 @@ class ClientSuscriptionController extends SuscriptionController
             $name = $child['name'];
             $number = $child['number'];
             $person = Person::where('name', $name)->where('number', $number)->first();
-            if($person){
+            if ($person) {
                 $person->parent_id = $data['id'];
                 $person->save();
                 $demo[] = $person;
-            }else{           
+            } else {
                 $child['parent_id'] = $data['id'];
                 $child['addresses'] = $request->input('addresses');
                 $childRequest = new PersonRequest();
                 $childRequest->merge($child);
                 $demo[] = $personController->store($childRequest);
             }
- 
         }
         $data[] = $demo;
         return $data;

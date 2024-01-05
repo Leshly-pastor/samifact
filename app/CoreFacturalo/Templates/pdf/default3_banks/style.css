@@ -71,7 +71,9 @@ max-height: 80px
 .text-upp {
 text-transform: uppercase;
 }
-
+.text-normal{
+text-transform: none;
+}
 .full-width {
   width: 100%;
 }

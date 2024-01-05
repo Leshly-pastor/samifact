@@ -163,12 +163,12 @@ if ($logo) {
                     <td>Nombre y/o razón social: {{ $document->dispatcher->name }}</td>
                     <td>{{ $document_type_dispatcher->description }}: {{ $document->dispatcher->number }}</td>
                 </tr>
-            @else
+            @endif
                 <tr>
-                    @if ($document->transport_data)
+                    @if (isset($document->transport_data['plate_number']))
                         <td>Número de placa del vehículo: {{ $document->transport_data['plate_number'] }}</td>
                     @endif
-                    @if ($document->driver->number)
+                    @if (isset($document->driver) && $document->driver->number)
                         <td>Conductor: {{ $document->driver->number }}</td>
                     @endif
                 </tr>
@@ -179,11 +179,10 @@ if ($logo) {
                             </td>
                         @endif
                     @endif
-                    @if ($document->driver->license)
+                    @if (isset($document->driver->license))
                         <td>Licencia del conductor: {{ $document->driver->license }}</td>
                     @endif
                 </tr>
-            @endif
         </tbody>
     </table>
     <table class="full-width border-box mt-10 mb-10">

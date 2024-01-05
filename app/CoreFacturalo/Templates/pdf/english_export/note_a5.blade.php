@@ -73,11 +73,11 @@
 </table>
 <table class="full-width mt-5">
     <tr>
-        <td width="120px">FECHA DE EMISIÓN</td>
+        <td width="120px">Date of issue</td>
         <td width="8px">:</td>
         <td>{{$document->date_of_issue->format('Y-m-d')}}</td>
         @if($invoice)
-            <td width="140px">FECHA DE VENCIMIENTO</td>
+            <td width="140px">Due date</td>
             <td width="8px" class="align-top">:</td>
             <td class="align-top">{{$invoice->date_of_due->format('Y-m-d')}}</td>
         @endif
@@ -94,7 +94,7 @@
     </tr>
     @if ($customer->address !== '')
     <tr>
-        <td class="align-top">DIRECCIÓN:</td>
+        <td class="align-top">Address:</td>
         <td>:</td>
         <td>
             {{ $customer->address }}
@@ -143,30 +143,30 @@
 <table class="full-width mt-3">
     @if ($document->purchase_order)
         <tr>
-            <td>ORDEN DE COMPRA</td>
+            <td>Purchase order</td>
             <td>:</td>
             <td>{{ $document->purchase_order }}</td>
         </tr>
     @endif
     @if ($document->quotation_id)
         <tr>
-            <td>COTIZACIÓN</td>
+            <td>Quotation</td>
             <td>:</td>
             <td>{{ $document->quotation->identifier }}</td>
         </tr>
     @endif
     @if(!is_null($document_base))
     <tr>
-        <td width="120px">DOC. AFECTADO</td>
+        <td width="120px">Doc Affected</td>
         <td width="8px">:</td>
         <td>{{ $affected_document_number }}</td>
 
-        <td width="120px">TIPO DE NOTA</td>
+        <td width="120px">Note type</td>
         <td width="8px">:</td>
         <td>{{ ($document_base->note_type === 'credit')?$document_base->note_credit_type->description:$document_base->note_debit_type->description}}</td>
     </tr>
     <tr>
-        <td>DESCRIPCIÓN</td>
+        <td>DESCRIPTION</td>
         <td>:</td>
         <td>{{ $document_base->note_description }}</td>
     </tr>
@@ -175,13 +175,13 @@
 
 {{--<table class="full-width mt-3">--}}
     {{--<tr>--}}
-        {{--<td width="25%">Documento Afectado:</td>--}}
+        {{--<td width="25%">Affected Document:</td>--}}
         {{--<td width="20%">{{ $document_base->affected_document->series }}-{{ $document_base->affected_document->number }}</td>--}}
         {{--<td width="15%">Tipo de nota:</td>--}}
         {{--<td width="40%">{{ ($document_base->note_type === 'credit')?$document_base->note_credit_type->description:$document_base->note_debit_type->description}}</td>--}}
     {{--</tr>--}}
     {{--<tr>--}}
-        {{--<td class="align-top">Descripción:</td>--}}
+        {{--<td class="align-top">Description:</td>--}}
         {{--<td class="text-left" colspan="3">{{ $document_base->note_description }}</td>--}}
     {{--</tr>--}}
 {{--</table>--}}
@@ -189,11 +189,11 @@
 <table class="full-width mt-10 mb-10">
     <thead class="">
     <tr class="bg-grey">
-        <th class="border-top-bottom text-center py-2" width="8%">CANT.</th>
-        <th class="border-top-bottom text-center py-2" width="8%">UNIDAD</th>
-        <th class="border-top-bottom text-left py-2">DESCRIPCIÓN</th>
+        <th class="border-top-bottom text-center py-2" width="8%">QTY</th>
+        <th class="border-top-bottom text-center py-2" width="8%">UNIT</th>
+        <th class="border-top-bottom text-left py-2">DESCRIPTION</th>
         <th class="border-top-bottom text-right py-2" width="12%">P.UNIT</th>
-        <th class="border-top-bottom text-right py-2" width="8%">DTO.</th>
+        <th class="border-top-bottom text-right py-2" width="8%">DISC.</th>
         <th class="border-top-bottom text-right py-2" width="12%">TOTAL</th>
     </tr>
     </thead>
@@ -243,31 +243,31 @@
     @endforeach
         @if($document->total_exportation > 0)
             <tr>
-                <td colspan="5" class="text-right font-bold">OP. EXPORTACIÓN: {{ $document->currency_type->symbol }}</td>
+                <td colspan="5" class="text-right font-bold">OP. Export: {{ $document->currency_type->symbol }}</td>
                 <td class="text-right font-bold">{{ number_format($document->total_exportation, 2) }}</td>
             </tr>
         @endif
         @if($document->total_free > 0)
             <tr>
-                <td colspan="5" class="text-right font-bold">OP. GRATUITAS: {{ $document->currency_type->symbol }}</td>
+                <td colspan="5" class="text-right font-bold">OP. Free: {{ $document->currency_type->symbol }}</td>
                 <td class="text-right font-bold">{{ number_format($document->total_free, 2) }}</td>
             </tr>
         @endif
         @if($document->total_unaffected > 0)
             <tr>
-                <td colspan="5" class="text-right font-bold">OP. INAFECTAS: {{ $document->currency_type->symbol }}</td>
+                <td colspan="5" class="text-right font-bold">OP. Unaffected: {{ $document->currency_type->symbol }}</td>
                 <td class="text-right font-bold">{{ number_format($document->total_unaffected, 2) }}</td>
             </tr>
         @endif
         @if($document->total_exonerated > 0)
             <tr>
-                <td colspan="5" class="text-right font-bold">OP. EXONERADAS: {{ $document->currency_type->symbol }}</td>
+                <td colspan="5" class="text-right font-bold">OP. Exonerated: {{ $document->currency_type->symbol }}</td>
                 <td class="text-right font-bold">{{ number_format($document->total_exonerated, 2) }}</td>
             </tr>
         @endif
         @if($document->total_taxed > 0)
             <tr>
-                <td colspan="5" class="text-right font-bold">OP. GRAVADAS: {{ $document->currency_type->symbol }}</td>
+                <td colspan="5" class="text-right font-bold">OP. Taxed: {{ $document->currency_type->symbol }}</td>
                 <td class="text-right font-bold">{{ number_format($document->total_taxed, 2) }}</td>
             </tr>
         @endif
@@ -288,7 +288,7 @@
             <td class="text-right font-bold">{{ number_format($document->total_igv, 2) }}</td>
         </tr>
         <tr>
-            <td colspan="5" class="text-right font-bold">TOTAL A PAGAR: {{ $document->currency_type->symbol }}</td>
+            <td colspan="5" class="text-right font-bold">Total to pay: {{ $document->currency_type->symbol }}</td>
             <td class="text-right font-bold">{{ number_format($document->total, 2) }}</td>
         </tr>
     </tbody>
@@ -311,7 +311,7 @@
             @foreach($document->additional_information as $information)
                 @if ($information)
                     @if ($loop->first)
-                        <strong>Información adicional</strong>
+                        <strong>Additional Information</strong>
                     @endif
                     <p>@if(\App\CoreFacturalo\Helpers\Template\TemplateHelper::canShowNewLineOnObservation())
                             {!! \App\CoreFacturalo\Helpers\Template\TemplateHelper::SetHtmlTag($information) !!}
@@ -344,7 +344,7 @@
     <table class="full-width">
         <tr>
         <td>
-        <strong>PAGOS:</strong> </td></tr>
+        <strong>Payments:</strong> </td></tr>
             @php
                 $payment = 0;
             @endphp

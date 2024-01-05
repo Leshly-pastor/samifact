@@ -51,7 +51,7 @@
             </div>
         </td>
         <td width="30%" class="border-box py-4 px-2 text-center">
-            <h5 class="text-center">ORDEN DE COMPRA</h5>
+            <h5 class="text-center">Purchase order</h5>
             <h3 class="text-center">{{ $tittle }}</h3>
         </td>
     </tr>
@@ -60,7 +60,7 @@
     <tr>
         <td width="15%">Proveedor:</td>
         <td width="45%">{{ $supplier->name }}</td>
-        <td width="25%">Fecha de emisión:</td>
+        <td width="25%">Date of issue:</td>
         <td width="15%">{{ $document->date_of_issue->format('Y-m-d') }}</td>
     </tr>
     <tr>
@@ -73,7 +73,7 @@
     </tr>
     @if ($supplier->address !== '')
     <tr>
-        <td class="align-top">Dirección:</td>
+        <td class="align-top">Address:</td>
         <td colspan="3">
             {{ $supplier->address }}
             {{ ($supplier->district_id !== '-')? ', '.$supplier->district->description : '' }}
@@ -84,7 +84,7 @@
     @endif
     @if ($document->shipping_address)
     <tr>
-        <td class="align-top">Dir. Envío:</td>
+        <td class="align-top">Shipping Address:</td>
         <td colspan="3">
             {{ $document->shipping_address }}
         </td>
@@ -92,7 +92,7 @@
     @endif
     @if ($supplier->telephone)
     <tr>
-        <td class="align-top">Teléfono:</td>
+        <td class="align-top">Phone:</td>
         <td colspan="3">
             {{ $supplier->telephone }}
         </td>
@@ -100,21 +100,21 @@
     @endif
     @if ($document->payment_method_type)
     <tr>
-        <td class="align-top">T. Pago:</td>
+        <td class="align-top">Payment:</td>
         <td colspan="3">
             {{ $document->payment_method_type->description }}
         </td>
     </tr>
     @endif
     <tr>
-        <td class="align-top">Vendedor:</td>
+        <td class="align-top">Seller:</td>
         <td colspan="3">
             {{ $document->user->name }}
         </td>
     </tr>
     @if($document->sale_opportunity)
     <tr>
-        <td class="align-top">O. Venta:</td>
+        <td class="align-top">O. Sale:</td>
         <td  colspan="3">{{ $document->sale_opportunity->number_full }}</td>
     </tr>
     @endif
@@ -158,12 +158,12 @@
 <table class="full-width mt-10 mb-10">
     <thead class="">
     <tr class="bg-grey">
-        <th class="border-top-bottom text-center py-2" width="8%">CANT.</th>
-        <th class="border-top-bottom text-center py-2" width="8%">UNIDAD</th>
-        <th class="border-top-bottom text-left py-2">DESCRIPCIÓN</th>
-        <th class="border-top-bottom text-left py-2">MODELO</th>
+        <th class="border-top-bottom text-center py-2" width="8%">QTY</th>
+        <th class="border-top-bottom text-center py-2" width="8%">UNIT</th>
+        <th class="border-top-bottom text-left py-2">DESCRIPTION</th>
+        <th class="border-top-bottom text-left py-2">MODEL</th>
         <th class="border-top-bottom text-right py-2" width="12%">P.UNIT</th>
-        <th class="border-top-bottom text-right py-2" width="8%">DTO.</th>
+        <th class="border-top-bottom text-right py-2" width="8%">DISC.</th>
         <th class="border-top-bottom text-right py-2" width="12%">TOTAL</th>
     </tr>
     </thead>
@@ -214,31 +214,31 @@
     @endforeach
         @if($document->total_exportation > 0)
             <tr>
-                <td colspan="6" class="text-right font-bold">OP. EXPORTACIÓN: {{ $document->currency_type->symbol }}</td>
+                <td colspan="6" class="text-right font-bold">OP. Export: {{ $document->currency_type->symbol }}</td>
                 <td class="text-right font-bold">{{ number_format($document->total_exportation, 2) }}</td>
             </tr>
         @endif
         @if($document->total_free > 0)
             <tr>
-                <td colspan="6" class="text-right font-bold">OP. GRATUITAS: {{ $document->currency_type->symbol }}</td>
+                <td colspan="6" class="text-right font-bold">OP. Free: {{ $document->currency_type->symbol }}</td>
                 <td class="text-right font-bold">{{ number_format($document->total_free, 2) }}</td>
             </tr>
         @endif
         @if($document->total_unaffected > 0)
             <tr>
-                <td colspan="6" class="text-right font-bold">OP. INAFECTAS: {{ $document->currency_type->symbol }}</td>
+                <td colspan="6" class="text-right font-bold">OP. Unaffected: {{ $document->currency_type->symbol }}</td>
                 <td class="text-right font-bold">{{ number_format($document->total_unaffected, 2) }}</td>
             </tr>
         @endif
         @if($document->total_exonerated > 0)
             <tr>
-                <td colspan="6" class="text-right font-bold">OP. EXONERADAS: {{ $document->currency_type->symbol }}</td>
+                <td colspan="6" class="text-right font-bold">OP. Exonerated: {{ $document->currency_type->symbol }}</td>
                 <td class="text-right font-bold">{{ number_format($document->total_exonerated, 2) }}</td>
             </tr>
         @endif
         @if($document->total_taxed > 0)
             <tr>
-                <td colspan="6" class="text-right font-bold">OP. GRAVADAS: {{ $document->currency_type->symbol }}</td>
+                <td colspan="6" class="text-right font-bold">OP. Taxed: {{ $document->currency_type->symbol }}</td>
                 <td class="text-right font-bold">{{ number_format($document->total_taxed, 2) }}</td>
             </tr>
         @endif
@@ -253,7 +253,7 @@
             <td class="text-right font-bold">{{ number_format($document->total_igv, 2) }}</td>
         </tr>
         <tr>
-            <td colspan="6" class="text-right font-bold">TOTAL A PAGAR: {{ $document->currency_type->symbol }}</td>
+            <td colspan="6" class="text-right font-bold">Total to pay: {{ $document->currency_type->symbol }}</td>
             <td class="text-right font-bold">{{ number_format($document->total, 2) }}</td>
         </tr>
     </tbody>
@@ -265,7 +265,7 @@
                 <p>Son: <span class="font-bold">{{ $row->value }} {{ $document->currency_type->description }}</span></p>
             @endforeach
             <br/>
-            <strong>Información adicional</strong>
+            <strong>Additional Information</strong>
             @foreach($document->additional_information as $information)
                 <p>@if(\App\CoreFacturalo\Helpers\Template\TemplateHelper::canShowNewLineOnObservation())
                             {!! \App\CoreFacturalo\Helpers\Template\TemplateHelper::SetHtmlTag($information) !!}

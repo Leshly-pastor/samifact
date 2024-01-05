@@ -2,6 +2,7 @@
 
 namespace Modules\Order\Http\Controllers;
 
+use App\CoreFacturalo\HelperFacturalo;
 use App\CoreFacturalo\Helpers\Storage\StorageDocument;
 use App\CoreFacturalo\Requests\Inputs\Common\EstablishmentInput;
 use App\CoreFacturalo\Requests\Inputs\Common\PersonInput;
@@ -537,7 +538,11 @@ class OrderNoteController extends Controller
             $total_taxed = $document->total_taxed != '' ? '10' : '0';
             $quantity_rows = count($document->items);
             $discount_global = 0;
+            $extra_by_item_description = 0;
             foreach ($document->items as $it) {
+                if (strlen($it->item->description) > 100) {
+                    $extra_by_item_description += 24;
+                }
                 if ($it->discounts) {
                     $discount_global = $discount_global + 1;
                 }
@@ -586,7 +591,9 @@ class OrderNoteController extends Controller
                 $total_taxed = $document->total_taxed != '' ? '10' : '0';
                 $quantity_rows = count($document->items);
                 $discount_global = 0;
+                $extra_by_item_description = 0;
                 foreach ($document->items as $it) {
+                
                     if ($it->discounts) {
                         $discount_global = $discount_global + 1;
                     }
@@ -671,7 +678,16 @@ class OrderNoteController extends Controller
             //$html_footer = $template->pdfFooter();
             //$pdf->SetHTMLFooter($html_footer);
         }
-
+        $helper_facturalo = new HelperFacturalo();
+        if ($helper_facturalo->isAllowedAddDispatchTicket($format_pdf, 'order-note', $document)) {
+            $company = Company::active();
+            $helper_facturalo->addDocumentDispatchTicket($pdf, $company, $document, [
+                $template,
+                $base_template,
+                $width,
+                ($quantity_rows * 8) + $extra_by_item_description
+            ]);
+        }
         $this->uploadFile($filename, $pdf->output('', 'S'), 'order_note');
     }
 

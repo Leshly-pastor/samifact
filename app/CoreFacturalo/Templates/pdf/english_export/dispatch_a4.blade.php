@@ -307,7 +307,7 @@
     <table class="full-width border-box">
         @if($document->sale_note)
             <tr>
-                <td class="text-bold border-bottom font-bold">NOTA DE VENTA</td>
+                <td class="text-bold border-bottom font-bold">SALE NOTE</td>
             </tr>
             <tr>
                 <td>{{ ($document->sale_note) ? $document->sale_note->number_full : "" }}</td>
@@ -329,7 +329,7 @@
     <table class="full-width">
         <tr>
             <td>
-                <h6 style="font-size: 12px; font-weight: bold;">Términos y condiciones del servicio</h6>
+                <h6 style="font-size: 12px; font-weight: bold;">Terms and conditions of the service</h6>
                 {!! $document->terms_condition !!}
             </td>
         </tr>

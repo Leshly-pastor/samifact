@@ -86,7 +86,7 @@ class HelperFacturalo
      */
     public function isAllowedAddDispatchTicket($format_pdf, $type, $document)
     {
-        return in_array($format_pdf, ['ticket', 'ticket_58', 'ticket_50']) && in_array($type, ['invoice', 'sale-note']) && (bool) $document->dispatch_ticket_pdf;
+        return in_array($format_pdf, ['ticket', 'ticket_58', 'ticket_50']) && in_array($type, ['invoice', 'sale-note','order-note']) && (bool) $document->dispatch_ticket_pdf;
     }
 
         
@@ -109,20 +109,34 @@ class HelperFacturalo
         $base_height = 40;
 
         if($document->reference_data) $additional += 10;
-
-        $pdf->AddPageByArray([
-            'orientation' => 'P',
-            'newformat' => [
-                $width,
-                $base_height + $calculated_height + $additional,
-            ],
-            'mgt' => 0,
-            'mgr' => 1,
-            'mgb' => 0,
-            'mgl' => 1
-        ]);
+        $dispatch_ticket_pdf_quantity = $document->dispatch_ticket_pdf_quantity ?? 1;
+        for ($i = 0; $i < $dispatch_ticket_pdf_quantity; $i++) {
+            $pdf->AddPageByArray([
+                'orientation' => 'P',
+                'newformat' => [
+                    $width,
+                    $base_height + $calculated_height + $additional,
+                ],
+                'mgt' => 0,
+                'mgr' => 1,
+                'mgb' => 0,
+                'mgl' => 1
+            ]);
+            $pdf->writeHTML($html_dispatch_ticket, HTMLParserMode::HTML_BODY);
+        }
+        // $pdf->AddPageByArray([
+        //     'orientation' => 'P',
+        //     'newformat' => [
+        //         $width,
+        //         $base_height + $calculated_height + $additional,
+        //     ],
+        //     'mgt' => 0,
+        //     'mgr' => 1,
+        //     'mgb' => 0,
+        //     'mgl' => 1
+        // ]);
         
-        $pdf->writeHTML($html_dispatch_ticket, HTMLParserMode::HTML_BODY);
+        // $pdf->writeHTML($html_dispatch_ticket, HTMLParserMode::HTML_BODY);
     }
 
 }

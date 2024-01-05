@@ -1,12 +1,10 @@
 <template>
     <div v-loading="loading_submit">
-        <div class="row ">
-            <div class="col-md-12 col-lg-12 col-xl-12 ">
+        <div class="row">
+            <div class="col-md-12 col-lg-12 col-xl-12">
                 <div v-if="applyFilter" class="row">
                     <div class="col-lg-3 col-md-3 col-sm-12 pb-2">
-                        <span style="width:100%">
-                            Filtrar por:
-                        </span>
+                        <span style="width: 100%"> Filtrar por: </span>
                         <el-select
                             v-model="search.column"
                             placeholder="Select"
@@ -26,16 +24,16 @@
                         <template
                             v-if="
                                 search.column === 'date_of_issue' ||
-                                    search.column === 'date_of_due' ||
-                                    search.column === 'date_of_payment' ||
-                                    search.column === 'person_date' ||
-                                    search.column === 'delivery_date'
+                                search.column === 'date_of_due' ||
+                                search.column === 'date_of_payment' ||
+                                search.column === 'person_date' ||
+                                search.column === 'delivery_date'
                             "
                         >
                             <el-date-picker
                                 v-model="search.value"
                                 placeholder="Buscar"
-                                style="width: 100%;"
+                                style="width: 100%"
                                 type="date"
                                 value-format="yyyy-MM-dd"
                                 @change="getRecords"
@@ -63,7 +61,7 @@
                                 v-model="search.value"
                                 placeholder="Buscar"
                                 prefix-icon="el-icon-search"
-                                style="width: 100%;"
+                                style="width: 100%"
                                 @input="getRecords"
                             >
                             </el-input>
@@ -72,7 +70,7 @@
 
                     <template v-if="type == 'children'">
                         <div class="col-lg-3 col-md-3 col-sm-12 pb-2">
-                            <span style="width:100%">
+                            <span style="width: 100%">
                                 Filtrar por
                                 {{
                                     getOpcionalName(
@@ -82,7 +80,7 @@
                                 }}:
                             </span>
                             <el-select
-                             clearable
+                                clearable
                                 v-model="search.grade"
                                 placeholder="Select"
                                 @change="changeClearInput"
@@ -96,7 +94,7 @@
                             </el-select>
                         </div>
                         <div class="col-lg-3 col-md-3 col-sm-12 pb-2">
-                            <span style="width:100%">
+                            <span style="width: 100%">
                                 Filtrar por
                                 {{
                                     getOpcionalName(
@@ -106,7 +104,7 @@
                                 }}:
                             </span>
                             <el-select
-                             clearable
+                                clearable
                                 v-model="search.section"
                                 placeholder="Select"
                                 @change="changeClearInput"
@@ -122,7 +120,37 @@
                     </template>
                 </div>
             </div>
-
+              <div
+                class="col-lg-3 col-md-3 col-sm-12 pb-2"
+                v-if=" type == 'children'"
+            >
+            <label for="year">
+                Año de pago
+            </label>
+                <!-- un select que contenga los años 2023 y 2024, y 2023 por defecto -->
+                <el-select
+                    v-model="search.year"
+                    placeholder="Año"
+                    @change="getRecords"
+                >
+                    <el-option
+                        v-for="year in [2023, 2024]"
+                        :key="year"
+                        :label="year"
+                        :value="year"
+                    ></el-option>
+                </el-select>
+            </div>
+            <div
+                class="col-lg-3 col-md-3 col-sm-12 d-flex align-items-center"
+                v-if="records.length > 0 && type == 'children'"
+            >
+                <!-- boton para exportar archivo excel -->
+                <el-button type="success" @click="exportExcel">
+                    <i class="fas fa-file-excel"></i>
+                    Exportar
+                </el-button>
+            </div>
             <div class="col-md-12">
                 <div class="container">
                     <table class="table tablex">
@@ -138,13 +166,17 @@
                         </tbody>
                         <tfoot v-if="type == 'children'">
                             <tr>
-                        <td colspan="8"></td>
-                        <td>Totales Generales</td>
-                        <td class="text-center" v-for="(total,idx) in generalTotals" :key="idx">
-                        <small>    {{total.toFixed(2)}}</small>
-                        </td>
-                        <td></td>
-                    </tr>
+                                <td colspan="7"></td>
+                                <td>Totales Generales</td>
+                                <td
+                                    class="text-center"
+                                    v-for="(total, idx) in generalTotals"
+                                    :key="idx"
+                                >
+                                    <small> {{ total.toFixed(2) }}</small>
+                                </td>
+                                <td></td>
+                            </tr>
                         </tfoot>
                     </table>
                     <div>
@@ -164,15 +196,15 @@
 </template>
 <style>
 .fixed-header {
-  position: sticky !important;
-  position: -webkit-sticky !important;
-  top: 0 !important;
-  background-color: #fff; /* Ajusta el color de fondo deseado */
-  z-index: 1; /* Ajusta el z-index según sea necesario */
+    position: sticky !important;
+    position: -webkit-sticky !important;
+    top: 0 !important;
+    background-color: #fff; /* Ajusta el color de fondo deseado */
+    z-index: 1; /* Ajusta el z-index según sea necesario */
 }
 .tablex {
-  /* height: 100vh !important;  */
-  overflow-y: scroll !important;
+    /* height: 100vh !important;  */
+    overflow-y: scroll !important;
 }
 </style>
 <script>
@@ -186,29 +218,29 @@ export default {
         extraquery: {
             type: Object,
             required: false,
-            default: () => {}
+            default: () => {},
         },
         productType: {
             type: String,
             required: false,
-            default: ""
+            default: "",
         },
         // resource: String,
         applyFilter: {
             type: Boolean,
             default: true,
-            required: false
+            required: false,
         },
         pharmacy: Boolean,
-
     },
     data() {
         return {
-            generalTotals :[],
+            generalTotals: [],
             time: null,
             search: {
+            year: 2024,
                 column: null,
-                value: null
+                value: null,
             },
             columns: [],
             records: [],
@@ -216,7 +248,7 @@ export default {
             grades: [],
             pagination: {},
             loading_submit: false,
-            fromPharmacy: false
+            fromPharmacy: false,
         };
     },
     created() {
@@ -233,7 +265,7 @@ export default {
     async mounted() {
         let column_resource = _.split(this.resource, "/");
         let url = _.head(column_resource);
-        await this.$http.get(`/suscription/${url}/columns`).then(response => {
+        await this.$http.get(`/suscription/${url}/columns`).then((response) => {
             this.columns = response.data;
             this.search.column = _.head(Object.keys(this.columns));
         });
@@ -243,6 +275,16 @@ export default {
         }
     },
     methods: {
+        getYear(){
+
+            return this.search.year;
+        },
+        exportExcel() {
+            let url = `/suscription/${
+                this.resource
+            }/excel?${queryString.stringify(this.getQueryParameters())}`;
+            window.open(url, "_blank");
+        },
         getOpcionalName(key, defaultName) {
             if (
                 this.suscriptionames &&
@@ -279,18 +321,18 @@ export default {
                 let url = `/suscription/${this.resource}/records`;
                 return this.$http
                     .post(url, this.getQueryParameters())
-                    .then(response => {
+                    .then((response) => {
                         this.records = response.data.data;
                         this.$store.commit("setTableData", this.records);
                         this.pagination = response.data.meta;
                         this.pagination.per_page = parseInt(
                             response.data.meta.per_page
                         );
-                        if(response.data.totals){
+                        if (response.data.totals) {
                             this.generalTotals = response.data.totals;
                         }
                     })
-                    .catch(error => {})
+                    .catch((error) => {})
                     .then(() => {
                         this.loading_submit = false;
                     });
@@ -305,7 +347,7 @@ export default {
                 limit: this.limit,
                 isPharmacy: this.fromPharmacy,
                 ...this.search,
-                ...this.extraquery
+                ...this.extraquery,
             };
         },
         changeClearInput() {
@@ -314,11 +356,11 @@ export default {
         },
         getSearch() {
             return this.search;
-        }
+        },
     },
 
     computed: {
-        ...mapState(["config", "table_data", "resource"])
-    }
+        ...mapState(["config", "table_data", "resource"]),
+    },
 };
 </script>

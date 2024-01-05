@@ -374,6 +374,16 @@
         >
             Guía
         </a>
+              <a
+            :href="
+                `/dispatch_carrier/create_new/quotation/${
+                    row.id
+                }`
+            "
+            class="dropdown-item"
+        >
+            Guía de transportista
+        </a>
         <template
             v-if="
                 row.btn_generate_cnt &&

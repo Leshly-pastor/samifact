@@ -193,21 +193,21 @@
         <br>
         <tr>
             <td colspan="2">
-                <p class="desc-ticket text-uppercase"><span>Información de la retención</span></p>
+                <p class="desc-ticket text-uppercase"><span>Withholding information</span></p>
             </td>
         </tr>
         <tr>
-            <td><p class="desc-ticket text-uppercase">Base imponible: </p></td>
+            <td><p class="desc-ticket text-uppercase">Tax base: </p></td>
             <td>
                 <p class="desc-ticket text-uppercase">{{ $document->currency_type->symbol}} {{ $document->retention->base }} </p>
             </td>
         </tr>
         <tr>
-            <td><p class="desc-ticket text-uppercase">Porcentaje:</p></td>
+            <td><p class="desc-ticket text-uppercase">Percentage:</p></td>
             <td><p class="desc-ticket text-uppercase">{{ $document->retention->percentage * 100 }}%</p></td>
         </tr>
         <tr>
-            <td><p class="desc-ticket text-uppercase">Monto:</p></td>
+            <td><p class="desc-ticket text-uppercase">Amount:</p></td>
             <td>
                 <p class="desc-ticket text-uppercase">{{ $document->currency_type->symbol}} {{ $document->retention->amount }}</p>
             </td>
@@ -261,7 +261,7 @@
 
 @if ($document->dispatch)
     <br/>
-    <strong>Guías de remisión</strong>
+    <strong>Reference guides</strong>
     <table>
         <tr>
             <td>{{ $document->dispatch->number_full }}</td>
@@ -285,7 +285,7 @@
 @if(!is_null($document_base))
     <table>
         <tr>
-            <td class="desc-ticket text-uppercase">Documento Afectado:</td>
+            <td class="desc-ticket text-uppercase">Affected Document:</td>
             <td class="desc-ticket text-uppercase">{{ $affected_document_number }}</td>
         </tr>
         <tr>
@@ -293,7 +293,7 @@
             <td class="desc-ticket text-uppercase">{{ ($document_base->note_type === 'credit')?$document_base->note_credit_type->description:$document_base->note_debit_type->description}}</td>
         </tr>
         <tr>
-            <td class="align-top desc-ticket">Descripción:</td>
+            <td class="align-top desc-ticket">Description:</td>
             <td class="text-left desc-ticket">{{ $document_base->note_description }}</td>
         </tr>
     </table>
@@ -305,7 +305,7 @@
     <tr>
         <td class="border-top-bottom desc text-left"></td>
         <td class="border-top-bottom desc text-left">UdM</td>
-        <td class="border-top-bottom desc text-left">DESCRIPCIÓN</td>
+        <td class="border-top-bottom desc text-left">DESCRIPTION</td>
         <td class="border-top-bottom desc text-right" style="padding-right:5px;">P.UNIT</td>
         <td class="border-top-bottom desc text-right">TOTAL</td>
     </tr>
@@ -375,7 +375,7 @@
     @endforeach
     @if($document->total_exportation > 0)
         <tr>
-            <td colspan="3" class="desc-ticket text-uppercase">OP. EXPORTACIÓN:
+            <td colspan="3" class="desc-ticket text-uppercase">OP. Export:
                 {{ $document->currency_type->symbol }}</td>
             <td colspan="2"
                 class="text-right desc-ticket text-uppercase">{{ number_format($document->total_exportation, 2) }}</td>
@@ -383,7 +383,7 @@
     @endif
     @if($document->total_free > 0)
         <tr>
-            <td colspan="3" class="desc-ticket text-uppercase">OP. GRATUITAS:
+            <td colspan="3" class="desc-ticket text-uppercase">OP. Free:
                 {{ $document->currency_type->symbol }}</td>
             <td colspan="2"
                 class="text-right desc-ticket text-uppercase">{{ number_format($document->total_free, 2) }}</td>
@@ -391,7 +391,7 @@
     @endif
     @if($document->total_unaffected > 0)
         <tr>
-            <td colspan="3" class="desc-ticket text-uppercase">OP. INAFECTAS:
+            <td colspan="3" class="desc-ticket text-uppercase">OP. Unaffected:
                 {{ $document->currency_type->symbol }}</td>
             <td colspan="2"
                 class="text-right desc-ticket text-uppercase">{{ number_format($document->total_unaffected, 2) }}</td>
@@ -399,7 +399,7 @@
     @endif
     @if($document->total_exonerated > 0)
         <tr>
-            <td colspan="3" class="desc-ticket text-uppercase">OP. EXONERADAS:
+            <td colspan="3" class="desc-ticket text-uppercase">OP. Exonerated:
                 {{ $document->currency_type->symbol }}</td>
             <td colspan="2"
                 class="text-right desc-ticket text-uppercase">{{ number_format($document->total_exonerated, 2) }}</td>
@@ -407,7 +407,7 @@
     @endif
     @if($document->total_taxed > 0)
         <tr>
-            <td colspan="3" class="desc-ticket text-uppercase">OP. GRAVADAS:
+            <td colspan="3" class="desc-ticket text-uppercase">OP. Taxed:
                 {{ $document->currency_type->symbol }}</td>
             <td colspan="2"
                 class="text-right desc-ticket text-uppercase">{{ number_format($document->total_taxed, 2) }}</td>
@@ -465,14 +465,14 @@
                 }
             @endphp
             <tr>
-                <td colspan="3" class="desc-ticket text-uppercase">CARGOS ({{$total_factor}}%):
+                <td colspan="3" class="desc-ticket text-uppercase">Charges ({{$total_factor}}%):
                     {{ $document->currency_type->symbol }}</td>
                 <td colspan="2"
                     class="text-right desc-ticket text-uppercase">{{ number_format($document->total_charge, 2) }}</td>
             </tr>
         @else
             <tr>
-                <td colspan="3" class="desc-ticket text-uppercase">CARGOS:
+                <td colspan="3" class="desc-ticket text-uppercase">Charges:
                     {{ $document->currency_type->symbol }}</td>
                 <td colspan="2"
                     class="text-right desc-ticket text-uppercase">{{ number_format($document->total_charge, 2) }}</td>
@@ -481,14 +481,14 @@
     @endif
 
     <tr>
-        <td colspan="3" class="desc-ticket text-uppercase">TOTAL A PAGAR:
+        <td colspan="3" class="desc-ticket text-uppercase">Total to pay:
             {{ $document->currency_type->symbol }}</td>
         <td colspan="2" class="text-right desc-ticket text-uppercase">{{ number_format($document->total, 2) }}</td>
     </tr>
 
     @if(($document->retention || $document->detraction) && $document->total_pending_payment > 0)
         <tr>
-            <td colspan="3" class="desc-ticket text-uppercase">M. PENDIENTE:
+            <td colspan="3" class="desc-ticket text-uppercase">A. Pending:
                 {{ $document->currency_type->symbol }}</td>
             <td colspan="2"
                 class="text-right desc-ticket text-uppercase">{{ number_format($document->total_pending_payment, 2) }}</td>
@@ -574,7 +574,7 @@
                             <td class="desc-ticket text-uppercase">
                                 &#8226; {{ (empty($quote->getStringPaymentMethodType()) ? 'Cuota #'.( $key + 1) : $quote->getStringPaymentMethodType()) }}
                                 / Fecha: {{ $quote->date->format('d-m-Y') }} /
-                                Monto: {{ $quote->currency_type->symbol }}{{ $quote->amount }}</td>
+                                Amount: {{ $quote->currency_type->symbol }}{{ $quote->amount }}</td>
                         </tr>
                         @endforeach
                         </tr>
@@ -585,18 +585,18 @@
                 <table class="full-width">
                     <tr>
                         <td>
-                            <strong>Información de la retención:</strong>
+                            <strong>Withholding information:</strong>
                         </td>
                     </tr>
                     <tr>
-                        <td>Base imponible de la retención:
+                        <td>Tax base of withholding:
                             S/ {{ round($document->retention->amount_pen / $document->retention->percentage, 2) }}</td>
                     </tr>
                     <tr>
-                        <td>Porcentaje de la retención {{ $document->retention->percentage * 100 }}%</td>
+                        <td>Retention percentage {{ $document->retention->percentage * 100 }}%</td>
                     </tr>
                     <tr>
-                        <td>Monto de la retención S/ {{ $document->retention->amount_pen }}</td>
+                        <td>Withholding amount S/ {{ $document->retention->amount_pen }}</td>
                     </tr>
                 </table>
             @endif
@@ -626,7 +626,7 @@
                     @foreach($document->additional_information as $information)
                         @if ($information)
                             @if ($loop->first)
-                                <span class=" ">Información adicional</span>
+                                <span class=" ">Additional Information</span>
                             @endif
                             <p>{{ $information }}</p>
                         @endif

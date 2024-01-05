@@ -943,13 +943,14 @@ class PseServiceDispatch
             $name = $customer->name;
         }
 
-
+        $name = $this->format_characters($name);
         $xml->addChild('tidoid', $identity_document_type_id);
         $xml->addChild('dedoid', $identity_document_type_description);
         $xml->addChild('nudoid', $number);
         // $xml->addChild('codcli', $receiver->identity_document_type_id);
         $xml->addChild('coddom', '001');
         $xml->addChild('nomcli', $name);
+
         // descnl Descripción del 
         // canal - Varchar 40 NO 
         // desneg Descripción del 

@@ -133,15 +133,15 @@ $item_lots_groups_description = $item_lots_group_service->getItemLotGroupLineBre
     @endif
     <td class="celda">
         @if ($isSaleNote)
-        @php
-            $isQuotation = get_class($document) == Quotation::class;
-            
-        @endphp
-        @if ($isQuotation)
-            COTIZACIÓN
-        @else
-        {{ $document->document_type ? $document->document_type->description : 'NOTA DE VENTA' }}
-        @endif
+            @php
+                $isQuotation = get_class($document) == Quotation::class;
+                
+            @endphp
+            @if ($isQuotation)
+                COTIZACIÓN
+            @else
+                {{ $document->document_type ? $document->document_type->description : 'NOTA DE VENTA' }}
+            @endif
         @else
             NOTA DE VENTA
         @endif
@@ -153,7 +153,7 @@ $item_lots_groups_description = $item_lots_group_service->getItemLotGroupLineBre
             80
         @endif
     </td>
-    <td class="celda">{{ $document->series ?? $document->prefix  }}</td>
+    <td class="celda">{{ $document->series ?? $document->prefix }}</td>
     <td class="celda">{{ $document->number ?? $document->id }}</td>
     <td class="celda">{{ $purchseOrder }}</td>
     <td class="celda">{{ $web_platform }}</td>
@@ -161,6 +161,15 @@ $item_lots_groups_description = $item_lots_group_service->getItemLotGroupLineBre
     <td class="celda">{{ $document->customer->identity_document_type->description }}</td>
     <td class="celda">{{ $document->customer->number }}</td>
     <td class="celda">{{ $document->customer->name }}</td>
+    @php
+        $person_type_description = '';
+        $customer = \App\Models\Tenant\Person::find($document->customer_id);
+        if ($customer && $customer->person_type_id) {
+            $person_type_description = $customer->person_type->description;
+        }
+        
+    @endphp
+    <td class="celda">{{ $person_type_description }}</td>
     <td class="celda">
         @if ($isSaleNote)
             {{ $document->seller_id == null ? $document->user->name : $document->seller->name }}

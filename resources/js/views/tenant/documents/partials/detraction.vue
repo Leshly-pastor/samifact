@@ -188,10 +188,12 @@
 
                     if(this.currencyTypeIdActive == 'PEN')
                     {
-                        this.detraction.amount = _.round(parseFloat(this.total) * (detraction_type.percentage/100), this.detractionDecimalQuantity)
+                        // this.detraction.amount = _.round(parseFloat(this.total) * (detraction_type.percentage/100), this.detractionDecimalQuantity)
+                        this.detraction.amount = _.round(parseFloat(this.detraction.reference_value_effective_load||0) * (detraction_type.percentage/100), this.detractionDecimalQuantity)
                     }else
                     {
-                        this.detraction.amount = _.round((parseFloat(this.total) * this.exchangeRateSale) * (detraction_type.percentage/100), this.detractionDecimalQuantity)
+                        // this.detraction.amount = _.round((parseFloat(this.total) * this.exchangeRateSale) * (detraction_type.percentage/100), this.detractionDecimalQuantity)
+                        this.detraction.amount = _.round((parseFloat(this.detraction.reference_value_effective_load) * this.exchangeRateSale) * (detraction_type.percentage/100), this.detractionDecimalQuantity)
                     }
 
                 }

@@ -58,7 +58,7 @@
     <tr>
         <td width="15%">Proveedor:</td>
         <td width="45%">{{ $supplier->name }}</td>
-        <td width="15%">Fecha de emisión:</td>
+        <td width="15%">Date of issue:</td>
         <td >{{ $document->date_of_issue->format('Y-m-d') }}</td>
     </tr>
     <tr>
@@ -67,7 +67,7 @@
 
         @if ($supplier->telephone)
         <tr>
-            <td width="25%">Teléfono:</td>
+            <td width="25%">Phone:</td>
             <td>
                 {{ $supplier->telephone }}
             </td>
@@ -76,7 +76,7 @@
     
     @if ($supplier->address)
     <tr>
-        <td class="align-top">Dirección:</td>
+        <td class="align-top">Address:</td>
         <td colspan="3">
             {{ $supplier->address }}
             {{ ($supplier->district_id !== '-')? ', '.$supplier->district->description : '' }}
@@ -99,7 +99,7 @@
     <thead class="">
     <tr class="bg-grey">
         <th class="border-top-bottom text-center py-2" width="5%">#</th>
-        <th class="border-top-bottom text-left py-2">DESCRIPCIÓN</th>
+        <th class="border-top-bottom text-left py-2">DESCRIPTION</th>
         <th class="border-top-bottom text-right py-2" width="12%">TOTAL</th>
     </tr>
     </thead>

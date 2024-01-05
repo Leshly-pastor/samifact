@@ -276,8 +276,9 @@ class Document extends ModelTenant
         'agent_id',
         'force_send_by_summary',
         'dispatch_ticket_pdf',
+        'dispatch_ticket_pdf_quantity',
         'quotations_optional_value',
-        'quotations_optional'
+        'quotations_optional',
     ];
 
     protected $casts = [

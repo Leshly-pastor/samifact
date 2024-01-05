@@ -63,6 +63,9 @@ class SaleNoteResource2 extends JsonResource
             'actions' => $this->actions,
             'observation' => $this->observation,
             'seller_id' => $this->seller_id,
+            'dispatch_ticket_pdf' => $this->dispatch_ticket_pdf,
+            'reference_data' => $this->reference_data,
+            'dispatch_ticket_pdf_quantity' => $this->dispatch_ticket_pdf_quantity,
             
         ];
     }

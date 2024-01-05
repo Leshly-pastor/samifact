@@ -11,7 +11,7 @@ use App\Models\Tenant\Purchase;
 use App\Models\Tenant\Document;
 use App\Models\Tenant\Company;
 use Hyn\Tenancy\Environment;
-
+use Illuminate\Support\Facades\Log;
 
 class SireService
 {
@@ -239,7 +239,6 @@ class SireService
 
         $statusCode = $response->getStatusCode();
         $data = json_decode($response->getBody(), true);
-
         if ($statusCode !== 200) {
             return [
                 'success' => false,
@@ -254,7 +253,6 @@ class SireService
                 $record = $records[0];
                 $status_code = $record['codEstadoProceso'];
                 $filename = isset($record['archivoReporte']) ? $record['archivoReporte'][0]['nomArchivoReporte'] : null;
-
                 $documents = null;
                 if ($status_code == '06' && $filename != null) {
                     $documents = $this->queryFile($filename, $type);
@@ -425,9 +423,9 @@ class SireService
                                 if ($currency_type_id != "PEN") {
                                     $total = $purchase->total * $purchase->exchange_rate_sale;
                                 }
-                                $total = (string) $total;
-                                $total_prosmart = (string) $values[24];
-
+                                $total = (string) number_format($total, 2);
+                                $total_prosmart = (string) number_format($values[24], 2);
+                         
                                 if ($total != $total_prosmart) {
                                     $diff = true;
                                 }
@@ -442,7 +440,7 @@ class SireService
                                     'document_type' => $purchase->document_type_id,
                                     'serie' => $purchase->series,
                                     'number' => $purchase->number,
-                                    'total' => number_format($purchase->total, 2)
+                                    'total' => $total,
                                 ]);
                             } else {
                                 $proSmartRow['label'] = 'DANGER';

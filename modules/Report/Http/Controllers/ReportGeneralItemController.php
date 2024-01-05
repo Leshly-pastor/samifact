@@ -193,7 +193,7 @@ class ReportGeneralItemController extends Controller
 
                 $column = ($type_person == 'customers') ? 'customer_id' : 'supplier_id';
 
-                $data =  $documents->whereHas($documents, function ($query) use ($column, $person_id) {
+                $data =  $documents->whereHas('document', function ($query) use ($column, $person_id) {
                     $query->where($column, $person_id);
                 });
             }

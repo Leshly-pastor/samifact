@@ -36,6 +36,7 @@ if ($current_hostname) {
 
                         Route::get('/columns', 'ClientSuscriptionController@Columns');
                         Route::post('/records', 'ClientSuscriptionController@Records');
+                        Route::get('/excel', 'ClientSuscriptionController@ExcelRecords');
                         Route::post('/tables', 'ClientSuscriptionController@Tables');
                         Route::post('/record', 'ClientSuscriptionController@Record');
                         Route::post('/itemPlan', 'ClientSuscriptionController@itemPlan');

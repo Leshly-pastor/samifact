@@ -14,6 +14,11 @@ class IncomeItem extends ModelTenant
         'description',
         'total', 
     ];
+    
+    protected $casts = [
+        'income_id' => 'int',
+        'total' => 'float'
+    ];
 
     public function income()
     {

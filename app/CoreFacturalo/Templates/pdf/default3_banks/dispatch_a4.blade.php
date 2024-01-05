@@ -267,8 +267,11 @@ if ($logo) {
                     
                 </td>
                 <td class="p-1 text-center align-top desc cell-solid-rl">{{ symbol_or_code($row->item->unit_type_id) }}</td>
-                <td class="p-1 text-left align-top desc text-upp cell-solid-rl">
-                    {!!$row->item->description!!}
+                <td class="p-1 text-left align-top desc  cell-solid-rl">
+                        @php
+                            $description = strtoupper($row->item->description);
+                        @endphp
+                    {!!$description!!}
                     @if($row->relation_item->attributes)
                         @foreach($row->relation_item->attributes as $attr)
                             @if($attr->attribute_type_id === '5032')

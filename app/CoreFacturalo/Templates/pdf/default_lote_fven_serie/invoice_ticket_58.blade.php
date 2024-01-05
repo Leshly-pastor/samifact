@@ -33,7 +33,7 @@
     </div>
 {{--@else--}}
     {{--<div class="text-center company_logo_box pt-5">--}}
-        {{--<img src="{{ asset('logo/logo.jpg') }}" class="company_logo_ticket contain">--}}
+        {{--<img src="{{ asset('logo/logo.jpg') }}" class="company_logo_ticket contain">--9}}
     {{--</div>--}}
 @endif
 <table class="full-width">

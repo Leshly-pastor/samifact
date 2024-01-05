@@ -3,9 +3,8 @@
         <div class="row">
             <div class="col-md-12 col-lg-12 col-xl-12">
                 <div class="row" v-if="applyFilter">
-                    <div class="col-lg-4 col-md-4 col-sm-12 pb-2">
-                        <div class="d-flex">
-                            <div style="width: 100px">Filtrar por:</div>
+                    <div class="col-lg-4 col-md-4 col-sm-12">
+                            <label style="width: 100%">Filtrar por:</label>
                             <el-select
                                 v-model="search.column"
                                 placeholder="Select"
@@ -18,9 +17,8 @@
                                     :label="label"
                                 ></el-option>
                             </el-select>
-                        </div>
                     </div>
-                    <div class="col-lg-3 col-md-4 col-sm-12 pb-2">
+                    <div class="col-lg-3 col-md-4 col-sm-12 ">
                         <template
                             v-if="
                                 search.column == 'date_of_issue' ||
@@ -29,6 +27,7 @@
                                 search.column == 'delivery_date'
                             "
                         >
+                        <br>
                             <el-date-picker
                                 v-model="search.value"
                                 type="date"
@@ -39,22 +38,36 @@
                             >
                             </el-date-picker>
                         </template>
-                        <template v-else>
+                        <template v-else-if="search.column == 'customer_id'">
+                            <br>
                             <el-input
                                 placeholder="Buscar"
                                 v-model="search.value"
                                 style="width: 100%"
                                 prefix-icon="el-icon-search"
-                                @input="getRecords"
+                                @input="getRecordsInput"
+                            >
+                               
+                            </el-input>
+                        </template>
+                        <template v-else>
+                            <br>
+                            <el-input
+                                placeholder="Buscar"
+                                v-model="search.value"
+                                style="width: 100%"
+                                prefix-icon="el-icon-search"
+                                @input="getRecordsInput"
                             >
                             </el-input>
                         </template>
                     </div>
                     <div
                         v-if="resource == 'finances/income'"
-                        class="col-lg-3 col-md-4 col-sm-12 pb-2"
+                        class="col-lg-3 col-md-4 col-sm-12 "
                     >
                         <template v-if="records.length > 0">
+                            <br>
                             <el-button
                                 class="submit"
                                 type="success"
@@ -111,6 +124,7 @@ export default {
     },
     data() {
         return {
+            customers: [],
             search: {
                 column: null,
                 value: null,
@@ -118,6 +132,8 @@ export default {
             columns: [],
             records: [],
             pagination: {},
+            loading: false,
+            timer:null,
         };
     },
     computed: {},
@@ -136,10 +152,33 @@ export default {
         await this.getRecords();
     },
     methods: {
-        clickDownload(type) {
-            
+        getRecordsInput() {
+            clearTimeout(this.timer);
+            this.timer = setTimeout(() => {
+                this.getRecords();
+            }, 500);
+        },
+        searchRemoteCustomers(input) {
+            if (input.length > 0) {
+                this.loading = true;
+                let parameters = `input=${input}&document_type_id=&operation_type_id=`;
 
-            window.open(`/${this.resource}/report/${type}/?${this.getQueryParameters()}`, '_blank');
+                this.$http
+                    .get(`/documents/search/customers?${parameters}`)
+                    .then((response) => {
+                        this.customers = response.data.customers;
+                    })
+                    .catch((error) => this.axiosError(error))
+                    .finally(() => (this.loading = false));
+            }
+        },
+        clickDownload(type) {
+            window.open(
+                `/${
+                    this.resource
+                }/report/${type}/?${this.getQueryParameters()}`,
+                "_blank"
+            );
         },
         customIndex(index) {
             return (

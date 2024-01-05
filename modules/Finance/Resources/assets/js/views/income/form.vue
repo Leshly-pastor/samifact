@@ -313,7 +313,10 @@
                                             :key="index"
                                         >
                                             <td>{{ index + 1 }}</td>
-                                            <td>{{ row.description }}</td>
+                                            <td>{{ row.description }}
+
+                                                
+                                            </td>
                                             <td class="text-end">
                                                 {{ currency_type.symbol }}
                                                 {{ row.total }}
@@ -385,6 +388,7 @@ import { functions, exchangeRate } from "@mixins/functions";
 export default {
     components: { IncomeFormItem, IncomeOptions, PersonForm },
     mixins: [functions, exchangeRate],
+        props: ["id"],
     data() {
         return {
             timer: null,
@@ -409,7 +413,7 @@ export default {
             customers: [],
         };
     },
-    created() {
+   async created() {
         this.initForm();
         this.$http.get(`/${this.resource}/tables`).then((response) => {
             this.income_reasons = response.data.income_reasons;
@@ -440,8 +444,19 @@ export default {
         this.$eventHub.$on("reloadDataPersons", (customer) => {
             this.reloadDataCustomers(customer);
         });
+        await this.isUpdate();
     },
     methods: {
+             async isUpdate() {
+            if (this.id) {
+                await this.$http
+                    .get(`/${this.resource}/record/${this.id}`)
+                    .then((response) => {
+                        console.log("🚀 ~ file: form.vue:452 ~ .then ~ response:", response)
+                        this.form = response.data.data.income;
+                    });
+            }
+        },
         searchRemoteCustomers(input) {
             if (this.timer) {
                 clearTimeout(this.timer);

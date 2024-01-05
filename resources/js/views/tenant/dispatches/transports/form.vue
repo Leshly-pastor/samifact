@@ -20,6 +20,35 @@
                      v-text="errors.plate_number[0]"></small>
             </div>
           </div>
+           <div class="col-md-6">
+            <div :class="{'has-danger': errors.secondary_plate_number}"
+                 class="form-group">
+              <label class="control-label">Nro. de Placa secundaria </label>
+              <el-input v-model="form.secondary_plate_number"
+                        dusk="name"></el-input>
+              <small v-if="errors.secondary_plate_number"
+                     class="text-danger"
+                     v-text="errors.secondary_plate_number[0]"></small>
+            </div>
+          </div>
+            <div class="col-md-6">
+            <div :class="{'has-danger': errors.tuc}"
+                 class="form-group">
+              <label class="control-label">T.U.C
+                <el-tooltip class="item"
+                            effect="dark"
+                            content="Tarjeta Única de Circulación"
+                            placement="top">
+                  <i class="el-icon-info"></i>
+                </el-tooltip>
+                 </label>
+              <el-input v-model="form.tuc"
+                        dusk="name"></el-input>
+              <small v-if="errors.tuc"
+                     class="text-danger"
+                     v-text="errors.tuc[0]"></small>
+            </div>
+          </div>
           <div class="col-md-6">
             <div :class="{'has-danger': errors.model}"
                  class="form-group">
@@ -83,10 +112,12 @@ export default {
       this.form = {
         id: null,
         plate_number: null,
+        secondary_plate_number: null,
         model: null,
         brand: null,
         is_default: false,
         is_active: true,
+        tuc: null,
       }
     },
     async create() {

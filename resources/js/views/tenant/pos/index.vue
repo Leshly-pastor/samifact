@@ -2362,6 +2362,7 @@ export default {
         },
         initForm() {
             this.form = {
+                dispatch_ticket_pdf_quantity: 1,
                 establishment_id: null,
                 document_type_id: "03",
                 series_id: null,
@@ -2416,6 +2417,8 @@ export default {
                     ? this.configuration.enabled_dispatch_ticket_pdf
                     : false,
             };
+                console.log("🚀 ~ file: index.vue:2365 ~ initForm ~ this.form:", this.form)
+            
             // console.log(this.configuration.show_terms_condition_pos);
             if (this.configuration.show_terms_condition_pos) {
                 this.form.terms_condition =

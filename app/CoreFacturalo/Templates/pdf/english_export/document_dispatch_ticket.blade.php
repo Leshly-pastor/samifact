@@ -29,7 +29,7 @@
         <td width="" ><p class="desc">{{ $document->time_of_issue }}</p></td>
     </tr>
     <tr>
-        <td class="align-top"><p class="desc">Cliente:</p></td>
+        <td class="align-top"><p class="desc">Customer:</p></td>
         <td><p class="desc">{{ $customer->name }}</p></td>
     </tr>
 
@@ -50,9 +50,9 @@
 <table class="full-width mt-10 mb-10">
     <thead class="">
     <tr>
-        <th class="border-top-bottom desc-9 text-center">CANT.</th>
-        <th class="border-top-bottom desc-9 text-center">UNIDAD</th>
-        <th class="border-top-bottom desc-9 text-left">DESCRIPCIÓN</th>
+        <th class="border-top-bottom desc-9 text-center">QTY</th>
+        <th class="border-top-bottom desc-9 text-center">UNIT</th>
+        <th class="border-top-bottom desc-9 text-left">DESCRIPTION</th>
     </tr>
     </thead>
     <tbody>

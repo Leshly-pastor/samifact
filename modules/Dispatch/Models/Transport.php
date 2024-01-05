@@ -9,7 +9,8 @@ class Transport extends ModelTenant
     protected $fillable = [
         'model',
         'brand',
-        'plate_number',
+        'tuc',
+        'plate_number', 'secondary_plate_number',
         'is_default',
         'is_active'
     ];

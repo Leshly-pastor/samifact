@@ -2,13 +2,14 @@
 
 namespace Modules\Sire\Http\Controllers;
 
-use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Modules\Sire\Helpers\SireService;
 use App\Models\Tenant\Company;
 use App\Models\Tenant\Document;
+use Carbon\Carbon;
 use Modules\Sire\Appendixes\Appendixes;
+use Modules\Sire\Export\SireExport;
 
 class SireController extends Controller
 {
@@ -49,7 +50,7 @@ class SireController extends Controller
         $company = Company::active();
         $date = $request->month;
         $date_name = date('Ym', strtotime($date));
-        $name = 'LE'.$company->number.$date_name.'00140400021112';
+        $name = 'LE' . $company->number . $date_name . '00140400021112';
         //00140400021112
         $month = date('m', strtotime($date));
         $appendix = $request->appendix;
@@ -57,16 +58,15 @@ class SireController extends Controller
         $documents = Document::whereMonth('date_of_issue', $month)->where($appendix_column, true)->get();
         $txt = '';
         foreach ($documents as $key => $document) {
-            $appendix_txt = new Appendixes($document, $key+1,$appendix);
+            $appendix_txt = new Appendixes($document, $key + 1, $appendix);
             $txt .= $appendix_txt->generate_txt() . "\n";
         }
 
         return [
             'success' => true,
             'content' => $txt,
-            'name' => $name.'.txt'
+            'name' => $name . '.txt'
         ];
-        
     }
 
 
@@ -105,7 +105,7 @@ class SireController extends Controller
      */
     public function getConfig()
     {
-        $company = Company::select('sire_client_id','sire_client_secret','sire_username','sire_password')->first();
+        $company = Company::select('sire_client_id', 'sire_client_secret', 'sire_username', 'sire_password')->first();
 
         return [
             'success' => true,
@@ -125,10 +125,26 @@ class SireController extends Controller
     /*
      * route get sire/{type}/query
      */
+    public function queryTicketExcel(Request $request)
+    {
+
+        $sire = new SireService();
+        $type = $request->type;
+        $response = $sire->queryTicket($request->page, $request->period, $request->ticket, $request->type);
+        $records = [];
+        if ($response['success']) {
+            $records = $response['data']['documents'];
+        }
+        $label = $type == 'sale' ? 'Ventas' : 'Compras';
+        return (new SireExport())
+            ->records($records)
+            ->type($request->type)
+            ->download('Reporte_Sire_' . $label . '_' . Carbon::now() . '.xlsx');
+    }
     public function queryTicket(Request $request, $type)
     {
         $sire = new SireService();
-        $response = $sire->queryTicket($request->page,$request->period,$request->ticket, $type);
+        $response = $sire->queryTicket($request->page, $request->period, $request->ticket, $type);
         return $response;
     }
 

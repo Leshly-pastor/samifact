@@ -244,7 +244,7 @@ $configuration_decimal_quantity = App\CoreFacturalo\Helpers\Template\TemplateHel
     {{-- <table class="full-width mt-3">--}}
     {{-- <tr>--}}
     {{-- <td colspan="3">--}}
-    {{-- <strong>Información de la retención</strong>--}}
+    {{-- <strong>Withholding information</strong>--}}
     {{-- </td>--}}
     {{-- </tr>--}}
     {{-- <tr>--}}
@@ -365,7 +365,7 @@ $configuration_decimal_quantity = App\CoreFacturalo\Helpers\Template\TemplateHel
     @elseif ($document->reference_guides)
     @if (count($document->reference_guides) > 0)
     <br />
-    <strong>Guías de remisión</strong>
+    <strong>Reference guides</strong>
     <table>
         @foreach($document->reference_guides as $guide)
         <tr>
@@ -445,13 +445,13 @@ $configuration_decimal_quantity = App\CoreFacturalo\Helpers\Template\TemplateHel
 
     {{--<table class="full-width mt-3">--}}
     {{--<tr>--}}
-    {{--<td width="25%">Documento Afectado:</td>--}}
+    {{--<td width="25%">Affected Document:</td>--}}
     {{--<td width="20%">{{ $document_base->affected_document->series }}-{{ $document_base->affected_document->number }}</td>--}}
     {{--<td width="15%">Tipo de nota:</td>--}}
     {{--<td width="40%">{{ ($document_base->note_type === 'credit')?$document_base->note_credit_type->description:$document_base->note_debit_type->description}}</td>--}}
     {{--</tr>--}}
     {{--<tr>--}}
-    {{--<td class="align-top">Descripción:</td>--}}
+    {{--<td class="align-top">Description:</td>--}}
     {{--<td class="text-left" colspan="3">{{ $document_base->note_description }}</td>--}}
     {{--</tr>--}}
     {{--</table>--}}

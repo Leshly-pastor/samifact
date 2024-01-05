@@ -82,7 +82,9 @@ class TransportController extends Controller
                     'plate_number' => $row->plate_number,
                     'model' => $row->model,
                     'brand' => $row->brand,
-                    'is_default' => $row->is_default
+                    'is_default' => $row->is_default,
+                    'tuc' => $row->tuc,
+                    'secondary_plate_number' => $row->secondary_plate_number,
                 ];
             });
     }

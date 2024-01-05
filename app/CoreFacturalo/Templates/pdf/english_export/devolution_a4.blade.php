@@ -69,7 +69,7 @@ $document_number = $document->prefix.'-'.str_pad($document->id, 8, '0', STR_PAD_
     </table>
     <table class="full-width mt-5">
         <tr>
-            <td width="120px">FECHA DE EMISIÓN</td>
+            <td width="120px">Date of issue</td>
             <td width="8px">:</td>
             <td>{{$document->date_of_issue->format('Y-m-d')}}</td>
         </tr>
@@ -90,11 +90,11 @@ $document_number = $document->prefix.'-'.str_pad($document->id, 8, '0', STR_PAD_
     <table class="full-width mt-10 mb-10">
         <thead class="">
             <tr class="bg-grey">
-                <th class="border-top-bottom text-center py-2" width="8%">CANT.</th>
-                <th class="border-top-bottom text-center py-2" width="8%">UNIDAD</th>
-                <th class="border-top-bottom text-left py-2">DESCRIPCIÓN</th>
-                <th class="border-top-bottom text-center py-2" width="8%">LOTE</th>
-                <th class="border-top-bottom text-center py-2" width="8%">SERIE</th>
+                <th class="border-top-bottom text-center py-2" width="8%">QTY</th>
+                <th class="border-top-bottom text-center py-2" width="8%">UNIT</th>
+                <th class="border-top-bottom text-left py-2">DESCRIPTION</th>
+                <th class="border-top-bottom text-center py-2" width="8%">BATCH</th>
+                <th class="border-top-bottom text-center py-2" width="8%">SERIES</th>
             </tr>
         </thead>
         <tbody>

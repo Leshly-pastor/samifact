@@ -283,24 +283,26 @@
                         <td :class="{ 'text-danger': row.active === false }">
                             {{ row.description }}
                         </td>
+                          <td
+                            :class="{ 'text-danger': row.active === false }"
+                            v-if="columns.description.visible"
+                        >
+                            {{ row.name }}
+                        </td>
                         <td
                             :class="{ 'text-danger': row.active === false }"
                             v-if="columns.model.visible"
                         >
                             {{ row.model }}
                         </td>
+                       
                         <td
                             :class="{ 'text-danger': row.active === false }"
                             v-if="columns.brand.visible"
                         >
                             {{ row.brand }}
                         </td>
-                        <td
-                            :class="{ 'text-danger': row.active === false }"
-                            v-if="columns.description.visible"
-                        >
-                            {{ row.name }}
-                        </td>
+                       
                         <td
                             :class="{ 'text-danger': row.active === false }"
                             v-if="columns.item_code.visible"

@@ -88,14 +88,14 @@ if($hostname) {
                     Route::get('columns', 'IncomeController@columns');
                     Route::get('records', 'IncomeController@records');
                     Route::get('records/income-payments/{record}', 'IncomeController@recordsIncomePayments');
-                    Route::get('create', 'IncomeController@create')->name('tenant.income.create');
+                    Route::get('create/{id?}', 'IncomeController@create')->name('tenant.income.create');
                     Route::get('tables', 'IncomeController@tables');
                     Route::get('report/excel', 'IncomeController@excel');
                     Route::get('table/{table}', 'IncomeController@table');
                     Route::post('', 'IncomeController@store');
                     Route::get('record/{record}', 'IncomeController@record');
                     Route::get('voided/{record}', 'IncomeController@voided');
-
+                    Route::get('duplicate/{id}', 'IncomeController@duplicate');
                     Route::get('print/{external_id}/{format?}', 'IncomeController@toPrint');
 
 

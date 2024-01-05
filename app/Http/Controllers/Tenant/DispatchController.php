@@ -251,7 +251,7 @@ class DispatchController extends Controller
             $items[] = [
                 'id' => $item->item_id,
                 'item_id' => $item->item_id,
-                'item' => $item,
+                'item' => $item->item,
                 'quantity' => $quantity,
                 'description' => $item->item->description,
                 'unit_type_id' => $item->item->unit_type_id,
@@ -285,6 +285,7 @@ class DispatchController extends Controller
             ];
         } else {
             $data = [
+                'purchase_order' => isset($document->purchase_order) ? $document->purchase_order : null,
                 'establishment_id' => $document->establishment_id,
                 'customer_id' => $document->customer_id,
                 'items' => $items,

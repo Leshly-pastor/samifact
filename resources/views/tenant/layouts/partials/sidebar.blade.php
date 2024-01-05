@@ -89,7 +89,7 @@ $thridLevel = $path[2] ?? null;
                             @if (in_array('new_document', $vc_module_levels))
                                 <li>
                                     <a class="{{ $firstLevel === 'documents' && $secondLevel === 'create' ? 'active' : '' }}"
-                                        href="{{ route('tenant.documents.create') }}">Nuevo</a>
+                                        href="{{ route('tenant.documents.create') }}">Nuevo comprobante</a>
                                 </li>
                             @endif
                         @endif
@@ -109,7 +109,7 @@ $thridLevel = $path[2] ?? null;
                     @if (in_array('sale_notes', $vc_module_levels))
                         <li>
                             <a class="{{ $firstLevel === 'sale-notes' ? 'active' : '' }}"
-                                href="{{ route('tenant.sale_notes.index') }}">Notas de Venta</a>
+                                href="{{ route('tenant.sale_notes.index') }}">Notas de venta</a>
                         </li>
                     @endif
                     @if ($configuration->package_handlers)
@@ -132,7 +132,7 @@ $thridLevel = $path[2] ?? null;
                             <li>
                                 <a class="{{ $firstLevel === 'documents' && $secondLevel === 'regularize-shipping' ? 'active' : '' }}"
                                     href="{{ route('tenant.documents.regularize_shipping') }}">
-                                    CPE pendientes de rectificación
+                                    CPE por rectificar
                                 </a>
                             </li>
                         @endif
@@ -146,7 +146,7 @@ $thridLevel = $path[2] ?? null;
                             <li>
                                 <a class="{{ $firstLevel === 'contingencies' ? 'active' : '' }}"
                                     href="{{ route('tenant.contingencies.index') }}">
-                                    Comprobante de contingencia
+                                    Comprobante contingencia
                                 </a>
                             </li>
                         @endif
@@ -275,15 +275,13 @@ $thridLevel = $path[2] ?? null;
                             <li>
                                 <a class="{{ $secondLevel === 'garage' ? 'active' : '' }}"
                                     href="{{ route('tenant.pos.garage') }}">Venta rápida <span
-                                        style="font-size:.65rem;">(Grifos y
-                                        Markets)</span></a>
+                                        style="font-size:.65rem;"></span></a>
                             </li>
                         @endif
                         @if (in_array('cash', $vc_module_levels))
                             <li>
                                 <a class="{{ $firstLevel === 'cash' ? 'active' : '' }}"
-                                    href="{{ route('tenant.cash.index') }}">Caja
-                                    chica POS</a>
+                                    href="{{ route('tenant.cash.index') }}">Listado de cajas</a>
                             </li>
                         @endif
                     </ul>
@@ -300,14 +298,14 @@ $thridLevel = $path[2] ?? null;
                     class="{{ in_array($firstLevel, ['ecommerce', 'items_ecommerce', 'tags', 'promotions', 'orders', 'configuration']) ? 'active' : '' }}"
                     data-clicked="{{ in_array($firstLevel, ['ecommerce', 'items_ecommerce', 'tags', 'promotions', 'orders', 'configuration']) ? true : false }}">
                     <i data-cs-icon="shop" class="icon" data-cs-size="18"></i>
-                    <span class="label">Tienda Virtual</span>
+                    <span class="label">Tienda virtual</span>
                 </a>
                 <ul id="tienda"
                     class="collapse {{ in_array($firstLevel, ['ecommerce', 'items_ecommerce', 'tags', 'promotions', 'orders', 'configuration']) ? 'show' : '' }}">
                     @if (in_array('ecommerce', $vc_module_levels))
                         <li>
                             <a class="nav-link" href="{{ route('tenant.ecommerce.index') }}" target="_blank"> Ir a
-                                Tienda </a>
+                                tienda </a>
                         </li>
                     @endif
                     @if (in_array('ecommerce_orders', $vc_module_levels))
@@ -320,26 +318,25 @@ $thridLevel = $path[2] ?? null;
                     @if (in_array('ecommerce_items', $vc_module_levels))
                         <li>
                             <a class="{{ $firstLevel === 'items_ecommerce' ? 'active' : '' }}"
-                                href="{{ route('tenant.items_ecommerce.index') }}">Productos Tienda Virtual</a>
+                                href="{{ route('tenant.items_ecommerce.index') }}">Productos de tienda virtual</a>
                         </li>
                     @endif
 
                     <li>
                         <a class="{{ $secondLevel === 'item-sets' ? 'active' : '' }}"
-                            href="{{ route('tenant.item_sets.index') }}">Conjuntos/Packs/Promociones</a>
+                            href="{{ route('tenant.item_sets.index') }}">Packs y promociones</a>
                     </li>
 
                     @if (in_array('ecommerce_tags', $vc_module_levels))
                         <li>
                             <a class="{{ $firstLevel === 'tags' ? 'active' : '' }}"
-                                href="{{ route('tenant.tags.index') }}">Tags -
-                                Categorias(Etiquetas)</a>
+                                href="{{ route('tenant.tags.index') }}">Categorias (Etiquetas)</a>
                         </li>
                     @endif
                     @if (in_array('ecommerce_promotions', $vc_module_levels))
                         <li>
                             <a class="{{ $firstLevel === 'promotions' ? 'active' : '' }}"
-                                href="{{ route('tenant.promotion.index') }}">Promociones(Banners)</a>
+                                href="{{ route('tenant.promotion.index') }}">Promociones (Banners)</a>
                         </li>
                     @endif
                     @if (in_array('ecommerce_settings', $vc_module_levels))
@@ -383,7 +380,7 @@ $thridLevel = $path[2] ?? null;
                     class="{{ in_array($firstLevel, ['items', 'services', 'categories', 'brands', 'item-lots', 'item-sets']) ? true : false }} {{ in_array($secondLevel, ['list']) ? 'active' : '' }}"
                     data-clicked="{{ in_array($firstLevel, ['items', 'services', 'categories', 'brands', 'item-lots', 'item-sets']) ? true : false }} {{ in_array($secondLevel, ['list']) ? true : false }}">
                     <i data-cs-icon="boxes" class="icon" data-cs-size="18"></i>
-                    <span class="label">Productos/Servicios</span>
+                    <span class="label">Productos y servicios</span>
                 </a>
                 <ul id="items"
                     class="collapse {{ in_array($firstLevel, ['items', 'services', 'categories', 'brands', 'item-lots', 'item-sets']) ? 'show' : '' }}">
@@ -397,7 +394,7 @@ $thridLevel = $path[2] ?? null;
                     @if (in_array('items_packs', $vc_module_levels))
                         <li class="{{ $firstLevel === 'item-sets' ? 'active' : '' }}">
                             <a class="nav-link" href="{{ route('tenant.item_sets.index') }}">
-                                <span class="label">Conjuntos/Packs/Promociones</span>
+                                <span class="label">Packs y promociones</span>
                             </a>
                         </li>
                     @endif
@@ -425,7 +422,7 @@ $thridLevel = $path[2] ?? null;
                     @if (in_array('items_lots', $vc_module_levels))
                         <li class="{{ $firstLevel === 'item-lots' ? 'active' : '' }}">
                             <a class="nav-link" href="{{ route('tenant.item-lots.index') }}">
-                                <span class="label">series</span>
+                                <span class="label">Series</span>
                             </a>
                         </li>
                     @endif
@@ -463,7 +460,7 @@ $thridLevel = $path[2] ?? null;
                         <li>
                             <a class="{{ $firstLevel === 'persons' && $secondLevel === 'customers' ? 'active' : '' }}"
                                 href="{{ route('tenant.persons.index', ['type' => 'customers']) }}">
-                                <span class="label"> Nuevo </span>
+                                <span class="label"> Listado de clientes </span>
                             </a>
                         </li>
                     @endif
@@ -514,7 +511,7 @@ $thridLevel = $path[2] ?? null;
                             <li>
                                 <a class="{{ $firstLevel === 'purchases' && $secondLevel === 'create' ? 'active' : '' }}"
                                     href="{{ route('tenant.purchases.create') }}">
-                                    <span class="label">Nuevo</span>
+                                    <span class="label">Nueva compra</span>
                                 </a>
                             </li>
                         @endif
@@ -522,7 +519,7 @@ $thridLevel = $path[2] ?? null;
                             <li>
                                 <a class="{{ $firstLevel === 'purchases' || $secondLevel === '' ? 'active' : '' }}"
                                     href="{{ route('tenant.purchases.index') }}">
-                                    <span class="label">Listado</span>
+                                    <span class="label">Listado de compras</span>
                                 </a>
                             </li>
                         @endif
@@ -638,7 +635,7 @@ $thridLevel = $path[2] ?? null;
                         <li>
                             <a class="{{ $firstLevel === 'reports' && $secondLevel === 'kardex' ? 'active' : '' }}"
                                 href="{{ route('reports.kardex.index') }}">
-                                <span class="label">Reporte Kardex</span>
+                                <span class="label">Reporte kardex</span>
                             </a>
                         </li>
                     @endif
@@ -646,7 +643,7 @@ $thridLevel = $path[2] ?? null;
                         <li>
                             <a class="{{ $firstLevel === 'reports' && $secondLevel == 'inventory' ? 'active' : '' }}"
                                 href="{{ route('reports.inventory.index') }}">
-                                <span class="label">Reporte Inventario</span>
+                                <span class="label">Reporte inventario</span>
                             </a>
                         </li>
                     @endif
@@ -654,7 +651,7 @@ $thridLevel = $path[2] ?? null;
                         <li>
                             <a class="{{ $firstLevel === 'reports' && $secondLevel === 'valued-kardex' ? 'active' : '' }}"
                                 href="{{ route('reports.valued_kardex.index') }}">
-                                <span class="label">Kardex valorizado</span>
+                                <span class="label">Kardex valorizado 13.1</span>
                             </a>
                         </li>
                     @endif
@@ -669,7 +666,7 @@ $thridLevel = $path[2] ?? null;
                     <li>
                         <a class="{{ $firstLevel === 'reports' && $secondLevel === 'stock_date' ? 'active' : '' }}"
                             href="{{ route('tenant.stock-date.index') }}">
-                            <span class="label">Stock Histórico </span>
+                            <span class="label">Stock histórico </span>
                         </a>
                     </li>
 
@@ -690,7 +687,7 @@ $thridLevel = $path[2] ?? null;
                     class="{{ $firstLevel === 'users' ? 'active' : '' }}{{ $firstLevel === 'establishments' ? 'active' : '' }}"
                     data-clicked="{{ $firstLevel === 'user' ? true : false }}{{ $firstLevel === 'establishments' ? true : false }}">
                     <i data-cs-icon="user" class="icon" data-cs-size="18"></i>
-                    <span class="label">Usuarios/Locales & Series</span>
+                    <span class="label">Usuarios y locales</span>
                 </a>
                 <ul id="establishments"
                     class="collapse{{ in_array($firstLevel, ['users', 'establishments']) ? 'show' : '' }}"
@@ -723,7 +720,7 @@ $thridLevel = $path[2] ?? null;
                     class="{{ $firstLevel === 'retentions' || $firstLevel === 'dispatches' || $firstLevel === 'perceptions' || $firstLevel === 'drivers' || $firstLevel === 'dispatchers' || $firstLevel === 'dispatchers' || $firstLevel === 'order-forms' || $firstLevel === 'dispatches' || $firstLevel === 'dispatch_carrier' || $firstLevel === 'dispatchers' || $firstLevel === 'drivers' || $firstLevel === 'transports' || $firstLevel === 'origin_addresses' ? 'active' : '' }}">
                     <div class="">
                         <i data-cs-icon="file-text" class="icon" data-cs-size="18"></i>
-                        <span class="label">Comprobantes avanzados</span>
+                        <span class="label">Comprob. avanzados</span>
                     </div>
 
                 </a>
@@ -750,7 +747,7 @@ $thridLevel = $path[2] ?? null;
                         <li>
                             <a class="{{ $firstLevel === 'order-forms' ? 'active' : '' }}"
                                 href="{{ route('tenant.order_forms.index') }}">
-                                <span class="label">Ordenes de Pedido</span>
+                                <span class="label">Ordenes de pedido</span>
                             </a>
                         </li>
                     @endif
@@ -844,7 +841,7 @@ $thridLevel = $path[2] ?? null;
                     <li>
                         <a class="{{ $firstLevel === 'account' && $secondLevel === 'ple' ? 'active' : '' }}"
                             href="{{ route('tenant.account_ple.index') }}">
-                            <span class="label">Libros Electrónicos</span>
+                            <span class="label">Libros electrónicos</span>
                         </a>
                     </li>
 
@@ -852,14 +849,14 @@ $thridLevel = $path[2] ?? null;
                         <li>
                             <a class="{{ $firstLevel === 'account' && $secondLevel == '' ? 'active' : '' }}"
                                 href="{{ route('tenant.account.index') }}">
-                                <span class="label">Sistemas Contables</span></a>
+                                <span class="label">Sistemas contables</span></a>
                         </li>
                     @endif
                     @if (in_array('account_summary', $vc_module_levels))
                         <li>
                             <a class="{{ $firstLevel === 'account' && $secondLevel == 'summary-report' ? 'active' : '' }}"
-                                href="{{ route('tenant.account_summary_report.index') }}">.
-                                <span class="label">Resumen de Venta</span>
+                                href="{{ route('tenant.account_summary_report.index') }}">
+                                <span class="label">Resumen de venta</span>
                             </a>
                         </li>
                     @endif
@@ -867,8 +864,8 @@ $thridLevel = $path[2] ?? null;
                         <li>
                             <a class="{{ $firstLevel === 'account' && $secondLevel == 'tax_return' ? 'active' : '' }}"
                                 href="{{ route('tenant.tax_return.index') }}">
-                                <span class="label">Declaración Mensual
-                                    SUNAT</span>
+                                <span class="label">Declaración mensual
+                                    </span>
                             </a>
                         </li>
                     @endif
@@ -933,7 +930,7 @@ $thridLevel = $path[2] ?? null;
                     @if (in_array('finances_incomes', $vc_module_levels))
                         <li class="{{ $firstLevel === 'finances' && $secondLevel == 'income' ? 'active' : '' }}">
                             <a class="nav-link" href="{{ route('tenant.finances.income.index') }}">
-                                <span class="label">Ingresos</span>
+                                <span class="label">Ingresos diversos</span>
                             </a>
                         </li>
                     @endif
@@ -953,7 +950,7 @@ $thridLevel = $path[2] ?? null;
                         <li
                             class="{{ $firstLevel === 'finances' && $secondLevel == 'global-payments' ? 'active' : '' }}">
                             <a class="nav-link"
-                                href="{{ route('tenant.finances.global_payments.index') }}">Pagos</a>
+                                href="{{ route('tenant.finances.global_payments.index') }}">Reporte de pagos</a>
                         </li>
                     @endif
                     @if (in_array('finances_balance', $vc_module_levels))
@@ -966,7 +963,7 @@ $thridLevel = $path[2] ?? null;
                             class="{{ $firstLevel === 'finances' && $secondLevel == 'payment-method-types' ? 'active' : '' }}">
                             <a class="nav-link"
                                 href="{{ route('tenant.finances.payment_method_types.index') }}">Ingresos
-                                y Egresos - M. Pago</a>
+                                y egresos</a>
                         </li>
                     @endif
                 </ul>
@@ -991,7 +988,7 @@ $thridLevel = $path[2] ?? null;
                     class="{{ $firstLevel === 'cuenta' ? 'active' : '' }}"
                     data-clicked="{{ $firstLevel === 'cuenta' ? true : false }}">
                     <i data-cs-icon="money" class="icon" data-cs-size="18"></i>
-                    <span class="label">Mis Pagos</span>
+                    <span class="label">Mis pagos</span>
 
                 </a>
                 <ul id="cuenta"
@@ -1007,7 +1004,7 @@ $thridLevel = $path[2] ?? null;
                             <a class="{{ $firstLevel === 'cuenta' && $secondLevel === 'payment_index' ? 'active' : '' }}"
                                 href="{{ route('tenant.payment.index') }}">Lista
                                 de
-                                Pagos</a>
+                                pagos</a>
                         </li>
                     @endif
 
@@ -1121,7 +1118,7 @@ $thridLevel = $path[2] ?? null;
                     data-clicked="{{ $firstLevel === 'digemid' ? true : false }}" href="#digemid">
                     <i class="fa fas fa-calendar-check" aria-hidden="true"></i>
                     <span class="label">
-                        Farmácia
+                        Farmacia
                     </span>
                 </a>
                 <ul id="digemid" class="collapse {{ $firstLevel === 'digemid' ? 'show' : '' }}">
@@ -1143,7 +1140,7 @@ $thridLevel = $path[2] ?? null;
                     data-clicked="{{ $firstLevel === 'full_suscription' ? true : false }}" href="#saas">
                     <i class="fa fas fa-calendar-check" aria-hidden="true"></i>
                     <span class="label">
-                        Suscripción Servicios SAAS
+                        Servicios SAAS
                     </span>
                 </a>
                 <ul id="saas" class="collapse {{ $firstLevel === 'full_suscription' ? 'show' : '' }}">
@@ -1334,7 +1331,7 @@ $thridLevel = $path[2] ?? null;
                 <a class="{{ $firstLevel === 'live-app' ? 'active' : '' }}"
                     href="{{ route('tenant.payment.generate.index') }}">
                     <i class="fas fa-puzzle-piece"></i>
-                    <span class="label">Generador link de Pago</span>
+                    <span class="label">Generador link de pago</span>
                 </a>
             </li>
         @endif

@@ -94,7 +94,7 @@
     <tr>
         <td class="border-top-bottom desc text-left"></td>
         <td class="border-top-bottom desc text-left">UdM</td>
-        <td class="border-top-bottom desc text-left">DESCRIPCIÓN</td>
+        <td class="border-top-bottom desc text-left">DESCRIPTION</td>
         <td class="border-top-bottom desc text-right" style="padding-right:5px;">P.UNIT </td>
         <td class="border-top-bottom desc text-right">TOTAL </td>
     </tr>
@@ -171,7 +171,7 @@
             <td class="text-left desc align-top">1</td>
             <td class="text-left desc align-top">NIU</td>
             <td class="text-left desc align-top">
-                ANTICIPO: {{($p->document_type_id == '02')? 'FACTURA':'BOLETA'}} NRO. {{$p->number}}
+                Advance: {{($p->document_type_id == '02')? 'FACTURA':'BOLETA'}} NRO. {{$p->number}}
             </td>
             <td class="text-left desc align-top"></td>
             <td class="text-left desc align-top"></td>
@@ -188,35 +188,35 @@
 
     @if($document->total_exportation > 0)
     <tr>
-        <td colspan="3" class="desc-ticket text-uppercase">OP. EXPORTACIÓN:
+        <td colspan="3" class="desc-ticket text-uppercase">OP. Export:
             {{ $document->currency_type->symbol }}</td>
         <td colspan="2" class="text-right desc-ticket text-uppercase">{{ number_format($document->total_exportation, 2) }}</td>
     </tr>
         @endif
         @if($document->total_free > 0)
             <tr>
-                <td colspan="3" class="desc-ticket text-uppercase">OP. GRATUITAS:
+                <td colspan="3" class="desc-ticket text-uppercase">OP. Free:
                     {{ $document->currency_type->symbol }}</td>
                 <td colspan="2" class="text-right desc-ticket text-uppercase">{{ number_format($document->total_free, 2) }}</td>
             </tr>
         @endif
         @if($document->total_unaffected > 0)
             <tr>
-                <td colspan="3" class="desc-ticket text-uppercase">OP. INAFECTAS:
+                <td colspan="3" class="desc-ticket text-uppercase">OP. Unaffected:
                     {{ $document->currency_type->symbol }}</td>
                 <td colspan="2" class="text-right desc-ticket text-uppercase">{{ number_format($document->total_unaffected, 2) }}</td>
             </tr>
         @endif
         @if($document->total_exonerated > 0)
             <tr>
-                <td colspan="3" class="desc-ticket text-uppercase">OP. EXONERADAS:
+                <td colspan="3" class="desc-ticket text-uppercase">OP. Exonerated:
                     {{ $document->currency_type->symbol }}</td>
                 <td colspan="2" class="text-right desc-ticket text-uppercase">{{ number_format($document->total_exonerated, 2) }}</td>
             </tr>
         @endif
         @if($document->total_taxed > 0)
             <tr>
-                <td colspan="3" class="desc-ticket text-uppercase">OP. GRAVADAS:
+                <td colspan="3" class="desc-ticket text-uppercase">OP. Taxed:
                     {{ $document->currency_type->symbol }}</td>
                 <td colspan="2" class="text-right desc-ticket text-uppercase">{{ number_format($document->total_taxed, 2) }}</td>
             </tr>
@@ -267,13 +267,13 @@
                     }
                 @endphp
                 <tr>
-                    <td colspan="3" class="desc-ticket text-uppercase">CARGOS ({{$total_factor}}%):
+                    <td colspan="3" class="desc-ticket text-uppercase">Charges ({{$total_factor}}%):
                         {{ $document->currency_type->symbol }}</td>
                     <td colspan="2" class="text-right desc-ticket text-uppercase">{{ number_format($document->total_charge, 2) }}</td>
                 </tr>
             @else
                 <tr>
-                    <td colspan="3" class="desc-ticket text-uppercase">CARGOS:
+                    <td colspan="3" class="desc-ticket text-uppercase">Charges:
                         {{ $document->currency_type->symbol }}</td>
                     <td colspan="2" class="text-right desc-ticket text-uppercase">{{ number_format($document->total_charge, 2) }}</td>
                 </tr>
@@ -281,14 +281,14 @@
         @endif
 
         <tr>
-            <td colspan="3" class="desc-ticket text-uppercase">TOTAL A PAGAR:
+            <td colspan="3" class="desc-ticket text-uppercase">Total to pay:
                 {{ $document->currency_type->symbol }}</td>
             <td colspan="2" class="text-right desc-ticket text-uppercase">{{ number_format($document->total, 2) }}</td>
         </tr>
 
         @if(($document->retention || $document->detraction) && $document->total_pending_payment > 0)
             <tr>
-                <td colspan="3" class="desc-ticket text-uppercase">M. PENDIENTE:
+                <td colspan="3" class="desc-ticket text-uppercase">A. Pending:
                     {{ $document->currency_type->symbol }}</td>
                 <td colspan="2" class="text-right desc-ticket text-uppercase">{{ number_format($document->total_pending_payment, 2) }}</td>
             </tr>
@@ -325,7 +325,7 @@
 <table class="full-width" style="font-family: 'Courier New', Courier, monospace">
 <tr>
     <td>
-    <strong>PAGOS:</strong> </td></tr>
+    <strong>Payments:</strong> </td></tr>
         @php
             $payment = 0;
         @endphp
@@ -335,7 +335,7 @@
                 $payment += (float) $row->payment;
             @endphp
         @endforeach
-        <tr><td class="pb-10"><strong>SALDO:</strong> {{ $document->currency_type->symbol }} {{ number_format($document->total - $payment, 2) }}</td>
+        <tr><td class="pb-10"><strong>BALANCE:</strong> {{ $document->currency_type->symbol }} {{ number_format($document->total - $payment, 2) }}</td>
     </tr>
 
 </table>

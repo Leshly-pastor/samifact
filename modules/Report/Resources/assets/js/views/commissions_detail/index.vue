@@ -26,8 +26,8 @@
                         <th class="text-center">Comercial</th>
                         <th class="text-center">Detalle</th>
                         <th class="text-center">Cantidad</th>
-                        <th class="text-center">Precio compra</th>
-                        <th class="text-center">Precio venta</th>
+                        <th class="text-center">Total compra</th>
+                        <th class="text-center">Total venta</th>
 
                         <th class="text-center">Ganancia unidad</th>
                         <th class="text-center">Ganancia total</th>

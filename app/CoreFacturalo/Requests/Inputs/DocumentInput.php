@@ -179,6 +179,8 @@ class DocumentInput
             'point_system_data' => $point_system_data['point_system_data'],
             'agent_id' => Functions::valueKeyInArray($inputs, 'agent_id'),
             'dispatch_ticket_pdf' => Functions::valueKeyInArray($inputs, 'dispatch_ticket_pdf', false),
+            'dispatch_ticket_pdf_quantity'
+            => Functions::valueKeyInArray($inputs, 'dispatch_ticket_pdf_quantity', 0),
         ];
     }
 
@@ -491,7 +493,6 @@ class DocumentInput
                         'is_amount' => $is_amount,
                         'is_split' => $is_split,
                     ];
-
                 }
                 return $discounts;
             }

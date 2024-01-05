@@ -4,14 +4,17 @@ use App\Models\Tenant\Catalogs\AffectationIgvType;
 use App\Models\Tenant\Catalogs\Country;
 use App\Models\Tenant\Catalogs\CurrencyType;
 use App\Models\Tenant\Catalogs\Department;
+use App\Models\Tenant\Catalogs\District;
 use App\Models\Tenant\Catalogs\IdentityDocumentType;
 use App\Models\Tenant\Catalogs\OperationType;
+use App\Models\Tenant\Catalogs\Province;
 use App\Models\Tenant\Catalogs\UnitType;
 use App\Models\Tenant\NameDocument;
 use Illuminate\Support\Facades\Cache;
 
 if (!function_exists('func_str_find_url')) {
-    function func_str_find_url($text){
+    function func_str_find_url($text)
+    {
         return preg_replace_callback(
             '/(https?:\/\/[^\s]+)/',
             function ($matches) {
@@ -20,7 +23,6 @@ if (!function_exists('func_str_find_url')) {
             $text
         );
     }
-
 }
 if (!function_exists('func_str_to_upper_utf8')) {
     function func_str_to_upper_utf8($text)
@@ -80,6 +82,43 @@ if (!function_exists('symbol_or_code')) {
             return $unit_type->id;
         }
         return $id;
+    }
+}
+if (!function_exists('func_get_location')) {
+    function func_get_location($string)
+    {
+
+        $code_department = substr($string, 0, 2);
+        $code_province = substr($string, 0, 4);
+        $code_district = $string;
+        
+        $deparment = Department::find($code_department);
+        $province = Province::find($code_province);
+        $district = District::find($code_district);
+        $cadena = '';
+        if ($district) {
+            $cadena = $district->description;
+            if ($province) {
+                $cadena = $cadena . ' - ' . $province->description;
+                if ($deparment) {
+                    $cadena = $cadena . ' - ' . $deparment->description;
+                }
+            }
+        } else {
+            if ($province) {
+                $cadena = $province->description;
+                if ($deparment) {
+                    $cadena = $cadena . ' - ' . $deparment->description;
+                }
+            } else {
+                if ($deparment) {
+                    $cadena = $deparment->description;
+                }
+            }
+        }
+        return $cadena;
+        
+
     }
 }
 if (!function_exists('func_get_locations')) {

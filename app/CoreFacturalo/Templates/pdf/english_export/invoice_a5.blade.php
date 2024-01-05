@@ -90,13 +90,13 @@ $configuration_decimal_quantity = App\CoreFacturalo\Helpers\Template\TemplateHel
     </table>
     <table class="full-width mt-2">
         <tr>
-            <td width="120px">FECHA DE EMISIÓN</td>
+            <td width="120px">Date of issue</td>
             <td width="8px">:</td>
             <td>{{$document->date_of_issue->format('Y-m-d')}}</td>
 
             @if ($document->detraction)
 
-            <td width="120px">N. CTA DETRACCIONES</td>
+            <td width="120px">N. Acc Detractions</td>
             <td width="8px" class="align-top">:</td>
             <td class="align-top">{{ $document->detraction->bank_account}}</td>
             @endif
@@ -104,14 +104,14 @@ $configuration_decimal_quantity = App\CoreFacturalo\Helpers\Template\TemplateHel
 
         @if($invoice)
         <tr>
-            <td width="120px">FECHA DE VENCIMIENTO</td>
+            <td width="120px">Due date</td>
             <td width="8px" class="align-top"> :</td>
             <td class="align-top">{{$invoice->date_of_due->format('Y-m-d')}}</td>
         </tr>
         @endif
 
         @if ($document->detraction)
-        <td width="120px">B/S SUJETO A DETRACCIÓN</td>
+        <td width="120px">P/S Subject to deduction</td>
         <td width="8px">:</td>
         @inject('detractionType', 'App\Services\DetractionTypeService')
         <td width="220px">{{$document->detraction->detraction_type_id}}
@@ -119,7 +119,7 @@ $configuration_decimal_quantity = App\CoreFacturalo\Helpers\Template\TemplateHel
 
         @endif
         <tr>
-            <td style="vertical-align: top;">CLIENTE</td>
+            <td style="vertical-align: top;">Customer</td>
             <td style="vertical-align: top;">:</td>
             <td style="vertical-align: top;">
                 {{ $customer->name }}
@@ -130,7 +130,7 @@ $configuration_decimal_quantity = App\CoreFacturalo\Helpers\Template\TemplateHel
             </td>
 
             @if ($document->detraction)
-            <td width="120px">MÉTODO DE PAGO</td>
+            <td width="120px">Payment method</td>
             <td width="8px">:</td>
             <td width="220px">{{ $detractionType->getPaymentMethodTypeDescription($document->detraction->payment_method_id ) }}</td>
             @endif
@@ -142,14 +142,14 @@ $configuration_decimal_quantity = App\CoreFacturalo\Helpers\Template\TemplateHel
 
 
             @if ($document->detraction)
-            <td width="120px">P. DETRACCIÓN</td>
+            <td width="120px">P. Detraction</td>
             <td width="8px">:</td>
             <td>{{ $document->detraction->percentage}}%</td>
             @endif
         </tr>
         @if ($customer->address !== '')
         <tr>
-            <td class="align-top">DIRECCIÓN:</td>
+            <td class="align-top">Address:</td>
             <td>:</td>
             <td>
                 {{ $customer->address }}
@@ -159,7 +159,7 @@ $configuration_decimal_quantity = App\CoreFacturalo\Helpers\Template\TemplateHel
             </td>
 
             @if ($document->detraction)
-            <td width="120px">MONTO DETRACCIÓN</td>
+            <td width="120px">Deduction amount</td>
             <td width="8px">:</td>
             <td>S/ {{ $document->detraction->amount}}</td>
             @endif
@@ -168,7 +168,7 @@ $configuration_decimal_quantity = App\CoreFacturalo\Helpers\Template\TemplateHel
         <tr>
             <td colspan="3">
             </td>
-            <td width="120px">C. PAGO</td>
+            <td width="120px">A. Payment</td>
             <td width="8px">:</td>
             <td>{{ $document->detraction->pay_constancy}}</td>
         </tr>
@@ -180,7 +180,7 @@ $configuration_decimal_quantity = App\CoreFacturalo\Helpers\Template\TemplateHel
 
         @if ($document->reference_data)
         <tr>
-            <td width="120px">D. REFERENCIA</td>
+            <td width="120px">D. Reference</td>
             <td width="8px">:</td>
             <td>{{ $document->reference_data}}</td>
         </tr>
@@ -207,7 +207,7 @@ $configuration_decimal_quantity = App\CoreFacturalo\Helpers\Template\TemplateHel
 
     @if ($document->dispatch)
     <br />
-    <strong>Guías de remisión</strong>
+    <strong>Reference guides</strong>
     <table>
         <tr>
             <td>{{ $document->dispatch->number_full }}</td>
@@ -235,7 +235,7 @@ $configuration_decimal_quantity = App\CoreFacturalo\Helpers\Template\TemplateHel
         @if ($document->prepayments)
         @foreach($document->prepayments as $p)
         <tr>
-            <td width="120px">ANTICIPO</td>
+            <td width="120px">Advance</td>
             <td width="8px">:</td>
             <td>{{$p->number}}</td>
         </tr>
@@ -243,18 +243,18 @@ $configuration_decimal_quantity = App\CoreFacturalo\Helpers\Template\TemplateHel
         @endif
         @if ($document->purchase_order)
         <tr>
-            <td width="120px">ORDEN DE COMPRA</td>
+            <td width="120px">Purchase order</td>
             <td width="8px">:</td>
             <td>{{ $document->purchase_order }}</td>
         </tr>
         @endif
         @if ($document->quotation_id)
         <tr>
-            <td width="120px">COTIZACIÓN</td>
+            <td width="120px">Quotation</td>
             <td width="8px">:</td>
             <td>{{ $document->quotation->identifier }}</td>
             @isset($document->quotation->delivery_date)
-            <td width="120px">F. ENTREGA</td>
+            <td width="120px">D. delivery</td>
             <td width="8px">:</td>
             <td>{{ $document->date_of_issue->addDays($document->quotation->delivery_date)->format('d-m-Y') }}</td>
             @endisset
@@ -262,23 +262,23 @@ $configuration_decimal_quantity = App\CoreFacturalo\Helpers\Template\TemplateHel
         @endif
         @isset($document->quotation->sale_opportunity)
         <tr>
-            <td width="120px">O. VENTA</td>
+            <td width="120px">O. Sale</td>
             <td width="8px">:</td>
             <td>{{ $document->quotation->sale_opportunity->number_full}}</td>
         </tr>
         @endisset
         @if(!is_null($document_base))
         <tr>
-            <td width="120px">DOC. AFECTADO</td>
+            <td width="120px">Doc Affected</td>
             <td width="8px">:</td>
             <td>{{ $affected_document_number }}</td>
 
-            <td width="120px">TIPO DE NOTA</td>
+            <td width="120px">Note type</td>
             <td width="8px">:</td>
             <td>{{ ($document_base->note_type === 'credit')?$document_base->note_credit_type->description:$document_base->note_debit_type->description}}</td>
         </tr>
         <tr>
-            <td>DESCRIPCIÓN</td>
+            <td>DESCRIPTION</td>
             <td>:</td>
             <td>{{ $document_base->note_description }}</td>
         </tr>
@@ -287,13 +287,13 @@ $configuration_decimal_quantity = App\CoreFacturalo\Helpers\Template\TemplateHel
 
     {{--<table class="full-width mt-3">--}}
     {{--<tr>--}}
-    {{--<td width="25%">Documento Afectado:</td>--}}
+    {{--<td width="25%">Affected Document:</td>--}}
     {{--<td width="20%">{{ $document_base->affected_document->series }}-{{ $document_base->affected_document->number }}</td>--}}
     {{--<td width="15%">Tipo de nota:</td>--}}
     {{--<td width="40%">{{ ($document_base->note_type === 'credit')?$document_base->note_credit_type->description:$document_base->note_debit_type->description}}</td>--}}
     {{--</tr>--}}
     {{--<tr>--}}
-    {{--<td class="align-top">Descripción:</td>--}}
+    {{--<td class="align-top">Description:</td>--}}
     {{--<td class="text-left" colspan="3">{{ $document_base->note_description }}</td>--}}
     {{--</tr>--}}
     {{--</table>--}}
@@ -301,12 +301,12 @@ $configuration_decimal_quantity = App\CoreFacturalo\Helpers\Template\TemplateHel
     <table class="full-width mt-10 mb-10">
         <thead class="">
             <tr class="bg-grey">
-                <th class="border-top-bottom text-center py-2" width="8%">CANT.</th>
-                <th class="border-top-bottom text-center py-2" width="8%">UNIDAD</th>
-                <th class="border-top-bottom text-left py-2">DESCRIPCIÓN</th>
-                <th class="border-top-bottom text-left py-2">MODELO</th>
+                <th class="border-top-bottom text-center py-2" width="8%">QTY</th>
+                <th class="border-top-bottom text-center py-2" width="8%">UNIT</th>
+                <th class="border-top-bottom text-left py-2">DESCRIPTION</th>
+                <th class="border-top-bottom text-left py-2">MODEL</th>
                 <th class="border-top-bottom text-right py-2" width="12%">P.UNIT</th>
-                <th class="border-top-bottom text-right py-2" width="8%">DTO.</th>
+                <th class="border-top-bottom text-right py-2" width="8%">DISC.</th>
                 <th class="border-top-bottom text-right py-2" width="12%">TOTAL</th>
             </tr>
         </thead>
@@ -415,7 +415,7 @@ $configuration_decimal_quantity = App\CoreFacturalo\Helpers\Template\TemplateHel
                 <td class="text-center align-top">1</td>
                 <td class="text-center align-top">NIU</td>
                 <td class="text-left align-top">
-                    ANTICIPO: {{($p->document_type_id == '02')? 'FACTURA':'BOLETA'}} NRO. {{$p->number}}
+                    Advance: {{($p->document_type_id == '02')? 'FACTURA':'BOLETA'}} NRO. {{$p->number}}
                 </td>
                 <td class="text-right align-top"></td>
                 <td class="text-right align-top">-{{ number_format($p->total, 2) }}</td>
@@ -430,25 +430,25 @@ $configuration_decimal_quantity = App\CoreFacturalo\Helpers\Template\TemplateHel
 
             @if($document->total_exportation > 0)
             <tr>
-                <td colspan="6" class="text-right font-bold">OP. EXPORTACIÓN: {{ $document->currency_type->symbol }}</td>
+                <td colspan="6" class="text-right font-bold">OP. Export: {{ $document->currency_type->symbol }}</td>
                 <td class="text-right font-bold">{{ number_format($document->total_exportation, 2) }}</td>
             </tr>
             @endif
             @if($document->total_free > 0)
             <tr>
-                <td colspan="6" class="text-right font-bold">OP. GRATUITAS: {{ $document->currency_type->symbol }}</td>
+                <td colspan="6" class="text-right font-bold">OP. Free: {{ $document->currency_type->symbol }}</td>
                 <td class="text-right font-bold">{{ number_format($document->total_free, 2) }}</td>
             </tr>
             @endif
             @if($document->total_unaffected > 0)
             <tr>
-                <td colspan="6" class="text-right font-bold">OP. INAFECTAS: {{ $document->currency_type->symbol }}</td>
+                <td colspan="6" class="text-right font-bold">OP. Unaffected: {{ $document->currency_type->symbol }}</td>
                 <td class="text-right font-bold">{{ number_format($document->total_unaffected, 2) }}</td>
             </tr>
             @endif
             @if($document->total_exonerated > 0)
             <tr>
-                <td colspan="6" class="text-right font-bold">OP. EXONERADAS: {{ $document->currency_type->symbol }}</td>
+                <td colspan="6" class="text-right font-bold">OP. Exonerated: {{ $document->currency_type->symbol }}</td>
                 <td class="text-right font-bold">{{ number_format($document->total_exonerated, 2) }}</td>
             </tr>
             @endif
@@ -456,13 +456,13 @@ $configuration_decimal_quantity = App\CoreFacturalo\Helpers\Template\TemplateHel
             @if ($document->document_type_id === '07')
             @if($document->total_taxed >= 0)
             <tr>
-                <td colspan="6" class="text-right font-bold">OP. GRAVADAS: {{ $document->currency_type->symbol }}</td>
+                <td colspan="6" class="text-right font-bold">OP. Taxed: {{ $document->currency_type->symbol }}</td>
                 <td class="text-right font-bold">{{ number_format($document->total_taxed, 2) }}</td>
             </tr>
             @endif
             @elseif($document->total_taxed > 0)
             <tr>
-                <td colspan="6" class="text-right font-bold">OP. GRAVADAS: {{ $document->currency_type->symbol }}</td>
+                <td colspan="6" class="text-right font-bold">OP. Taxed: {{ $document->currency_type->symbol }}</td>
                 <td class="text-right font-bold">{{ number_format($document->total_taxed, 2) }}</td>
             </tr>
             @endif
@@ -509,26 +509,26 @@ $configuration_decimal_quantity = App\CoreFacturalo\Helpers\Template\TemplateHel
             }
             @endphp
             <tr>
-                <td colspan="6" class="text-right font-bold">CARGOS ({{$total_factor}}
+                <td colspan="6" class="text-right font-bold">Charges ({{$total_factor}}
                     %): {{ $document->currency_type->symbol }}</td>
                 <td class="text-right font-bold">{{ number_format($document->total_charge, 2) }}</td>
             </tr>
             @else
             <tr>
-                <td colspan="6" class="text-right font-bold">CARGOS: {{ $document->currency_type->symbol }}</td>
+                <td colspan="6" class="text-right font-bold">Charges: {{ $document->currency_type->symbol }}</td>
                 <td class="text-right font-bold">{{ number_format($document->total_charge, 2) }}</td>
             </tr>
             @endif
             @endif
 
             <tr>
-                <td colspan="6" class="text-right font-bold">TOTAL A PAGAR: {{ $document->currency_type->symbol }}</td>
+                <td colspan="6" class="text-right font-bold">Total to pay: {{ $document->currency_type->symbol }}</td>
                 <td class="text-right font-bold">{{ number_format($document->total, 2) }}</td>
             </tr>
 
             @if(($document->retention || $document->detraction) && $document->total_pending_payment > 0)
             <tr>
-                <td colspan="6" class="text-right font-bold">M. PENDIENTE: {{ $document->currency_type->symbol }}</td>
+                <td colspan="6" class="text-right font-bold">A. Pending: {{ $document->currency_type->symbol }}</td>
                 <td class="text-right font-bold">{{ number_format($document->total_pending_payment, 2) }}</td>
             </tr>
             @endif
@@ -559,7 +559,7 @@ $configuration_decimal_quantity = App\CoreFacturalo\Helpers\Template\TemplateHel
                 @if ($document->detraction)
                 <p>
                     <span class="font-bold">
-                        Operación sujeta al Sistema de Pago de Obligaciones Tributarias
+                        Operation subject to the Tax Obligation Payment System
                     </span>
                 </p>
                 <br />
@@ -569,11 +569,11 @@ $configuration_decimal_quantity = App\CoreFacturalo\Helpers\Template\TemplateHel
                 <br /><br /><br />
                 <div>
                     <center>
-                        Representación impresa del Comprobante de Pago Electrónico.
-                        <br />Esta puede ser consultada en:
+                        Printed representation of the Electronic Payment Voucher.
+                        <br />This can be consulted at:
                         <br /><b>{!! url('/buscar') !!}</b>
-                        <br /> "Bienes transferidos en la Amazonía
-                        <br />para ser consumidos en la misma".
+                        <br /> "Goods transferred in the Amazon
+                        <br />to be consumed therein."
                     </center>
                 </div>
                 <br />
@@ -581,7 +581,7 @@ $configuration_decimal_quantity = App\CoreFacturalo\Helpers\Template\TemplateHel
                 @foreach($document->additional_information as $information)
                 @if ($information)
                 @if ($loop->first)
-                <strong>Información adicional</strong>
+                <strong>Additional Information</strong>
                 @endif
                 <p>@if(\App\CoreFacturalo\Helpers\Template\TemplateHelper::canShowNewLineOnObservation())
                     {!! \App\CoreFacturalo\Helpers\Template\TemplateHelper::SetHtmlTag($information) !!}
@@ -605,11 +605,11 @@ $configuration_decimal_quantity = App\CoreFacturalo\Helpers\Template\TemplateHel
                 @endif
 
                 @if ($document->retention)
-                <p><strong>Información de la retención</strong></p>
+                <p><strong>Withholding information</strong></p>
                 <p>
-                    Base imponible: {{ $document->currency_type->symbol}} {{ $document->retention->base }} /
-                    Porcentaje: {{ $document->retention->percentage * 100 }}% /
-                    Monto: {{ $document->currency_type->symbol}} {{ $document->retention->amount }}
+                    Tax base: {{ $document->currency_type->symbol}} {{ $document->retention->base }} /
+                    Percentage: {{ $document->retention->percentage * 100 }}% /
+                    Amount: {{ $document->currency_type->symbol}} {{ $document->retention->amount }}
                 </p>
                 @endif
 
@@ -630,7 +630,7 @@ $configuration_decimal_quantity = App\CoreFacturalo\Helpers\Template\TemplateHel
     <table class="full-width">
         <tr>
             <td>
-                <strong>CONDICIÓN DE PAGO: {{ $paymentCondition }} </strong>
+                <strong>Payment conditions: {{ $paymentCondition }} </strong>
             </td>
         </tr>
     </table>
@@ -639,7 +639,7 @@ $configuration_decimal_quantity = App\CoreFacturalo\Helpers\Template\TemplateHel
     <table class="full-width">
         <tr>
             <td>
-                <strong>MÉTODO DE PAGO: </strong>{{ $document->payment_method_type->description }}
+                <strong>Payment method: </strong>{{ $document->payment_method_type->description }}
             </td>
         </tr>
     </table>
@@ -649,7 +649,7 @@ $configuration_decimal_quantity = App\CoreFacturalo\Helpers\Template\TemplateHel
     <table class="full-width">
         <tr>
             <td>
-                <strong>PAGOS:</strong>
+                <strong>Payments:</strong>
             </td>
         </tr>
         @php
@@ -671,7 +671,7 @@ $configuration_decimal_quantity = App\CoreFacturalo\Helpers\Template\TemplateHel
             <td>
                 &#8226; {{ (empty($quote->getStringPaymentMethodType()) ? 'Cuota #'.( $key + 1) : $quote->getStringPaymentMethodType()) }}
                 / Fecha: {{ $quote->date->format('d-m-Y') }} /
-                Monto: {{ $quote->currency_type->symbol }}{{ $quote->amount }}</td>
+                Amount: {{ $quote->currency_type->symbol }}{{ $quote->amount }}</td>
         </tr>
         @endforeach
         </tr>
@@ -681,7 +681,7 @@ $configuration_decimal_quantity = App\CoreFacturalo\Helpers\Template\TemplateHel
     <table class="full-width">
         <tr>
             <td>
-                <strong>Vendedor:</strong>
+                <strong>Seller:</strong>
             </td>
         </tr>
         <tr>
@@ -697,12 +697,12 @@ $configuration_decimal_quantity = App\CoreFacturalo\Helpers\Template\TemplateHel
     <table class="full-width">
         <tr>
             <td>
-                <strong>Información de la retención:</strong>
+                <strong>Withholding information:</strong>
             </td>
-            <td>Base imponible de la retención:
+            <td>Tax base of withholding:
                 S/ {{ round($document->retention->amount_pen / $document->retention->percentage, 2) }}</td>
-            <td>Porcentaje de la retención {{ $document->retention->percentage * 100 }}%</td>
-            <td>Monto de la retención S/ {{ $document->retention->amount_pen }}</td>
+            <td>Retention percentage {{ $document->retention->percentage * 100 }}%</td>
+            <td>Withholding amount S/ {{ $document->retention->amount_pen }}</td>
         </tr>
     </table>
     @endif
@@ -711,7 +711,7 @@ $configuration_decimal_quantity = App\CoreFacturalo\Helpers\Template\TemplateHel
     <table class="full-width">
         <tr>
             <td>
-                <h6 style="font-size: 12px; font-weight: bold;">Términos y condiciones del servicio</h6>
+                <h6 style="font-size: 12px; font-weight: bold;">Terms and conditions of the service</h6>
                 {!! $document->terms_condition !!}
             </td>
         </tr>

@@ -29,7 +29,7 @@
                 <div class="col-lg-3">
                     <div class="form-group" :class="{'has-danger': errors.weight}">
                         <label class="control-label">Peso</label>
-                        <el-input-number v-model="form.weight" :precision="2" :step="1" :min="0.001" :max="999999"></el-input-number>
+                        <el-input-number v-model="form.weight"></el-input-number>
                         <small class="text-danger" v-if="errors.weight" v-text="errors.weight[0]"></small>
                     </div>
                 </div>
@@ -117,12 +117,10 @@
             updateQW() {
                 const contex = this;
                 this.item.attributes.forEach((row) => {
-                    console.log("adentro")
                     if (row.attribute_type_id == '5031') {
                         this.form.weight = row.value * (this.form.quantity ? this.form.quantity : 1)
+                        console.log("🚀 ~ file: items.vue:122 ~ this.item.attributes.forEach ~ this.form.weight:", this.form.weight)
                     }
-                    console.log(this.form.quantity)
-                    console.log(this.form.weight)
                 });
             },
             addRowLotGroup(id) {

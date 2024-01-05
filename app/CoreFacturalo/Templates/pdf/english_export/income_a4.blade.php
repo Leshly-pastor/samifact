@@ -55,9 +55,9 @@
 </table>
 <table class="full-width mt-5">
     <tr>
-        <td width="15%">Cliente:</td>
+        <td width="15%">Customer:</td>
         <td width="45%">{{ $document->customer }}</td>
-        <td width="25%">Fecha de emisión:</td>
+        <td width="25%">Date of issue:</td>
         <td width="15%">{{ $document->date_of_issue->format('Y-m-d') }}</td>
     </tr>
     <tr>
@@ -73,7 +73,7 @@
     <thead class="">
     <tr class="bg-grey">
         <th class="border-top-bottom text-center py-2" width="5%">#</th>
-        <th class="border-top-bottom text-left py-2">DESCRIPCIÓN</th>
+        <th class="border-top-bottom text-left py-2">DESCRIPTION</th>
         <th class="border-top-bottom text-right py-2" width="12%">TOTAL</th>
     </tr>
     </thead>

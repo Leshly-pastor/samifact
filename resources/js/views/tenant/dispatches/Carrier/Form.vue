@@ -1,7 +1,7 @@
 <template>
     <div class="card mb-0 pt-2 pt-md-0">
         <div class="card-header">
-            <h3 class="my-0">{{title}}</h3>
+            <h3 class="my-0">{{ title }}</h3>
         </div>
         <div class="card-body">
             <form autocomplete="off" @submit.prevent="submit">
@@ -162,6 +162,26 @@
                         </div>
                     </div>
                     <div class="row">
+                        <div class="col-lg-2">
+                            <div
+                                :class="{
+                                    'has-danger': errors.purchase_order,
+                                }"
+                                class="form-group"
+                            >
+                                <label class="control-label"
+                                    >Orden de compra
+                                </label>
+                                <el-input
+                                    v-model="form.purchase_order"
+                                ></el-input>
+                                <small
+                                    v-if="errors.purchase_order"
+                                    class="text-danger"
+                                    v-text="errors.purchase_order[0]"
+                                ></small>
+                            </div>
+                        </div>
                         <!--                        <div class="col-lg-2">-->
                         <!--                            <div :class="{'has-danger': errors.packages_number}"-->
                         <!--                                 class="form-group">-->
@@ -388,6 +408,7 @@
                             >
                                 <label class="control-label"
                                     >Datos del vehículo
+                                    <span class="text-danger"> *</span>
                                     <a
                                         v-if="can_add_new_product"
                                         href="#"
@@ -765,7 +786,7 @@ export default {
     },
     data() {
         return {
-            title:"Nueva G.R. Transportista",
+            title: "Nueva G.R. Transportista",
             can_add_new_product: false,
             showDialogNewItem: false,
             showDialogAddItems: false,
@@ -821,7 +842,7 @@ export default {
         this.canCreateProduct();
     },
     async mounted() {
-        if(this.parentTable === "dispatch"){
+        if (this.parentTable === "dispatch") {
             this.title = "Editar G.R. Transportista";
         }
         const itemsFromSummary = localStorage.getItem("items");
@@ -858,11 +879,22 @@ export default {
 
         if (this.parentId) {
             this.form = Object.assign({}, this.form, this.document);
+            console.log(
+                "🚀 ~ file: Form.vue:882 ~ mounted ~ this.form:",
+                this.form
+            );
+            if (this.form.customer_id) {
+                this.form.receiver_id = this.form.customer_id;
+            }
+            if (this.form.sender_id) {
+                await this.reloadDataSenders(this.form.sender_id);
+                await this.getSenderAddresses(this.form.sender_id);
+            }
+            if (this.form.receiver_id) {
+                await this.reloadDataReceivers(this.form.receiver_id);
+                await this.getReceiverAddresses(this.form.receiver_id);
+            }
 
-            await this.reloadDataSenders(this.form.sender_id);
-            await this.reloadDataReceivers(this.form.receiver_id);
-            await this.getSenderAddresses(this.form.sender_id);
-            await this.getReceiverAddresses(this.form.receiver_id);
             if (this.receiver_addresses.length > 0) {
                 this.form.receiver_address_id = _.head(
                     this.receiver_addresses
@@ -876,7 +908,7 @@ export default {
                 this.setDefaults();
             }
         } else {
-            await this.reloadDataReceivers("");
+            // await this.reloadDataReceivers("");
             await this.searchRemoteSenders("");
             await this.searchRemoteReceivers("");
             if (this.establishments.length > 0) {
@@ -909,6 +941,7 @@ export default {
             if (isNaN(customer_id)) customer_id = null;
             if (isNaN(establishment_id)) establishment_id = null;
             this.form = {
+                purchase_order: null,
                 id: null,
                 establishment_id: establishment_id,
                 document_type_id: "31",

@@ -3,6 +3,7 @@
 namespace Modules\Report\Http\Resources;
 
 use App\Models\Tenant\DocumentItem;
+use App\Models\Tenant\Person;
 use App\Models\Tenant\Purchase;
 use App\Models\Tenant\PurchaseItem;
 use App\Models\Tenant\QuotationItem;
@@ -84,6 +85,7 @@ class GeneralItemCollection extends ResourceCollection
                 'date_of_issue' => $resource['date_of_issue'],
                 'customer_name' => $resource['customer_name'],
                 'purchase_order' => $resource['purchase_order'],
+                'customer_type' => $resource['customer_type'], // 'person_type' => 'person_type_id
                 'customer_number' => $resource['customer_number'],
                 'brand' => $row->relation_item->brand->name,
                 'series' => $resource['series'],
@@ -215,7 +217,7 @@ class GeneralItemCollection extends ResourceCollection
         $data['unit_type_id'] = $row->item->unit_type_id;
         $data['description'] = $row->item->description;*/
         $data['purchase_order'] = null;
-
+     
         if ($row->document && $row->document->date_of_issue) {
             /** @var \App\Models\Tenant\Document $document */
 
@@ -224,6 +226,7 @@ class GeneralItemCollection extends ResourceCollection
             $data['date_of_issue'] = $document->date_of_issue->format('Y-m-d');
             $data['customer_name'] = $document->customer->name;
             $data['customer_number'] = $document->customer->number;
+          
             $data['series'] = $document->series;
             $data['alone_number'] = $document->number;
             $data['document_type_description'] = $document->document_type->description;
@@ -274,6 +277,11 @@ class GeneralItemCollection extends ResourceCollection
             $data['observation'] = $document->observation;
         }
 
+        $customer = Person::find($document->customer_id??$document->supplier_id);
+        $data['customer_type'] = null;
+        if($customer && $customer->person_type){
+            $data['customer_type'] = $customer->person_type->description;
+        }
         return $data;
     }
 }

@@ -9,7 +9,7 @@
             </ol>
         </div>
         <div class="card mt-3">
-            <div class="card-body border-bottom">
+            <div class="card-body border-bottom d-flex">
                 <el-form
                     :inline="true"
                     :model="form"
@@ -69,6 +69,14 @@
                             ></el-input>
                         </td>
                         <td class="text-right">
+                            <el-button
+                                v-if="documents.length > 0"
+                                type="success"
+                                @click="queryTicketExcel"
+                            >
+                                <i class="fas fa-file-excel"></i>
+                                Exportar
+                            </el-button>
                             <el-button
                                 type="primary"
                                 @click="queryTicket"
@@ -294,6 +302,7 @@
 }
 </style>
 <script>
+import queryString from "query-string";
 export default {
     props: ["company"],
     components: {},
@@ -336,6 +345,7 @@ export default {
         this.getData();
     },
     methods: {
+        exportExcel() {},
         setType() {
             this.type = window.location.href.split("/").pop();
         },
@@ -369,7 +379,10 @@ export default {
             this.period_month = record.periods;
         },
         sendPeriod() {
-            localStorage.setItem(this.type + "_sire_period_" + this.company.number, this.form.period);
+            localStorage.setItem(
+                this.type + "_sire_period_" + this.company.number,
+                this.form.period
+            );
             this.period_current = this.form.period;
             this.$http
                 .get(
@@ -380,10 +393,13 @@ export default {
                         this.code_ticket = response.data.data.numTicket;
                         this.status_ticket = "00";
                         localStorage.setItem(
-                            this.type + "_sire_ticket_"+this.company.number,
+                            this.type + "_sire_ticket_" + this.company.number,
                             this.code_ticket
                         );
-                        localStorage.setItem(this.type + "_sire_status_"+this.company.number, "00");
+                        localStorage.setItem(
+                            this.type + "_sire_status_" + this.company.number,
+                            "00"
+                        );
                     } else {
                         this.$message.error(response.data.message);
                     }
@@ -393,16 +409,34 @@ export default {
                 });
         },
         getData() {
-            let sire_ticket = localStorage.getItem(this.type + "_sire_ticket_"+this.company.number);
+            let sire_ticket = localStorage.getItem(
+                this.type + "_sire_ticket_" + this.company.number
+            );
             this.code_ticket = sire_ticket !== null ? sire_ticket : null;
-            let sire_status = localStorage.getItem(this.type + "_sire_status_"+this.company.number);
+            let sire_status = localStorage.getItem(
+                this.type + "_sire_status_" + this.company.number
+            );
             this.status_ticket = sire_status !== null ? sire_status : "00";
             if (sire_ticket != null) {
                 let sire_period = localStorage.getItem(
-                    this.type + "_sire_period_"+this.company.number
+                    this.type + "_sire_period_" + this.company.number
                 );
                 this.period_current = sire_period !== null ? sire_period : null;
             }
+        },
+        queryTicketExcel() {
+            let params = {
+                period: this.period_current,
+                page: this.page,
+                ticket: this.code_ticket,
+                type: this.type,
+            };
+            window.open(
+                `/${this.resource}/query-excel?${queryString.stringify(
+                    params
+                )}`,
+                "_blank"
+            );
         },
         queryTicket() {
             this.documents = [];
@@ -419,10 +453,10 @@ export default {
                     if (response.data.success) {
                         this.status_ticket = response.data.data.status_code;
                         localStorage.setItem(
-                            this.type + "_sire_status_"+this.company.number,
+                            this.type + "_sire_status_" + this.company.number,
                             this.status_ticket
                         );
-                        this.documents = response.data.data.documents;
+                        this.documents = response.data.data.documents||[];
                         this.getTotals();
                     } else {
                         this.$message.error(response.data.message);
@@ -468,7 +502,9 @@ export default {
         },
         sendAccept() {
             this.loading_accept = true;
-            let sire_period = localStorage.getItem(this.type + "_sire_period_"+this.company.number);
+            let sire_period = localStorage.getItem(
+                this.type + "_sire_period_" + this.company.number
+            );
             this.$http
                 .get(`/${this.resource}/${this.type}/${sire_period}/accept`)
                 .then((response) => {

@@ -358,9 +358,6 @@
                                 <el-input-number
                                     v-model="form.total_weight"
                                     :max="9999999999"
-                                    :min="0"
-                                    :precision="2"
-                                    :step="1"
                                 ></el-input-number>
                                 <small
                                     v-if="errors.total_weight"
@@ -441,6 +438,26 @@
                                     v-if="errors.order_form_external"
                                     class="text-danger"
                                     v-text="errors.order_form_external[0]"
+                                ></small>
+                            </div>
+                        </div>
+                        <div class="col-lg-2">
+                            <div
+                                :class="{
+                                    'has-danger': errors.purchase_order,
+                                }"
+                                class="form-group"
+                            >
+                                <label class="control-label"
+                                    >Orden de compra
+                                </label>
+                                <el-input
+                                    v-model="form.purchase_order"
+                                ></el-input>
+                                <small
+                                    v-if="errors.purchase_order"
+                                    class="text-danger"
+                                    v-text="errors.purchase_order[0]"
                                 ></small>
                             </div>
                         </div>
@@ -585,6 +602,8 @@
                             <div class="col-lg-6">
                                 <label class="control-label font-bold">
                                     Datos del transportista
+                                    <span class="text-danger"> *</span>
+
                                     <a
                                         v-if="can_add_new_product"
                                         href="#"
@@ -594,7 +613,6 @@
                                         >[+ Nuevo]</a
                                     >
                                 </label>
-                                <span class="text-danger"> *</span>
                                 <div
                                     :class="{
                                         'has-danger': errors.dispatcher_id,
@@ -627,109 +645,121 @@
                                 </div>
                             </div>
                         </template>
-                        <template v-if="form.transport_mode_type_id === '02'">
-                            <div class="col-lg-6">
-                                <label class="control-label">
-                                    Datos del conductor
+                        <!-- <template v-if="form.transport_mode_type_id === '02'"> -->
+                        <div class="col-lg-6">
+                            <label class="control-label">
+                                Datos del conductor
+                                       <template
+                                    v-if="form.transport_mode_type_id === '02'"
+                                >
+                                    <span class="text-danger">*</span>
+                                </template>
+                                <a
+                                    v-if="can_add_new_product"
+                                    href="#"
+                                    @click.prevent="showDialogDriverForm = true"
+                                    >[+ Nuevo]</a
+                                >
+                         
+                            </label>
+
+                            <div
+                                :class="{ 'has-danger': errors.driver_id }"
+                                class="form-group"
+                            >
+                                <el-select
+                                    v-model="form.driver_id"
+                                    clearable
+                                    remote
+                                    filterable
+                                    :remote-method="searchRemoteDrivers"
+                                    placeholder="Seleccionar conductor"
+                                >
+                                    <el-option
+                                        v-for="option in drivers"
+                                        :key="option.id"
+                                        :label="
+                                            option.number +
+                                            ' - ' +
+                                            option.name +
+                                            ' - ' +
+                                            option.license
+                                        "
+                                        :value="option.id"
+                                    ></el-option>
+                                </el-select>
+                                <small
+                                    v-if="errors.dispacher"
+                                    class="text-danger"
+                                    v-text="errors.dispacher[0]"
+                                ></small>
+                            </div>
+                        </div>
+                        <div class="col-lg-3">
+                            <div
+                                :class="{
+                                    'has-danger': errors.transport_id,
+                                }"
+                                class="form-group"
+                            >
+                                <label class="control-label"
+                                    >Datos del vehículo
+                                      <template
+                                        v-if="
+                                            form.transport_mode_type_id === '02'
+                                        "
+                                    >
+                                        <span class="text-danger">*</span>
+                                    </template>
                                     <a
                                         v-if="can_add_new_product"
                                         href="#"
                                         @click.prevent="
-                                            showDialogDriverForm = true
+                                            showDialogTransportForm = true
                                         "
                                         >[+ Nuevo]</a
                                     >
+                                  
                                 </label>
-
-                                <div
-                                    :class="{ 'has-danger': errors.driver_id }"
-                                    class="form-group"
+                                <el-select
+                                    v-model="form.transport_id"
+                                    clearable
+                                    placeholder="Seleccionar vehículo"
                                 >
-                                    <el-select
-                                        v-model="form.driver_id"
-                                        clearable
-                                        remote
-                                        filterable
-                                        :remote-method="searchRemoteDrivers"
-                                        placeholder="Seleccionar conductor"
-                                    >
-                                        <el-option
-                                            v-for="option in drivers"
-                                            :key="option.id"
-                                            :label="
-                                                option.number +
-                                                ' - ' +
-                                                option.name +
-                                                ' - ' +
-                                                option.license
-                                            "
-                                            :value="option.id"
-                                        ></el-option>
-                                    </el-select>
-                                    <small
-                                        v-if="errors.dispacher"
-                                        class="text-danger"
-                                        v-text="errors.dispacher[0]"
-                                    ></small>
-                                </div>
-                            </div>
-                            <div class="col-lg-3">
-                                <div
-                                    :class="{
-                                        'has-danger': errors.transport_id,
-                                    }"
-                                    class="form-group"
-                                >
-                                    <label class="control-label"
-                                        >Datos del vehículo
-                                        <a
-                                            v-if="can_add_new_product"
-                                            href="#"
-                                            @click.prevent="
-                                                showDialogTransportForm = true
-                                            "
-                                            >[+ Nuevo]</a
-                                        >
-                                    </label>
-                                    <el-select
-                                        v-model="form.transport_id"
-                                        clearable
-                                        placeholder="Seleccionar vehículo"
-                                    >
-                                        <el-option
-                                            v-for="option in transports"
-                                            :key="option.id"
-                                            :label="
-                                                option.plate_number +
-                                                ' - ' +
-                                                option.model +
-                                                ' - ' +
-                                                option.brand
-                                            "
-                                            :value="option.id"
-                                        ></el-option>
-                                    </el-select>
-                                    <small
-                                        v-if="errors.transport_id"
-                                        class="text-danger"
-                                        v-text="errors.transport_id[0]"
-                                    ></small>
-                                </div>
-                            </div>
-                            <div class="col-lg-3">
-                                <div class="form-group">
-                                    <label class="control-label"
-                                        >N° placa semirremolque</label
-                                    >
-                                    <el-input
-                                        v-model="
-                                            form.secondary_license_plates
-                                                .semitrailer
+                                    <el-option
+                                        v-for="option in transports"
+                                        :key="option.id"
+                                        :label="
+                                            option.plate_number +
+                                            ' - ' +
+                                            option.model +
+                                            ' - ' +
+                                            option.brand
                                         "
-                                    ></el-input>
-                                </div>
+                                        :value="option.id"
+                                    ></el-option>
+                                </el-select>
+                                <small
+                                    v-if="errors.transport_id"
+                                    class="text-danger"
+                                    v-text="errors.transport_id[0]"
+                                ></small>
                             </div>
-                        </template>
+                        </div>
+                        <div class="col-lg-3">
+                            <div class="form-group">
+                                <label class="control-label"
+                                    >N° placa semirremolque</label
+                                >
+                                <el-input
+                                    v-model="
+                                        form.secondary_license_plates
+                                            .semitrailer
+                                    "
+                                ></el-input>
+                            </div>
+                        </div>
+                        <!-- </template> -->
                     </div>
                     <hr />
                     <div class="col-md-12">
@@ -800,9 +830,6 @@
                                             <el-input-number
                                                 v-model="row.weight"
                                                 :max="99999999"
-                                                :min="0"
-                                                :precision="4"
-                                                :step="1"
                                                 :value="row.weight"
                                                 placeholder="Cantidad"
                                                 @change="verifyWeightItems"
@@ -1124,6 +1151,10 @@ export default {
         };
     },
     async created() {
+        console.log(
+            "🚀 ~ file: create.vue:1127 ~ created ~ this.document:",
+            this.document
+        );
         this.initForm();
         this.loadConfiguration();
         this.$store.commit("setConfiguration", this.configuration);
@@ -1198,12 +1229,13 @@ export default {
                     );
                 }
             });
+
         if (this.parentId) {
             this.form = Object.assign({}, this.form, this.document);
             await this.reloadDataCustomers(this.form.customer_id);
             await this.getDeliveryAddresses(this.form.customer_id);
             await this.changeEstablishment();
-            if (this.parentTable !== "dispatches") {
+            if (this.parentTable !== "dispatch") {
                 this.setDefaults();
             }
             this.form.series = this.series_default;
@@ -1233,10 +1265,6 @@ export default {
             this.$http
                 .get(`/drivers/get_drivers?value=${value || ""}`)
                 .then((response) => {
-                    console.log(
-                        "🚀 ~ file: create.vue:1218 ~ .then ~ response:",
-                        response
-                    );
                     this.drivers = response.data;
                     // this.customers = response.data.customers;
                     this.loading_search = false;
@@ -1331,6 +1359,7 @@ export default {
             if (isNaN(customer_id)) customer_id = null;
             if (isNaN(establishment_id)) establishment_id = null;
             this.form = {
+                purchase_order: null,
                 inventory_reference_id: null,
                 id: null,
                 establishment_id: establishment_id,
@@ -1348,8 +1377,8 @@ export default {
                 transshipment_indicator: false,
                 port_code: null,
                 unit_type_id: "KGM",
-                total_weight: 1,
-                packages_number: 1,
+                total_weight: 0, 
+                packages_number: 0,
                 container_number: null,
                 dispatcher_id: null,
                 dispatcher: {},
@@ -1661,6 +1690,7 @@ export default {
             }
         },
         addItem(form) {
+            console.log("🚀 ~ file: create.vue:1699 ~ addItem ~ form:", form)
             let it = form.item;
 
             let qty = form.quantity;
@@ -1671,11 +1701,6 @@ export default {
                     return item.id == it.id;
                 }
             });
-
-            // console.log(
-            //     "🚀 ~ file: create.vue:1093 ~ addItem ~ this.form.items:",
-            //     this.form.items
-            // );
             let attributes = null;
             if (it.attributes) {
                 attributes = it.attributes;
@@ -1838,8 +1863,20 @@ export default {
                 // }
             }
             if (this.form.transport_mode_type_id === "01") {
-                this.form.driver_id = null;
-                this.form.driver = null;
+                // this.form.driver_id = null;
+                // this.form.driver = null;
+                this.form.transport = _.find(this.transports, {
+                    id: this.form.transport_id,
+                });
+                this.form.driver = _.find(this.drivers, {
+                    id: this.form.driver_id,
+                });
+                if(this.form.driver){
+                    this.form.driver_id = this.form.driver.id;
+                }
+                if(this.form.transport){
+                    this.form.transport_id = this.form.transport.id;
+                }
                 if (!this.form.dispatcher_id) {
                     return this.$message.error("El transportista es requerido");
                 }

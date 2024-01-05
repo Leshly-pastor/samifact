@@ -41,25 +41,38 @@ class IncomeController extends Controller
     }
 
 
-    public function create()
+    public function create($id = null)
     {
-        return view('finance::income.form');
+        return view('finance::income.form', compact('id'));
     }
 
     public function columns()
     {
         return [
+            'customer_id' => 'Cliente',
             'number' => 'Número',
             'date_of_issue' => 'Fecha de emisión',
         ];
     }
 
-
     public function records(Request $request)
     {
-        $records = Income::where($request->column, 'like', "%{$request->value}%")
-            ->whereTypeUser()
-            ->latest();
+        $column = $request->input('column');
+        $value = $request->input('value');
+        if ($column == "customer_id") {
+            
+            $records = Income::whereHas('customer', function ($query) use ($column, $value) {
+                $query->where('name', 'like', "%{$value}%")
+                    ->orWhere('number', 'like', "%{$value}%");
+            })->orWhere('customer', 'like', "%{$value}%")
+                ->whereTypeUser()
+                ->latest();
+        } else {
+            $records = Income::where($request->column, 'like', "%{$request->value}%")
+                ->whereTypeUser()
+                ->latest();
+        }
+
 
         return new IncomeCollection($records->paginate(config('tenant.items_per_page')));
     }
@@ -68,9 +81,21 @@ class IncomeController extends Controller
     {
 
 
-        $records = Income::where($request->column, 'like', "%{$request->value}%")
-            ->whereTypeUser()
-            ->get();
+        $column = $request->input('column');
+        $value = $request->input('value');
+        if ($column == "customer_id") {
+            
+            $records = Income::whereHas('customer', function ($query) use ($column, $value) {
+                $query->where('name', 'like', "%{$value}%")
+                    ->orWhere('number', 'like', "%{$value}%");
+            })->orWhere('customer', 'like', "%{$value}%")
+                ->whereTypeUser()
+                ->get();
+        } else {
+            $records = Income::where($request->column, 'like', "%{$request->value}%")
+                ->whereTypeUser()
+                ->get();
+        }
 
         $establishment = auth()->user()->establishment;
         $balance = new IncomeExport();
@@ -110,6 +135,47 @@ class IncomeController extends Controller
         return $record;
     }
 
+    public function duplicate(Request $request)
+    {
+        // return $request->id;
+        $obj = Income::find($request->id);
+        $number = self::newNumber($obj->soap_type_id);
+        $income = $obj->replicate();
+        $income->number = $number;
+        $income->filename = null;
+        $income->external_id = Str::uuid()->toString();
+        $income->save();
+
+        foreach ($obj->items as $row) {
+            $new = $row->replicate();
+            $new->income_id = $income->id;
+            $new->save();
+        }
+        $cash = self::getCash();
+        foreach ($obj->payments as $row) {
+            $new = $row->replicate();
+            $new->income_id = $income->id;
+            $new->save();
+            if ($cash && $row['payment_destination_id'] === 'cash') {
+                CashDocument::create([
+                    'cash_id' => $cash['cash_id'],
+                    'income_payment_id' => $new->id,
+                ]);
+            }
+
+            $this->createGlobalPayment($new, $row);
+        }
+        $this->setFilename($income);
+        $this->createPdf($income);
+
+        return [
+            'success' => true,
+            'message' => 'Ingreso duplicado con éxito',
+            'data' => [
+                'id' => $income->id,
+            ],
+        ];
+    }
     public function store(IncomeRequest $request)
     {
 
@@ -117,12 +183,12 @@ class IncomeController extends Controller
 
         $income =  DB::connection('tenant')->transaction(function () use ($data) {
             $cash = self::getCash();
-            $doc = Income::create($data);
-
+            $doc = Income::updateOrCreate(['id' => $data['id']], $data);
+            $doc->items()->delete();
             foreach ($data['items'] as $row) {
                 $doc->items()->create($row);
             }
-
+            $this->deleteAllPayments($doc->payments);
             foreach ($data['payments'] as $row) {
                 $record_payment = $doc->payments()->create($row);
                 if ($cash && $row['payment_destination_id'] === 'cash') {
@@ -207,8 +273,12 @@ class IncomeController extends Controller
     {
 
         $company = Company::active();
-
+        $customer = $inputs['customer'];
+        $customer_id = Person::where('name', $customer)
+            ->whereType('customers')
+            ->first()->id;
         $values = [
+            'customer_id' => $customer_id,
             'user_id' => auth()->id(),
             'number' => $inputs['id'] ? $inputs['number'] : self::newNumber($company->soap_type_id),
             'state_type_id' => '05',

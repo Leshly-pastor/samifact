@@ -17,6 +17,7 @@ class Income extends ModelTenant
     // protected $with = ['user', 'items'];
 
     protected $fillable = [
+        'customer_id',
         'user_id',
         'soap_type_id',
         'income_type_id',
@@ -37,7 +38,10 @@ class Income extends ModelTenant
     protected $casts = [
         'date_of_issue' => 'date',
     ];
-  
+    
+    public function customer(){
+        return $this->belongsTo(Person::class, 'customer_id');
+    }
     public function items()
     {
         return $this->hasMany(IncomeItem::class);

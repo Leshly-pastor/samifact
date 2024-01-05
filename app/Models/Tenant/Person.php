@@ -501,8 +501,11 @@ class Person extends ModelTenant
      *
      * @return array
      */
-    public function getCollectionData($withFullAddress = false, $childrens = false, $servers = false)
-    {
+    public function getCollectionData($withFullAddress = false, $childrens = false, $servers = false,$year = null)
+    {   
+        if($year == null){
+            $year = Carbon::now()->year;
+        }
         $addresses = $this->addresses;
         if ($withFullAddress == true) {
             $addresses = collect($addresses)->transform(function ($row) {
@@ -631,7 +634,7 @@ class Person extends ModelTenant
             'discount_amount' => $this->discount_amount,
             'location_id' => $location_id,
             'person_date' => $this->person_date ? Carbon::parse($this->person_date)->format('Y-m-d') : null,
-            'months' => $this->parent_id != 0 ? $this->getPayForMonths() : null,
+            'months' => $this->parent_id != 0 ? $this->getPayForMonths($year) : null,
             'student' => $this->student()->exists() ? $this->student()->latest()->first() : null ,
 
         ];
@@ -649,6 +652,7 @@ class Person extends ModelTenant
         }
 
         if ($servers == true) {
+
             $serv = FullSuscriptionServerDatum::where('person_id', $this->id)->get();
             $extra_data = FullSuscriptionUserDatum::where('person_id', $this->id)->first();
             if (empty($extra_data)) {
@@ -664,11 +668,9 @@ class Person extends ModelTenant
 
         return $data;
     }
-    function getPayForMonths()
+    function getPayForMonths($currentYear)
     {
-        $currentYear = date('Y');
         $months = [];
-        //for loop for last 12 months
         for ($i = 0; $i < 12; $i++) {
             $month = $i + 1;
             $date = Carbon::createFromDate($currentYear, $month, 1)->format('Y-m-d');

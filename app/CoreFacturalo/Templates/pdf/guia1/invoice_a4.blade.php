@@ -38,7 +38,8 @@ $logo = $establishment__->logo ?? $company->logo;
     $total_discount_items = 0;
 
     $establishment__ = \App\Models\Tenant\Establishment::find($document->establishment_id);
-$logo = $establishment__->logo ?? $company->logo;
+    $logo = $establishment__->logo ?? $company->logo;
+
     
     if ($logo === null && !file_exists(public_path("$logo}"))) {
         $logo = "{$company->logo}";
@@ -96,24 +97,40 @@ $logo = $establishment__->logo ?? $company->logo;
         @endif
     </div>
     <div class="text-left float-left header-company">
-        <div class="text-uppercase font-bold" style="font-size: 25px; color: #33436a">{{ $company->name }}</div>
+        @php
+        $header_img = $configurations->header_image; 
+        @endphp
+        @if($header_img)
+        {{-- <img src="{{ app_path('CoreFacturalo'.DIRECTORY_SEPARATOR.'Templates'.DIRECTORY_SEPARATOR.'pdf'.DIRECTORY_SEPARATOR.''.$establishment__->template_pdf.''.DIRECTORY_SEPARATOR.'datos.png') }}" style="max-height: 180px" /> --}}
+        
+        <img src="{{ public_path("storage/uploads/header_images/{$header_img}") }}" alt="{{$company->name}}" class="company_logo_rec" style="max-height: 180px" />
+        @else
+        <div class="text-uppercase font-bold" style="font-size: 17px; color: #fff width:250px;">.</div>
+        @endif
+        {{-- <div class="text-uppercase font-bold" style="font-size: 17px; color: #3a628c">{{ $company->name }}</div>
         <div class="text-uppercase mayus">
-            {{ ($establishment->address !== '-')? $establishment->address.'' : '' }}
+            Oficina Principal: {{ ($establishment->address !== '-')? $establishment->address.'' : '' }}
         </div>
         <div class="text-uppercase mayus">
             {{ ($establishment->district_id !== '-')? ' '.$establishment->district->description : '' }}
             {{ ($establishment->province_id !== '-')? ', '.$establishment->province->description : '' }}
             {{ ($establishment->department_id !== '-')? '- '.$establishment->department->description : '' }}
         </div>
+        @isset($establishment->trade_address)
+        <div class="text-uppercase mayus">
+        {{ $establishment->trade_address !== '-' ? 'Sucursal: ' . $establishment->trade_address : '' }}
+        </div>
+        @endisset
         <div>
             {{ ($establishment->telephone !== '-')? ''.$establishment->telephone : '' }}
+            {{ $establishment->email !== '-' ? ' ' . $establishment->email : '' }}
         </div>
         <div class="text-left">
             {{ ($establishment->web_address !== '-')? ''.$establishment->web_address : '' }}
         </div>
         @isset($establishment->aditional_information)
             <div>{{ ($establishment->aditional_information !== '-')? $establishment->aditional_information : '' }}</div>
-        @endisset
+        @endisset --}}
     </div>
     <div  class="text-center float-left header-number py-3 font-bold ">
         <div style="margin-top: 5px" class="font-lg">RUC {{$company->number }}</div>
@@ -433,10 +450,47 @@ $logo = $establishment__->logo ?? $company->logo;
                     <td class="text-left"> {{ $document->currency_type->symbol }}</td>
                     <td class="text-right font-bold">{{ number_format($document->total, 2) }}</td>
                 </tr>
+
+            @if($document->retention)
+                <tr>
+                    <td class="text-left">TOTAL RETENCIÓN ({{ $document->retention->percentage * 100 }} %)</td>
+                    <td class="text-left"> {{ $document->currency_type->symbol }}</td>
+                    <td class="text-right font-bold">{{ number_format($document->retention->amount, 2) }}</td>
+                </tr>
+                <tr>
+                    <td class="text-left font-bold">IMPORTE NETO:</td>
+                    <td class="text-left"> {{ $document->currency_type->symbol }}</td>
+                    <td class="text-right font-bold">{{ number_format($document->total - $document->retention->amount, 2) }}
+                    </td>
+                </tr>
+            @endif
             </table>
+
+            
         </td>
     </tr>
 </table>
+
+@if ($document->retention)
+<br>
+<table class="full-width">
+    <tr>
+        <td>
+            <strong>Información de la retención:</strong>
+        </td>
+    </tr>
+    <tr>
+        <td>Base imponible de la retención:
+            S/ {{ round($document->retention->amount_pen / $document->retention->percentage, 2) }}</td>
+    </tr>
+    <tr>
+        <td>Porcentaje de la retención {{ $document->retention->percentage * 100 }}%</td>
+    </tr>
+    <tr>
+        <td>Monto de la retención S/ {{ $document->retention->amount_pen }}</td>
+    </tr>
+</table>
+@endif
 
 </body>
 </html>
