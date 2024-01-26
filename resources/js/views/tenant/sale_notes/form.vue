@@ -475,7 +475,10 @@
                                     </el-option>
                                 </el-select>
                             </div>
-                            <div class="col-lg-6 col-md-6">
+                            <div
+                                class="col-lg-6 col-md-6"
+                                v-if="!isIntegrateSystem"
+                            >
                                 <div class="form-group">
                                     <label class="control-label"
                                         >Observación
@@ -862,6 +865,13 @@
                                                         row.affectation_igv_type
                                                             .description
                                                     }}</small>
+       <a href="#"
+                                            @click.prevent="seeDetails(row.item)"
+                                            class="text-info"
+                                            >
+                                            [Ver detalle] 
+                                            </a>
+
                                                 </td>
                                                 <td
                                                     v-if="
@@ -1158,7 +1168,20 @@
                             </div>
                         </div>
                     </div>
-
+                    <div class="col-12" v-if="isIntegrateSystem">
+                        <div class="form-group">
+                            <label class="control-label">Observación </label>
+                            <el-input
+                                type="textarea"
+                                v-model="form.observation"
+                            ></el-input>
+                            <small
+                                class="text-danger"
+                                v-if="errors.observation"
+                                v-text="errors.observation[0]"
+                            ></small>
+                        </div>
+                    </div>
                     <div class="form-actions text-end mt-4">
                         <el-button @click.prevent="close()">Cancelar</el-button>
 
@@ -1284,6 +1307,7 @@ export default {
             monthCollege: [],
             collegeYear: [],
             yearCollegeName: null,
+            isIntegrateSystem: false,
             children: [],
             userId: null,
             monthsSelected: [],
@@ -1376,6 +1400,7 @@ export default {
             this.currency_types = response.data.currency_types;
             this.establishments = response.data.establishments;
             this.all_customers = response.data.customers;
+            this.isIntegrateSystem = response.data.is_integrate_system;
             if (this.isDriver) {
                 this.all_customers = this.all_customers.filter((customer) => {
                     return customer.is_driver;
@@ -1432,6 +1457,10 @@ export default {
         this.changeCurrencyType();
     },
     methods: {
+          seeDetails(item){
+            let {id} = item;
+            window.open(`/items/details/${id}`, '_blank');
+        },
         async changeSeller() {
             let { seller_id } = this.form;
             await this.getCash(seller_id);
@@ -1637,7 +1666,10 @@ export default {
             let payment_method_type = _.find(this.payment_method_types, {
                 id: this.form.payments[index].payment_method_type_id,
             });
-            console.log("🚀 ~ file: form.vue:1619 ~ changePaymentMethodType ~ payment_method_type:", payment_method_type)
+            console.log(
+                "🚀 ~ file: form.vue:1619 ~ changePaymentMethodType ~ payment_method_type:",
+                payment_method_type
+            );
 
             if (payment_method_type.is_credit) {
                 this.form.payment_method_type_id = payment_method_type.id;
@@ -1983,7 +2015,7 @@ export default {
             this.calculateTotal();
         },
         clickRemoveItem(index) {
-              let item = this.form.items[index];
+            let item = this.form.items[index];
             if (item.random_key) {
                 this.form.items = this.form.items.filter((it, index) => {
                     return item.random_key !== it.depend_key;

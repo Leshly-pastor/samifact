@@ -492,5 +492,39 @@ $logo = $establishment__->logo ?? $company->logo;
 </table>
 @endif
 
+
+
+
+
+
+
+@php
+    $path_style = app_path('CoreFacturalo' . DIRECTORY_SEPARATOR . 'Templates' . DIRECTORY_SEPARATOR . 'pdf' . DIRECTORY_SEPARATOR . 'style.css');
+    $accounts = \App\Models\Tenant\BankAccount::where('show_in_documents', true)->get();
+@endphp
+
+<head>
+    <link href="{{ $path_style }}" rel="stylesheet" />
+</head>
+
+@if($document)
+    <table class="full-width">
+        <tr>
+            <td class="font-bold">CUENTAS:</td>
+        </tr>
+
+        @if (in_array($document->document_type->id, ['01', '03']))
+            @foreach ($accounts as $account)
+            <tr>
+                <td class="font-xs">{{ $account->bank->description }}:{{ $account->number }}  @if ($account->cci) CCI: {{ $account->cci }} @endif - {{ $account->currency_type->description }}</td>
+            </tr>
+            @endforeach
+        @endif
+        <tr>
+            <td class="font-xs">Representacion impresa de la {{ $document->document_type->description }}, esta puede ser consultada en {!! url('/buscar') !!}</td>
+        </tr>
+    </table>
+@endif
+
 </body>
 </html>

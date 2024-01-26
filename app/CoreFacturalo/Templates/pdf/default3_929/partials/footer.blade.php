@@ -96,12 +96,12 @@ $customer_address = str_pad($customer_address, $max_address_length, ' ');
 $date = $document->date_of_issue->format('d/m/Y');
 $currency = $document->currency_type->description;
 $gudie = "";
-if (!isset($document->guides)) {
+/*if (!isset($document->guides)) {
     foreach ($document->guides as $item) {
         $gudie .= $item->document_type_description . " : " . $item->number . "<br>";
    }
 
-}
+}*/
 
 
 if ($document->payment_condition_id === '01') {

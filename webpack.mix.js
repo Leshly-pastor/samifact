@@ -100,6 +100,8 @@ mix.webpackConfig({
             ),
         }
     }
-}).sourceMaps(false, "source-map");
+})
+// .sourceMaps();
+.sourceMaps(false, "source-map");
 
 mix.disableSuccessNotifications();

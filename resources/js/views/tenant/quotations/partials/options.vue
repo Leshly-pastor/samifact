@@ -6,7 +6,7 @@
             :show-close="false"
             :title="titleDialog"
             :visible="showDialog"
-            width="50%"
+            width="70%"
             append-to-body
             @open="create"
         >
@@ -66,9 +66,7 @@
             <div class="row mt-3">
                 <div class="col-md-12 mt-2">
                     <el-input v-model="form.customer_telephone">
-                        <template slot="prepend"
-                            >+51</template
-                        >
+                        <template slot="prepend">+51</template>
                         <el-button
                             slot="append"
                             @click="clickSendWhatsapp"
@@ -88,9 +86,7 @@
                         v-model="form.customer_telephone"
                         placeholder="Enviar link por WhatsApp"
                     >
-                        <template slot="prepend"
-                            >+51</template
-                        >
+                        <template slot="prepend">+51</template>
                         <el-button slot="append" @click="clickSendWhatsapp2"
                             >Enviar URL
                             <el-tooltip
@@ -217,7 +213,7 @@
                             v-model="document.payment_condition_id"
                             dusk="document_type_id"
                             popper-class="el-select-document_type"
-                            style="max-width: 200px;"
+                            style="max-width: 200px"
                             @change="changePaymentCondition"
                         >
                             <el-option
@@ -369,7 +365,7 @@
                                         <a
                                             class="text-center font-weight-bold text-center text-info"
                                             href="#"
-                                            style="font-size:18px"
+                                            style="font-size: 18px"
                                             @click.prevent="clickAddFee"
                                             >[+]</a
                                         >
@@ -425,16 +421,14 @@
                         <table v-if="document.fee.length > 0" width="100%">
                             <thead>
                                 <tr>
-                                    <th>
-                                        Método de pago
-                                    </th>
+                                    <th>Método de pago</th>
                                     <th>Fecha</th>
                                     <th>Monto</th>
                                     <th style="width: 30px">
                                         <a
                                             class="text-center font-weight-bold text-center text-info"
                                             href="#"
-                                            style="font-size:18px"
+                                            style="font-size: 18px"
                                             @click.prevent="clickAddFeeNew"
                                             >[+]</a
                                         >
@@ -498,6 +492,7 @@
                         </table>
                     </div>
                     <!-- Contado -->
+
                     <div
                         v-show="document.payment_condition_id == '01'"
                         class="col-lg-12"
@@ -524,7 +519,7 @@
                                         <a
                                             class="text-center font-weight-bold text-center text-info"
                                             href="#"
-                                            style="font-size:18px"
+                                            style="font-size: 18px"
                                             @click.prevent="clickAddPayment"
                                             >[+]</a
                                         >
@@ -560,38 +555,30 @@
                                         </el-select>
                                     </td>
                                     <td>
-                                        <div class="form-group mb-2 mr-2">
-                                            <el-select
-                                                v-model="
-                                                    row.payment_destination_id
-                                                "
-                                                :disabled="
-                                                    row.payment_destination_disabled
-                                                "
-                                                filterable
-                                            >
-                                                <el-option
-                                                    v-for="option in payment_destinations"
-                                                    :key="option.id"
-                                                    :label="option.description"
-                                                    :value="option.id"
-                                                ></el-option>
-                                            </el-select>
-                                        </div>
+                                        <el-select
+                                            v-model="row.payment_destination_id"
+                                            :disabled="
+                                                row.payment_destination_disabled
+                                            "
+                                            filterable
+                                        >
+                                            <el-option
+                                                v-for="option in payment_destinations"
+                                                :key="option.id"
+                                                :label="option.description"
+                                                :value="option.id"
+                                            ></el-option>
+                                        </el-select>
                                     </td>
                                     <td>
-                                        <div class="form-group mb-2 mr-2">
-                                            <el-input
-                                                v-model="row.reference"
-                                            ></el-input>
-                                        </div>
+                                        <el-input
+                                            v-model="row.reference"
+                                        ></el-input>
                                     </td>
                                     <td>
-                                        <div class="form-group mb-2 mr-2">
-                                            <el-input
-                                                v-model="row.payment"
-                                            ></el-input>
-                                        </div>
+                                        <el-input
+                                            v-model="row.payment"
+                                        ></el-input>
                                     </td>
                                     <td
                                         class="series-table-actions text-center"
@@ -621,17 +608,14 @@
             <!-- controlar series y lotes -->
 
             <div v-show="document.total > 0" class="col-lg-12">
-                 
-                    <label class="control-label text-end"> Total 
-                        <template v-if="document.currency_type_id=='PEN'">
-                           S/
-                        </template>
-                        <template v-else>
-                            $
-                        </template>
-                        {{ document.total }}</label> 
-              
-                 
+                <label class="control-label text-end">
+                    Total
+                    <template v-if="document.currency_type_id == 'PEN'">
+                        S/
+                    </template>
+                    <template v-else> $ </template>
+                    {{ document.total }}</label
+                >
             </div>
             <span slot="footer" class="dialog-footer">
                 <template v-if="showClose">
@@ -697,20 +681,20 @@ export default {
         "showClose",
         "showGenerate",
         "type",
-        "typeUser"
+        "typeUser",
     ],
     mixins: [functions],
     computed: {
         ...mapState(["config", "payment_method_types"]),
-        credit_payment_metod: function() {
+        credit_payment_metod: function () {
             return _.filter(this.payment_method_types, { is_credit: true });
         },
-        cash_payment_metod: function() {
+        cash_payment_metod: function () {
             return _.filter(this.payment_method_types, { is_credit: false });
         },
-        isCreditPaymentCondition: function() {
+        isCreditPaymentCondition: function () {
             return ["02", "03"].includes(this.document.payment_condition_id);
-        }
+        },
     },
     data() {
         return {
@@ -739,7 +723,7 @@ export default {
             // payment_method_types: [],
             sellers: [],
             show_has_retention: true,
-            cash_id:null
+            cash_id: null,
         };
     },
     created() {
@@ -749,13 +733,13 @@ export default {
         this.clickAddPayment();
     },
     methods: {
-           hasCashOpen() {
+        hasCashOpen() {
             let has_cash = this.payment_destinations.some(
-                payment_destination => payment_destination.cash_id != null
+                (payment_destination) => payment_destination.cash_id != null
             );
             if (has_cash) {
                 this.cash_id = this.payment_destinations.find(
-                    payment_destination => payment_destination.cash_id != null
+                    (payment_destination) => payment_destination.cash_id != null
                 ).cash_id;
             }
             return has_cash;
@@ -766,9 +750,7 @@ export default {
                 return this.$message.error("El número es obligatorio");
             }
             window.open(
-                `https://wa.me/51${this.form.customer_telephone}?text=${
-                    this.form.message_text
-                }`,
+                `https://wa.me/51${this.form.customer_telephone}?text=${this.form.message_text}`,
                 "_blank"
             );
         },
@@ -785,24 +767,27 @@ export default {
                 mensaje:
                     "Su comprobante de pago electrónico " +
                     this.form.number +
-                    " ha sido generado correctamente"
+                    " ha sido generado correctamente",
             };
-            this.$http.post(`/whatsapp`, form).then(response => {
-                if (response.data.success == true) {
-                        this.$message.success(response.data.message)
-                        this.loading_Whatsapp = false
-                }else{
-                    this.$message.error(response.data.message)
-                    this.loading_Whatsapp = false
-                }
-            }).catch(error => {
-                    this.loading_Whatsapp = false
+            this.$http
+                .post(`/whatsapp`, form)
+                .then((response) => {
+                    if (response.data.success == true) {
+                        this.$message.success(response.data.message);
+                        this.loading_Whatsapp = false;
+                    } else {
+                        this.$message.error(response.data.message);
+                        this.loading_Whatsapp = false;
+                    }
+                })
+                .catch((error) => {
+                    this.loading_Whatsapp = false;
                     this.$message.error(error.response.data.message);
-                 })
-            .finally(() => {
-                this.loading_Whatsapp = false
-                this.$message.error(error.response.data.message);
-            });
+                })
+                .finally(() => {
+                    this.loading_Whatsapp = false;
+                    this.$message.error(error.response.data.message);
+                });
         },
 
         validateCustomerRetention(identity_document_type_id) {
@@ -833,7 +818,7 @@ export default {
                     base: base,
                     code: "62", //Código de Retención del IGV
                     amount: amount,
-                    percentage: percentage
+                    percentage: percentage,
                 };
 
                 this.setTotalPendingAmountRetention(amount);
@@ -860,6 +845,10 @@ export default {
             this.document.payments = [];
             if (this.document.payment_condition_id === "01") {
                 this.document.payments = this.form.quotation.payments;
+                console.log(
+                    "🚀 ~ file: options.vue:855 ~ changePaymentCondition ~ this.document.payments:",
+                    this.document.payments
+                );
                 if (
                     this.document.payments === undefined ||
                     this.document.payments.length < 1
@@ -899,7 +888,7 @@ export default {
         clickAddFeeNew() {
             let first = {
                 id: "05",
-                number_days: 0
+                number_days: 0,
             };
             if (this.credit_payment_metod[0] !== undefined) {
                 first = this.credit_payment_metod[0];
@@ -914,7 +903,7 @@ export default {
                 payment_method_type_id: first.id,
                 date: date,
                 currency_type_id: this.document.currency_type_id,
-                amount: 0
+                amount: 0,
             });
             this.calculateFee();
         },
@@ -924,7 +913,7 @@ export default {
                 id: null,
                 date: moment().format("YYYY-MM-DD"),
                 currency_type_id: this.document.currency_type_id,
-                amount: 0
+                amount: 0,
             });
             this.calculateFee();
         },
@@ -935,7 +924,7 @@ export default {
 
             let accumulated = 0;
             let amount = _.round(total / fee_count, 2);
-            _.forEach(this.document.fee, row => {
+            _.forEach(this.document.fee, (row) => {
                 accumulated += amount;
                 if (total - accumulated < 0) {
                     amount = _.round(total - accumulated + amount, 2);
@@ -982,7 +971,7 @@ export default {
                 payment_method_type_id: id,
                 payment_destination_id: null,
                 reference: null,
-                payment: parseFloat(total)
+                payment: parseFloat(total),
             });
         },
         initForm() {
@@ -995,17 +984,15 @@ export default {
                 external_id: null,
                 identifier: null,
                 date_of_issue: null,
-                quotation: null
+                quotation: null,
             };
         },
         getCustomer() {
             this.$http
                 .get(
-                    `/${this.resource_documents}/search/customer/${
-                        this.form.quotation.customer_id
-                    }`
+                    `/${this.resource_documents}/search/customer/${this.form.quotation.customer_id}`
                 )
-                .then(response => {
+                .then((response) => {
                     this.customers = response.data.customers;
                     this.document.customer_id = this.form.quotation.customer_id;
                     this.changeCustomer();
@@ -1017,13 +1004,11 @@ export default {
         searchRemoteCustomers(input) {
             if (input.length > 0) {
                 this.loading_search = true;
-                let parameters = `input=${input}&document_type_id=${
-                    this.form.document_type_id
-                }&operation_type_id=${this.form.operation_type_id}`;
+                let parameters = `input=${input}&document_type_id=${this.form.document_type_id}&operation_type_id=${this.form.operation_type_id}`;
 
                 this.$http
                     .get(`/${this.resource}/search/customers?${parameters}`)
-                    .then(response => {
+                    .then((response) => {
                         this.customers = response.data.customers;
                         this.loading_search = false;
                     });
@@ -1070,7 +1055,7 @@ export default {
                 guides: [],
                 additional_information: null,
                 actions: {
-                    format_pdf: "a4"
+                    format_pdf: "a4",
                 },
                 quotation_id: null,
                 is_receivable: false,
@@ -1079,7 +1064,7 @@ export default {
 
                 total_pending_payment: 0,
                 has_retention: false,
-                retention: {}
+                retention: {},
             };
         },
         async changeDateOfIssue() {
@@ -1100,16 +1085,16 @@ export default {
         validatePaymentDestination() {
             let error_by_item = 0;
 
-            this.document.payments.forEach(item => {
+            this.document.payments.forEach((item) => {
                 if (item.payment_destination_id == null) error_by_item++;
             });
 
             return {
-                error_by_item: error_by_item
+                error_by_item: error_by_item,
             };
         },
         async submit() {
-               if (!this.hasCashOpen()) {
+            if (!this.hasCashOpen()) {
                 this.$message.error("Debe abrir caja para realizar la venta");
                 return false;
             }
@@ -1119,7 +1104,8 @@ export default {
 
             await this.assignDocument();
 
-            let validate_payment_destination = await this.validatePaymentDestination();
+            let validate_payment_destination =
+                await this.validatePaymentDestination();
 
             if (validate_payment_destination.error_by_item > 0) {
                 return this.$message.error(
@@ -1138,12 +1124,12 @@ export default {
             // Condicion de pago Credito con cuota pasa a credito
             if (this.document.payment_condition_id === "03")
                 this.document.payment_condition_id = "02";
-            if(this.cash_id){
+            if (this.cash_id) {
                 this.document.cash_id = this.cash_id;
             }
             this.$http
                 .post(`/${this.resource_documents}`, this.document)
-                .then(response => {
+                .then((response) => {
                     if (response.data.success) {
                         this.documentNewId = response.data.data.id;
 
@@ -1155,7 +1141,7 @@ export default {
 
                         const payloadCash = {
                             document_id: null,
-                            sale_note_id: null
+                            sale_note_id: null,
                         };
 
                         if (this.document.document_type_id === "nv") {
@@ -1170,13 +1156,14 @@ export default {
                         this.$eventHub.$emit("reloadData");
                         this.resetDocument();
                         this.saveCashDocument(payloadCash);
-                        this.document.customer_id = this.form.quotation.customer_id;
+                        this.document.customer_id =
+                            this.form.quotation.customer_id;
                         this.changeCustomer();
                     } else {
                         this.$message.error(response.data.message);
                     }
                 })
-                .catch(error => {
+                .catch((error) => {
                     if (error.response.status === 422) {
                         this.errors = error.response.data;
                     } else {
@@ -1198,6 +1185,7 @@ export default {
             if (q.purchase_order !== undefined && q.purchase_order != null) {
                 this.document.purchase_order = q.purchase_order;
             }
+
             this.document.exchange_rate_sale = q.exchange_rate_sale;
             this.document.total_prepayment = q.total_prepayment;
             this.document.total_charge = q.total_charge;
@@ -1235,17 +1223,17 @@ export default {
                 this.document.seller_id = q.seller_id;
             }
             this.document.actions = {
-                format_pdf: "a4"
+                format_pdf: "a4",
             };
             this.document.quotation_id = this.form.id;
-            _.forEach(this.document.items, row => {
+            _.forEach(this.document.items, (row) => {
                 row.name_product_pdf = row.item.name_product_pdf;
             });
         },
         async create() {
             await this.$http
                 .get(`/${this.resource}/option/tables`)
-                .then(response => {
+                .then((response) => {
                     this.all_document_types =
                         response.data.document_types_invoice;
                     this.all_series = response.data.series;
@@ -1267,16 +1255,20 @@ export default {
         async getRecord() {
             await this.$http
                 .get(`/${this.resource}/record2/${this.recordId}`)
-                .then(response => {
+                .then((response) => {
                     this.form = response.data.data;
-                    this.form.establishment_id = this.form.quotation.establishment_id;
+                    this.form.establishment_id =
+                        this.form.quotation.establishment_id;
                     this.form.date_of_issue = this.form.quotation.date_of_issue;
                     this.getPercentageIgv();
                     this.document.payments =
                         response.data.data.quotation.payments;
                     this.document.total = this.form.quotation.total;
-                    this.document.currency_type_id = this.form.quotation.currency_type_id;
-                    this.document.payment_condition_id = this.form.quotation.payment_condition_id;
+                
+                    this.document.currency_type_id =
+                        this.form.quotation.currency_type_id;
+                    this.document.payment_condition_id =
+                        this.form.quotation.payment_condition_id;
                     if (
                         this.document.payment_condition_id === undefined ||
                         this.document.payments.length > 0
@@ -1290,6 +1282,10 @@ export default {
                     let type = this.type == "edit" ? "editada" : "registrada";
                     this.titleDialog =
                         `Cotización ${type}: ` + this.form.identifier;
+
+                    // if (this.form.is_integrate_system  ) {
+                    //     this.clickAddPayment();
+                    // }
                 });
         },
         changeDocumentType() {
@@ -1304,12 +1300,12 @@ export default {
                 this.show_has_retention = true;
             } else {
                 this.series = _.filter(this.all_series, {
-                    document_type_id: "80"
+                    document_type_id: "80",
                 });
                 this.document.series_id =
                     this.series.length > 0 ? this.series[0].id : null;
 
-                this.is_document_type_invoice = false;
+                this.is_document_type_invoice = this.form.is_integrate_system;
 
                 this.disabledRetention();
             }
@@ -1318,7 +1314,7 @@ export default {
             let identity_document_types = ["0", "1"];
             // console.log(this.document)
             let customer = _.find(this.customers, {
-                id: this.document.customer_id
+                id: this.document.customer_id,
             });
 
             if (
@@ -1327,7 +1323,7 @@ export default {
                 )
             ) {
                 this.document_types = _.filter(this.all_document_types, {
-                    id: "03"
+                    id: "03",
                 });
             } else {
                 this.document_types = this.all_document_types;
@@ -1348,7 +1344,7 @@ export default {
         filterSeries() {
             this.document.series_id = null;
             this.series = _.filter(this.all_series, {
-                document_type_id: this.document.document_type_id
+                document_type_id: this.document.document_type_id,
             });
             this.document.series_id =
                 this.series.length > 0 ? this.series[0].id : null;
@@ -1378,9 +1374,9 @@ export default {
                 .post(`/${this.resource}/email`, {
                     customer_email: this.customer_email,
                     id: this.form.id,
-                    customer_id: this.form.quotation.customer_id
+                    customer_id: this.form.quotation.customer_id,
                 })
-                .then(response => {
+                .then((response) => {
                     if (response.data.success) {
                         this.$message.success(
                             "El correo fue enviado satisfactoriamente"
@@ -1389,7 +1385,7 @@ export default {
                         this.$message.error("Error al enviar el correo");
                     }
                 })
-                .catch(error => {
+                .catch((error) => {
                     this.$message.error("Error al enviar el correo");
                 })
                 .then(() => {
@@ -1400,10 +1396,10 @@ export default {
             let error = 0;
             let error_lots_group = 0;
 
-            await this.form.quotation.items.forEach(element => {
+            await this.form.quotation.items.forEach((element) => {
                 if (element.item.series_enabled) {
                     const select_lots = _.filter(element.item.lots, {
-                        has_sale: true
+                        has_sale: true,
                     }).length;
                     if (select_lots != element.quantity) error++;
                 }
@@ -1417,7 +1413,7 @@ export default {
                 return {
                     success: false,
                     message:
-                        "Las cantidades y lotes seleccionados deben ser iguales."
+                        "Las cantidades y lotes seleccionados deben ser iguales.",
                 };
             }
 
@@ -1425,7 +1421,7 @@ export default {
                 return {
                     success: false,
                     message:
-                        "Las cantidades y series seleccionadas deben ser iguales."
+                        "Las cantidades y series seleccionadas deben ser iguales.",
                 };
 
             return { success: true };
@@ -1445,7 +1441,7 @@ export default {
                 id = this.document.fee[index].payment_method_type_id;
             }
             let payment_method_type = _.find(this.payment_method_types, {
-                id: id
+                id: id,
             });
 
             if (payment_method_type.number_days) {
@@ -1490,17 +1486,17 @@ export default {
             if (!this.id) {
                 await this.$http
                     .post(`/cash/cash_document`, payload)
-                    .then(response => {
+                    .then((response) => {
                         if (response.data.success) {
                         } else {
                             this.$message.error(response.data.message);
                         }
                     })
-                    .catch(error => {
+                    .catch((error) => {
                         console.log(error);
                     });
             }
-        }
-    }
+        },
+    },
 };
 </script>

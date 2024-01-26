@@ -830,9 +830,7 @@
                         </template>
                     </div>
                     <div class="row">
-                        <div
-                            class="col-lg-12 col-md-6 d-flex align-items-end mt-4"
-                        >
+                        <div class="col-xl-3 col-md-3 col-12 pb-2">
                             <div class="form-group">
                                 <button
                                     class="btn waves-effect waves-light btn-primary"
@@ -842,6 +840,73 @@
                                     + Agregar Producto
                                 </button>
                             </div>
+                        </div>
+                        <div class="col-xl-3 col-md-3 col-12 pb-2">
+                            <el-popover
+                                placement="top-start"
+                                :open-delay="1000"
+                                width="145"
+                                trigger="hover"
+                                content="Subir un excel para la venta"
+                            >
+                                <button
+                                    slot="reference"
+                                    type="button"
+                                    class="btn btn-outline-success mb-1"
+                                    @click.prevent="$refs.file_items.click()"
+                                >
+                                    Subir productos existentes
+                                </button>
+                            </el-popover>
+                            <input
+                                type="file"
+                                style="display: none"
+                                ref="file_items"
+                                @change="uploadFileItems"
+                                accept=".xlsx"
+                            />
+
+                            <br />
+                            <small>
+                                <a
+                                    target="_blank"
+                                    href="/formats/upload_items_to_document.xlsx"
+                                    >Descargar formato</a
+                                >
+                            </small>
+                        </div>
+                        <div class="col-xl-3 col-md-3 col-12 pb-2">
+                            <el-popover
+                                placement="top-start"
+                                :open-delay="1000"
+                                width="145"
+                                trigger="hover"
+                                content="Subir un excel para la venta"
+                            >
+                                <button
+                                    slot="reference"
+                                    type="button"
+                                    class="btn btn-outline-success mb-1"
+                                    @click.prevent="$refs.file.click()"
+                                >
+                                    Subir productos nuevos
+                                </button>
+                            </el-popover>
+                            <input
+                                type="file"
+                                style="display: none"
+                                ref="file"
+                                @change="uploadFileNewItems"
+                                accept=".xlsx"
+                            />
+                            <br />
+                            <small>
+                                <a
+                                    target="_blank"
+                                    href="/formats/items_news.xlsx"
+                                    >Descargar formato</a
+                                >
+                            </small>
                         </div>
                     </div>
                     <div
@@ -1318,6 +1383,12 @@
             :external="true"
             :showDialog.sync="showLicenseDialog"
         ></license-modal>
+        <result-excel-products
+            :showDialog.sync="showResultExcelProducts"
+            :registered="registered"
+            :errors="errors"
+            :hash="hash"
+        ></result-excel-products>
     </div>
 </template>
 
@@ -1340,6 +1411,7 @@ import { mapActions, mapState } from "vuex";
 import InputLotGroup from "@components/secondary/InputLotGroup.vue";
 import ResponsibleModal from "./partials/responsible_modal.vue";
 import LicenseModal from "./partials/license_modal.vue";
+import ResultExcelProducts from "@components/ResultExcelProducts.vue";
 export default {
     props: ["purchase_order_id"],
     components: {
@@ -1350,6 +1422,7 @@ export default {
         PurchaseOptions,
         SeriesForm,
         InputLotGroup,
+        ResultExcelProducts,
     },
     mixins: [functions, exchangeRate, fnPaymentsFee, operationsForDiscounts],
     computed: {
@@ -1375,6 +1448,10 @@ export default {
     },
     data() {
         return {
+            hash: null,
+            showResultExcelProducts: false,
+            registered: 0,
+            errors: [],
             input_person: {},
             showLicenseDialog: false,
             showResponsibleDialog: false,
@@ -1437,7 +1514,7 @@ export default {
                 this.currency_types = data.currency_types;
                 this.payment_conditions = data.payment_conditions;
                 // this.establishment = data.establishment
-
+                 this.affectation_igv_types = data.affectation_igv_types;
                 this.all_suppliers = data.suppliers;
                 this.discount_types = data.discount_types;
                 this.payment_method_types = data.payment_method_types;
@@ -1497,6 +1574,168 @@ export default {
         this.initGlobalIgv();
     },
     methods: {
+        async uploadFileNewItems(event) {
+            let file = event.target.files[0];
+
+            let url = `/items/items-document-news`;
+            //mandar el archivo por post a esa url
+            let formData = new FormData();
+            formData.append("file", file);
+            formData.append("type", "purchases");
+            try {
+                this.loading = true;
+                const response = await this.$http.post(url, formData);
+
+                if (response.status == 200) {
+                    const {
+                        data: { data },
+                    } = response;
+                    let items = data.items;
+
+                    for (let i = 0; i < items.length; i++) {
+                        const item = items[i];
+                        this.changeItem(item);
+                    }
+                }
+
+                //limpiar el input file
+                event.target.value = "";
+            } catch (e) {
+                console.log(e);
+            } finally {
+                this.loading = false;
+            }
+        },
+        async uploadFileItems(event) {
+            this.errors = [];
+            this.registered = 0;
+            this.hash = null;
+            let file = event.target.files[0];
+
+            let url = `/items/items-document`;
+            //mandar el archivo por post a esa url
+            let formData = new FormData();
+            formData.append("file", file);
+            formData.append("type", "purchases");
+            try {
+                this.loading = true;
+                const response = await this.$http.post(url, formData);
+
+                if (response.status == 200) {
+                    const {
+                        data: { data },
+                    } = response;
+                    let items = data.items;
+                    this.registered = data.registered;
+                    this.errors = data.errors;
+                    this.hash = data.hash;
+                    for (let i = 0; i < items.length; i++) {
+                        const item = items[i];
+                        this.changeItem(item);
+                    }
+                }
+
+                //limpiar el input file
+                this.showResultExcelProducts = true;
+                event.target.value = "";
+            } catch (e) {
+                console.log(e);
+            } finally {
+                this.loading = false;
+            }
+        },
+        async clickAddItem(form) {
+            let affectation_igv_types_exonerated_unaffected = [
+                "20",
+                "21",
+                "30",
+                "31",
+                "32",
+                "33",
+                "34",
+                "35",
+                "36",
+                "37",
+            ];
+
+            let unit_price = form.unit_price;
+
+            if (
+                !affectation_igv_types_exonerated_unaffected.includes(
+                    form.affectation_igv_type_id
+                )
+            ) {
+                unit_price = form.purchase_has_igv
+                    ? form.unit_price
+                    : form.unit_price * (1 + this.percentageIgv);
+            }
+
+            let date_of_due = form.date_of_due;
+            if (
+                this.date_of_due != null &&
+                form.update_date_of_due &&
+                !form.item.lots_enabled
+            ) {
+                date_of_due = this.date_of_due;
+            }
+
+            form.item.unit_price = unit_price;
+            form.item.presentation = this.item_unit_type;
+            form.affectation_igv_type = _.find(this.affectation_igv_types, {
+                id: form.affectation_igv_type_id,
+            });
+            let row = await calculateRowItem(
+                form,
+                this.form.currency_type_id,
+                this.form.exchange_rate_sale,
+                this.percentage_igv
+            );
+            row.lot_code = await this.lot_code;
+            row.lots = await this.lots;
+            row.update_price = form.update_price;
+            row.update_date_of_due = form.update_date_of_due;
+            row.update_purchase_price = form.update_purchase_price;
+            row.sale_unit_price = this.sale_unit_price;
+
+            // this.row = this.changeWarehouse(this.row);
+
+            // this.row.date_of_due = date_of_due;
+
+            row.item.name_product_pdf = row.name_product_pdf || "";
+
+            // this.initForm();
+
+            // this.$emit("add", this.row);
+            this.addRow(row);
+        },
+        changeItem(item) {
+            let form = {};
+            form.item = item;
+            // form.item = this.setExtraFieldOfitem(this.form.item);
+
+            const saleUnitPrice = item.sale_unit_price;
+            // this.sale_unit_price = parseFloat(saleUnitPrice).toFixed(2);
+            form.unit_price = form.item.purchase_unit_price;
+            form.quantity = form.item.quantity;
+            form.affectation_igv_type_id =
+                form.item.purchase_affectation_igv_type_id;
+            // form.item_unit_types = _.find(this.items, {
+            //     id: this.form.item_id
+            // }).item_unit_types;
+            this.prices = form.item_unit_types;
+            this.date_of_due = form.date_of_due;
+            form.purchase_has_igv = form.item.purchase_has_igv;
+            // this.setExtraElements(this.form.item);
+            // this.setGlobalIgvToItem();}
+            // this.setGlobalPurchaseCurrencyToItem();
+
+            //asignar variables isc
+            form.has_isc = form.item.purchase_has_isc;
+            form.percentage_isc = form.item.purchase_percentage_isc;
+            form.system_isc_type_id = form.item.purchase_system_isc_type_id;
+
+            this.clickAddItem(form);
+        },
         reloadDataLicense(license) {
             let { id } = license;
             this.licenses.push(license);
@@ -2064,6 +2303,7 @@ export default {
         },
 
         addRow(row) {
+            console.log("🚀 ~ file: form.vue:2303 ~ addRow ~ row:", row)
             if (this.form.igv_10) {
                 row = this.changePercentageIgv(row);
             }

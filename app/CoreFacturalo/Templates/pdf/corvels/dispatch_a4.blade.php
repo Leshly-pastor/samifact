@@ -118,10 +118,10 @@ $establishment = $document->establishment;
         @endif
     </tr>
     <tr>
-        <td colspan="2">P.Partida: {{ $document->origin->location_id }} - {{ $document->origin->address }}</td>
+        <td colspan="2">P.Partida: {{ isset($document->origin) ? $document->origin->location_id:null }} - {{ $document->origin->address }}</td>
     </tr>
     <tr>
-        <td colspan="2">P.Llegada: {{ $document->delivery->location_id }} - {{ $document->delivery->address }}</td>
+        <td colspan="2">P.Llegada: {{ isset($document->delivery) ? $document->delivery->location_id:null }} - {{ $document->delivery->address }}</td>
     </tr>
     @if($document->order_form_external)
         <tr>

@@ -75,7 +75,10 @@ use App\CoreFacturalo\Requests\Inputs\Common\PersonInput;
 use Modules\Suscription\Models\Tenant\SuscriptionPayment;
 use App\CoreFacturalo\Requests\Inputs\Common\EstablishmentInput;
 use App\Exports\SaleNoteExport;
+use App\Mail\Tenant\IntegrateSystemEmail;
+use App\Models\Tenant\MessageIntegrateSystem;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Modules\BusinessTurn\Models\BusinessTurn;
 use Modules\Inventory\Models\InventoryConfiguration;
 
 class SaleNoteController extends Controller
@@ -125,15 +128,40 @@ class SaleNoteController extends Controller
     }
     public function index()
     {
+        $is_comercial  = auth()->user()->integrate_user_type_id == 2;
+        $is_integrate_system = BusinessTurn::isIntegrateSystem();
         $company = Company::select('soap_type_id')->first();
         $soap_company  = $company->soap_type_id;
         $configuration = Configuration::select('ticket_58')->first();
 
-        return view('tenant.sale_notes.index', compact('soap_company', 'configuration'));
+        return view('tenant.sale_notes.index', compact(
+            'soap_company',
+            'is_comercial',
+            'configuration',
+            'is_integrate_system'
+        ));
     }
 
 
 
+    public function changeStatePayment($sale_note_id, $state_payment_id)
+    {
+        $sale_note = SaleNote::find($sale_note_id);
+        $sale_note->state_payment_id = $state_payment_id;
+        if($state_payment_id == '02'){
+            $customer = Person::find($sale_note->customer_id);
+            $customer_email = $customer->email;
+            $message = MessageIntegrateSystem::getMessage('sale_note.02');
+            $mailable = new IntegrateSystemEmail($customer,$message);
+            $id = $sale_note->id;
+            EmailController::SendMail($customer_email, $mailable,$id,6);
+        }
+        $sale_note->save();
+        return [
+            'success' => true,
+            'message' => 'Se ha cambiado el estado de pago'
+        ];
+    }
     public function create($id = null)
     {
         $cashid = null;
@@ -536,7 +564,12 @@ class SaleNoteController extends Controller
      */
     private function getRecords($request)
     {
-        $records = SaleNote::whereTypeUser();
+        $is_integrate_system = BusinessTurn::isIntegrateSystem();
+        if($is_integrate_system){
+            $records = SaleNote::query();
+        }else{
+            $records = SaleNote::whereTypeUser();
+        }
         // Solo devuelve matriculas
         if ($request != null && $request->has('onlySuscription') && (bool)$request->onlySuscription == true) {
             $records->whereNotNull('grade')->whereNotNull('section');
@@ -644,8 +677,10 @@ class SaleNoteController extends Controller
         // $sellers = User::GetSellers(false)->get();
         $sellers = User::getSellersToNvCpe($establishment_id, $userId);
         $global_discount_types = ChargeDiscountType::getGlobalDiscounts();
+        $is_integrate_system = BusinessTurn::isIntegrateSystem();
 
         return compact(
+            'is_integrate_system',
             'customers',
             'establishments',
             'currency_types',
@@ -717,7 +752,8 @@ class SaleNoteController extends Controller
     {
         $configuration = Configuration::first();
         $type_user = auth()->user()->type;
-        if($configuration->block_seller_sale_note_edit && $type_user === 'seller') {
+        $id  = $request->input('id');
+        if ($configuration->block_seller_sale_note_edit && $type_user === 'seller' && $id) {
             return [
                 'success' => false,
                 'message' => 'No tiene permisos para editar Notas de Venta'
@@ -755,6 +791,9 @@ class SaleNoteController extends Controller
                 }
                 $this->setIdLoteSelectedToItem($row);
                 $this->setSizesSelectedToItem($row);
+                if(isset($row['warehouse_id'])){
+                    $row["warehouse_id"] = ($row["warehouse_id"] == 0) ? null : $row["warehouse_id"];
+                }
                 $sale_note_item->fill($row);
                 $sale_note_item->sale_note_id = $this->sale_note->id;
                 $sale_note_item->save();
@@ -788,7 +827,7 @@ class SaleNoteController extends Controller
                         foreach ($id_lote_selected as $item) {
                             $lot = ItemLotsGroup::query()->find($item['id']);
                             $lot->quantity = $lot->quantity - ($quantity_unit * $item['compromise_quantity']);
-                            if($inventory_configuration->stock_control){
+                            if ($inventory_configuration->stock_control) {
                                 $this->validateStockLotGroup($lot, $sale_note_item);
                             }
                             $lot->save();
@@ -834,7 +873,7 @@ class SaleNoteController extends Controller
             $base_url = url('/');
             $external_id = $this->sale_note->external_id;
             $establishment = Establishment::where('id', auth()->user()->establishment_id)->first();
-            $print_format = $establishment->print_format??'ticket';
+            $print_format = $establishment->print_format ?? 'ticket';
             $url_print = "{$base_url}/sale-notes/print/{$external_id}/$print_format";
             return [
                 'success' => true,
@@ -949,7 +988,7 @@ class SaleNoteController extends Controller
 
     public function mergeData($inputs)
     {
-        
+
         $this->company = Company::active();
 
         $cash_id = Functions::valueKeyInArray($inputs, 'cash_id');
@@ -1452,7 +1491,7 @@ class SaleNoteController extends Controller
                             'identity_document_type_code' => $row->identity_document_type->code
                         ];
                     });
-               
+
                 return $customers;
 
                 break;
@@ -1647,7 +1686,7 @@ class SaleNoteController extends Controller
     {
         $establishment = Establishment::where('id', auth()->user()->establishment_id)->first();
         $series = Series::where('establishment_id', $establishment->id)->get();
-        $document_types_invoice = DocumentType::whereIn('id', ['01', '03'])->where('active',true)->get();
+        $document_types_invoice = DocumentType::whereIn('id', ['01', '03'])->where('active', true)->get();
         $payment_method_types = PaymentMethodType::all();
         $payment_destinations = $this->getPaymentDestinations();
         $sellers = User::GetSellers(false)->get();
@@ -1657,6 +1696,22 @@ class SaleNoteController extends Controller
         return compact('series', 'document_types_invoice', 'payment_method_types', 'payment_destinations', 'sellers', 'configuration', 'global_discount_types');
     }
 
+    public function sendEmail(Request $request)
+    {
+        // $company = Company::active();
+        $record = SaleNote::find($request->input('id'));
+        $customer = Person::find($record->customer_id);
+        $customer_email = $request->input('customer_email');
+        $email = $customer_email;
+        $message = $request->input('message');
+        $mailable = new SaleNoteEmail($customer, $record, $message);
+        $id = (int) $request->id;
+        $sendIt = EmailController::SendMail($email, $mailable, $id, 2);
+
+        return [
+            'success' =>  $sendIt
+        ];
+    }
     public function email(Request $request)
     {
         $company = Company::active();
@@ -1682,7 +1737,8 @@ class SaleNoteController extends Controller
         }*/
 
         return [
-            'success' => true
+            'success' => $sendIt,
+            'message' => ($sendIt) ? 'Email enviado con éxito' : 'Ocurrió un error al enviar el email'
         ];
     }
 

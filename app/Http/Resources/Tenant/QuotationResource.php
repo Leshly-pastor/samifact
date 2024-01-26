@@ -5,6 +5,7 @@ namespace App\Http\Resources\Tenant;
 use App\Models\Tenant\Quotation;
 use Illuminate\Http\Resources\Json\JsonResource;
 use App\Models\Tenant\Item;
+use Modules\BusinessTurn\Models\BusinessTurn;
 use Modules\Inventory\Models\Warehouse as ModuleWarehouse;
 
 
@@ -35,6 +36,7 @@ class QuotationResource extends JsonResource
             'customer_email' => $this->customer->email ?? null,
             'customer_telephone' => $this->customer->telephone ?? null,
             'customer_id' => $this->customer_id,
+            'is_integrate_system' => BusinessTurn::isIntegrateSystem(),
         ];
     }
 

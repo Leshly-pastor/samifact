@@ -61,7 +61,7 @@ class InventoryKardexServiceProvider extends ServiceProvider
         PurchaseItem::created(function (PurchaseItem $purchase_item) {
             $purchase = $purchase_item->purchase;
             $factor = 1;
-            if($purchase->is_note_credit()){
+            if ($purchase->is_note_credit()) {
                 $factor = -1;
             }
 
@@ -72,7 +72,7 @@ class InventoryKardexServiceProvider extends ServiceProvider
             // $warehouse = $this->findWarehouse();
             //$this->createInventory($purchase_item->item_id, $purchase_item->quantity, $warehouse->id);
             $this->createInventoryKardex($purchase_item->purchase, $purchase_item->item_id, /*$purchase_item->quantity*/ ($purchase_item->quantity * $presentationQuantity * $factor), $warehouse->id);
-            $this->updateStock($purchase_item->item_id, ($purchase_item->quantity * $presentationQuantity*$factor), $warehouse->id);
+            $this->updateStock($purchase_item->item_id, ($purchase_item->quantity * $presentationQuantity * $factor), $warehouse->id);
         });
     }
 
@@ -161,16 +161,16 @@ class InventoryKardexServiceProvider extends ServiceProvider
                         if (is_array($document_item->item->IdLoteSelected)) {
                             // presentacion - factor de lista de precios
                             $quantity_unit = isset($document_item->item->presentation->quantity_unit) ? $document_item->item->presentation->quantity_unit : 1;
-
                             $lotesSelecteds = $document_item->item->IdLoteSelected;
                             $document_factor = ($document->document_type_id === '07') ? 1 : -1;
                             $inventory_configuration = InventoryConfiguration::first();
                             $inventory_configuration->stock_control;
                             foreach ($lotesSelecteds as $item) {
                                 $lot = ItemLotsGroup::query()->find($item->id);
-                                $lot->quantity = $lot->quantity + (($quantity_unit * $item->compromise_quantity) * $document_factor);
-                                if($inventory_configuration->stock_control){
-                                $this->validateStockLotGroup($lot, $document_item);
+                                $compromise_quantity = isset($item->compromise_quantity) ? $item->compromise_quantity : 1;
+                                $lot->quantity = $lot->quantity + ($quantity_unit * $compromise_quantity * $document_factor);
+                                if ($inventory_configuration->stock_control) {
+                                    $this->validateStockLotGroup($lot, $document_item);
                                 }
                                 $lot->save();
                             }
@@ -187,7 +187,6 @@ class InventoryKardexServiceProvider extends ServiceProvider
                             } else {
                                 $quantity = $lot->quantity - ($quantity_unit * $document_item->quantity);
                             }
-
                             $lot->quantity = $quantity;
                             $lot->save();
                         }

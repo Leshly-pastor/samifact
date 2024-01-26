@@ -228,7 +228,7 @@ $establishment = $document->establishment;
                 </p>
             </td>
         </tr>
-        @if ($document->description)
+        @if ($document->description && !is_integrate_system())
             <tr>
                 <td class="align-top">
                     <p class="desc">Observación:</p>
@@ -396,6 +396,19 @@ $establishment = $document->establishment;
             </tr>
         </tbody>
     </table>
+    @if ($document->description && is_integrate_system())
+    <table class="full-width">
+        <tr>
+            <td class="align-top">
+                <p class="desc">Observación:</p>
+            </td>
+            <td>
+                <p class="desc">{!! str_replace("\n", '<br/>', $document->description) !!}</p>
+            </td>
+            {{-- <td><p class="desc">{{ $document->description }}</p></td> --}}
+        </tr>
+    </table>
+    @endif
     <table class="full-width">
         <tr>
 
@@ -435,6 +448,7 @@ $establishment = $document->establishment;
 
     </table>
     <br>
+
     <table class="full-width">
         <tr>
             <td class="desc pt-3">

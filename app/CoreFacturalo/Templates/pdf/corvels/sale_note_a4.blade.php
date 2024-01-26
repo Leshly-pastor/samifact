@@ -189,7 +189,8 @@ $establishment = $document->establishment;
 
 <table class="full-width mt-10 mb-10">
     <thead class="border-tables">
-    <tr class="bg-grey " style="background: url('{{ app_path('CoreFacturalo'.DIRECTORY_SEPARATOR.'Templates'.DIRECTORY_SEPARATOR.'pdf'.DIRECTORY_SEPARATOR.''.$template_data->template_pdf.''.DIRECTORY_SEPARATOR.'bgbox3.png') }}'); background-repeat: no-repeat;">
+    
+    <tr class="bg-grey " >
         <th class="border-top-bottom2 text-center py-2" width="8%">Cant.</th>
         <th class="border-top-bottom2 text-center py-2" width="8%">Unidad</th>
         <th class="border-top-bottom2 text-left py-2">Descripción</th>

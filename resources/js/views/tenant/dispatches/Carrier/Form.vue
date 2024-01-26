@@ -462,6 +462,7 @@
                                 <el-select
                                     v-model="form.driver_id"
                                     clearable
+                                    filterable
                                     placeholder="Seleccionar conductor"
                                 >
                                     <el-option

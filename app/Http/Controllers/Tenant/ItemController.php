@@ -79,6 +79,7 @@ use App\Models\Tenant\InitStock;
 use App\Models\Tenant\Inventory;
 use App\Models\Tenant\InventoryKardex;
 use App\Models\Tenant\ItemBonus;
+use App\Models\Tenant\ItemFoodDealer;
 use App\Models\Tenant\ItemSet;
 use App\Models\Tenant\ItemSizeStock;
 use App\Models\Tenant\PersonType;
@@ -103,16 +104,25 @@ class ItemController extends Controller
 {
     use OfflineTrait;
 
+    public function details($record_id)
+    {
+        $vc_company = Company::first();
+        return view('tenant.items.details', compact('record_id', 'vc_company'));
+    }
     public function index()
     {
+        $is_food_dealer = BusinessTurn::isFoodDealer();
+        $is_comercial  = auth()->user()->integrate_user_type_id == 2;
         $type = 'PRODUCTS';
-        return view('tenant.items.index', compact('type'));
+        return view('tenant.items.index', compact('type', 'is_comercial', 'is_food_dealer'));
     }
 
     public function indexServices()
     {
+        $is_food_dealer = BusinessTurn::isFoodDealer();
+        $is_comercial  = auth()->user()->integrate_user_type_id == 2;
         $type = 'ZZ';
-        return view('tenant.items.index', compact('type'));
+        return view('tenant.items.index', compact('type', 'is_comercial', 'is_food_dealer'));
     }
 
     public function templateUpdatePricesPersonType()
@@ -399,8 +409,8 @@ class ItemController extends Controller
         $configuration = Configuration::first();
         $is_majolica = false;
         $business_turn = BusinessTurn::where('value', 'majolica')->first();
-        if($business_turn){
-            
+        if ($business_turn) {
+
             $is_majolica = (bool) $business_turn->active;
         }
         /** Informacion adicional */
@@ -638,6 +648,7 @@ class ItemController extends Controller
                     $itemSupply->save();
                 }
             }
+
             ItemBonus::where('item_id', $item->id)->delete();
             if (isset($request->bonus_items)) {
                 foreach ($request->bonus_items as $value) {
@@ -648,6 +659,16 @@ class ItemController extends Controller
                     $itemBonus->fill($value);
                     $itemBonus->save();
                 }
+            }
+            ItemFoodDealer::where('item_id', $item->id)->delete();
+            if (isset($request->start) && isset($request->end)) {
+                ItemFoodDealer::create([
+                    'item_id' => $item->id,
+                    'start_time' => Carbon::parse($request->start)
+                        ->timezone('America/Lima')->format('H:i:s'),
+                    'end_time' => Carbon::parse($request->end)
+                        ->timezone('America/Lima')->format('H:i:s'),
+                ]);
             }
 
             $configuration = Configuration::first();
@@ -1013,7 +1034,6 @@ class ItemController extends Controller
             'message' => 'Registro eliminado con éxito'
         ];
     }
-
 
     public function import(Request $request)
     {
@@ -1520,7 +1540,8 @@ class ItemController extends Controller
      *
      * @return \Illuminate\Http\Response|\Symfony\Component\HttpFoundation\BinaryFileResponse
      */
-    public function exportDigemidCsv(){
+    public function exportDigemidCsv()
+    {
         ini_set('max_execution_time', 0);
         $company = Company::first();
         $company_cod_digemid = $company->cod_digemid;

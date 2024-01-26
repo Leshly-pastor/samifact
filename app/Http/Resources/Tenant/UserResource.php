@@ -3,6 +3,7 @@
 namespace App\Http\Resources\Tenant;
 
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Class UserResource
@@ -25,7 +26,26 @@ class UserResource extends JsonResource {
                        ->pluck('module_level_id')
                        ->toArray();
 
+        //si modules y levels estan vacios, se asigna el modulo por defecto
+        if(empty($modules) && empty($levels)){
+            $establishment = DB::connection('tenant')->table('modules')->where('value', 'establishments')->first();
+            $module_id = $establishment->id;
+            $user_id = $this->id;
+            //si el id es  1 ingresar todos los modules y levels, sino en  modulos no ingresar el de establecimientos y ni el de levels
+            if($user_id == 1){
+                $modules = DB::connection('tenant')->table('modules')->pluck('id')->toArray();
+                $levels = DB::connection('tenant')->table('module_levels')->pluck('id')->toArray();
+            }else{
+                $modules = DB::connection('tenant')->table('modules')->where('id', '!=', $module_id)->pluck('id')->toArray();
+                $levels = DB::connection('tenant')->table('module_levels')->where('module_id', '!=', $module_id)->pluck('id')->toArray();
+            }
 
+            //guardar los modulos y niveles por defecto
+            $this->setModuleAndLevelModule($modules, $levels);
+
+           
+        }
+        
         return [
             'auditor' => (bool)$this->auditor,
             'id'               => $this->id,
@@ -38,6 +58,7 @@ class UserResource extends JsonResource {
             'modules'          => $modules,
             'levels'           => $levels,
             'locked'           => (bool)$this->locked,
+            'integrate_user_type_id' => $this->integrate_user_type_id,
             'document_id'      => $this->document_id,
             'permission_edit_cpe' => $this->permission_edit_cpe,
             'recreate_documents' => $this->recreate_documents,

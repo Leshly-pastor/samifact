@@ -1311,6 +1311,7 @@ export default {
         "businessTurns",
         "typeUser",
         "isPrint",
+        "isFoodDealer",
     ],
     components: {
         OptionsOrder,
@@ -1378,18 +1379,19 @@ export default {
             sellers: [],
             keys: {},
             company: null,
+            itemsFoodDealer: [],
         };
     },
     async created() {
-       
         this.loadConfiguration();
         this.$store.commit("setConfiguration", this.configuration2);
         await this.initForm();
         await this.getTables();
         await this.getPercentageIgv();
         this.events();
-
-        await this.getFormPosLocalStorage();
+        if (!this.isFoodDealer) {
+            await this.getFormPosLocalStorage();
+        }
         await this.initCurrencyType();
         this.customer = await this.getLocalStorageIndex("customer");
 
@@ -1492,6 +1494,8 @@ export default {
             this.clickAddItem(item, index);
         },
         async clickSendOrderNote() {
+            
+            if(await this.checkFoodsDealer()) return;
             if (!this.form.subtotal) {
                 //fix para agregar subtotal si no existe prop en json almacenado en local storage
                 this.form.subtotal = this.form.total;
@@ -2327,6 +2331,7 @@ export default {
                 this.$nextTick(() => {
                     this.initFocus();
                 });
+                this.setFoodsDealer();
             });
 
             // await this.$eventHub.$on("indexInitFocus", () => {
@@ -2417,8 +2422,11 @@ export default {
                     ? this.configuration.enabled_dispatch_ticket_pdf
                     : false,
             };
-                console.log("🚀 ~ file: index.vue:2365 ~ initForm ~ this.form:", this.form)
-            
+            console.log(
+                "🚀 ~ file: index.vue:2365 ~ initForm ~ this.form:",
+                this.form
+            );
+
             // console.log(this.configuration.show_terms_condition_pos);
             if (this.configuration.show_terms_condition_pos) {
                 this.form.terms_condition =
@@ -3151,6 +3159,7 @@ export default {
                     this.all_customers = response.data.customers;
                     this.sellers = response.data.sellers;
                     this.company = response.data.company;
+                    this.itemsFoodDealer = response.data.items_food_dealer;
                     this.establishment = response.data.establishment;
                     this.currency_types = response.data.currency_types;
                     this.user = response.data.user;
@@ -3165,7 +3174,62 @@ export default {
                     //this.filterItems();
                     this.changeDateOfIssue();
                     this.changeExchangeRate();
+                    this.setFoodsDealer();
                 });
+        },
+        async checkFoodsDealer() {
+            let error = false;
+            if(!this.configuration.order_note_mode && !this.isFoodDealer){
+                return error;
+            }
+            try {
+                let data = {
+                    date_of_issue: this.form.date_of_issue,
+                    customer_id: this.form.customer_id,
+                    items_id: this.form.items.map((item) => item.item_id),
+                };
+                const response = await this.$http.post(
+                    "order-notes/check-item-food-dealer",
+                    data
+                );
+                if(response.status == 200){
+                    let {success,errors} = response.data;
+                    if(!success){
+                        error = true;
+                        this.$message(
+                            {
+                                type: "error",
+                                dangerouslyUseHTMLString: true,
+                                message: errors.join("<br>"),
+                            }
+                        );
+                    }
+                }
+            } catch (err) {
+                console.log(err);
+            }finally{
+                return error;
+            }
+        },
+        setFoodsDealer() {
+            if (this.isFoodDealer && this.configuration.order_note_mode) {
+                let time = moment().format("HH:mm:ss");
+                let items = this.itemsFoodDealer.filter((item) => {
+                    let { start, end } = item;
+
+                    return start <= time && end >= time;
+                });
+
+                for (let i = 0; i < items.length; i++) {
+                    let item = items[i];
+                    let exist_item = _.find(this.form.items, {
+                        item_id: item.item_id,
+                    });
+                    if (!exist_item) {
+                        this.clickAddItem(item, 0);
+                    }
+                }
+            }
         },
         selectDefaultCustomer() {
             if (this.establishment.customer_id && !this.form.customer_id) {

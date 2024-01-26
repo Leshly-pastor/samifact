@@ -14,6 +14,7 @@ use App\Models\Tenant\Catalogs\{
     Province,
     District
 };
+use Illuminate\Support\Facades\DB;
 use Modules\BusinessTurn\Models\DocumentTransport;
 use Modules\BusinessTurn\Http\Requests\DocumentHotelGuestRequest;
 
@@ -43,6 +44,11 @@ class BusinessTurnController extends Controller
         $record = BusinessTurn::findOrFail($request->id);
         $record->active = ($record->active) ? false:true;
         $record->save();
+        if(!BusinessTurn::isIntegrateSystem()){
+            //setear a todos los usuarios la propiedad integrate_user_type_id a null
+            DB::connection('tenant')->table('users')->update(['integrate_user_type_id' => null]);
+            
+        }
 
         return [
             'success' => true,

@@ -133,12 +133,12 @@ if ($logo) {
                 @endif
             </tr>
             <tr>
-                <td colspan="2">P.Partida: {{ $document->origin->location_id }} - {{ $document->origin->address }}
+                <td colspan="2">P.Partida: {{$document->origin ? $document->origin->location_id :null }} - {{ $document->origin ? $document->origin->address : null }}
                 </td>
             </tr>
             <tr>
-                <td colspan="2">P.Llegada: {{ $document->delivery->location_id }} -
-                    {{ $document->delivery->address }}</td>
+                <td colspan="2">P.Llegada: {{  $document->delivery ? $document->delivery->location_id : null }} -
+                    {{ $document->delivery ? $document->delivery->address : null }}</td>
             </tr>
             @if ($document->order_form_external)
                 <tr>

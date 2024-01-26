@@ -444,6 +444,13 @@
                                                 row.affectation_igv_type
                                                     .description
                                             }}</small>
+                                            <br>
+                                            <a href="#"
+                                            @click="seeDetails(row.item)"
+                                            class="text-info"
+                                            >
+                                            [Ver detalle] 
+                                            </a>
                                         </td>
                                         <td class="text-center">
                                             {{ row.item.unit_type_id }}
@@ -3457,6 +3464,10 @@ export default {
         this.startConnectionQzTray();
     },
     methods: {
+    seeDetails(item){
+        console.log("🚀 ~ file: invoice.vue:3465 ~ seeDetails ~ item:", item)
+        
+    },
         ...mapActions(["loadConfiguration"]),
         startConnectionQzTray() {
             if (!qz.websocket.isActive() && this.isAutoPrint) {

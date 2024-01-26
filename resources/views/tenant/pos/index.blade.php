@@ -16,6 +16,7 @@
         :configuration="{{ $configuration}}"
      	:soap-company="{{ json_encode($soap_company) }}"
       :business-turns="{{ $business_turns }}"
+      :is-food-dealer="{{ json_encode($is_food_dealer) }}"
       :type-user="{{json_encode(Auth::user()->type)}}"
       :is-print="{{json_encode($configuration->auto_print)}}">
     </tenant-pos-index>

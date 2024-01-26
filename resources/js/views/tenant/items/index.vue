@@ -147,7 +147,7 @@
                     </div>
                 </template>
                 <button
-                    v-if="can_add_new_product"
+                    v-if="can_add_new_product && !isComercial"
                     class="btn btn-custom btn-sm mt-2 mr-2"
                     type="button"
                     @click.prevent="clickCreate()"
@@ -601,6 +601,7 @@
                 :recordId="recordId"
                 :showDialog.sync="showDialog"
                 :type="type"
+                :isFoodDealer="isFoodDealer"
             ></items-form>
 
             <items-import :showDialog.sync="showImportDialog"></items-import>
@@ -685,7 +686,7 @@ import ItemsImportUpdatePriceWarehouses from "./partials/update_prices_warehouse
 import ItemsImportUpdatePricePersonType from "./partials/update_prices_person_type.vue";
 
 export default {
-    props: ["configuration", "typeUser", "type"],
+    props: ["configuration", "typeUser", "type","isComercial","isFoodDealer"],
     mixins: [deletable],
     components: {
         ItemsImportListSize,

@@ -1903,6 +1903,7 @@
                             </div>
                         </div>
                     </el-tab-pane>
+
                     <el-tab-pane class="mb-3" name="third">
                         <span slot="label">Contable</span>
                         <div class="row">
@@ -2893,6 +2894,21 @@
                                         >
                                             <i class="fa fa-info-circle"></i>
                                         </el-tooltip>
+                                        <el-tooltip
+                                            class="item"
+                                            content="Eliminar la imagen de encabezado"
+                                            effect="dark"
+                                            placement="top-start"
+                                        >
+                                           <!-- un icono como boton pequeño para eliminar la imagen -->
+                                        <el-tag
+                                            type="danger"
+                                            role="button"
+                                            @click="removeImageHeader"
+                                        >
+                                            <i class="fa fa-trash"></i>
+                                        </el-tag>
+                                        </el-tooltip>
                                     </label>
                                     <el-input
                                         v-model="form.header_image"
@@ -2971,6 +2987,21 @@
                                             placement="top-start"
                                         >
                                             <i class="fa fa-info-circle"></i>
+                                        </el-tooltip>
+                                             <el-tooltip
+                                            class="item"
+                                            content="Eliminar la imagen para del membretado"
+                                            effect="dark"
+                                            placement="top-start"
+                                        >
+                                           <!-- un icono como boton pequeño para eliminar la imagen -->
+                                        <el-tag
+                                            type="danger"
+                                            role="button"
+                                            @click="removeMembrete"
+                                        >
+                                            <i class="fa fa-trash"></i>
+                                        </el-tag>
                                         </el-tooltip>
                                     </label>
                                     <el-input
@@ -4949,6 +4980,15 @@ export default {
         this.events();
     },
     methods: {
+        async removeMembrete(){
+            this.form.background_image = null;
+            await this.submit();
+        },
+        async removeImageHeader() {
+            this.form.header_image = null;
+            await this.submit();
+
+        },
         ...mapActions(["loadConfiguration"]),
         events() {
             this.$eventHub.$on("submitFormConfigurations", (form) => {

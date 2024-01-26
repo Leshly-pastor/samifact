@@ -9,6 +9,8 @@
         width="75%"
         @close="close"
         @open="create"
+        :fullscreen="isReadonly"
+        :show-close="!isReadonly"
     >
         <form autocomplete="off" @submit.prevent="submit">
             <el-tabs v-model="activeName">
@@ -174,7 +176,7 @@
                                 ></small>
                             </div>
                         </div>
-                             <div class="col-md-3" v-if="isMajolica">
+                        <div class="col-md-3" v-if="isMajolica">
                             <div
                                 :class="{ 'has-danger': errors.meter }"
                                 class="form-group"
@@ -575,8 +577,7 @@
                                         <i class="fa fa-info-circle"></i>
                                     </el-tooltip>
                                 </label>
-                                <el-input :value="form.sanitary">
-                                </el-input>
+                                <el-input :value="form.sanitary"> </el-input>
                                 <small
                                     v-if="errors.sanitary"
                                     class="text-danger"
@@ -590,8 +591,7 @@
                                 <label class="control-label">
                                     Laboratorio
                                 </label>
-                                <el-input :value="form.laboratory">
-                                </el-input>
+                                <el-input :value="form.laboratory"> </el-input>
                             </div>
                         </div>
                         <div class="col-md-3">
@@ -925,13 +925,11 @@
                                 </small>
                             </div>
                         </div>
-                         <div class="col-md-3">
+                        <div class="col-md-3">
                             <div>
                                 <el-checkbox v-model="form.has_bonus_item"
-                              
                                     >Producto con bonificación</el-checkbox
                                 >
-                              
                             </div>
                         </div>
                         <div v-if="isClothesShoes" class="col-md-3">
@@ -1026,6 +1024,27 @@
                                 </div>
                             </div>
                         </template>
+                        <template v-if="isFoodDealer">
+                            <div class="col-md-3">
+                                <div
+                                    :class="{
+                                        'has-danger': errors.is_food_dealer,
+                                    }"
+                                    class="form-group"
+                                >
+                                    <el-checkbox v-model="form.is_food_dealer"
+                                        >¿Es producto para el
+                                        concesionario?</el-checkbox
+                                    >
+                                    <br />
+                                    <small
+                                        v-if="errors.is_food_dealer"
+                                        class="text-danger"
+                                        v-text="errors.is_food_dealer[0]"
+                                    ></small>
+                                </div>
+                            </div>
+                        </template>
                     </div>
                 </el-tab-pane>
 
@@ -1066,7 +1085,7 @@
                         </div>
                     </div>
                 </el-tab-pane>
-              
+
                 <el-tab-pane class v-if="!isService" name="third">
                     <span slot="label">Presentaciones</span>
                     <div class="row">
@@ -1923,7 +1942,7 @@
                         <!-- isc compras -->
                     </div>
                 </el-tab-pane>
-   <el-tab-pane class  name="seven">
+                <el-tab-pane class name="seven">
                     <span slot="label">Tipo de clientes</span>
                     <div class="row">
                         <div class="col-12">
@@ -1948,7 +1967,6 @@
                                                 ></el-input>
                                             </td>
                                         </tr>
-                                 
                                     </tbody>
                                 </table>
                             </div>
@@ -2130,11 +2148,7 @@
                     </div>
                 </el-tab-pane>
 
-                         <el-tab-pane
-                    class
-                    v-if="form.has_bonus_item"
-                    name="eight"
-                >
+                <el-tab-pane class v-if="form.has_bonus_item" name="eight">
                     <span slot="label">Bonificación</span>
                     <div class="row">
                         <div class="col-md-7 col-lg-7 col-xl-7 col-sm-7">
@@ -2143,7 +2157,9 @@
                                 :class="{ 'has-danger': errors.item_id }"
                                 class="form-group"
                             >
-                                <label class="control-label"> Bonificación </label>
+                                <label class="control-label">
+                                    Bonificación
+                                </label>
 
                                 <el-select
                                     class="w-100"
@@ -2202,7 +2218,9 @@
                         </div>
                         <div
                             class="col-12 table-responsive"
-                            v-if="form.bonus_items && form.bonus_items.length > 0"
+                            v-if="
+                                form.bonus_items && form.bonus_items.length > 0
+                            "
                         >
                             <div class="table-responsive">
                                 <table class="table">
@@ -2239,27 +2257,64 @@
                                                 ></el-input-number>
                                             </td>
                                             <td>
-                                                
                                                 <button
                                                     type="button"
                                                     class="btn waves-effect waves-light btn-sm btn-danger"
-                                                    @click.prevent="clickDeleteBonusItem(index)"
+                                                    @click.prevent="
+                                                        clickDeleteBonusItem(
+                                                            index
+                                                        )
+                                                    "
                                                 >
-                                                <i class="fa fa-trash"></i>
+                                                    <i class="fa fa-trash"></i>
                                                 </button>
                                             </td>
-
-                                      </tr>
+                                        </tr>
                                     </tbody>
                                 </table>
                             </div>
                         </div>
-
-                      
+                    </div>
+                </el-tab-pane>
+                <el-tab-pane
+                    class
+                    v-if="form.is_food_dealer"
+                    name="food_dealer"
+                >
+                    <span slot="label">Horario Concesionario</span>
+                    <div class="row">
+                        <div class="col-md-3 col-lg-3 col-12">
+                            <label for="start">Inicio</label>
+                            <el-time-picker
+                                v-model="form.start"
+                                placeholder="Seleccione hora"
+                                value-format="HH:mm"
+                                :format="'HH:mm'"
+                                :picker-options="{
+                                    format: 'HH:mm', // Utiliza 'hh' para las horas en formato de 12 horas y 'A' para AM/PM
+                                }"
+                                timezone="America/Lima"
+                                style="width: 100%"
+                            ></el-time-picker>
+                        </div>
+                        <div class="col-md-3 col-lg-3 col-12">
+                            <label for="end">Fin</label>
+                            <el-time-picker
+                                v-model="form.end"
+                                placeholder="Seleccione hora"
+                                style="width: 100%"
+                                  value-format="HH:mm"
+                                :format="'HH:mm'"
+                                :picker-options="{
+                                    format: 'HH:mm', // Utiliza 'hh' para las horas en formato de 12 horas y 'A' para AM/PM
+                                }"
+                                timezone="America/Lima"
+                            ></el-time-picker>
+                        </div>
                     </div>
                 </el-tab-pane>
             </el-tabs>
-            <div class="form-actions text-end pt-2 mt-2">
+            <div class="form-actions text-end pt-2 mt-2" v-if="!isReadonly">
                 <el-button @click.prevent="close()">Cancelar</el-button>
                 <el-button
                     :loading="loading_submit"
@@ -2298,9 +2353,17 @@ import {
     ItemOptionDescription,
     ItemSlotTooltip,
 } from "../../../helpers/modal_item";
-
+import moment from "moment";
 export default {
-    props: ["showDialog", "recordId", "external", "type", "pharmacy"],
+    props: [
+        "showDialog",
+        "recordId",
+        "external",
+        "type",
+        "pharmacy",
+        "isReadonly",
+        "isFoodDealer",
+    ],
     components: {
         LotsForm,
         ExtraInfo,
@@ -2379,7 +2442,7 @@ export default {
 
     data() {
         return {
-            customerTypes:[],
+            customerTypes: [],
             imageStyle: {
                 objectFit: "cover",
                 width: "200px",
@@ -2416,12 +2479,12 @@ export default {
             resource: "items",
             errors: {},
             item_suplly: {},
-            item_bonus:{},
+            item_bonus: {},
             headers: headers_token,
             form: {
                 item_supplies: [],
                 is_for_production: false,
-                has_bonus_item:false,
+                has_bonus_item: false,
             },
             // configuration: {},
             unit_types: [],
@@ -2529,15 +2592,16 @@ export default {
         });
 
         await this.setDefaultConfiguration();
+        if (this.isReadonly) {
+            await this.create();
+        }
     },
 
     methods: {
-        clickDeleteBonusItem(idx){
+        clickDeleteBonusItem(idx) {
             this.form.bonus_items.splice(idx, 1);
         },
-        changeBonusItem(){
-
-        },
+        changeBonusItem() {},
         addRowSize(sizes) {
             this.form.sizes = sizes;
         },
@@ -2644,13 +2708,16 @@ export default {
             this.form.sale_affectation_igv_type_id = this.config
                 ? this.config.affectation_igv_type_id
                 : "10";
-             this.form.purchase_affectation_igv_type_id = this.config
+            this.form.purchase_affectation_igv_type_id = this.config
                 ? this.config.purchase_affectation_igv_type_id
                 : "10";
-            if(this.form.purchase_affectation_igv_type_id == null){
+            if (this.form.purchase_affectation_igv_type_id == null) {
                 this.form.purchase_affectation_igv_type_id = "10";
             }
-                console.log("🚀 ~ file: form.vue:2628 ~ setDefaultConfiguration ~ config.purchase_affectation_igv_type_id:", this.config.purchase_affectation_igv_type_id)
+            console.log(
+                "🚀 ~ file: form.vue:2628 ~ setDefaultConfiguration ~ config.purchase_affectation_igv_type_id:",
+                this.config.purchase_affectation_igv_type_id
+            );
             this.$http.get(`/configurations/record`).then((response) => {
                 this.form.has_igv = response.data.data.include_igv;
                 this.form.purchase_has_igv = response.data.data.include_igv;
@@ -2769,8 +2836,10 @@ export default {
             (this.loading_submit = false), (this.errors = {});
 
             this.form = {
+                start: null,
+                end: null,
                 sizes: [],
-                has_bonus_item:false,
+                has_bonus_item: false,
                 has_sizes: false,
                 frequent: null,
                 id: null,
@@ -2905,11 +2974,22 @@ export default {
                 ? "Editar Producto"
                 : "Nuevo Producto";
 
+            if (this.isReadonly) {
+                this.titleDialog = "Detalle Producto";
+            }
+
             if (this.recordId) {
                 await this.$http
                     .get(`/${this.resource}/record/${this.recordId}`)
                     .then((response) => {
                         this.form = response.data.data;
+                        let { start, end } = this.form;
+                        if (start && end) {
+                            console.log("🚀 ~ file: form.vue:2986 ~ .then ~ start:", start)
+                            console.log("🚀 ~ file: form.vue:2986 ~ .then ~ end:", end)
+                            this.form.start = start;
+                            this.form.end = end;
+                        }
                         this.form.item_unit_types =
                             this.form.item_unit_types.map((i) => ({
                                 ...i,
@@ -3113,7 +3193,10 @@ export default {
                         "El porcentaje isc debe ser mayor a 0 (Compras)"
                     );
             }
-            console.log("🚀 ~ file: form.vue:2943 ~ submit ~ this.form:", this.form)
+            console.log(
+                "🚀 ~ file: form.vue:2943 ~ submit ~ this.form:",
+                this.form
+            );
 
             this.loading_submit = true;
 
@@ -3149,6 +3232,8 @@ export default {
                 });
         },
         close() {
+            if (this.isReadonly) return;
+
             this.$emit("update:showDialog", false);
             this.resetForm();
         },
@@ -3281,7 +3366,7 @@ export default {
         ItemOptionDescriptionView(item) {
             return ItemOptionDescription(item);
         },
-         clickAddBonusItem() {
+        clickAddBonusItem() {
             // item_supplies
             if (this.form.bonus_items === undefined) this.form.bonus_items = [];
             let item = this.item_bonus;
@@ -3298,7 +3383,7 @@ export default {
                 description: item.description,
             };
             //item.individual_item = item
-            item.quantity = 1
+            item.quantity = 1;
             //if(isNaN(item.quantity)) item.quantity = 0 ;
             this.form.bonus_items.push(item);
             this.changeItem();

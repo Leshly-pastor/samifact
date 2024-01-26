@@ -42,11 +42,12 @@
                     </button>
                 </span>
                 <a
+                    v-if="!isComercial"
                     :href="`/${resource}/create`"
                     class="btn btn-custom btn-sm mt-2 mr-2"
                     ><i class="fa fa-plus-circle"></i> Nuevo</a
                 >
-                <div class="btn-group flex-wrap">
+                <div class="btn-group flex-wrap"     v-if="!isComercial">
                     <button
                         type="button"
                         class="btn btn-custom btn-sm mt-2 mr-2 dropdown-toggle"
@@ -759,7 +760,7 @@
                                 style="min-width: 41px"
                                 class="btn btn-outline-danger mb-1"
                                 @click.prevent="clickKillDocument(row.id)"
-                                v-if="configuration.delete_documents"
+                                v-if="configuration.delete_documents && !isComercial"
                             >
                                 ELIMINAR
                             </button>
@@ -778,7 +779,8 @@
                                     <i class="fas fa-ellipsis-v"></i>
                                 </button>
                                 <div class="dropdown-menu dropdown-menu-end">
-                                    <div
+                                   <template v-if="!isComercial">
+                                     <div
                                         v-if="
                                             configuration.permission_to_edit_cpe
                                         "
@@ -988,14 +990,7 @@
                                     >
                                         C. Detracción
                                     </a>
-                                    <button
-                                        class="dropdown-item"
-                                        @click.prevent="clickOptions(row.id)"
-                                    >
-                                        Opciones
-                                    </button>
-
-                                    <template
+                                      <template
                                         v-if="
                                             row.btn_force_send_by_summary &&
                                             typeUser === 'admin'
@@ -1028,6 +1023,15 @@
                                             Retención
                                         </button>
                                     </template>
+                                   </template>
+                                    <button
+                                        class="dropdown-item"
+                                        @click.prevent="clickOptions(row.id)"
+                                    >
+                                        Opciones
+                                    </button>
+
+                                  
                                 </div>
                             </div>
                         </td>
@@ -1130,6 +1134,7 @@ export default {
     props: [
         "to_anulate",
         "isAuditor",
+        "isComercial",
         "isClient",
         "typeUser",
         "import_documents",

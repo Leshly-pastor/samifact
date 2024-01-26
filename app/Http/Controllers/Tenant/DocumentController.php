@@ -177,6 +177,7 @@ class DocumentController extends Controller
     public function index(Request $request)
     {
 
+        $is_comercial  = auth()->user()->integrate_user_type_id == 2;
         $to_anulate = $request->input('to_anulate') ?? false;
         $is_client = $this->getIsClient();
         $import_documents = config('tenant.import_documents');
@@ -193,6 +194,7 @@ class DocumentController extends Controller
         return view(
             'tenant.documents.index',
             compact(
+                'is_comercial',
                 'document_state_types',
                 'is_auditor',
                 'to_anulate',

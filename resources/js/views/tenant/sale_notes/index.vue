@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div v-loading="loading">
         <div class="page-header pr-0">
             <h2>
                 <a href="/dashboard"><i class="fas fa-tachometer-alt"></i></a>
@@ -7,30 +7,30 @@
             <ol class="breadcrumbs">
                 <li class="active"><span>Notas de Venta</span></li>
             </ol>
-            <div class="right-wrapper pull-right">
+            <div class="right-wrapper pull-right" v-if="!isCommercial">
                 <a
                     href="#"
                     @click.prevent="clickCreate()"
-                    class="btn btn-custom btn-sm  mt-2 mr-2"
+                    class="btn btn-custom btn-sm mt-2 mr-2"
                     ><i class="fa fa-plus-circle"></i> Nuevo</a
                 >
                 <a
                     href="#"
                     @click.prevent="onOpenModalGenerateCPE"
-                    class="btn btn-custom btn-sm  mt-2 mr-2"
+                    class="btn btn-custom btn-sm mt-2 mr-2"
                     >Generar comprobante desde múltiples Notas</a
                 >
-                  <a
+                <a
                     href="#"
                     @click.prevent="onOpenModalGenerateGuie"
-                    class="btn btn-custom btn-sm  mt-2 mr-2"
+                    class="btn btn-custom btn-sm mt-2 mr-2"
                     >Generar guía desde múltiples Notas</a
                 >
                 <a
                     href="#"
                     v-if="config.send_data_to_other_server === true"
                     @click.prevent="onOpenModalMigrateNv"
-                    class="btn btn-custom btn-sm  mt-2 mr-2"
+                    class="btn btn-custom btn-sm mt-2 mr-2"
                     >Migrar Datos</a
                 >
             </div>
@@ -59,15 +59,12 @@
             </div>
             <div class="card-body">
                 <data-table
-                :isDriver="isDriver"
-                    
-                    
-                 ref="dataTable" :resource="resource">
+                    :isDriver="isDriver"
+                    ref="dataTable"
+                    :resource="resource"
+                >
                     <tr slot="heading">
                         <th>#</th>
-                        <th class="text-end" v-if="columns.seller_name.visible">
-                            Vendedor
-                        </th>
 
                         <th class="text-center">Fecha Emisión</th>
                         <th
@@ -77,6 +74,9 @@
                             Fecha de pago
                         </th>
                         <th>Cliente</th>
+                        <th class="text-end" v-if="columns.seller_name.visible">
+                            Vendedor
+                        </th>
                         <th>Nota de Venta</th>
                         <th>Estado</th>
                         <th
@@ -133,10 +133,21 @@
 
                         <th class="text-center">Comprobantes</th>
                         <th class="text-center">Estado pago</th>
-                        <th class="text-center">Orden de compra</th>
+                        <th v-if="isIntegrateSystem" class="text-center">
+                            Confirmación de pago
+                        </th>
+                        <th v-else class="text-center">Orden de compra</th>
 
                         <th class="text-center">Pagos</th>
                         <th class="text-center">Descarga</th>
+                        <template v-if="isIntegrateSystem">
+                            <th class="text-center">Encargado</th>
+                            <th class="text-center">Producción</th>
+                            <th class="text-center">Encargado</th>
+                            <th class="text-center">Logistica</th>
+                            <th class="text-center">Guia de traslado</th>
+                            <th class="text-center">G. remisión</th>
+                        </template>
                         <th
                             class="text-center"
                             v-if="columns.recurrence.visible"
@@ -167,22 +178,17 @@
                         >
                             Placa
                         </th>
-                            <th
+                        <th
                             class="text-center"
                             v-if="columns.observation.visible"
                         >
                             Observación
                         </th>
                         <th class="text-end">Acciones</th>
-                        <th v-if="configuration.college">
-                            Periodo
-                        </th>
+                        <th v-if="configuration.college">Periodo</th>
                     </tr>
                     <tr slot-scope="{ index, row }">
                         <td>{{ index }}</td>
-                        <td class="text-end" v-if="columns.seller_name.visible">
-                            {{ row.seller_name }}
-                        </td>
 
                         <td class="text-center">{{ row.date_of_issue }}</td>
                         <td
@@ -195,6 +201,9 @@
                             {{ row.customer_name }}<br /><small
                                 v-text="row.customer_number"
                             ></small>
+                        </td>
+                        <td class="text-end" v-if="columns.seller_name.visible">
+                            {{ row.seller_name }}
                         </td>
                         <td>{{ row.full_number }}</td>
                         <td>{{ row.state_type_description }}</td>
@@ -251,6 +260,7 @@
                         >
                             {{ row.total_pending_paid }}
                         </td>
+
                         <td>
                             <template v-for="(document, i) in row.documents">
                                 <label
@@ -271,7 +281,7 @@
                                     class="badge text-white"
                                     :class="{
                                         'bg-success': row.total_canceled,
-                                        'bg-warning': !row.total_canceled
+                                        'bg-warning': !row.total_canceled,
                                     }"
                                     >{{
                                         row.total_canceled
@@ -282,7 +292,67 @@
                             </template>
                         </td>
 
-                        <td>{{ row.purchase_order }}</td>
+                        <td v-if="isIntegrateSystem">
+                            <template v-if="isCommercial">
+                                <el-button
+                                    :class="`state_${row.state_payment_id}_py`"
+                                >
+                                    {{
+                                        row.state_payment_id == "01"
+                                            ? "En espera"
+                                            : row.state_payment_id == "02"
+                                            ? "Aprobado"
+                                            : "Rechazado"
+                                    }}
+                                </el-button></template
+                            >
+                            <template v-else>
+                                <el-dropdown
+                                    trigger="click"
+                                    @command="changeStatePayment"
+                                >
+                                    <el-button
+                                        :class="`state_${row.state_payment_id}_py`"
+                                    >
+                                        {{
+                                            row.state_payment_id == "01"
+                                                ? "En espera"
+                                                : row.state_payment_id == "02"
+                                                ? "Aprobado"
+                                                : "Rechazado"
+                                        }}<i
+                                            class="el-icon-arrow-down el-icon--right"
+                                        ></i>
+                                    </el-button>
+                                    <el-dropdown-menu slot="dropdown">
+                                        <el-dropdown-item
+                                            v-for="(state, index) in [
+                                                {
+                                                    id: '01',
+                                                    description: 'En espera',
+                                                },
+                                                {
+                                                    id: '02',
+                                                    description: 'Aprobado',
+                                                },
+                                                {
+                                                    id: '03',
+                                                    description: 'Rechazado',
+                                                },
+                                            ]"
+                                            :key="index"
+                                            :disabled="
+                                                state.id == row.state_payment_id
+                                            "
+                                            :command="[state.id, row.id]"
+                                        >
+                                            {{ state.description }}
+                                        </el-dropdown-item>
+                                    </el-dropdown-menu>
+                                </el-dropdown>
+                            </template>
+                        </td>
+                        <td v-else>{{ row.purchase_order }}</td>
 
                         <td class="text-center">
                             <button
@@ -304,6 +374,70 @@
                                 <i class="fas fa-file-pdf"></i>
                             </button>
                         </td>
+                        <template v-if="isIntegrateSystem">
+                            <td class="text-center">
+                                {{
+                                    row.production_order &&
+                                    row.production_order.responsible_name
+                                }}
+                            </td>
+                            <td class="text-center">
+                                <el-button
+                                    v-if="row.production_order"
+                                    :class="`state_${row.production_order.state_id}_p`"
+                                >
+                                    <small>
+                                        {{
+                                            row.production_order
+                                                .state_description
+                                        }}
+                                    </small>
+                                </el-button>
+                            </td>
+                            <td class="text-center">
+                                {{
+                                    row.dispatch_order &&
+                                    row.dispatch_order.responsible_name
+                                }}
+                            </td>
+                            <td class="text-center">
+                                <el-button
+                                    v-if="row.dispatch_order"
+                                    :class="`state_${row.dispatch_order.state_id}_d`"
+                                >
+                                    <small>
+                                        {{
+                                            row.dispatch_order.state_description
+                                        }}
+                                    </small>
+                                </el-button>
+                            </td>
+                            <td class="text-center">
+                                <button
+                                    v-if="row.has_agency_dispatch"
+                                    type="button"
+                                    style="min-width: 41px"
+                                    class="btn waves-effect waves-light btn-sm btn-success"
+                                    @click.prevent="viewGuide(row)"
+                                >
+                                    Ver guia de traslado
+                                </button>
+                            </td>
+                            <td>
+                                <template
+                                    v-for="(dispatch, i) in row.dispatches"
+                                >
+                                    <el-button
+                                        type="primary"
+                                        :key="i"
+                                        :class="`state_${dispatch.state_id}_d`"
+                                        @click="openDispatchFinish(dispatch.id)"
+                                    >
+                                        {{ dispatch.number }}
+                                    </el-button>
+                                </template>
+                            </td>
+                        </template>
                         <td class="text-end" v-if="columns.recurrence.visible">
                             <template
                                 v-if="
@@ -344,10 +478,7 @@
                         >
                             {{ row.license_plate }}
                         </td>
-  <td
-                            class="text-end"
-                            v-if="columns.observation.visible"
-                        >
+                        <td class="text-end" v-if="columns.observation.visible">
                             {{ row.observation }}
                         </td>
                         <td class="text-end">
@@ -363,6 +494,60 @@
                                     <i class="fas fa-ellipsis-v"></i>
                                 </button>
                                 <div class="dropdown-menu dropdown-menu-end">
+                                    <template v-if="isCommercial">
+                                        <button
+                                            data-toggle="tooltip"
+                                            data-placement="top"
+                                            title="Enviar guia"
+                                            v-if="row.dispatches.length > 0"
+                                            type="button"
+                                            class="dropdown-item"
+                                            @click.prevent="
+                                                openDispatchFinish(
+                                                    row.dispatches[0].id
+                                                )
+                                            "
+                                        >
+                                            <!--                                <i class="fas fa-trash"></i>-->
+                                            Enviar guía
+                                        </button>
+
+                                        <button
+                                            data-toggle="tooltip"
+                                            data-placement="top"
+                                            title="Enviar guia"
+                                            v-if="row.documents.length > 0"
+                                            type="button"
+                                            class="dropdown-item"
+                                            @click.prevent="
+                                                openDocumentOptions(
+                                                    row.document_id
+                                                )
+                                            "
+                                        >
+                                            <!--                                <i class="fas fa-trash"></i>-->
+                                            Enviar Documento
+                                        </button>
+                                    </template>
+                                    <button
+                                        data-toggle="tooltip"
+                                        data-placement="top"
+                                        title="Anular"
+                                        v-if="
+                                            row.quotation_id &&
+                                            isIntegrateSystem
+                                        "
+                                        type="button"
+                                        class="dropdown-item"
+                                        @click.prevent="
+                                            clickOpenObservationQuotation(
+                                                row.quotation_id
+                                            )
+                                        "
+                                    >
+                                        <!--                                <i class="fas fa-trash"></i>-->
+                                        Editar observaciones cotizaciones
+                                    </button>
                                     <button
                                         data-toggle="tooltip"
                                         data-placement="top"
@@ -375,7 +560,6 @@
                                         <!--                                <i class="fas fa-trash"></i>-->
                                         Anular
                                     </button>
-
                                     <button
                                         data-toggle="tooltip"
                                         data-placement="top"
@@ -385,46 +569,86 @@
                                         @click.prevent="clickCreate(row.id)"
                                         v-if="
                                             row.btn_generate &&
-                                                row.state_type_id != '11' && row.not_blocked
+                                            row.state_type_id != '11' &&
+                                            row.not_blocked
                                         "
                                     >
                                         <!--                                        <i class="dropdown-item fas fa-file-signature"></i>-->
                                         Editar
                                     </button>
-
                                     <button
                                         data-toggle="tooltip"
                                         data-placement="top"
-                                        title="Generar comprobante"
+                                        title="Generar orden de producción"
                                         type="button"
                                         class="dropdown-item"
-                                        @click.prevent="clickGenerate(row.id)"
+                                        @click.prevent="
+                                            clickGenerateProductionOrder(row.id)
+                                        "
                                         v-if="
-                                            !row.changed &&
-                                                row.state_type_id != '11' &&
-                                                soapCompany != '03'
+                                            isIntegrateSystem &&
+                                            !row.production_order &&
+                                            !isCommercial
                                         "
                                     >
                                         <!--                                <i class="dropdown-item fas fa-file-excel"></i>-->
-                                        Generar comprobante
+                                        Generar Orden de producción
                                     </button>
+                                    <template v-if="isIntegrateSystem">
+                                        <button
+                                            data-toggle="tooltip"
+                                            data-placement="top"
+                                            title="Generar comprobante"
+                                            type="button"
+                                            class="dropdown-item"
+                                            @click.prevent="
+                                                clickGenerateUrl(row.id)
+                                            "
+                                            v-if="
+                                                !row.changed &&
+                                                row.state_type_id != '11' &&
+                                                soapCompany != '03' &&
+                                                !isCommercial
+                                            "
+                                        >
+                                            Generar comprobante
+                                        </button>
+                                    </template>
+                                    <template v-else>
+                                        <button
+                                            data-toggle="tooltip"
+                                            data-placement="top"
+                                            title="Generar comprobante"
+                                            type="button"
+                                            class="dropdown-item"
+                                            @click.prevent="
+                                                clickGenerate(row.id)
+                                            "
+                                            v-if="
+                                                !row.changed &&
+                                                row.state_type_id != '11' &&
+                                                soapCompany != '03'
+                                            "
+                                        >
+                                            <!--                                <i class="dropdown-item fas fa-file-excel"></i>-->
+                                            Generar comprobante
+                                        </button>
+                                    </template>
 
                                     <el-tooltip
+                                        v-if="!isCommercial"
                                         class="item"
                                         effect="dark"
                                         content="Generar guía desde CPE"
                                         placement="top-start"
                                     >
                                         <template
-                                            v-for="(document,
-                                            i) in row.documents"
+                                            v-for="(
+                                                document, i
+                                            ) in row.documents"
                                         >
                                             <a
-                                                :href="
-                                                    `/dispatches/create/${
-                                                        document.id
-                                                    }`
-                                                "
+                                                :href="`/dispatches/create/${document.id}`"
                                                 class="dropdown-item"
                                                 v-if="row.changed"
                                                 :key="i"
@@ -436,17 +660,14 @@
                                     </el-tooltip>
 
                                     <el-tooltip
+                                        v-if="!isCommercial"
                                         class="item"
                                         effect="dark"
                                         content="Generar guía desde Nota Venta"
                                         placement="left"
                                     >
                                         <a
-                                            :href="
-                                                `/dispatches/create_new/sale_note/${
-                                                    row.id
-                                                }`
-                                            "
+                                            :href="`/dispatches/create_new/sale_note/${row.id}`"
                                             class="dropdown-item"
                                         >
                                             Generar guía
@@ -480,7 +701,10 @@
                                         @click.prevent="
                                             clickKillDocument(row.id)
                                         "
-                                        v-if="configuration.delete_documents"
+                                        v-if="
+                                            configuration.delete_documents &&
+                                            !isCommercial
+                                        "
                                     >
                                         Eliminar
                                     </button>
@@ -490,7 +714,8 @@
                                         title="Enviar a otro servidor"
                                         v-if="
                                             row.state_type_id != '11' &&
-                                                row.send_other_server === true
+                                            row.send_other_server === true &&
+                                            !isCommercial
                                         "
                                         type="button"
                                         class="dropdown-item"
@@ -506,7 +731,8 @@
                                         title="Elimina unicamente la relación entre la nota y factura"
                                         v-if="
                                             configuration.delete_relation_note_to_invoice &&
-                                                row.documents.length > 0
+                                            row.documents.length > 0 &&
+                                            !isCommercial
                                         "
                                         type="button"
                                         class="dropdown-item"
@@ -515,6 +741,17 @@
                                         "
                                     >
                                         Eliminar factura relacionada
+                                    </button>
+                                    <button
+                                        data-toggle="tooltip"
+                                        data-placement="top"
+                                        title="Elimina unicamente la relación entre la nota y factura"
+                                        v-if="isIntegrateSystem"
+                                        type="button"
+                                        class="dropdown-item"
+                                        @click="openSendEmailModal(row)"
+                                    >
+                                        Enviar nota de venta
                                     </button>
                                 </div>
                             </div>
@@ -563,22 +800,111 @@
             :showClose="true"
             :configuration="config"
         ></sale-notes-options>
-
+        <sale-note-production-order
+            :dialogVisible.sync="showDialogGenerateProductionOrder"
+            :recordId="recordId"
+            @getRecords="getRecords"
+        ></sale-note-production-order>
         <sale-note-generate
             :show.sync="showDialogGenerate"
             :recordId="recordId"
             :showGenerate="true"
             :showClose="false"
         ></sale-note-generate>
+        <email-modal
+            :showDialog.sync="showEmailModal"
+            :saleNoteId="recordId"
+            :mail="mail"
+            :fullNumber="fullNumber"
+        ></email-modal>
         <ModalGenerateCPE :show.sync="showModalGenerateCPE"></ModalGenerateCPE>
-        <ModalGenerateGuie :show.sync="showModalGenerateGuie"></ModalGenerateGuie>
+        <ModalGenerateGuie
+            :show.sync="showModalGenerateGuie"
+        ></ModalGenerateGuie>
         <UploadToOtherServer
             :configuration="config"
             :showMigrate.sync="showMigrateNv"
         ></UploadToOtherServer>
+        <guide-modal-view
+            :showDialog.sync="showGuideModalView"
+            :currentRecord="dispatch_order"
+        ></guide-modal-view>
+
+        <dispatch-finish
+            :recordId="dispatchId"
+            :showClose="true"
+            :send-sunat="false"
+            :showDialog.sync="showDialogFinish"
+        ></dispatch-finish>
+        <quotation-observation
+            :showDialog.sync="showDialogQuotationObservation"
+            :quotationId="quotationId"
+        ></quotation-observation>
+        <document-options
+            :showDialog.sync="showDialogDocumentOptions"
+            :recordId="documentId"
+        ></document-options>
     </div>
 </template>
+<style>
+.state_1_p {
+    color: white;
+    background: #ffcc00;
+}
+.state_01_py {
+    color: white;
+    background: #ffcc00;
+}
+.state_2_p {
+    color: white;
+    background: #ff9900;
+}
+.state_3_p {
+    color: white;
+    background: #33cc33;
+}
+.state_02_py {
+    color: white;
+    background: #33cc33;
+}
+.state_4_p {
+    color: white;
+    background: #0070c0;
+}
+.state_5_p {
+    color: white;
+    background: red;
+}
 
+.state_1_d {
+    color: white;
+    background: #ffcc00;
+}
+.state_2_d {
+    color: white;
+    background: #ff9900;
+}
+.state_3_d {
+    color: white;
+    background: #33cc33;
+}
+.state_4_d {
+    color: white;
+    background: #33cc33;
+}
+.state_03_py {
+    color: white;
+    background: red;
+}
+.state_5_d {
+    color: white;
+    background: red;
+}
+.state_6_d {
+    color: white;
+    background: #0070c0;
+}
+</style>
 <script>
 import PeriodModal from "../../../../../modules/Suscription/Resources/assets/js/components/PeriodModal.vue";
 
@@ -586,16 +912,28 @@ import DataTable from "../../../components/DataTableSaleNote.vue";
 import UploadToOtherServer from "./partials/upload_other_server_group.vue";
 import SaleNotePayments from "./partials/payments.vue";
 import SaleNotesOptions from "./partials/options.vue";
+import SaleNoteProductionOrder from "./partials/order_production.vue";
 import SaleNoteGenerate from "./partials/option_documents";
+import EmailModal from "./partials/email_modal.vue";
+import DispatchFinish from "../../tenant/dispatches/partials/finish.vue";
 import { deletable } from "../../../mixins/deletable";
 import ModalGenerateCPE from "./ModalGenerateCPE";
 import ModalGenerateGuie from "./ModalGenerateGuie";
 import { mapActions, mapState } from "vuex/dist/vuex.mjs";
-
+import GuideModalView from "./partials/guide_modal_view.vue";
+import QuotationObservation from "./partials/quotation_observation.vue";
+import DocumentOptions from "../../tenant/documents/partials/options.vue"
 export default {
-    props: ["soapCompany", "typeUser", "configuration"],
+    props: [
+        "soapCompany",
+        "isCommercial",
+        "typeUser",
+        "configuration",
+        "isIntegrateSystem",
+    ],
     mixins: [deletable],
     components: {
+        EmailModal,
         PeriodModal,
         DataTable,
         SaleNotePayments,
@@ -603,14 +941,28 @@ export default {
         SaleNoteGenerate,
         ModalGenerateCPE,
         UploadToOtherServer,
-        ModalGenerateGuie
+        ModalGenerateGuie,
+        SaleNoteProductionOrder,
+        GuideModalView,
+        DispatchFinish,
+        QuotationObservation,
+        DocumentOptions
     },
     computed: {
-        ...mapState(["config"])
+        ...mapState(["config"]),
     },
     data() {
         return {
-            showModalGenerateGuie:false,
+            showDialogQuotationObservation: false,
+            quotationId: null,
+            showDialogFinish: false,
+            dispatchId: null,
+            showGuideModalView: false,
+            fullNumber: "",
+            mail: "",
+            showEmailModal: false,
+            showDialogGenerateProductionOrder: false,
+            showModalGenerateGuie: false,
             currentDocument: null,
             showPeriod: false,
             showModalGenerateCPE: false,
@@ -621,98 +973,105 @@ export default {
             showDialogGenerate: false,
             saleNotesNewId: null,
             recordId: null,
+            loading: false,
             columns: {
-                observation:{
+                observation: {
                     title: "Observación",
-                    visible: false
+                    visible: false,
                 },
                 due_date: {
                     title: "Fecha de Vencimiento",
-                    visible: false
+                    visible: false,
                 },
                 exchange_rate_sale: {
                     title: "Tipo de cambio",
-                    visible: false
+                    visible: false,
                 },
                 total_free: {
                     title: "T.Gratuito",
-                    visible: false
+                    visible: false,
                 },
                 total_exportation: {
                     title: "T.Exportación",
-                    visible: false
+                    visible: false,
                 },
                 total_unaffected: {
                     title: "T.Inafecto",
-                    visible: false
+                    visible: false,
                 },
                 total_exonerated: {
                     title: "T.Exonerado",
-                    visible: false
+                    visible: false,
                 },
                 total_taxed: {
                     title: "T.Gravado",
-                    visible: false
+                    visible: false,
                 },
                 total_igv: {
                     title: "T.IGV",
-                    visible: false
+                    visible: false,
                 },
                 paid: {
                     title: "Estado de Pago",
-                    visible: false
+                    visible: false,
                 },
                 type_period: {
                     title: "Tipo Periodo",
-                    visible: true
+                    visible: true,
                 },
                 quantity_period: {
                     title: "Cantidad Periodo",
-                    visible: true
+                    visible: true,
                 },
                 license_plate: {
                     title: "Placa",
-                    visible: true
+                    visible: true,
                 },
                 total_paid: {
                     title: "Pagado",
-                    visible: false
+                    visible: false,
                 },
                 total_pending_paid: {
                     title: "Por pagar",
-                    visible: false
+                    visible: false,
                 },
                 seller_name: {
                     title: "Vendedor",
-                    visible: false
+                    visible: false,
                 },
                 recurrence: {
                     title: "Recurrencia",
-                    visible: false
+                    visible: false,
                 },
                 region: {
                     title: "Region",
-                    visible: false
+                    visible: false,
                 },
                 date_payment: {
                     title: "Fecha de pago",
-                    visible: false
-                }
+                    visible: false,
+                },
             },
-            isDriver:false,
+            isDriver: false,
             // showDialogDeleteRelationInvoice: false,
             // dataDeleteRelation: {
             //     documents: {},
             //     id: ''
             // }
+            dispatch_order: {},
+            documentId:null,
+            showDialogDocumentOptions:false,
         };
     },
     created() {
         this.loadConfiguration();
         this.$store.commit("setConfiguration", this.configuration);
-        let {package_handlers} = this.configuration;
+        let { package_handlers } = this.configuration;
         this.isDriver = package_handlers;
         this.getColumnsToShow();
+        if (this.isIntegrateSystem) {
+            this.columns.seller_name.visible = true;
+        }
     },
     filters: {
         period(name) {
@@ -729,9 +1088,63 @@ export default {
             }
 
             return res;
-        }
+        },
     },
     methods: {
+        openDocumentOptions(id){
+            this.documentId = id;
+            this.showDialogDocumentOptions = true;
+        },
+        clickOpenObservationQuotation(quotation_id) {
+            this.quotationId = quotation_id;
+            this.showDialogQuotationObservation = true;
+        },
+        openDispatchFinish(id) {
+            this.dispatchId = id;
+            this.showDialogFinish = true;
+        },
+        viewGuide(row) {
+            this.dispatch_order = row.dispatch_order;
+            this.showGuideModalView = true;
+        },
+        async changeStatePayment([stateId, rowId]) {
+            try {
+                await this.$confirm(
+                    "¿Está seguro de cambiar el estado?",
+                    "Advertencia",
+                    {
+                        confirmButtonText: "Cambiar",
+                        cancelButtonText: "Cancelar",
+                        type: "warning",
+                    }
+                );
+                this.loading = true;
+                const response = await this.$http(
+                    `/${this.resource}/change-state-payment/${rowId}/${stateId}`
+                );
+                if (response.status == 200) {
+                    this.$message.success(response.data.message);
+                    this.$refs.dataTable.getRecords();
+                }
+            } catch (e) {
+                return;
+            } finally {
+                this.loading = false;
+            }
+        },
+        getRecords() {
+            this.$refs.dataTable.getRecords();
+        },
+        openSendEmailModal(row) {
+            console.log(
+                "🚀 ~ file: index.vue:771 ~ openSendEmailModal ~ row:",
+                row
+            );
+            this.showEmailModal = true;
+            this.mail = row.customer_email;
+            this.fullNumber = row.full_number;
+            this.recordId = row.id;
+        },
         async clickKillDocument(id) {
             try {
                 const confirm = await this.$confirm(
@@ -740,7 +1153,7 @@ export default {
                     {
                         confirmButtonText: "Eliminar",
                         cancelButtonText: "Cancelar",
-                        type: "warning"
+                        type: "warning",
                     }
                 );
                 if (confirm) {
@@ -770,9 +1183,9 @@ export default {
                 .post("/validate_columns", {
                     columns: this.columns,
                     report: "sale_notes_index", // Nombre del reporte.
-                    updated: updated !== undefined
+                    updated: updated !== undefined,
                 })
-                .then(response => {
+                .then((response) => {
                     if (updated === undefined) {
                         let currentCols = response.data.columns;
                         if (currentCols !== undefined) {
@@ -780,14 +1193,14 @@ export default {
                         }
                     }
                 })
-                .catch(error => {
+                .catch((error) => {
                     console.error(error);
                 });
         },
         duplicate(id) {
             this.$http
                 .post(`${this.resource}/duplicate`, { id })
-                .then(response => {
+                .then((response) => {
                     if (response.data.success) {
                         this.$message.success(
                             "Se guardaron los cambios correctamente."
@@ -797,12 +1210,11 @@ export default {
                         this.$message.error("No se guardaron los cambios");
                     }
                 })
-                .catch(error => {});
+                .catch((error) => {});
             this.$eventHub.$emit("reloadData");
         },
-        onOpenModalGenerateGuie(){
+        onOpenModalGenerateGuie() {
             this.showModalGenerateGuie = true;
-            
         },
         onOpenModalGenerateCPE() {
             this.showModalGenerateCPE = true;
@@ -823,7 +1235,7 @@ export default {
         sendToServer(recordId) {
             this.$http
                 .post("/sale-notes/UpToOther", { sale_note_id: recordId })
-                .then(response => {
+                .then((response) => {
                     if (response.data.success) {
                         this.$message.success(response.data.message);
                         this.$eventHub.$emit("reloadData");
@@ -831,7 +1243,7 @@ export default {
                         this.$message.error(response.data.message);
                     }
                 })
-                .catch(error => {
+                .catch((error) => {
                     if (
                         error.response !== undefined &&
                         error.response.status !== undefined &&
@@ -844,6 +1256,13 @@ export default {
                     }
                 })
                 .then(() => {});
+        },
+        clickGenerateProductionOrder(recordId) {
+            this.recordId = recordId;
+            this.showDialogGenerateProductionOrder = true;
+        },
+        clickGenerateUrl(recordId) {
+            window.open(`/documents/create/sale-notes/${recordId}`, "_blank");
         },
         clickGenerate(recordId) {
             this.recordId = recordId;
@@ -859,7 +1278,7 @@ export default {
         changeConcurrency(row) {
             this.$http
                 .post(`/${this.resource}/enabled-concurrency`, row)
-                .then(response => {
+                .then((response) => {
                     if (response.data.success) {
                         this.$message.success(response.data.message);
                         this.$eventHub.$emit("reloadData");
@@ -867,7 +1286,7 @@ export default {
                         this.$message.error(response.data.message);
                     }
                 })
-                .catch(error => {
+                .catch((error) => {
                     if (error.response.status === 422) {
                         this.errors = error.response.data.errors;
                     } else {
@@ -889,7 +1308,7 @@ export default {
         sendDeleteRelationInvoice(id) {
             this.$http
                 .post(`${this.resource}/delete-relation-invoice`, { id })
-                .then(response => {
+                .then((response) => {
                     if (response.data.success) {
                         this.$message.success(
                             "Se ha eliminado el comprobante relacionado correctamente."
@@ -899,11 +1318,11 @@ export default {
                         this.$message.error("No se guardaron los cambios");
                     }
                 })
-                .catch(error => {
+                .catch((error) => {
                     console.log(error);
                 });
             this.$eventHub.$emit("reloadData");
-        }
-    }
+        },
+    },
 };
 </script>

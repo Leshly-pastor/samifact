@@ -2,6 +2,7 @@
 
 namespace Modules\Sale\Http\Resources;
 
+use App\Models\Tenant\AgencyDispatchTable;
 use Illuminate\Http\Resources\Json\ResourceCollection;
 
 class ProductionOrderCollection extends ResourceCollection
@@ -15,7 +16,6 @@ class ProductionOrderCollection extends ResourceCollection
     public function toArray($request)
     {
         return $this->collection->transform(function($row, $key) {
-        
 
             return [
                 'id' => $row->id, 

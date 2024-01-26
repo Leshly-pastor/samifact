@@ -44,6 +44,7 @@ class FormatController extends Controller
      */
     public function download(Request $request)
     {
+        ini_set('memory_limit', '-1');
 
         $type = $request->input('type');
         $month = $request->input('month');

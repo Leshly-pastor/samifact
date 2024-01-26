@@ -38,12 +38,13 @@
             /** @var User $user */
             $user = $request->user();
             $level = $user->getLevel();
+            
             $path = explode('/', $request->path());
+            
             $levels = $user->getLevels();
             $this->route_path = $request->path();
-
             if (!$request->ajax()) {
-
+                
                 if (count($levels) != 0) {
                     // dd("w");
 
@@ -55,10 +56,12 @@
 
                     $group = $this->getGroup($path, $level);
                     // dd($group);
+                    
 
                     if ($group) {
                         if ($this->getLevelByGroup($levels, $group) === 0) {
                             $this->fixPermissions($level, $path);
+                            
                             return $this->redirectRoute($level);
                         }
 
@@ -86,7 +89,8 @@
             $group = null;
             $firstLevel = $path[0] ?? null;
             $secondLevel = $path[1] ?? null;
-
+            
+            
             if (isset($path[1])) {
 
                 if ($path[0] == "documents" && $path[1] == "create") {
@@ -160,6 +164,9 @@
                     $group = "sale_notes";
                 } elseif (in_array($path[0], ["incentives", "user-commissions"])) {
                     $group = "incentives";
+                } elseif (in_array($path[0], ["production-orders"])) {
+                    $group = "production_orders";
+
                 } elseif ($path[0] == "sale-opportunities") {
                     $group = "sale-opportunity";
                 } elseif (in_array($path[0], ["contracts", "production-orders"])) {
@@ -285,7 +292,6 @@
             $this->saveGeneralSystemActivity(auth()->user(), 'level_module_access_error', $this->route_path);
 
             switch ($level) {
-
                 case 'new_document':
                     return redirect()->route('tenant.documents.create');
 
@@ -305,7 +311,7 @@
                     return redirect()->route('tenant.summaries.create');
 
                 case 'quotations':
-                    return redirect()->route('tenant.quotations.create');
+                    return redirect()->route('tenant.quotations.index');
 
                 case 'sale_notes':
                     return redirect()->route('tenant.sale_notes.create');
@@ -313,7 +319,8 @@
                 case 'incentives':
                     return redirect()->route('tenant.incentives.create');
 
-
+                case 'production_orders':
+                    return redirect()->route('tenant.production_order.index');
                 case 'sale-opportunity':
                     return redirect()->route('tenant.sale_opportunities.index');
 
@@ -325,7 +332,8 @@
 
                 case 'technical-service':
                     return redirect()->route('tenant.technical_services.create');
-
+                case 'advanced_dispatches':
+                    return redirect()->route('tenant.dispatches.index');
                 case 'purchases_orders':
                     return redirect()->route('tenant.purchase-orders.index');
                 case 'digemid':
@@ -345,6 +353,7 @@
                     //return redirect()->route('tenant.suscription.payments.index');
                     //return redirect()->route('tenant.suscription.plans.index');
                 default;
+                    
                     return redirect()->route('tenant.dashboard.index');
 
 

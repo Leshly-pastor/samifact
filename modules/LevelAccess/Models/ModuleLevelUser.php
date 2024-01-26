@@ -19,7 +19,7 @@ use App\Models\Tenant\ModelTenant;
  */
 class ModuleLevelUser extends ModelTenant
 {
-
+    public $timestamps = false;
     protected $table = 'module_level_user';
     protected $fillable = [
         'user_id',

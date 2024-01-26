@@ -3,7 +3,8 @@
     namespace App\Http\Resources\Tenant;
 
     use App\Models\Tenant\Configuration;
-    use Illuminate\Http\Resources\Json\ResourceCollection;
+use App\Models\Tenant\Dispatch;
+use Illuminate\Http\Resources\Json\ResourceCollection;
     use App\Models\Tenant\Person;
     /**
      * Class SaleNoteCollection
@@ -39,7 +40,19 @@
                 }
                 //$depa=$depa->description;
                 //return dd($date);
+                $dispatches = Dispatch::where('reference_sale_note_id',$row->id)
+                ->where('state_type_id','<>',11)
+                ->where('state_type_id','<>',13)
+                ->get()
+                ->transform(function ($row){
+                    return [
+                        'number' => $row->number_full,
+                        'external_id' => $row->external_id,
+                    ];
+                })
+                ;
                 return [
+                    'dispatches'                   => $dispatches,
                     'id'                           => $row->id,
                     'soap_type_id'                 => $row->soap_type_id,
                     'external_id'                  => $row->external_id,
@@ -48,6 +61,7 @@
                     'full_number'                  => $row->series.'-'.$row->number,
                     'customer_name'                => $row->customer->name,
                     'customer_number'              => $row->customer->number,
+                    'customer_email'               => $row->customer->email,
                     'customer_region'              => $row->customer->department->description,
                     'currency_type_id'             => $row->currency_type_id,
                     'total_exportation'            => number_format($row->total_exportation, 2),

@@ -9,8 +9,10 @@ use App\CoreFacturalo\Requests\Inputs\Common\PersonInput;
 use App\Models\Tenant\Catalogs\IdentityDocumentType;
 use App\Models\Tenant\Company;
 use App\Models\Tenant\Dispatch;
+use App\Models\Tenant\DispatchOrder;
 use App\Models\Tenant\Item;
 use Illuminate\Support\Str;
+use Modules\BusinessTurn\Models\BusinessTurn;
 use Modules\Dispatch\Models\DispatchAddress;
 use Modules\Dispatch\Models\Dispatcher;
 use Modules\Dispatch\Models\DispatchPerson;
@@ -40,6 +42,15 @@ class DispatchInput
         $filename = Functions::filename($company, $document_type_id, $series, $number);
         $establishment = EstablishmentInput::set($inputs['establishment_id']);
         $customer = PersonInput::set($inputs['customer_id']);
+        $reference_sale_note_id = Functions::valueKeyInArray($inputs, 'reference_sale_note_id');
+        if ($reference_sale_note_id) {
+            if(BusinessTurn::isIntegrateSystem()){
+                $dispatch_order = DispatchOrder::where('sale_note_id', $reference_sale_note_id)->first();
+                if($dispatch_order){
+                    $inputs['reference_dispatch_order_id'] = $dispatch_order->id;
+                }
+            }
+        } 
         $inputs['type'] = 'dispatch';
         $data = [
             'purchase_order' => Functions::valueKeyInArray($inputs, 'purchase_order'),
@@ -87,6 +98,7 @@ class DispatchInput
             'reference_order_note_id' => Functions::valueKeyInArray($inputs, 'reference_order_note_id'),
             'reference_order_form_id' => Functions::valueKeyInArray($inputs, 'reference_order_form_id'),
             'reference_sale_note_id' => Functions::valueKeyInArray($inputs, 'reference_sale_note_id'),
+            'reference_dispatch_order_id' => Functions::valueKeyInArray($inputs, 'reference_dispatch_order_id'),
             'secondary_license_plates' => self::secondary_license_plates($inputs),
             'related' => self::related($inputs),
             'order_form_external' => Functions::valueKeyInArray($inputs, 'order_form_external'),

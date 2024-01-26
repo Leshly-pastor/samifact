@@ -28,7 +28,7 @@ class ItemLotGroupCollection extends ResourceCollection
                 'date' => $row->date_of_due,
                 'state_id' => optional($status)->id,
                 'item_id' => $row->item_id,
-                'stock' => $row->item->stock,
+                'stock' => $row->quantity,
                 // 'lot_code' => ($row->item_loteable_type) ? (isset($row->item_loteable->lot_code) ? $row->item_loteable->lot_code:null):null
             ];
         });

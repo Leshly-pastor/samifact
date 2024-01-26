@@ -31,6 +31,7 @@ use App\Models\Tenant\Establishment;
 use App\Models\Tenant\Item;
 use App\Models\Tenant\PaymentMethodType;
 use App\Models\Tenant\Person;
+use App\Models\Tenant\PersonFoodDealer;
 use App\Models\Tenant\Quotation;
 use App\Models\Tenant\Series;
 use App\Models\Tenant\User;
@@ -38,8 +39,11 @@ use App\Models\Tenant\Warehouse;
 use App\Traits\OfflineTrait;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use Modules\BusinessTurn\Models\BusinessTurn;
 use Modules\Document\Models\SeriesConfiguration;
 use Modules\Finance\Traits\FinanceTrait;
 use Modules\Order\Http\Requests\OrderNoteRequest;
@@ -396,7 +400,43 @@ class OrderNoteController extends Controller
 
         return $record;
     }
-
+    function getSerie($establishment_id){
+        $series = Series::where('establishment_id', $establishment_id)
+        ->where('document_type_id', 'PD')
+        ->get();
+        $serie = $series->first();
+        if ($serie) {
+            $serie = $serie->number;
+        }
+        return $serie;
+    }
+    public function checkItemFoodDealer(Request $request){
+        $items_id = $request->items_id;
+        $customer_id = $request->customer_id;
+        $date_of_issue = $request->date_of_issue;
+        $errors = [];
+        foreach($items_id as $item_id){
+            $item = Item::find($item_id);
+            $item_food_dealer = PersonFoodDealer::where('item_id', $item_id)
+            ->where('person_id', $customer_id)
+            ->where('date_of_issue', $date_of_issue)
+            ->first();
+            if($item_food_dealer){
+                $order_note = OrderNote::find($item_food_dealer->order_note_id);
+                $errors[] = "El item {$item->description} ya fue entregado en la orden de venta {$order_note->number_full} para la fecha {$date_of_issue}";
+            }
+        } 
+        if(count($errors) > 0){
+            return [
+                'success' => false,
+                'errors' => $errors
+            ];
+        }else{
+            return [
+                'success' => true,
+            ];
+        }
+    }
     /**
      * @param OrderNoteRequest $request
      *
@@ -405,11 +445,17 @@ class OrderNoteController extends Controller
      */
     public function store(OrderNoteRequest $request)
     {
+
         try{
             $data = $this->mergeArray($request);
+            $is_food_dealer = BusinessTurn::isFoodDealer();
             /* @todo Deberia pasarse a facturalo para tenerlo como standar */
-             DB::connection('tenant')->transaction(function () use ($data) {
+             DB::connection('tenant')->transaction(function () use ($data,$is_food_dealer) {
                 $series = Functions::valueKeyInArray($data, "prefix", null);
+                $serie = $this->getSerie($data['establishment_id']);
+                if($serie){
+                    $data["prefix"] = $serie;
+                }
                 if (OrderNote::count() == 0 && $series) {
                     $series_configuration = SeriesConfiguration::where([['document_type_id', "PD"], ['series', $series]])->first();
                     $number = $series_configuration->number ?? 1;
@@ -418,8 +464,9 @@ class OrderNoteController extends Controller
                 }
                 $number = Functions::valueKeyInArray($data, "number", null);
                 if(!$number){
-                    //get last id from table
-                    $last_id = OrderNote::orderBy('id', 'desc')->first();
+                    $last_id = OrderNote::orderBy('id', 'desc')
+                    ->where('prefix', $series)
+                    ->first();
                     $data["number"] = $last_id->id + 1;
                 }
                 $this->order_note = OrderNote::create($data);
@@ -427,6 +474,17 @@ class OrderNoteController extends Controller
                 foreach ($data['items'] as $row) {
                     $this->generalSetIdLoteSelectedToItem($row);
                     $this->order_note->items()->create($row);
+                    if($is_food_dealer){
+                        $person_id = $data['customer_id'];
+                        $item_id = $row['item_id'];
+                        $date_of_issue = $data['date_of_issue'];
+                        $person_food_dealer = new PersonFoodDealer();
+                        $person_food_dealer->item_id = $item_id;
+                        $person_food_dealer->person_id = $person_id;
+                        $person_food_dealer->order_note_id = $this->order_note->id;
+                        $person_food_dealer->date_of_issue = $date_of_issue;
+                        $person_food_dealer->save();
+                    }
                 }
     
                 $this->setFilename();

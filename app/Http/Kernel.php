@@ -38,6 +38,7 @@ class Kernel extends HttpKernel
             \App\Http\Middleware\VerifyCsrfToken::class,
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
             \App\Http\Middleware\LockedAdmin::class,
+            \App\Http\Middleware\LockedUser::class,
         ],
 
         'api' => [
@@ -68,6 +69,7 @@ class Kernel extends HttpKernel
         'redirect.module' => \App\Http\Middleware\RedirectModule::class,
         'redirect.level' => \App\Http\Middleware\RedirectModuleLevel::class,
         'locked.tenant' => \App\Http\Middleware\LockedTenant::class,
+        'locked.user' => \App\Http\Middleware\LockedUser::class,
         //'locked.admin' => \App\Http\Middleware\LockedAdmin::class,
         'tenant.internal.mode' => \App\Http\Middleware\InternalModeTenant::class,
 

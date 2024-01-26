@@ -104,7 +104,24 @@
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label class="control-label">Logo</label>
+                                    <label class="control-label"
+                                        >Logo
+                                        <el-tooltip
+                                            class="item"
+                                            content="Eliminar el logo"
+                                            effect="dark"
+                                            placement="top-start"
+                                        >
+                                            <!-- un icono como boton pequeño para eliminar la imagen -->
+                                            <el-tag
+                                                type="danger"
+                                                role="button"
+                                                @click="removeLogo"
+                                            >
+                                                <i class="fa fa-trash"></i>
+                                            </el-tag>
+                                        </el-tooltip>
+                                    </label>
                                     <el-input
                                         v-model="form.logo"
                                         :readonly="true"
@@ -203,7 +220,23 @@
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label class="control-label"
-                                        >Imagen Fondo</label
+                                        >Imagen Fondo
+                                            <el-tooltip
+                                            class="item"
+                                            content="Eliminar la imagen de fondo"
+                                            effect="dark"
+                                            placement="top-start"
+                                        >
+                                            <!-- un icono como boton pequeño para eliminar la imagen -->
+                                            <el-tag
+                                                type="danger"
+                                                role="button"
+                                                @click="removebgdefault"
+                                            >
+                                                <i class="fa fa-trash"></i>
+                                            </el-tag>
+                                        </el-tooltip>
+                                        </label
                                     >
                                     <el-input
                                         v-model="form.bg_default"
@@ -234,7 +267,24 @@
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label class="control-label">Favicon</label>
+                                    <label class="control-label">Favicon
+   <el-tooltip
+                                            class="item"
+                                            content="Eliminar el favicon"
+                                            effect="dark"
+                                            placement="top-start"
+                                        >
+                                            <!-- un icono como boton pequeño para eliminar la imagen -->
+                                            <el-tag
+                                                type="danger"
+                                                role="button"
+                                                @click="removeFavicon"
+                                            >
+                                                <i class="fa fa-trash"></i>
+                                            </el-tag>
+                                        </el-tooltip>
+
+                                    </label>
                                     <el-input
                                         v-model="form.favicon"
                                         :readonly="true"
@@ -333,14 +383,14 @@
                                         >Frase de pie de página</label
                                     >
                                     <el-input
-                                    @input="setConfiguration"
+                                        @input="setConfiguration"
                                         v-model="form.footer_text_template"
                                     >
                                     </el-input>
                                     <div class="sub-title text-danger"></div>
                                 </div>
                             </div>
-                              <!-- <div class="col-md-6">
+                            <!-- <div class="col-md-6">
                                 <div class="form-group">
                                     <label class="control-label"
                                         >Es RUS
@@ -390,7 +440,7 @@
                             <div v-show="false" class="col-md-6 mt-4">
                                 <div
                                     :class="{
-                                        'has-danger': errors.operation_amazonia
+                                        'has-danger': errors.operation_amazonia,
                                     }"
                                     class="form-group"
                                 >
@@ -445,7 +495,7 @@
                             <div class="col-md-6">
                                 <div
                                     :class="{
-                                        'has-danger': errors.soap_type_id
+                                        'has-danger': errors.soap_type_id,
                                     }"
                                     class="form-group"
                                 >
@@ -482,7 +532,7 @@
                             >
                                 <div
                                     :class="{
-                                        'has-danger': errors.soap_send_id
+                                        'has-danger': errors.soap_send_id,
                                     }"
                                     class="form-group"
                                 >
@@ -494,8 +544,9 @@
                                         :disabled="!form.config_system_env"
                                     >
                                         <el-option
-                                            v-for="(option,
-                                            index) in soap_sends"
+                                            v-for="(
+                                                option, index
+                                            ) in soap_sends"
                                             :key="index"
                                             :label="option"
                                             :value="index"
@@ -512,7 +563,7 @@
                         <template
                             v-if="
                                 form.soap_type_id == '02' ||
-                                    form.soap_send_id == '02'
+                                form.soap_send_id == '02'
                             "
                         >
                             <div class="row">
@@ -633,7 +684,7 @@
                             <div
                                 :class="{
                                     'has-danger':
-                                        errors.integrated_query_client_id
+                                        errors.integrated_query_client_id,
                                 }"
                                 class="form-group"
                             >
@@ -815,7 +866,7 @@
 <script>
 import { mapActions, mapState } from "vuex";
 import TokenRucDni from "./token_ruc_dni.vue";
-import SireConfiguration from '../sire/partials/configuration.vue'
+import SireConfiguration from "../sire/partials/configuration.vue";
 
 export default {
     props: ["configuration"],
@@ -824,7 +875,7 @@ export default {
         SireConfiguration,
     },
     computed: {
-        ...mapState(["config"])
+        ...mapState(["config"]),
     },
     data() {
         return {
@@ -836,7 +887,7 @@ export default {
             soap_sends: [],
             soap_types: [],
             toggle: false, //Creando el objeto a retornar con v-model
-            timer:null,
+            timer: null,
         };
     },
     async created() {
@@ -856,7 +907,19 @@ export default {
         this.events();
     },
     methods: {
-        setConfiguration(){
+        async removebgdefault() {
+            this.form.bg_default = null;
+            await this.submit();
+        },
+        async removeLogo() {
+            this.form.logo = null;
+            await this.submit();
+        },
+         async removeFavicon() {
+            this.form.favicon = null;
+            await this.submit();
+        },
+        setConfiguration() {
             clearTimeout(this.timer);
             this.timer = setTimeout(() => {
                 this.submit();
@@ -909,7 +972,7 @@ export default {
                 soap_sunat_username: null,
                 soap_sunat_password: null,
                 api_sunat_id: null,
-                api_sunat_secret: null
+                api_sunat_secret: null,
             };
         },
         submit() {

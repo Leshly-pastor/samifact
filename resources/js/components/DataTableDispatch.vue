@@ -146,6 +146,14 @@
                             icon="el-icon-delete"
                             >Limpiar
                         </el-button>
+                          <el-button
+                          v-if="records.length > 0"
+                            class="submit"
+                            type="success"
+                            @click.prevent="exportExcel"
+                            icon="el-icon-download"
+                            >Excel
+                        </el-button>
                     </div>
                 </div>
                 <div class="row mt-1 mb-3"></div>
@@ -245,6 +253,9 @@ export default {
         await this.loadScroll();
     },
     methods: {
+        exportExcel(){
+            window.open(`/${this.resource}/export-excel?${this.getQueryParameters()}`, '_blank');
+        },
         searchRemoteCustomers(input) {
             if (input.length > 0) {
                 this.loading_search = true;

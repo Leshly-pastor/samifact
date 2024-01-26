@@ -39,7 +39,10 @@ if ($logo) {
 @endif
 <table class="full-width">
     <tr>
-        <td class="text-center"><h4>{{ $company->name }}</h4></td>
+        <td class="text-center"><h4>{{ $company->trade_name }}</h4></td>
+    </tr>
+    <tr>
+        <td class="text-center"><h6>De: {{ $company->name }}</h6></td>
     </tr>
     <tr>
         <td class="text-center"><h5>{{ 'RUC '.$company->number }}</h5></td>

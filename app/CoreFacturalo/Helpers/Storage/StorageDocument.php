@@ -47,6 +47,12 @@ trait StorageDocument
             case 'sale_note':
                 $extension = 'pdf';
                 break;
+            case 'production_order':
+                $extension = 'pdf';
+                break;
+            case 'dispatch_order':
+                $extension = 'pdf';
+                break;
             case 'cdr':
                 $filename = 'R-' . $filename;
                 $extension = 'zip';

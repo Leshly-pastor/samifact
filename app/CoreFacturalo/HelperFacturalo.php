@@ -106,7 +106,7 @@ class HelperFacturalo
 
         $html_dispatch_ticket = $template->pdfWithoutFormat($base_pdf_template, 'document_dispatch_ticket', $company, $document);
         $additional = 0;
-        $base_height = 40;
+        $base_height = 80;
 
         if($document->reference_data) $additional += 10;
         $dispatch_ticket_pdf_quantity = $document->dispatch_ticket_pdf_quantity ?? 1;

@@ -40,6 +40,7 @@ class Company extends ModelTenant
         'integrated_query_client_secret',
         'app_logo',
         'footer_logo',
+        'favicon',
         'send_document_to_pse',
         'url_send_cdr_pse',
         'url_signature_pse',

@@ -2,6 +2,7 @@
 
 namespace Modules\Finance\Traits;
 
+use App\Models\Tenant\BillOfExchange;
 use App\Models\Tenant\Document;
 use App\Models\Tenant\Establishment;
 use App\Models\Tenant\Dispatch;
@@ -15,31 +16,29 @@ use Carbon\Carbon;
 trait UnpaidTrait
 {
 
-    public function transformRecords($records) {
+    public function transformRecords($records)
+    {
 
-        return $records->transform(function($row, $key) {
+        return $records->transform(function ($row, $key) {
 
             $total_to_pay = $this->getTotalToPay($row);
             // $total_to_pay = (float)$row->total - (float)$row->total_payment;
             $delay_payment = null;
             $date_of_due = null;
 
-            if($total_to_pay > 0) {
-                if($row->document_type_id){
+            if ($total_to_pay > 0) {
+                if ($row->document_type_id) {
 
                     $invoice = Invoice::where('document_id', $row->id)->first();
-                    if($invoice)
-                    {
+                    if ($invoice) {
                         $due =   Carbon::parse($invoice->date_of_due); // $invoice->date_of_due;
                         $date_of_due = $invoice->date_of_due->format('Y/m/d');
                         $now = Carbon::now();
 
-                        if($now > $due){
+                        if ($now > $due) {
 
                             $delay_payment = $now->diffInDays($due);
                         }
-
-
                     }
                 }
             }
@@ -47,8 +46,8 @@ trait UnpaidTrait
             $guides = null;
             $date_payment_last = '';
 
-            if($row->document_type_id){
-                $guides =  Dispatch::where('reference_document_id', $row->id )->orderBy('series')->orderBy('number', 'desc')->get()->transform(function($item) {
+            if ($row->document_type_id) {
+                $guides =  Dispatch::where('reference_document_id', $row->id)->orderBy('series')->orderBy('number', 'desc')->get()->transform(function ($item) {
                     return [
                         'id' => $item->id,
                         'external_id' => $item->external_id,
@@ -61,8 +60,7 @@ trait UnpaidTrait
                 });
 
                 $date_payment_last = DocumentPayment::where('document_id', $row->id)->orderBy('date_of_payment', 'desc')->first();
-            }
-            else{
+            } else {
                 $date_payment_last = SaleNotePayment::where('sale_note_id', $row->id)->orderBy('date_of_payment', 'desc')->first();
             }
             $purchase_order = null;
@@ -74,19 +72,29 @@ trait UnpaidTrait
                 $document = SaleNote::find($row->id);
                 $web_platforms = $document->getPlatformThroughItems();
                 $purchase_order = $document->purchase_order;
+            } elseif ($row->type == 'bill_of_exchange') {
+                $document = BillOfExchange::find($row->id);
+                $web_platforms = [];
+                $purchase_order = null;
             } else {
                 $web_platforms = new \Illuminate\Database\Eloquent\Collection();
+            }
+            $customer_internal_code = null;
+            $customer_trade_name  = null;
+            if ($document) {
+                $customer_internal_code = $document->customer->internal_code;
+                $customer_trade_name  = $document->customer->trade_name;
             }
             return [
                 'id' => $row->id,
                 'date_of_issue' => $row->date_of_issue,
                 'customer_name' => $row->customer_name,
-                'customer_internal_code' => $document->customer->internal_code,
-                'customer_trade_name' => $document->customer->trade_name,
+                'customer_internal_code' => $customer_internal_code,
+                'customer_trade_name' => $customer_trade_name,
                 'customer_id' => $row->customer_id,
                 'number_full' => $row->number_full,
-                'total' => number_format((float) $row->total,2, ".", ""),
-                'total_to_pay' => number_format($total_to_pay,2, ".", ""),
+                'total' => number_format((float) $row->total, 2, ".", ""),
+                'total_to_pay' => number_format($total_to_pay, 2, ".", ""),
                 'type' => $row->type,
                 'guides' => $guides,
                 'date_payment_last' => ($date_payment_last) ? $date_payment_last->date_of_payment->format('Y-m-d') : null,
@@ -94,19 +102,17 @@ trait UnpaidTrait
                 'date_of_due' =>  $date_of_due,
                 'currency_type_id' => $row->currency_type_id,
                 'exchange_rate_sale' => (float)$row->exchange_rate_sale,
-                "user_id"=> $row->user_id,
+                "user_id" => $row->user_id,
                 "username" => $row->username,
                 "total_subtraction" => $row->total_subtraction,
                 "total_payment" => $row->total_payment,
                 "purchase_order" => $purchase_order,
-                "web_platforms" => $web_platforms ,
-                "total_credit_notes" => $this->getTotalCreditNote($row) ,
+                "web_platforms" => $web_platforms,
+                "total_credit_notes" => $this->getTotalCreditNote($row),
             ];
-
         });
-
     }
-    
+
 
     /**
      * Obtener total por cobrar
@@ -130,5 +136,4 @@ trait UnpaidTrait
     {
         return ($row->total_credit_notes ?? 0);
     }
-
 }

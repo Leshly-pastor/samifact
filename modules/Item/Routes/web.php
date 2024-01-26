@@ -8,6 +8,11 @@ if ($hostname) {
     Route::domain($hostname->fqdn)->group(function () {
         Route::middleware(['auth', 'locked.tenant'])->group(function () {
 
+
+
+            Route::get('items/items-document-error/{hash}', 'ItemController@ItemsDocumentErrors');
+            Route::post('items/items-document', 'ItemController@uploadItemsDocument');
+            Route::post('items/items-document-news', 'ItemController@uploadItemsDocumentNews');
             Route::get('items/codes-digemid', 'ItemController@codes_digemid');
 
             Route::get('categories', 'CategoryController@index')->name('tenant.categories.index')->middleware('redirect.level');

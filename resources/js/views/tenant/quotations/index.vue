@@ -10,7 +10,7 @@
             <div class="right-wrapper pull-right">
                 <a
                     :href="`/${resource}/create`"
-                    class="btn btn-custom btn-sm  mt-2 mr-2"
+                    class="btn btn-custom btn-sm mt-2 mr-2"
                     ><i class="fa fa-plus-circle"></i> Nuevo</a
                 >
             </div>
@@ -51,7 +51,7 @@
                         <th>Cliente</th>
                         <th>Estado</th>
                         <th>Cotización</th>
-                        <th>Comprobantes</th>
+                        <th v-if="!isCommercial">Comprobantes</th>
                         <th>Notas de venta</th>
                         <th v-if="columns.order_note.visible">Pedido</th>
                         <th>Oportunidad Venta</th>
@@ -120,7 +120,7 @@
                                 <el-select
                                     v-model="row.state_type_id"
                                     @change="changeStateType(row)"
-                                    style="width:120px !important"
+                                    style="width: 120px !important"
                                 >
                                     <el-option
                                         v-for="(option, idx) in state_types"
@@ -132,7 +132,7 @@
                             </template>
                         </td>
                         <td>{{ row.identifier }}</td>
-                        <td>
+                        <td v-if="!isCommercial">
                             <template v-for="(document, i) in row.documents">
                                 <template v-if="document.is_voided_or_rejected">
                                     <label :key="i" class="d-block text-danger">
@@ -164,7 +164,7 @@
                             <template
                                 v-if="
                                     row.order_note !== undefined &&
-                                        row.order_note.full_number !== undefined
+                                    row.order_note.full_number !== undefined
                                 "
                             >
                                 <label class="d-block"
@@ -315,126 +315,120 @@
                                 </button>
                                 <div class="dropdown-menu dropdown-menu-end">
                                     <button
-            v-if="row.btn_options"
-            class="dropdown-item"
-            @click.prevent="
-                clickGenerateDocument(row.id)
-            "
-        >
-            Generar comprobante
-        </button>
+                                        v-if="row.btn_options && !isComercial"
+                                        class="dropdown-item"
+                                        @click.prevent="
+                                            clickGenerateDocument(row.id)
+                                        "
+                                    >
+                                        Generar comprobante
+                                    </button>
 
-        <button
-            v-if="row.btn_options"
-            class="dropdown-item"
-            @click.prevent="clickOptions(row.id)"
-        >
-            Generar nota de venta
-        </button>
+                                    <button
+                                        v-if="row.btn_options"
+                                        class="dropdown-item"
+                                        @click.prevent="clickOptions(row.id)"
+                                    >
+                                        Generar nota de venta
+                                    </button>
 
-        <a
-            v-if="
-                row.documents.length == 0 &&
-                    row.state_type_id != '11'
-            "
-            :href="`/${resource}/edit/${row.id}`"
-            type="button"
-            class="dropdown-item"
-        >
-            Editar
-        </a>
+                                    <a
+                                        v-if="
+                                            row.documents.length == 0 &&
+                                            row.state_type_id != '11'
+                                        "
+                                        :href="`/${resource}/edit/${row.id}`"
+                                        type="button"
+                                        class="dropdown-item"
+                                    >
+                                        Editar
+                                    </a>
 
-        <button
-            v-if="
-                row.documents.length == 0 &&
-                    row.state_type_id != '11'
-            "
-            type="button"
-            class="dropdown-item"
-            @click.prevent="clickAnulate(row.id)"
-        >
-            Anular
-        </button>
+                                    <button
+                                        v-if="
+                                            row.documents.length == 0 &&
+                                            row.state_type_id != '11'
+                                        "
+                                        type="button"
+                                        class="dropdown-item"
+                                        @click.prevent="clickAnulate(row.id)"
+                                    >
+                                        Anular
+                                    </button>
 
-        <button
-            @click="duplicate(row.id)"
-            type="button"
-            class="dropdown-item"
-        >
-            Duplicar
-        </button>
+                                    <button
+                                        v-if="!isIntegrateSystem"
+                                        @click="duplicate(row.id)"
+                                        type="button"
+                                        class="dropdown-item"
+                                    >
+                                        Duplicar
+                                    </button>
 
-        <a
-            :href="
-                `/dispatches/create_new/quotation/${
-                    row.id
-                }`
-            "
-            class="dropdown-item"
-        >
-            Guía
-        </a>
-              <a
-            :href="
-                `/dispatch_carrier/create_new/quotation/${
-                    row.id
-                }`
-            "
-            class="dropdown-item"
-        >
-            Guía de transportista
-        </a>
-        <template
-            v-if="
-                row.btn_generate_cnt &&
-                    row.state_type_id != '11'
-            "
-        >
-            <a
-                :href="
-                    `/contracts/generate-quotation/${
-                        row.id
-                    }`
-                "
-                class="dropdown-item"
-            >
-                Generar contrato
-            </a>
-        </template>
-        <template v-else>
-            <button
-                type="button"
-                @click="
-                    clickPrintContract(
-                        row.external_id_contract
-                    )
-                "
-                class="dropdown-item"
-            >
-                Ver contrato
-            </button>
-        </template>
-        <!-- pedidos -->
-        <button
-            v-if="canMakeOrderNote(row)"
-            @click="makeOrder(row.id)"
-            type="button"
-            class="dropdown-item"
-        >
-            Generar Pedido
-        </button>
-        <button
-            @click="clickSendQuotation(row.id)"
-            type="button"
-            class="dropdown-item"
-        >
-            Enviar cotización
-        </button>
-                                  
-                                     
+                                    <a
+                                        :href="`/dispatches/create_new/quotation/${row.id}`"
+                                        v-if="!isIntegrateSystem"
+                                        class="dropdown-item"
+                                    >
+                                        Guía
+                                    </a>
+                                    <a
+                                        :href="`/dispatch_carrier/create_new/quotation/${row.id}`"
+                                        class="dropdown-item"
+                                        v-if="!isIntegrateSystem"
+                                    >
+                                        Guía de transportista
+                                    </a>
+                                    <template
+                                        v-if="
+                                            row.btn_generate_cnt &&
+                                            row.state_type_id != '11' &&
+                                            !isIntegrateSystem
+                                        "
+                                    >
+                                        <a
+                                            :href="`/contracts/generate-quotation/${row.id}`"
+                                            class="dropdown-item"
+                                        >
+                                            Generar contrato
+                                        </a>
+                                    </template>
+                                    <template v-else>
+                                        <button
+                                            v-if="!isIntegrateSystem"
+                                            type="button"
+                                            @click="
+                                                clickPrintContract(
+                                                    row.external_id_contract
+                                                )
+                                            "
+                                            class="dropdown-item"
+                                        >
+                                            Ver contrato
+                                        </button>
+                                    </template>
+                                    <!-- pedidos -->
+                                    <button
+                                        v-if="
+                                            canMakeOrderNote(row) &&
+                                            !isIntegrateSystem
+                                        "
+                                        @click="makeOrder(row.id)"
+                                        type="button"
+                                        class="dropdown-item"
+                                    >
+                                        Generar Pedido
+                                    </button>
+                                    <button
+                                        @click="clickSendQuotation(row.id)"
+                                        type="button"
+                                        class="dropdown-item"
+                                        v-if="!isIntegrateSystem"
+                                    >
+                                        Enviar cotización
+                                    </button>
                                 </div>
                             </div>
-                           
                         </td>
                     </tr>
                 </data-table>
@@ -481,17 +475,23 @@ import { mapActions, mapState } from "vuex";
 import SendEmailDocument from "@components/secondary/SendEmailDocument.vue";
 
 export default {
-    props: ["typeUser", "soapCompany", "generateOrderNoteFromQuotation"],
+    props: [
+        "isCommercial",
+        "typeUser",
+        "soapCompany",
+        "generateOrderNoteFromQuotation",
+        "isIntegrateSystem",
+    ],
     mixins: [deletable],
     components: {
         DataTable,
         QuotationOptions,
         QuotationOptionsPdf,
         QuotationPayments,
-        SendEmailDocument
+        SendEmailDocument,
     },
     computed: {
-        ...mapState(["config"])
+        ...mapState(["config"]),
     },
     data() {
         return {
@@ -505,44 +505,45 @@ export default {
             columns: {
                 total_exportation: {
                     title: "T.Exportación",
-                    visible: false
+                    visible: false,
                 },
                 total_unaffected: {
                     title: "T.Inafecto",
-                    visible: false
+                    visible: false,
                 },
                 total_exonerated: {
                     title: "T.Exonerado",
-                    visible: false
+                    visible: false,
                 },
                 total_free: {
                     title: "T.Gratuito",
-                    visible: false
+                    visible: false,
                 },
                 contract: {
                     title: "Contrato",
-                    visible: false
+                    visible: false,
                 },
                 delivery_date: {
                     title: "T.Entrega",
-                    visible: false
+                    visible: false,
                 },
                 referential_information: {
                     title: "Inf.Referencial",
-                    visible: false
+                    visible: false,
                 },
                 order_note: {
                     title: "Pedidos",
-                    visible: false
+                    visible: false,
                 },
                 exchange_rate_sale: {
                     title: "Tipo de cambio",
-                    visible: false
-                }
-            }
+                    visible: false,
+                },
+            },
         };
     },
     async created() {
+        console.log("is commercial: ", this.isCommercial);
         await this.filter();
     },
     mounted() {
@@ -581,9 +582,11 @@ export default {
             ).then(() => this.$eventHub.$emit("reloadData"));
         },
         async filter() {
-            await this.$http.get(`/${this.resource}/filter`).then(response => {
-                this.state_types = response.data.state_types;
-            });
+            await this.$http
+                .get(`/${this.resource}/filter`)
+                .then((response) => {
+                    this.state_types = response.data.state_types;
+                });
         },
         clickEdit(id) {
             this.recordId = id;
@@ -611,7 +614,7 @@ export default {
         duplicate(id) {
             this.$http
                 .post(`${this.resource}/duplicate`, { id })
-                .then(response => {
+                .then((response) => {
                     if (response.data.success) {
                         this.$message.success(
                             "Se guardaron los cambios correctamente."
@@ -621,12 +624,12 @@ export default {
                         this.$message.error("No se guardaron los cambios");
                     }
                 })
-                .catch(error => {});
+                .catch((error) => {});
             this.$eventHub.$emit("reloadData");
         },
         clickGenerateDocument(recordId) {
             window.location.href = `/documents/create/quotations/${recordId}`;
-        }
-    }
+        },
+    },
 };
 </script>

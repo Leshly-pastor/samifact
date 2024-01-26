@@ -645,7 +645,6 @@
                                 </div>
                             </div>
                         </template>
-                        <!-- <template v-if="form.transport_mode_type_id === '02'"> -->
                         <div class="col-lg-6">
                             <label class="control-label">
                                 Datos del conductor
@@ -759,7 +758,6 @@
                                 ></el-input>
                             </div>
                         </div>
-                        <!-- </template> -->
                     </div>
                     <hr />
                     <div class="col-md-12">
@@ -1067,6 +1065,7 @@ import { setDefaultSeriesByMultipleDocumentTypes } from "@mixins/functions";
 
 export default {
     props: [
+        "isIntegrateSystem",
         "series_default",
         "parentTable",
         "parentId",
@@ -1151,10 +1150,6 @@ export default {
         };
     },
     async created() {
-        console.log(
-            "🚀 ~ file: create.vue:1127 ~ created ~ this.document:",
-            this.document
-        );
         this.initForm();
         this.loadConfiguration();
         this.$store.commit("setConfiguration", this.configuration);

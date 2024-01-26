@@ -2222,7 +2222,7 @@ export default {
 
                     if (val_purchase_unit_price > parseFloat(unit_price)) {
                         return this.$message.error(
-                            `El precio de compra no puede ser superior al precio de venta (P. Compra: ${val_purchase_unit_price})`
+                            `El precio de venta no puede ser menor al precio de compra (P. Compra: ${val_purchase_unit_price})`
                         );
                     }
                 }

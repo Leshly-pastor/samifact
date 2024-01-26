@@ -88,7 +88,10 @@
                                     ></small>
                                 </div>
                                 <div
-                                    v-if="customer_addresses.length > 0 && !isProject"
+                                    v-if="
+                                        customer_addresses.length > 0 &&
+                                        !isProject
+                                    "
                                     class="form-group"
                                 >
                                     <label
@@ -154,7 +157,10 @@
                                     ></small>
                                 </div>
                                 <div
-                                    v-if="customer_addresses.length > 0 && !isProject"
+                                    v-if="
+                                        customer_addresses.length > 0 &&
+                                        !isProject
+                                    "
                                     class="form-group"
                                 >
                                     <label
@@ -196,7 +202,10 @@
                                     ></small>
                                 </div>
                                 <div
-                                    v-if="customer_addresses.length > 0 && !isProject"
+                                    v-if="
+                                        customer_addresses.length > 0 &&
+                                        !isProject
+                                    "
                                     class="form-group"
                                 >
                                     <label
@@ -508,7 +517,10 @@
                                 </div>
                             </div>
 
-                            <div class="col-lg-8 mt-2">
+                            <div
+                                class="col-lg-8 mt-2"
+                                v-if="!isIntegrateSystem"
+                            >
                                 <label>Pagos</label>
                                 <table>
                                     <thead>
@@ -702,12 +714,15 @@
                                                 </div>
                                             </div>
 
-                                            <div class="col-lg-6">
+                                            <div
+                                                class="col-lg-6"
+                                                v-if="!isIntegrateSystem"
+                                            >
                                                 <div
                                                     class="form-group"
                                                     :class="{
                                                         'has-danger':
-                                                            errors.exchange_rate_sale,
+                                                            errors.description,
                                                     }"
                                                 >
                                                     <label class="control-label"
@@ -764,7 +779,7 @@
                             </div>
                         </div>
                         <div class="col-md-12 col-sm-12 mt-2" v-if="isProject">
-                            <div class="form-group" >
+                            <div class="form-group">
                                 <label class="control-label"
                                     >Observaciones que iran en el pdf</label
                                 >
@@ -937,6 +952,16 @@
                                                         row.affectation_igv_type
                                                             .description
                                                     }}</small>
+
+                                                    <a
+                                                        href="#"
+                                                        @click.prevent="
+                                                            seeDetails(row.item)
+                                                        "
+                                                        class="text-info"
+                                                    >
+                                                        [Ver detalle]
+                                                    </a>
                                                 </td>
                                                 <td class="text-center">
                                                     {{ row.item.unit_type_id }}
@@ -1017,9 +1042,7 @@
                                     </table>
                                 </div>
                             </div>
-                            <div
-                                class="col-lg-12 col-md-6 d-flex align-items-end"
-                            >
+                            <div class="col-xl-3 col-md-3 col-12 pb-2">
                                 <div class="form-group">
                                     <button
                                         type="button"
@@ -1030,7 +1053,75 @@
                                     </button>
                                 </div>
                             </div>
+                            <div class="col-xl-3 col-md-3 col-12 pb-2">
+                                <el-popover
+                                    placement="top-start"
+                                    :open-delay="1000"
+                                    width="145"
+                                    trigger="hover"
+                                    content="Subir un excel para la venta"
+                                >
+                                    <button
+                                        slot="reference"
+                                        type="button"
+                                        class="btn btn-outline-success mb-1"
+                                        @click.prevent="
+                                            $refs.file_items.click()
+                                        "
+                                    >
+                                        Subir productos existentes
+                                    </button>
+                                </el-popover>
+                                <input
+                                    type="file"
+                                    style="display: none"
+                                    ref="file_items"
+                                    @change="uploadFileItems"
+                                    accept=".xlsx"
+                                />
 
+                                <br />
+                                <small>
+                                    <a
+                                        target="_blank"
+                                        href="/formats/upload_items_to_document.xlsx"
+                                        >Descargar formato</a
+                                    >
+                                </small>
+                            </div>
+                            <div class="col-xl-3 col-md-3 col-12 pb-2">
+                                <el-popover
+                                    placement="top-start"
+                                    :open-delay="1000"
+                                    width="145"
+                                    trigger="hover"
+                                    content="Subir un excel para la venta"
+                                >
+                                    <button
+                                        slot="reference"
+                                        type="button"
+                                        class="btn btn-outline-success mb-1"
+                                        @click.prevent="$refs.file.click()"
+                                    >
+                                        Subir productos nuevos
+                                    </button>
+                                </el-popover>
+                                <input
+                                    type="file"
+                                    style="display: none"
+                                    ref="file"
+                                    @change="uploadFileNewItems"
+                                    accept=".xlsx"
+                                />
+                                <br />
+                                <small>
+                                    <a
+                                        target="_blank"
+                                        href="/formats/items_news.xlsx"
+                                        >Descargar formato</a
+                                    >
+                                </small>
+                            </div>
                             <div class="col-md-8 mt-3"></div>
 
                             <div class="col-md-4">
@@ -1109,7 +1200,29 @@
                             </div>
                         </div>
                     </div>
-
+                    <div class="col-12" v-if="isIntegrateSystem">
+                        <div
+                            class="form-group"
+                            :class="{
+                                'has-danger': errors.description,
+                            }"
+                        >
+                            <label class="control-label">Observación </label>
+                            <el-input
+                                type="textarea"
+                                :rows="3"
+                                v-model="form.description"
+                                maxlength="1000"
+                                show-word-limit
+                            >
+                            </el-input>
+                            <small
+                                class="text-danger"
+                                v-if="errors.description"
+                                v-text="errors.description[0]"
+                            ></small>
+                        </div>
+                    </div>
                     <div class="form-actions text-end mt-4">
                         <el-button @click.prevent="close()">Cancelar</el-button>
                         <el-button
@@ -1161,6 +1274,12 @@
             :form="form"
             :showClose="false"
         ></terms-condition>
+        <result-excel-products
+            :showDialog.sync="showResultExcelProducts"
+            :registered="registered"
+            :errors="errors"
+            :hash="hash"
+        ></result-excel-products>
     </div>
 </template>
 <style>
@@ -1191,6 +1310,7 @@ import {
 import Logo from "../companies/logo.vue";
 import { mapActions, mapState } from "vuex/dist/vuex.mjs";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
+import ResultExcelProducts from "@components/ResultExcelProducts.vue";
 import VueCkeditor from "vue-ckeditor5";
 export default {
     props: [
@@ -1208,10 +1328,16 @@ export default {
         Logo,
         TermsCondition,
         "vue-ckeditor": VueCkeditor.component,
+        ResultExcelProducts
     },
     mixins: [functions, exchangeRate],
     data() {
         return {
+            hash: null,
+            showResultExcelProducts: false,
+            registered: 0,
+            errors: [],
+            isIntegrateSystem: false,
             editors: {
                 classic: ClassicEditor,
             },
@@ -1251,6 +1377,7 @@ export default {
             decimalQuantity: 2,
             series: [],
             all_series: [],
+            affectation_igv_types: [],
         };
     },
     async created() {
@@ -1261,10 +1388,12 @@ export default {
         await this.initForm();
         await this.$http.get(`/${this.resource}/tables`).then((response) => {
             const data = response.data;
+            this.isIntegrateSystem = data.is_integrate_system;
             this.currency_types = data.currency_types;
             this.all_series = data.series;
             this.establishments = data.establishments;
             this.all_customers = data.customers;
+            this.affectation_igv_types = data.affectation_igv_types;
             this.discount_types = data.discount_types;
             this.serie = data.serie;
             this.charges_types = data.charges_types;
@@ -1319,6 +1448,222 @@ export default {
     },
     mounted() {},
     methods: {
+        async clickAddItemQ(form) {
+            if (form.item.lots_enabled) {
+                if (!form.IdLoteSelected)
+                    return this.$message.error("Debe seleccionar lote.");
+            }
+            let extra = form.item.extra;
+
+            // if (this.validateTotalItem().total_item) return;
+
+            let affectation_igv_type_id = form.affectation_igv_type_id;
+            // let unit_price = (this.form.has_igv) ? this.form.unit_price_value : this.form.unit_price_value * 1.18;
+            let unit_price = form.unit_price_value;
+            if (form.has_igv === false) {
+                if (
+                    affectation_igv_type_id === "20" ||
+                    affectation_igv_type_id === "21" ||
+                    affectation_igv_type_id === "40"
+                ) {
+                    // do nothing
+                    // exonerado de igv
+                } else {
+                    unit_price =
+                        form.unit_price_value * (1 + this.percentage_igv);
+                }
+            }
+
+            form.input_unit_price_value = form.unit_price_value;
+
+            form.unit_price = unit_price;
+            form.item.unit_price = unit_price;
+            // this.form.item.meter =
+            // form.item.presentation = this.item_unit_type;
+            form.item.presentation = {};
+
+            form.affectation_igv_type = _.find(this.affectation_igv_types, {
+                id: affectation_igv_type_id,
+            });
+
+            let IdLoteSelected = form.IdLoteSelected;
+            let document_item_id = form.document_item_id;
+            let row = calculateRowItem(
+                form,
+                this.form.currency_type_id,
+                this.form.exchange_rate_sale,
+                this.percentage_igv
+            );
+            row.update_price = form.update_price;
+            row.meter = form.item.meter;
+            row.item.name_product_pdf = row.name_product_pdf || "";
+
+            // let { has_bonus_item, bonus_items } = form.item;
+            // this.row.sizes_selected = this.sizes;
+            // let general_random_key = null;
+            // if (has_bonus_item) {
+            //     let random_key = Math.random().toString(36).substring(2);
+            //     this.row.random_key = random_key;
+            //     general_random_key = random_key;
+            // }
+            // if (key && typeof key === "string") {
+            //     this.row.depend_key = key;
+            // }
+
+            row.item.extra = extra;
+            //this.initializeFields()
+
+            // this.row.IdLoteSelected = IdLoteSelected;
+            // this.row.document_item_id = document_item_id;
+
+            // this.showMessageDetraction();
+
+            this.addRow(row);
+        },
+        async changeItem(item) {
+            let form = {};
+            form.item = item;
+
+            form.unit_price_value = form.item.sale_unit_price;
+            form.meter = form.item.meter;
+
+            form.has_igv = form.item.has_igv;
+            form.has_plastic_bag_taxes = form.item.has_plastic_bag_taxes;
+            form.affectation_igv_type_id =
+                form.item.sale_affectation_igv_type_id;
+            let affectation_igv_type = _.find(this.affectation_igv_types, {
+                id: form.item.sale_affectation_igv_type_id,
+            });
+            if (affectation_igv_type == undefined) {
+                form.affectation_igv_type_id = this.affectation_igv_types[0].id;
+            }
+
+            form.quantity = form.item.quantity;
+
+            //asignar variables isc
+            form.has_isc = form.item.has_isc;
+            form.percentage_isc = form.item.percentage_isc;
+            form.system_isc_type_id = form.item.system_isc_type_id;
+
+            if (this.hasAttributes(form)) {
+                form.item.attributes.forEach((row) => {
+                    form.attributes.push({
+                        attribute_type_id: row.attribute_type_id,
+                        description: row.description,
+                        value: row.value,
+                        start_date: row.start_date,
+                        end_date: row.end_date,
+                        duration: row.duration,
+                    });
+                });
+            }
+
+            form.lots_group = form.item.lots_group;
+            // this.setExtraElements(this.form.item);
+            // if (
+            //     form.item_unit_types &&
+            //     form.item_unit_types.length != 0
+            // ) {
+            //     this.changePrice(this.form.item_unit_type_id);
+            // } else {
+            //     await this.getLastPriceItem();
+            // }
+            if (
+                form.item.name_product_pdf &&
+                this.config.item_name_pdf_description
+            ) {
+                form.name_product_pdf = form.item.name_product_pdf;
+            }
+
+            // return form;
+            this.clickAddItemQ(form);
+        },
+        hasAttributes(form) {
+            if (
+                form.item !== undefined &&
+                form.item.attributes !== undefined &&
+                form.item.attributes !== null &&
+                form.item.attributes.length > 0
+            ) {
+                return true;
+            }
+
+            return false;
+        },
+        async uploadFileNewItems(event) {
+            let file = event.target.files[0];
+
+            let url = `/items/items-document-news`;
+            //mandar el archivo por post a esa url
+            let formData = new FormData();
+            formData.append("file", file);
+            formData.append("type", "quotations");
+            try {
+                this.loading = true;
+                const response = await this.$http.post(url, formData);
+
+                if (response.status == 200) {
+                    const {
+                        data: { data },
+                    } = response;
+                    let items = data.items;
+
+                    for (let i = 0; i < items.length; i++) {
+                        const item = items[i];
+                        this.changeItem(item);
+                    }
+                }
+
+                //limpiar el input file
+                event.target.value = "";
+            } catch (e) {
+                console.log(e);
+            } finally {
+                this.loading = false;
+            }
+        },
+        async uploadFileItems(event) {
+            this.errors = [];
+            this.registered = 0;
+            this.hash = null;
+            let file = event.target.files[0];
+
+            let url = `/items/items-document`;
+            //mandar el archivo por post a esa url
+            let formData = new FormData();
+            formData.append("file", file);
+            formData.append("type", "quotations");
+            try {
+                this.loading = true;
+                const response = await this.$http.post(url, formData);
+
+                if (response.status == 200) {
+                    const {
+                        data: { data },
+                    } = response;
+                    let items = data.items;
+                    this.registered = data.registered;
+                    this.errors = data.errors;
+                    this.hash = data.hash;
+                    for (let i = 0; i < items.length; i++) {
+                        const item = items[i];
+                        this.changeItem(item);
+                    }
+                }
+
+                //limpiar el input file
+                this.showResultExcelProducts = true;
+                event.target.value = "";
+            } catch (e) {
+                console.log(e);
+            } finally {
+                this.loading = false;
+            }
+        },
+        seeDetails(item) {
+            let { id } = item;
+            window.open(`/items/details/${id}`, "_blank");
+        },
         printHtml() {
             console.log(this.form.observations);
         },
@@ -1527,7 +1872,7 @@ export default {
         initForm() {
             this.errors = {};
             this.form = {
-                series_id:null,
+                series_id: null,
                 observations:
                     "<p>* PRECIOS NO INCLUYEN IGV. VALIDEZ DE LA OFERTA:&nbsp;</p><p>* FORMA DE PAGO: &nbsp;DE ADELANTO, SALDO ANTES DE LA ENTREGA &nbsp; &nbsp;</p><p>* PLAZO DE ENTREGA PRODUCTOS: &nbsp;DEPENDIENDO LA DISPONIBILIDAD DE FABRICA &nbsp; &nbsp;</p><p>* PRECIOS EXPRESADOS EN&nbsp;</p><p>* LA COTIZACION NO INCLUYE ACARREO DE MATERIAL. &nbsp; &nbsp;</p><p>* ESTA COTIZACION NO INCLUYE EMBALAJE ESPECIAL DE MATERIAL, SI FUERA REQUERIDO SE COTIZARÁ. &nbsp; &nbsp;</p><p>* FORMA DE PAGO: TRANSFERENCIA &nbsp; &nbsp;</p><p><strong>Razón Social: AQUA CONCEPT / RUC 20608989324 &nbsp; &nbsp;</strong></p><p><strong>SCOTIABANK &nbsp; &nbsp;</strong></p><p><strong>Cuenta Ahorro soles &nbsp;</strong> &nbsp;</p><p>139-0286506 &nbsp; &nbsp;</p><p>CCI: 009-038-201390286506-13 &nbsp; &nbsp;</p><p><strong>Cuenta ahorro dólares&nbsp;</strong> &nbsp;&nbsp;</p><p>139-0290034</p><p>CCI: 009-038-211390290034-18 &nbsp; &nbsp;</p>",
                 seller_id: null,
@@ -1674,21 +2019,21 @@ export default {
             });
             let items = [];
             this.form.items.forEach((row) => {
-                 let newItem =
-                    calculateRowItem(
-                        row,
-                        this.form.currency_type_id,
-                        this.form.exchange_rate_sale,
-                        this.percentage_igv
-                    )
-                if(this.isProject){
-                newItem.header = row.header;
-                newItem.disponibilidad = row.disponibilidad;
-                console.log("🚀 ~ file: form.vue:1695 ~ this.form.items.forEach ~ newItem:", newItem)
-                
+                let newItem = calculateRowItem(
+                    row,
+                    this.form.currency_type_id,
+                    this.form.exchange_rate_sale,
+                    this.percentage_igv
+                );
+                if (this.isProject) {
+                    newItem.header = row.header;
+                    newItem.disponibilidad = row.disponibilidad;
+                    console.log(
+                        "🚀 ~ file: form.vue:1695 ~ this.form.items.forEach ~ newItem:",
+                        newItem
+                    );
                 }
                 items.push(newItem);
-
             });
             this.form.items = items;
             this.calculateTotal();

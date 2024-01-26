@@ -72,16 +72,29 @@ class PersonController extends Controller
         $api_service_token = \App\Models\Tenant\Configuration::getApiServiceToken();
         $driver = true;
         $suscriptionames = SuscriptionNames::create_new();
-        return view('tenant.persons.index', compact('type', 'driver', 'api_service_token', 'suscriptionames'));
+        return view('tenant.persons.index', compact(
+            'type',
+            'driver',
+            'api_service_token',
+            'suscriptionames'
+        ));
     }
     public function index($type)
     {
+        $is_comercial  = auth()->user()->integrate_user_type_id == 2;
+
         // $configuration = Configuration::first();
         // $api_service_token = $configuration->token_apiruc =! '' ? $configuration->token_apiruc : config('configuration.api_service_token');
         $api_service_token = \App\Models\Tenant\Configuration::getApiServiceToken();
         $driver = false;
         $suscriptionames = SuscriptionNames::create_new();
-        return view('tenant.persons.index', compact('type', 'driver', 'api_service_token', 'suscriptionames'));
+        return view('tenant.persons.index', compact(
+            'type',
+            'is_comercial',
+            'driver',
+            'api_service_token',
+            'suscriptionames'
+        ));
     }
 
     public function columns()
@@ -212,7 +225,7 @@ class PersonController extends Controller
     public function store(PersonRequest $request)
     {
         /* dd($request->all()); */
-        
+
         if (!$request->barcode) {
             if ($request->internal_id) {
                 $request->merge(['barcode' => $request->internal_id]);

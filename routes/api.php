@@ -44,6 +44,9 @@ if ($hostname) {
 
             Route::get('app/company-params', 'Tenant\ItemController@tables'); // Parámetros de la empresa
 
+            // whatsapp
+            Route::post('whatsapp', 'Tenant\WhatsappController@sendwhatsapp');
+            
             // PRODUCTOS
             Route::get('app/paginate-items', 'Tenant\ItemController@records'); // Listar items por paginación
             Route::get('app/retrieve-item/{id}', 'Tenant\ItemController@record'); // Obtener la información de un producto

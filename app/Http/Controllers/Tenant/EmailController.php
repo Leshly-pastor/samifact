@@ -57,6 +57,7 @@
          */
         public static function SendMail($email, $mailable, $id = 0, $type = null): bool
         {
+           try{
             $sendit = new self();
             $mail = explode(';', str_replace([',', ' '], [';', ''], $email));
             $mails = [];
@@ -77,11 +78,20 @@
                 ->setArrayEmail(explode(';',$email))
                 // ->setEmail(str_replace([';', '  '], [', ', ' '], $email))
                 ->SendAMail($mailable);
-
-
             return true;
-        }
 
+           }catch(Exception $e){
+
+            EmailSendLog::channel('emails')->error(
+                "Codigo : " . $e->getCode() . "\n" .
+                "Mensaje : " . $e->getMessage() . "\n" .
+                "Linea : " . $e->getLine() . "\n" .
+                "\n"
+            );
+
+            return false;
+        }
+    }
         /**
          * @param $mailable
          *

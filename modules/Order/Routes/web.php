@@ -40,6 +40,7 @@ if($current_hostname) {
              */
             Route::prefix('order-notes')->group(function () {
 
+                Route::post('/check-item-food-dealer', 'OrderNoteController@checkItemFoodDealer');
                 Route::get('/', 'OrderNoteController@index')->name('tenant.order_notes.index')->middleware(['redirect.level']);
                 Route::get('columns', 'OrderNoteController@columns');
                 Route::get('records', 'OrderNoteController@records');

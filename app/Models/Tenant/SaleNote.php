@@ -149,6 +149,7 @@ class SaleNote extends ModelTenant
     ];
 
     protected $fillable = [
+        'state_payment_id',
         'no_stock',
         'cash_id',
         'user_id',
@@ -353,6 +354,16 @@ class SaleNote extends ModelTenant
     {
 
         return (is_null($value)) ? null : (object)json_decode($value);
+    }
+
+    public function production_order()
+    {
+        return $this->hasOne(ProductionOrder::class);
+    }
+
+    public function dispatch_order()
+    {
+        return $this->hasOne(DispatchOrder::class);
     }
 
     public function setEstablishmentAttribute($value)
@@ -724,7 +735,42 @@ class SaleNote extends ModelTenant
         // $btn_generate = ($total_documents > 0) ? false : true;
         $btn_payments = ($total_documents > 0) ? false : true;
         $due_date = (!empty($this->due_date)) ? $this->due_date->format('Y-m-d') : null;
+        $btn_generate = $this->getBtnGenerate($total_documents);
+        // $btn_generate = ($total_documents > 0) ? false : true;
+        $btn_payments = ($total_documents > 0) ? false : true;
+        $due_date = (!empty($this->due_date)) ? $this->due_date->format('Y-m-d') : null;
 
+        if (empty($this->seller_id)) {
+            $this->seller_id = $this->user_id;
+        }
+        $this->payments = $this->getTransformPayments();
+        $message_text = '';
+        if (!empty($this->number_full) && !empty($this->external_id)) {
+            $message_text = "Su comprobante de nota de venta {$this->number_full} ha sido generado correctamente, puede revisarlo en el siguiente enlace: " .
+                url('') . "/sale-notes/print/{$this->external_id}/a4" . '';
+        }
+        $canSentToOtherServer = false;
+        if ($configuration->isSendDataToOtherServer() == true && auth()->user()->type === 'admin') {
+            $alreadySent = SaleNoteMigration::where([
+                'sale_notes_id' => $this->id,
+                'success' => true
+            ])->first();
+            if ($alreadySent == false) {
+                $canSentToOtherServer = true;
+            }
+        }
+        $web_platforms = $this->getPlatformThroughItems();
+        $child_name = '';
+        $child_number = '';
+        $customer = $this->customer;
+        if (property_exists($customer, 'children')) {
+            $child = $customer->children;
+            $child_name = $child->name;
+            $child_number = $child->number;
+        }
+        $person = $this->person;
+        $mails = $person->getCollectionData();
+        $customer_email =  $mails['optional_email_send'];
         if (empty($this->seller_id)) {
             $this->seller_id = $this->user_id;
         }
@@ -772,7 +818,66 @@ class SaleNote extends ModelTenant
         if ($configuration->block_seller_sale_note_edit && $type_user === 'seller') {
             $not_blocked = false;
         }
+        $production_order = $this->production_order;
+        if($production_order){
+            $state_production_order = $production_order->production_order_state;
+            $state_id = $state_production_order->id;
+            $state_description = $state_production_order->description;
+            $responsible_name = null;
+            if($production_order->responsible_id){
+                $responsible = User::find($production_order->responsible_id);
+                $responsible_name = $responsible->name;
+            }
+            $production_order = [
+                'id' => $production_order->id,
+                'number_full' => $production_order->number_full,
+                'state_description' => $state_description,
+                'state_id' => $state_id,
+                'responsible_name' => $responsible_name,
+            ];
+        }
+        $dispatch_order = $this->dispatch_order;
+        if($dispatch_order){
+            $state_dispatch_order = $dispatch_order->dispatch_order_state;
+            $state_id = $state_dispatch_order->id;
+            $state_description = $state_dispatch_order->description;
+            $responsible_name = null;
+            if($dispatch_order->responsible_id){
+                $responsible = User::find($dispatch_order->responsible_id);
+                $responsible_name = $responsible->name;
+            }
+            $dispatch_order = [
+                'id' => $dispatch_order->id,
+                'number_full' => $dispatch_order->number_full,
+                'state_description' => $state_description,
+                'state_id' => $state_id,
+                'responsible_name' => $responsible_name,
+            ];
+        }
+        $dispatches = Dispatch::where('reference_sale_note_id',$this->id)
+        ->where('state_type_id','<>',11)
+        ->where('state_type_id','<>',13)
+        ->get()
+        ->transform(function ($row){
+            return [
+                'id' => $row->id,
+                'number' => $row->number_full,
+                'external_id' => $row->external_id,
+            ];
+        })
+        ;
+        $has_agency_dispatch = null;
+        if($dispatch_order){
+            $has_agency_dispatch = AgencyDispatchTable::where('dispatch_order_id',$dispatch_order["id"])->count() > 0;
+
+        }
         return [
+            'quotation_id' => $this->quotation_id,
+            'has_agency_dispatch' => $has_agency_dispatch,
+            'state_payment_id' => $this->state_payment_id,
+            'dispatches' => $dispatches,
+            'production_order'             => $production_order,
+            'dispatch_order'               => $dispatch_order,
             'not_blocked' => $not_blocked,
             'id' => $this->id,
             'soap_type_id' => $this->soap_type_id,

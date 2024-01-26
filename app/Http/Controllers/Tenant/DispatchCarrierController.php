@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Tenant;
 
 use App\CoreFacturalo\Facturalo;
 use App\CoreFacturalo\Helpers\Storage\StorageDocument;
+use App\Exports\DispatchExport;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Tenant\DispatchRequest;
 use App\Http\Resources\Tenant\DispatchCollection;
@@ -30,8 +31,7 @@ use Illuminate\Support\Facades\DB;
 use Modules\ApiPeruDev\Http\Controllers\ServiceDispatchController;
 use Modules\Dispatch\Http\Controllers\DispatcherController;
 use Modules\Dispatch\Http\Controllers\DriverController;
-use Modules\Dispatch\Http\Controllers\ReceiverController;
-use Modules\Dispatch\Http\Controllers\SenderController;
+
 use Modules\Dispatch\Http\Controllers\TransportController;
 use Modules\Dispatch\Models\OriginAddress;
 use Modules\Document\Traits\SearchTrait;
@@ -42,6 +42,7 @@ use Modules\Order\Mail\DispatchEmail;
 use Modules\Order\Models\OrderNote;
 use App\Models\Tenant\PaymentCondition;
 use App\Models\Tenant\Catalogs\RelatedDocumentType;
+use Carbon\Carbon;
 
 class DispatchCarrierController extends Controller
 {
@@ -67,6 +68,15 @@ class DispatchCarrierController extends Controller
         ];
     }
 
+    public function exportExcel(Request $request){
+        $records = $this->getRecords($request);
+        $records = $records->get();
+
+        return (new DispatchExport)
+            ->records($records)
+            ->isTransport(true)
+            ->download('Reporte_Guia_Transportista_'.Carbon::now()->format('Y-m-d').'.xlsx');
+    }
     public function records(Request $request)
     {
         $records = $this->getRecords($request);

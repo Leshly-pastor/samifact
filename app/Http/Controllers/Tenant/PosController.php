@@ -41,12 +41,12 @@ class PosController extends Controller
         if (!$cash) return redirect()->route('tenant.cash.index');
 
         $configuration = Configuration::first();
-
+        $is_food_dealer = BusinessTurn::isFoodDealer();
         $company = Company::select('soap_type_id')->first();
         $soap_company  = $company->soap_type_id;
         $business_turns = BusinessTurn::select('active')->where('id', 4)->first();
 
-        return view('tenant.pos.index', compact('configuration', 'soap_company', 'business_turns'));
+        return view('tenant.pos.index', compact('configuration', 'soap_company', 'business_turns','is_food_dealer'));
     }
 
     public function index_full()
@@ -87,7 +87,7 @@ class PosController extends Controller
             return [
                 'id' => $row->id,
                 'item_id' => $row->id,
-                'sizes' => $row->sizes,                
+                'sizes' => $row->sizes,
                 'full_description' => $full_description,
                 'description' => ($row->brand->name) ? $row->description . ' - ' . $row->brand->name : $row->description,
                 'currency_type_id' => $row->currency_type_id,
@@ -141,23 +141,97 @@ class PosController extends Controller
 
         return compact('items');
     }
-    private function getSaleUnitPrice($row, $configuration){
+    private function getSaleUnitPrice($row, $configuration)
+    {
 
         $sale_unit_price = number_format($row->sale_unit_price, $configuration->decimal_quantity, ".", "");
 
-        if($configuration->active_warehouse_prices){
+        if ($configuration->active_warehouse_prices) {
 
             $warehouse_price = $row->warehousePrices()->where('warehouse_id', auth()->user()->establishment->warehouse->id)->first();
-            if($warehouse_price){
+            if ($warehouse_price) {
                 $sale_unit_price = number_format($warehouse_price->price, $configuration->decimal_quantity, ".", "");
-             }else{
-                if($row->warehousePrices()->count() > 0){
+            } else {
+                if ($row->warehousePrices()->count() > 0) {
                     $sale_unit_price = number_format($row->warehousePrices()->first()->price, $configuration->decimal_quantity, ".", "");
                 }
             }
-
         }
-         return $sale_unit_price;
+        return $sale_unit_price;
+    }
+    function get_items_food_dealer()
+    {
+        $configuration =  Configuration::first();
+        $items_query = Item::whereHas('food_dealer')
+            ->whereWarehouse();
+
+
+
+        $items =  $items_query->whereIsActive()->get()->transform(function ($row) {
+
+            $full_description = ($row->internal_id) ? $row->internal_id . ' - ' . $row->description : $row->description;
+            $configuration = Configuration::first();
+            $sale_unit_price = $this->getSaleUnitPrice($row, $configuration);
+            
+            return [
+                'id' => $row->id,
+                'start' => $row->food_dealer->start_time,
+                'end' => $row->food_dealer->end_time,
+                'item_id' => $row->id,
+                'sizes' => $row->sizes,
+                'full_description' => $full_description,
+                'description' => ($row->brand->name) ? $row->description . ' - ' . $row->brand->name : $row->description,
+                'currency_type_id' => $row->currency_type_id,
+                'internal_id' => $row->internal_id,
+                'currency_type_symbol' => $row->currency_type->symbol,
+                'sale_unit_price' => number_format($sale_unit_price, $configuration->decimal_quantity, ".", ""),
+                'purchase_unit_price' => $row->purchase_unit_price,
+                'unit_type_id' => $row->unit_type_id,
+                'aux_unit_type_id' => $row->unit_type_id,
+                'sale_affectation_igv_type_id' => $row->sale_affectation_igv_type_id,
+                'purchase_affectation_igv_type_id' => $row->purchase_affectation_igv_type_id,
+                'calculate_quantity' => (bool) $row->calculate_quantity,
+                'is_set' => (bool) $row->is_set,
+                'edit_unit_price' => false,
+                'has_igv' => (bool) $row->has_igv,
+                'aux_quantity' => 1,
+                'aux_sale_unit_price' => number_format($row->sale_unit_price, $configuration->decimal_quantity, ".", ""),
+                'edit_sale_unit_price' => number_format($row->sale_unit_price, $configuration->decimal_quantity, ".", ""),
+                'image_url' => ($row->image !== 'imagen-no-disponible.jpg') ? asset('storage' . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . 'items' . DIRECTORY_SEPARATOR . $row->image) : asset("/logo/{$row->image}"),
+                'sets' => collect($row->sets)->transform(function ($r) {
+                    return [
+                        $r->individual_item->description
+                    ];
+                }),
+                'warehouses' => collect($row->warehouses)->transform(function ($row) {
+                    return [
+                        'warehouse_description' => $row->warehouse->description,
+                        'stock' => $row->stock,
+                    ];
+                }),
+                'unit_type' => $row->item_unit_types,
+                // 'unit_type' => $row->item_unit_types,
+                'category' => ($row->category) ? $row->category->name : null,
+                'brand' => ($row->brand) ? $row->brand->name : null,
+                'has_plastic_bag_taxes' => (bool) $row->has_plastic_bag_taxes,
+                'amount_plastic_bag_taxes' => $row->amount_plastic_bag_taxes,
+
+                'has_isc' => (bool)$row->has_isc,
+                'system_isc_type_id' => $row->system_isc_type_id,
+                'percentage_isc' => $row->percentage_isc,
+                'search_item_by_barcode_presentation' => false,
+
+                'exchange_points' => $row->exchange_points,
+                'quantity_of_points' => $row->quantity_of_points,
+                'exchanged_for_points' => false, //para determinar si desea canjear el producto
+                'used_points_for_exchange' => null, //total de puntos
+                'original_affectation_igv_type_id' => $row->sale_affectation_igv_type_id,
+                'restrict_sale_cpe' => $row->restrict_sale_cpe,
+            ];
+        });
+
+        // return compact('items');
+        return $items;
     }
     public function tables()
     {
@@ -168,7 +242,11 @@ class PosController extends Controller
         $currency_types = CurrencyType::whereActive()->get();
         $sellers = $this->getSellers();
         $customers = $this->table('customers');
-        $configuration=Configuration::all();
+        $configuration = Configuration::all();
+        $items_food_dealer = [];
+        if (BusinessTurn::isFoodDealer()) {
+            $items_food_dealer = $this->get_items_food_dealer();
+        }
         $user = User::findOrFail(auth()->user()->id);
 
         $items = $this->table('items');
@@ -176,6 +254,7 @@ class PosController extends Controller
         $categories = Category::all();
         $payment_method_types = PaymentMethodType::getPaymentMethodTypes();
         return compact(
+            'items_food_dealer',
             'company',
             'configuration',
             'sellers',
@@ -323,10 +402,10 @@ class PosController extends Controller
     {
         $configuration = Configuration::first();
         $inventory_configuration = InventoryConfiguration::firstOrFail();
-        if($configuration->list_items_by_warehouse){
+        if ($configuration->list_items_by_warehouse) {
             $warehouse = Warehouse::where('establishment_id', auth()->user()->establishment_id)->first();
-        }else{
-            
+        } else {
+
             $establishment = $configuration->getMainWarehouse();
             $warehouse = Warehouse::where('establishment_id', $establishment->id)->first();
         }
@@ -347,7 +426,7 @@ class PosController extends Controller
                         ['warehouse_id', $warehouse->id]
                     ]
                 )->first();
-               
+
                 if (!$item_warehouse)
                     return [
                         'success' => false,
@@ -375,8 +454,8 @@ class PosController extends Controller
                     'message' => ''
                 ];
             }
-           
-            if (!$item_warehouse && $item->unit_type_id !== 'ZZ'){
+
+            if (!$item_warehouse && $item->unit_type_id !== 'ZZ') {
                 return [
                     'success' => false,
                     'message' => "El producto seleccionado no está disponible en su almacén!"
@@ -485,13 +564,12 @@ class PosController extends Controller
      */
     public function search_items_cat(Request $request)
     {
-        $configuration =Configuration::first();
-        if($configuration->active_warehouse_prices==true){
+        $configuration = Configuration::first();
+        if ($configuration->active_warehouse_prices == true) {
             $item = Item::where('series_enabled', 0);
-        }else{
+        } else {
             $item = Item::whereWarehouse()
-             ->where('series_enabled', 0);
-
+                ->where('series_enabled', 0);
         }
 
         self::FilterItem($item, $request);

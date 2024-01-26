@@ -4,6 +4,7 @@
     <?php
     use App\Models\Tenant\Configuration;
     $configuration = Configuration::first();
+    $is_integrate_system = \Modules\BusinessTurn\Models\BusinessTurn::isIntegrateSystem();
     ?>
     <div class="page-header pr-0">
         <h2>
@@ -59,6 +60,14 @@
                                     <i data-cs-icon="web" class="icon" data-cs-size="18"></i>
                                     Plataformas</a>
                             </li>
+                            @if ($is_integrate_system)
+                                <li>
+
+                                    <a href="{{ url('message-integrate-system') }}">
+                                        <i data-cs-icon="email" class="icon" data-cs-size="18"></i>
+                                        Mensajes predeterminados - Sistema integrado</a>
+                                </li>
+                            @endif
                         @endif
                     </ul>
                 </div>

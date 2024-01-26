@@ -98,12 +98,12 @@ if ($logo) {
 </table>
 <table class="full-width border-box mt-2">
     <tr>
-        <td class="font-xs font-bold pt-1 pb-1 pl-2" width="100%"> Direc. partida : {{ $document->origin->location_id }} - {{ $document->origin->address }}</td>
+        <td class="font-xs font-bold pt-1 pb-1 pl-2" width="100%"> Direc. partida : {{ optional($document->origin)->location_id }} - {{ optional($document->origin)->address }}</td>
     </tr>
 </table>
 <table class="full-width border-box mt-2">
     <tr>
-        <td class="font-xs font-bold pt-1 pb-1 pl-2" width="100%"> Direc. llegada : {{ $document->delivery->location_id }} - {{ $document->delivery->address }}</td>
+        <td class="font-xs font-bold pt-1 pb-1 pl-2" width="100%"> Direc. llegada : {{ optional($document->delivery)->location_id }} - {{ optional($document->delivery)->address }}</td>
     </tr>
 </table>
 <table class="full-width  mt-2">

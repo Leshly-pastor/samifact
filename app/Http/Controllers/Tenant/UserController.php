@@ -18,13 +18,39 @@ use App\Models\Tenant\Catalogs\IdentityDocumentType;
 use Illuminate\Http\Request;
 use Modules\Finance\Helpers\UploadFileHelper;
 use Illuminate\Support\Facades\DB;
-
+use Modules\BusinessTurn\Models\BusinessTurn;
 
 class UserController extends Controller
 {
+    public function unlock(Request $request){
+        $user_id = $request->input('user_id');
+        $user = User::findOrFail($user_id);
+        $user->is_locked = false;
+        $user->msg_locked = null;
+        $user->save();
+        return [
+            'success' => true,
+            'message' => 'Usuario desbloqueado'
+        ];
+    }
+    public function lock(Request $request){
+        $user_id = $request->input('user_id');
+        $message = $request->input('message');
+        $message = trim($message);
+        $user = User::findOrFail($user_id);
+        $user->is_locked = true;
+        if($message == null || $message == "" || $message == " "){
+            $message = "Su cuenta ha sido bloqueada. Comuníquese con el administrador";
+        }
+        $user->msg_locked = $message;
+        $user->save();
+        return [
+            'success' => true,
+            'message' => 'Usuario bloqueado'
+        ];
+    }
     public function cambiarContrasena(Request $request)
     {
-        //obten la url de la pagina y hazle un explode por el . si el primer elemento es igual a "demo" seteale la clave en 123456
         $url = explode('.', $request->getHttpHost());
         $part = $url[0];
         $password = $request->input('password');
@@ -141,8 +167,9 @@ class UserController extends Controller
 
     public function store(UserRequest $request)
     {
+        // 
         $id = $request->input('id');
-
+      
         if (!$id) { //VALIDAR EMAIL DISPONIBLE
             $verify = User::where('email', $request->input('email'))->first();
             if ($verify) {
@@ -154,13 +181,16 @@ class UserController extends Controller
         }
 
         DB::connection('tenant')->transaction(function () use ($request, $id) {
-
+            $is_integrate_system = BusinessTurn::isIntegrateSystem();
+            $integrate_user_type_id = $request->input('integrate_user_type_id');
             /** @var User $user */
             $user = User::firstOrNew(['id' => $id]);
+    
             $user->name = $request->input('name');
             $user->email = $request->input('email');
             $user->establishment_id = $request->input('establishment_id');
             $user->type = $request->input('type');
+            $user->integrate_user_type_id = $request->input('integrate_user_type_id');
 
             // Zona por usuario
             // $user->zone_id = $request->input('zone_id');
@@ -209,6 +239,21 @@ class UserController extends Controller
             if ($user->id != 1) {
                 $user->setModuleAndLevelModule($request->modules, $request->levels);
             }
+            if($is_integrate_system && $integrate_user_type_id){
+                if($id){
+                    DB::connection('tenant')
+                    ->table('module_user')
+                    ->where('user_id', $user->id)
+                    ->delete();
+        
+                    DB::connection('tenant')
+                    ->table('module_level_user')
+                    ->where('user_id', $user->id)
+                    ->delete();
+                   }
+        
+                $user->setIntegrateUserType($integrate_user_type_id);
+            }
         });
 
         return [
@@ -217,7 +262,7 @@ class UserController extends Controller
         ];
     }
 
-
+  
     /**
      * 
      * Asignar datos

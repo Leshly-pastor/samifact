@@ -1096,7 +1096,7 @@ class PseService
 
         }
         $affectation_igv_type_id = $document_item->affectation_igv_type_id;
-        if ($affectation_igv_type_id != '20' && $affectation_igv_type_id != '30') {
+        if ($affectation_igv_type_id != '20' && $affectation_igv_type_id != '30' && $affectation_igv_type_id != '40') {
 
             $prelis = $preuni * (1 + $document_item->percentage_isc / 100) * (1 + $document_item->percentage_igv / 100);
         } else {
@@ -1118,6 +1118,10 @@ class PseService
             case '30':
                 $this->basina += $totuni;
                 break;
+            case '40':
+                $this->basexo += $totuni;
+                break;
+
         }
         $monigv = 0;
         if ($affectation_igv_type_id == '10') {

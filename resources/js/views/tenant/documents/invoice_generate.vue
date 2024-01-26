@@ -639,6 +639,75 @@
                                     </el-popover>
                                 </div>
                                 <div class="col-xl-3 col-md-3 col-12 pb-2">
+                                    <el-popover
+                                        placement="top-start"
+                                        :open-delay="1000"
+                                        width="145"
+                                        trigger="hover"
+                                        content="Subir un excel para la venta"
+                                    >
+                                        <button
+                                            slot="reference"
+                                            type="button"
+                                            class="btn btn-outline-success mb-1"
+                                            @click.prevent="
+                                                $refs.file_items.click()
+                                            "
+                                        >
+                                            Subir productos existentes
+                                        </button>
+                                    </el-popover>
+                                    <input
+                                        type="file"
+                                        style="display: none"
+                                        ref="file_items"
+                                        @change="uploadFileItems"
+                                        accept=".xlsx"
+                                    />
+
+                                    <br />
+                                    <small>
+                                        <a
+                                            target="_blank"
+                                            href="/formats/upload_items_to_document.xlsx"
+                                            >Descargar formato</a
+                                        >
+                                    </small>
+                                </div>
+                                <div class="col-xl-3 col-md-3 col-12 pb-2">
+                                    <el-popover
+                                        placement="top-start"
+                                        :open-delay="1000"
+                                        width="145"
+                                        trigger="hover"
+                                        content="Subir un excel para la venta"
+                                    >
+                                        <button
+                                            slot="reference"
+                                            type="button"
+                                            class="btn btn-outline-success mb-1"
+                                            @click.prevent="$refs.file.click()"
+                                        >
+                                            Subir productos nuevos
+                                        </button>
+                                    </el-popover>
+                                    <input
+                                        type="file"
+                                        style="display: none"
+                                        ref="file"
+                                        @change="uploadFileNewItems"
+                                        accept=".xlsx"
+                                    />
+                                    <br />
+                                    <small>
+                                        <a
+                                            target="_blank"
+                                            href="/formats/items_news.xlsx"
+                                            >Descargar formato</a
+                                        >
+                                    </small>
+                                </div>
+                                <div class="col-xl-3 col-md-3 col-12 pb-2">
                                     <button
                                         type="button"
                                         class="btn btn-outline-primary mb-1"
@@ -1296,23 +1365,25 @@
                                 >
                                     <div class="row">
                                         <div class="col-3">
-                                            <label for="quantity">Número de tickets de
-                                            despacho</label>
-                                                   <el-input
-                                            v-model="
-                                                form.dispatch_ticket_pdf_quantity
-                                            "
-                                            type="number"
-                                        ></el-input>
+                                            <label for="quantity"
+                                                >Número de tickets de
+                                                despacho</label
+                                            >
+                                            <el-input
+                                                v-model="
+                                                    form.dispatch_ticket_pdf_quantity
+                                                "
+                                                type="number"
+                                            ></el-input>
                                         </div>
                                     </div>
                                     <div class="row mt-2">
                                         <div class="col-12">
                                             Datos de referencia
-                                              <el-input
-                                            v-model="form.reference_data"
-                                            type="textarea"
-                                        ></el-input>
+                                            <el-input
+                                                v-model="form.reference_data"
+                                                type="textarea"
+                                            ></el-input>
                                         </div>
                                     </div>
                                 </div>
@@ -1430,7 +1501,7 @@
                                                     <template
                                                         v-if="
                                                             config.enabled_point_system &&
-                                                            custiner_accumulated_points >
+                                                            customer_accumulated_points >
                                                                 0 &&
                                                             row.item
                                                                 .exchange_points
@@ -1479,6 +1550,16 @@
                                                             >
                                                         </template>
                                                     </template>
+                                                    <br />
+                                                    <a
+                                                        href="#"
+                                                        @click.prevent="
+                                                            seeDetails(row.item)
+                                                        "
+                                                        class="text-info"
+                                                    >
+                                                        [Ver detalle]
+                                                    </a>
                                                 </td>
                                                 <td
                                                     v-if="
@@ -3162,6 +3243,12 @@
             :document-id="documentId"
             @success="successItemSeries"
         ></store-item-series-index>
+        <result-excel-products
+        :showDialog.sync="showResultExcelProducts"
+        :registered="registered"
+        :errors="errors"
+        :hash="hash"
+        ></result-excel-products>
     </div>
 </template>
 
@@ -3220,7 +3307,7 @@ import Keypress from "vue-keypress";
 import StoreItemSeriesIndex from "../Store/ItemSeriesIndex";
 import DocumentReportCustomer from "./partials/report_customer.vue";
 import SetTip from "@components/SetTip.vue";
-
+import ResultExcelProducts from "@components/ResultExcelProducts.vue";
 export default {
     props: [
         "idUser",
@@ -3250,6 +3337,7 @@ export default {
         DocumentTransportForm,
         DocumentReportCustomer,
         SetTip,
+        ResultExcelProducts
     },
     mixins: [
         functions,
@@ -3260,6 +3348,11 @@ export default {
     ],
     data() {
         return {
+
+            hash: null,
+            showResultExcelProducts: false,
+            registered:0,
+            errors:[],
             split_base: false,
             loading: false,
             person_type_id: null,
@@ -3536,6 +3629,7 @@ export default {
             await this.$http
                 .get(`/store/record/${this.table}/${this.tableId}`)
                 .then((response) => {
+                    console.log("🚀 ~ file: invoice_generate.vue:3632 ~ .then ~ response:", response)
                     this.onSetFormData(response.data.data);
                 })
                 .finally(() => (this.loading_submit = false));
@@ -3640,6 +3734,79 @@ export default {
         this.formatTooltip(20);
     },
     methods: {
+       async uploadFileNewItems(event) {
+            let file = event.target.files[0];
+       
+
+            let url = `/items/items-document-news`;
+            //mandar el archivo por post a esa url
+            let formData = new FormData();
+            formData.append("file", file);
+            formData.append("type","documents");
+            try{
+                this.loading=true;
+                  const response = await this.$http.post(url, formData);
+  
+            if (response.status == 200) {
+                const { data:{data} } = response;
+                let items = data.items;
+
+                for (let i = 0; i < items.length; i++) {
+                    const item = items[i];
+                    this.changeItem(item);
+                }
+            }
+
+            //limpiar el input file 
+            event.target.value = "";
+            }catch(e){
+                console.log(e);
+            }finally{
+                this.loading = false;
+            }
+        },
+        async uploadFileItems(event) {
+            this.errors = [];
+            this.registered = 0;
+            this.hash = null;
+            let file = event.target.files[0];
+       
+
+            let url = `/items/items-document`;
+            //mandar el archivo por post a esa url
+            let formData = new FormData();
+            formData.append("file", file);
+            formData.append("type","documents");
+            try{
+                this.loading=true;
+                  const response = await this.$http.post(url, formData);
+  
+            if (response.status == 200) {
+                const { data:{data} } = response;
+                let items = data.items;
+                this.registered = data.registered;
+                this.errors = data.errors;
+                this.hash = data.hash;
+                for (let i = 0; i < items.length; i++) {
+                    const item = items[i];
+                    this.changeItem(item);
+                }
+            }
+
+            //limpiar el input file 
+            this.showResultExcelProducts = true;
+            event.target.value = "";
+            }catch(e){
+                console.log(e);
+            }finally{
+                this.loading = false;
+            }
+        },
+
+        seeDetails(item) {
+            let { id } = item;
+            window.open(`/items/details/${id}`, "_blank");
+        },
         splitBase() {
             if (this.total_global_discount == 0 || !this.is_amount) return;
             if (this.split_base) {
@@ -3874,8 +4041,8 @@ export default {
             this.errors = {};
             this.split_base = false;
             this.form = {
-                dispatch_ticket_pdf_quantity:1, 
-                dispatch_ticket_pdf:false, 
+                dispatch_ticket_pdf_quantity: 1,
+                dispatch_ticket_pdf: false,
                 child_id: null,
                 no_stock: this.configuration.document_no_stock || false,
                 establishment_id: null,
@@ -4207,9 +4374,10 @@ export default {
             this.form.currency_type_id = data.currency_type_id;
             // this.form.exchange_rate_sale = data.exchange_rate_sale;
             this.form.external_id = data.external_id;
-              this.form.reference_data = data.reference_data;
+            this.form.reference_data = data.reference_data;
             this.form.dispatch_ticket_pdf = data.dispatch_ticket_pdf;
-            this.form.dispatch_ticket_pdf_quantity = data.dispatch_ticket_pdf_quantity;
+            this.form.dispatch_ticket_pdf_quantity =
+                data.dispatch_ticket_pdf_quantity;
             this.form.filename = data.filename;
             this.form.group_id = data.group_id;
             this.form.perception = data.perception;
@@ -4230,6 +4398,7 @@ export default {
                 data.pending_amount_prepayment || 0;
             this.form.payment_method_type_id = data.payment_method_type_id;
             this.form.charges = data.charges || [];
+            this.form.sale_note_id = data.sale_note_id;
 
             this.form.discounts = this.prepareDataGlobalDiscount(data);
             // this.form.discounts = data.discounts || [];
@@ -6087,7 +6256,7 @@ export default {
             };
         },
         async submit() {
-            if(this.configuration.enabled_dispatch_ticket_pdf){
+            if (this.configuration.enabled_dispatch_ticket_pdf) {
                 this.form.dispatch_ticket_pdf = true;
             }
             if (!this.hasCashOpen()) {
@@ -6129,7 +6298,6 @@ export default {
                     return this.$message.error(error_prepayment.message);
             }
 
-           
             if (this.is_receivable) {
                 this.form.payments = [];
             } else {
@@ -6580,6 +6748,144 @@ export default {
         },
         showItemSeries(series) {
             return series.map((o) => o["series"]).join(", ");
+        },
+        async clickAddItem(form) {
+      
+            let extra = form.item.extra;
+
+            // if (this.validateTotalItem().total_item) return;
+
+            let affectation_igv_type_id = form.affectation_igv_type_id;
+            // let unit_price = (this.form.has_igv) ? this.form.unit_price_value : this.form.unit_price_value * 1.18;
+            let unit_price = form.unit_price_value;
+            if (form.has_igv === false) {
+                if (
+                    affectation_igv_type_id === "20" ||
+                    affectation_igv_type_id === "21" ||
+                    affectation_igv_type_id === "40"
+                ) {
+                    // do nothing
+                    // exonerado de igv
+                } else {
+                    unit_price =
+                        form.unit_price_value * (1 + this.percentage_igv);
+                }
+            }
+
+            form.input_unit_price_value = form.unit_price_value;
+
+            form.unit_price = unit_price;
+            form.item.unit_price = unit_price;
+            // this.form.item.meter =
+            // form.item.presentation = this.item_unit_type;
+            form.item.presentation = {};
+
+            form.affectation_igv_type = _.find(this.affectation_igv_types, {
+                id: affectation_igv_type_id,
+            });
+
+       
+            let row = calculateRowItem(
+                form,
+                this.form.currency_type_id,
+                this.form.exchange_rate_sale,
+                this.percentage_igv
+            );
+            row.update_price = form.update_price;
+            row.meter = form.item.meter;
+            row.item.name_product_pdf = row.name_product_pdf || "";
+
+            // let { has_bonus_item, bonus_items } = form.item;
+            // this.row.sizes_selected = this.sizes;
+            // let general_random_key = null;
+            // if (has_bonus_item) {
+            //     let random_key = Math.random().toString(36).substring(2);
+            //     this.row.random_key = random_key;
+            //     general_random_key = random_key;
+            // }
+            // if (key && typeof key === "string") {
+            //     this.row.depend_key = key;
+            // }
+
+            row.item.extra = extra;
+            //this.initializeFields()
+
+            // this.row.IdLoteSelected = IdLoteSelected;
+            // this.row.document_item_id = document_item_id;
+
+            // this.showMessageDetraction();
+
+            this.addRow(row);
+        },
+        async changeItem(item) {
+            let form = {};
+            form.item = item;
+
+            form.unit_price_value = form.item.sale_unit_price;
+            form.meter = form.item.meter;
+
+            form.has_igv = form.item.has_igv;
+            form.has_plastic_bag_taxes = form.item.has_plastic_bag_taxes;
+            form.affectation_igv_type_id =
+                form.item.sale_affectation_igv_type_id;
+            let affectation_igv_type = _.find(this.affectation_igv_types, {
+                id: form.item.sale_affectation_igv_type_id,
+            });
+            if (affectation_igv_type == undefined) {
+                form.affectation_igv_type_id = this.affectation_igv_types[0].id;
+            }
+
+            form.quantity = form.item.quantity;
+
+            //asignar variables isc
+            form.has_isc = form.item.has_isc;
+            form.percentage_isc = form.item.percentage_isc;
+            form.system_isc_type_id = form.item.system_isc_type_id;
+
+            if (this.hasAttributes(form)) {
+                form.item.attributes.forEach((row) => {
+                    form.attributes.push({
+                        attribute_type_id: row.attribute_type_id,
+                        description: row.description,
+                        value: row.value,
+                        start_date: row.start_date,
+                        end_date: row.end_date,
+                        duration: row.duration,
+                    });
+                });
+            }
+
+            form.lots_group = form.item.lots_group;
+            // this.setExtraElements(this.form.item);
+            // if (
+            //     form.item_unit_types &&
+            //     form.item_unit_types.length != 0
+            // ) {
+            //     this.changePrice(this.form.item_unit_type_id);
+            // } else {
+            //     await this.getLastPriceItem();
+            // }
+            if (
+                form.item.name_product_pdf &&
+                this.config.item_name_pdf_description
+            ) {
+                form.name_product_pdf = form.item.name_product_pdf;
+            }
+
+            // return form;
+            this.clickAddItem(form);
+        },
+        hasAttributes(form) {
+            if (
+                form.item !== undefined &&
+                form.item.attributes !== undefined &&
+                form.item.attributes !== null &&
+                form.item.attributes.length > 0
+            ) {
+                return true;
+            }
+
+            return false;
         },
     },
 };

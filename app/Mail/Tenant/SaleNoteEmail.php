@@ -7,19 +7,24 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Modules\BusinessTurn\Models\BusinessTurn;
 
 class SaleNoteEmail extends Mailable
 {
     use Queueable, SerializesModels;
     use StorageDocument;
 
-    public $company;
+    public $customer;
     public $document;
+    public $localmessage;
+    public $isIntegrateSystem;
 
-    public function __construct($company, $document)
+    public function __construct($customer, $document, $localmessage = null)
     {
-        $this->company = $company;
+        $this->customer = $customer;
         $this->document = $document;
+        $this->localmessage = $localmessage;
+        $this->isIntegrateSystem = BusinessTurn::isIntegrateSystem();
     }
 
     /**

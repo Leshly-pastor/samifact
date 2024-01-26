@@ -2,6 +2,9 @@
 
 namespace Modules\Item\Http\Controllers;
 
+use App\Imports\ItemsImport;
+use App\Imports\ItemsImportDocument;
+use App\Imports\ItemsImportDocumentNews;
 use App\Imports\PriceUpdatePersonTypeImport;
 use App\Imports\PriceUpdateWarehouseImport;
 use App\Models\System\Digemid;
@@ -26,6 +29,8 @@ use Modules\Item\Imports\ItemListWithExtraData;
 use Modules\Item\Models\ItemLot;
 use Picqer\Barcode\BarcodeGeneratorPNG;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Cache;
+use Modules\Item\Exports\ItemDocumentErrorExport;
 use Modules\Item\Imports\{
     ItemListSizeImport,
     ItemUpdatePriceImport
@@ -34,6 +39,77 @@ use Modules\Item\Imports\{
 
 class ItemController extends Controller
 {
+    public function ItemsDocumentErrors($hash){
+
+        $exists_data = Cache::has($hash);
+
+        if(!$exists_data){
+            return [
+                'success' => false,
+                'message' => 'No se encontró los datos del documento'
+            ];
+        }
+
+        $data = Cache::get($hash);
+
+        return (new ItemDocumentErrorExport)
+        ->records($data)
+        ->download('Productos_nuevos_'.Carbon::now().'.xlsx');
+    }
+    public function uploadItemsDocumentNews(Request $request){
+        $type = $request->type;
+        if ($request->hasFile('file')) {
+            try {
+                $import = new ItemsImportDocumentNews();
+                $import->import($request->file('file'), null, Excel::XLSX);
+                $data = $import->getData();
+                return [
+                    'success' => true,
+                    'message' =>  __('app.actions.upload.success'),
+                    'data' => $data
+                ];
+            } catch (Exception $e) {
+                return [
+                    'success' => false,
+                    'message' =>  $e->getMessage()
+                ];
+            }
+        }
+        return [
+            'success' => false,
+            'message' =>  __('app.actions.upload.error'),
+        ];
+    }
+    public function uploadItemsDocument(Request $request)
+    {
+        // $request->validate([
+        //     'warehouse_id' => 'required|numeric|min:1'
+        // ]);
+        $type = $request->type;
+        if ($request->hasFile('file')) {
+            try {
+                $import = new ItemsImportDocument();
+                $import->import($request->file('file'), null, Excel::XLSX);
+                $data = $import->getData();
+                return [
+                    'success' => true,
+                    'message' =>  __('app.actions.upload.success'),
+                    'data' => $data
+                ];
+            } catch (Exception $e) {
+                return [
+                    'success' => false,
+                    'message' =>  $e->getMessage()
+                ];
+            }
+        }
+        return [
+            'success' => false,
+            'message' =>  __('app.actions.upload.error'),
+        ];
+    }
+
+
     public function set_internal_code()
     {
         Item::whereNull('internal_id')->chunk(50, function ($items) {

@@ -20,7 +20,7 @@ if ($hostname) {
         Route::post('/cambiar_contrasena', [UserController::class, 'cambiarContrasena'])->name('cambiar_contrasena');
 
         Route::get('restaurant/worker/print-ticket/{id}', '\Modules\Restaurant\Http\Controllers\OrdenController@printTicket');
-      
+
         //Route::post('restaurant/login', '\Modules\Restaurant\Http\Controllers\RestaurantController@login');
         Route::get('search', 'Tenant\SearchController@index')->name('search.index');
         Route::get('buscar', 'Tenant\SearchController@index')->name('search.index');
@@ -32,13 +32,15 @@ if ($hostname) {
         Route::get('printticket/{model}/{external_id}/{format?}', 'Tenant\DownloadController@toTicket');
         Route::get('/exchange_rate/ecommence/{date}', 'Tenant\Api\ServiceController@exchangeRateTest');
 
+        Route::get('production-order/print/{external_id}/{format?}', 'Tenant\ProductionOrderController@toPrint');
+        Route::get('dispatch-order/print/{external_id}/{format?}', 'Tenant\DispatchOrderController@toPrint');
         Route::get('sale-notes/print/{external_id}/{format?}', 'Tenant\SaleNoteController@toPrint');
         Route::get('sale-notes/ticket/{id}/{format?}', 'Tenant\SaleNoteController@toTicket');
         Route::get('purchases/print/{external_id}/{format?}', 'Tenant\PurchaseController@toPrint');
 
         Route::get('quotations/print/{external_id}/{format?}', 'Tenant\QuotationController@toPrint');
 
-        Route::middleware(['auth', 'redirect.module', 'locked.tenant'])->group(function () {
+        Route::middleware(['auth', 'redirect.module', 'locked.tenant','locked.user'])->group(function () {
 
             Route::prefix('package-handler')->group(function () {
                 Route::get('/', 'Tenant\PackageHandlerController@index')->name('tenant.package_handler.index');
@@ -52,25 +54,24 @@ if ($hostname) {
                 Route::get('/columns', 'Tenant\PackageHandlerController@columns');
                 Route::get('/tables', 'Tenant\PackageHandlerController@tables');
                 Route::get('/search/customer/{id}', 'Tenant\PackageHandlerController@searchCustomerById');
-
             });
 
             Route::prefix('bill-of-exchange')->group(function () {
-                Route::get('/', [BillOfExchangeController::class,'index'])->name('tenant.bill_of_exchange.index');
-                Route::post('/', [BillOfExchangeController::class,'store']);
+                Route::get('/', [BillOfExchangeController::class, 'index'])->name('tenant.bill_of_exchange.index');
+                Route::post('/', [BillOfExchangeController::class, 'store']);
                 // Route::get('create/{packagehandler?}', [BillOfExchangeController::class,'create'])->name('tenant.package_handler.create');
-                Route::delete('/{id}', [BillOfExchangeController::class,'delete']);
-                Route::delete('/payment/{id}', [BillOfExchangeController::class,'delete_payment']);
-                Route::get('/records', [BillOfExchangeController::class,'records']);
-                Route::get('/pdf/{id}', [BillOfExchangeController::class,'pdf']);
-                Route::get('/payments/{id}', [BillOfExchangeController::class,'payments']);
-                Route::post('/payments', [BillOfExchangeController::class,'store_payment']);
-                Route::get('/record/{id}', [BillOfExchangeController::class,'record']);
-                Route::get('/document/{id}', [BillOfExchangeController::class,'document']);
-                Route::get('/columns', [BillOfExchangeController::class,'columns']);
-                Route::get('/columns', [BillOfExchangeController::class,'columns']);
-                Route::get('/list-by-client', [BillOfExchangeController::class,'documentsCreditByClient']);
-                Route::get('/tables', [BillOfExchangeController::class,'tables']);
+                Route::delete('/{id}', [BillOfExchangeController::class, 'delete']);
+                Route::delete('/payment/{id}', [BillOfExchangeController::class, 'delete_payment']);
+                Route::get('/records', [BillOfExchangeController::class, 'records']);
+                Route::get('/pdf/{id}', [BillOfExchangeController::class, 'pdf']);
+                Route::get('/payments/{id}', [BillOfExchangeController::class, 'payments']);
+                Route::post('/payments', [BillOfExchangeController::class, 'store_payment']);
+                Route::get('/record/{id}', [BillOfExchangeController::class, 'record']);
+                Route::get('/document/{id}', [BillOfExchangeController::class, 'document']);
+                Route::get('/columns', [BillOfExchangeController::class, 'columns']);
+                Route::get('/columns', [BillOfExchangeController::class, 'columns']);
+                Route::get('/list-by-client', [BillOfExchangeController::class, 'documentsCreditByClient']);
+                Route::get('/tables', [BillOfExchangeController::class, 'tables']);
                 // Route::get('/search/customer/{id}', [BillOfExchangeController::class,'searchCustomerById']);
 
             });
@@ -85,7 +86,7 @@ if ($hostname) {
             Route::post('name_quotations', [NameQuotationsController::class, 'store']);
             Route::get('name_quotations/record', [NameQuotationsController::class, 'record']);
             //'Tenant\SettingController@document_quotations'
-            Route::get('document-quotations',[SettingController::class, 'document_quotations'] )->name('tenant.document_quotations.index');
+            Route::get('document-quotations', [SettingController::class, 'document_quotations'])->name('tenant.document_quotations.index');
 
 
             //Route::post('login', '\Modules\Restaurant\Http\Controllers\RestaurantController@login');
@@ -158,7 +159,7 @@ if ($hostname) {
             Route::post('companies/uploads', 'Tenant\CompanyController@uploadFile');
 
             //configuracion envio documento a 
-            
+
             Route::post('companies/store-send-pse', 'Tenant\CompanyController@storeSendPse');
             Route::get('companies/record-send-pse', 'Tenant\CompanyController@recordSendPse');
             Route::post('companies/pse', 'Tenant\CompanyController@storePse');
@@ -254,6 +255,8 @@ if ($hostname) {
             Route::post('users', 'Tenant\UserController@store');
             Route::post('users/token/{user}', 'Tenant\UserController@regenerateToken');
             Route::get('users/records', 'Tenant\UserController@records');
+            Route::post('users/lock', 'Tenant\UserController@lock');
+            Route::post('users/unlock', 'Tenant\UserController@unlock');
             Route::get('users/records-lite', 'Tenant\UserController@records_lite');
             Route::delete('users/{user}', 'Tenant\UserController@destroy');
 
@@ -277,6 +280,7 @@ if ($hostname) {
             Route::get('items/formats/items-update-prices-person-type', 'Tenant\ItemController@templateUpdatePricesPersonType');
             Route::get('items/records', 'Tenant\ItemController@records');
             Route::get('items/erase/{item_id}', 'Tenant\ItemController@erase');
+            Route::get('items/details/{item_id}', 'Tenant\ItemController@details');
             Route::get('items/tables', 'Tenant\ItemController@tables');
             Route::get('items/record/{item}', 'Tenant\ItemController@record');
             Route::post('items', 'Tenant\ItemController@store');
@@ -485,6 +489,7 @@ if ($hostname) {
                 Route::get('', 'Tenant\DispatchController@index')->name('tenant.dispatches.index');
                 Route::get('/columns', 'Tenant\DispatchController@columns');
                 Route::get('/records', 'Tenant\DispatchController@records');
+                Route::get('/export-excel', 'Tenant\DispatchController@exportExcel');
                 Route::get('/create/{document?}/{type?}/{dispatch?}', 'Tenant\DispatchController@create');
                 Route::post('/tables', 'Tenant\DispatchController@tables');
                 Route::post('', 'Tenant\DispatchController@store');
@@ -513,6 +518,7 @@ if ($hostname) {
                 Route::get('', 'Tenant\DispatchCarrierController@index')->name('tenant.dispatch_carrier.index');
                 Route::get('/columns', 'Tenant\DispatchCarrierController@columns');
                 Route::get('/records', 'Tenant\DispatchCarrierController@records');
+                Route::get('/export-excel', 'Tenant\DispatchCarrierController@ExportExcel');
                 Route::get('/create/{document?}/{type?}/{dispatch?}', 'Tenant\DispatchCarrierController@create');
                 Route::post('/tables', 'Tenant\DispatchCarrierController@tables');
                 Route::post('', 'Tenant\DispatchCarrierController@store');
@@ -650,12 +656,12 @@ if ($hostname) {
 
             Route::delete('purchases/destroy_purchase_item/{purchase_item}', 'PurchaseController@destroy_purchase_item');
 
-            Route::get('purchases-responsible/records',[PurchaseResponsibleLicenseController::class,'responsible_records']);
-            Route::post('purchases-responsible',[PurchaseResponsibleLicenseController::class,'store_responsible']);
-            Route::get('purchases-responsible/record/{id}',[PurchaseResponsibleLicenseController::class,'responsible_record']);
-            Route::get('purchases-license/records',[PurchaseResponsibleLicenseController::class,'license_records']);
-            Route::post('purchases-license',[PurchaseResponsibleLicenseController::class,'store_license']);
-            Route::post('purchases-license/record/{id}',[PurchaseResponsibleLicenseController::class,'license_record']);
+            Route::get('purchases-responsible/records', [PurchaseResponsibleLicenseController::class, 'responsible_records']);
+            Route::post('purchases-responsible', [PurchaseResponsibleLicenseController::class, 'store_responsible']);
+            Route::get('purchases-responsible/record/{id}', [PurchaseResponsibleLicenseController::class, 'responsible_record']);
+            Route::get('purchases-license/records', [PurchaseResponsibleLicenseController::class, 'license_records']);
+            Route::post('purchases-license', [PurchaseResponsibleLicenseController::class, 'store_license']);
+            Route::post('purchases-license/record/{id}', [PurchaseResponsibleLicenseController::class, 'license_record']);
             //quotations
             Route::get('quotations', 'Tenant\QuotationController@index')->name('tenant.quotations.index')->middleware('redirect.level');
             Route::get('quotations/columns', 'Tenant\QuotationController@columns');
@@ -681,11 +687,86 @@ if ($hostname) {
             Route::post('quotations/duplicate', 'Tenant\QuotationController@duplicate');
             Route::get('quotations/record2/{quotation}', 'Tenant\QuotationController@record2');
             Route::get('quotations/changed/{quotation}', 'Tenant\QuotationController@changed');
+            Route::post('quotations/change-description/{quotation}', 'Tenant\QuotationController@changed_description');
 
             Route::get('quotations/search-items', 'Tenant\QuotationController@searchItems');
             Route::get('quotations/search/item/{item}', 'Tenant\QuotationController@searchItemById');
             Route::get('quotations/item-warehouses/{item}', 'Tenant\QuotationController@itemWarehouses');
-
+            //production-orders
+            Route::prefix('message-integrate-system')
+            ->group(function(){
+                Route::get('/', 'Tenant\MessageIntegrateSystemController@index')
+                ->name('tenant.message_integrate_system.index')
+                ;
+                Route::get('/columns', 'Tenant\MessageIntegrateSystemController@columns');
+                Route::get('/records', 'Tenant\MessageIntegrateSystemController@records');
+                Route::get('/record/{id}', 'Tenant\MessageIntegrateSystemController@record');
+                Route::post('/', 'Tenant\MessageIntegrateSystemController@store');
+            });
+            //production-orders
+            Route::prefix('agency')->group(function () {
+                Route::get('columns', 'Tenant\AgencyController@columns');
+                Route::get('records', 'Tenant\AgencyController@records');
+                Route::get('record/{agency}', 'Tenant\AgencyController@record');
+                Route::post('', 'Tenant\AgencyController@store');
+                Route::post('/agency-dispatch', 'Tenant\AgencyController@saveAgencyDispatch');
+                Route::get('/agency-dispatch/{record}', 'Tenant\AgencyController@getAgencyDispatch');
+            });
+            Route::prefix('integrate-system')
+            ->group(function(){
+                Route::get('user-types', 'Tenant\IntegrateSystemController@userTypes');
+            });
+            Route::prefix('production-order')->group(function () {
+                Route::get('', 'Tenant\ProductionOrderController@index')->name('tenant.production_order.index')->middleware('redirect.level');
+                Route::get('columns', 'Tenant\ProductionOrderController@columns');
+                Route::get('states', 'Tenant\ProductionOrderController@states');
+                Route::get('tables', 'Tenant\ProductionOrderController@tables');
+                Route::get('search/customers', 'Tenant\ProductionOrderController@searchCustomers');
+                Route::get('search/customer/{id}', 'Tenant\ProductionOrderController@searchCustomerById');
+                Route::get('create/{dispatchorder?}', 'Tenant\ProductionOrderController@create')->name('tenant.production_order.create');
+                Route::get('records', 'Tenant\ProductionOrderController@records');
+                Route::post('', 'Tenant\ProductionOrderController@store');
+                Route::get('record2/{order_production_id}', 'Tenant\ProductionOrderController@record2');
+                Route::get('paymentdestinations/{userid?}', 'Tenant\ProductionOrderController@paymentdestinations');
+                Route::get('users', 'Tenant\ProductionOrderController@users');
+                Route::get('responsibles', 'Tenant\ProductionOrderController@responsibles');
+                Route::get('set-responsible/{production_order_id}/{user_id}', 'Tenant\ProductionOrderController@setResponsible');
+                Route::post('generate/{sale_note_id}', 'Tenant\ProductionOrderController@generateFromSaleNote');
+                Route::get('records', 'Tenant\ProductionOrderController@records');
+                Route::get('record/{production_order_id}', 'Tenant\ProductionOrderController@record');
+                Route::get('change-state/{production_order_id}/{state_id}', 'Tenant\ProductionOrderController@changeState');
+                Route::get('downloadExternal/{external_id}/{format?}', 'Tenant\ProductionOrderController@downloadExternal');
+            });
+            Route::prefix('production-order-payments')->group(function () {
+                Route::get('document/{production_order_id}', 'Tenant\ProductionOrderPaymentController@document');
+                Route::get('records/{production_order}', 'Tenant\ProductionOrderPaymentController@records');
+            });
+            //dispatch-orders
+            Route::prefix('dispatch-order')->group(function () {
+                Route::get('', 'Tenant\DispatchOrderController@index')->name('tenant.dispatch_order.index')->middleware('redirect.level');
+                Route::get('columns', 'Tenant\DispatchOrderController@columns');
+                Route::get('states', 'Tenant\DispatchOrderController@states');
+                Route::get('tables', 'Tenant\DispatchOrderController@tables');
+                Route::get('search/customers', 'Tenant\DispatchOrderController@searchCustomers');
+                Route::get('search/customer/{id}', 'Tenant\DispatchOrderController@searchCustomerById');
+                Route::get('create/{dispatchorder?}', 'Tenant\DispatchOrderController@create')->name('tenant.dispatch_order.create');
+                Route::get('records', 'Tenant\DispatchOrderController@records');
+                Route::post('', 'Tenant\DispatchOrderController@store');
+                Route::get('record2/{dispatch_order_id}', 'Tenant\DispatchOrderController@record2');
+                Route::get('paymentdestinations/{userid?}', 'Tenant\DispatchOrderController@paymentdestinations');
+                Route::get('responsibles', 'Tenant\DispatchOrderController@responsibles');
+                Route::get('users', 'Tenant\DispatchOrderController@users');
+                Route::get('set-responsible/{dispatch_order_id}/{user_id}', 'Tenant\DispatchOrderController@setResponsible');
+                Route::post('generate/{dispatch_order_id}', 'Tenant\DispatchOrderController@generateFromProductionOrder');
+                Route::get('records', 'Tenant\DispatchOrderController@records');
+                Route::get('record/{dispatch_order_id}', 'Tenant\DispatchOrderController@record');
+                Route::get('change-state/{dispatch_order_id}/{state_id}', 'Tenant\DispatchOrderController@changeState');
+                Route::get('downloadExternal/{external_id}/{format?}', 'Tenant\DispatchOrderController@downloadExternal');
+            });
+            Route::prefix('dispatch-order-payments')->group(function () {
+                Route::get('document/{dispatch_order_id}', 'Tenant\DispatchOrderPaymentController@document');
+                Route::get('records/{dispatch_order}', 'Tenant\DispatchOrderPaymentController@records');
+            });
             //sale-notes
             Route::get('sale-notes', 'Tenant\SaleNoteController@index')->name('tenant.sale_notes.index')->middleware('redirect.level');
             Route::get('sale-notes/columns', 'Tenant\SaleNoteController@columns');
@@ -696,7 +777,7 @@ if ($hostname) {
             // Route::get('sale-notes/create', 'Tenant\SaleNoteController@create')->name('tenant.sale_notes.create');
             Route::get('sale-notes/create/{salenote?}', 'Tenant\SaleNoteController@create')->name('tenant.sale_notes.create')->middleware('redirect.level');
             Route::get('sale-notes/receipt/{id}', 'Tenant\SaleNoteController@receipt');
-            
+
             Route::get('sale-notes/tables', 'Tenant\SaleNoteController@tables');
             Route::post('sale-notes/UpToOther', 'Tenant\SaleNoteController@EnviarOtroSitio');
             Route::post('sale-notes/getUpToOther', 'Tenant\SaleNoteController@getSaleNoteToOtherSite');
@@ -709,10 +790,12 @@ if ($hostname) {
             Route::get('sale-notes/search/customers', 'Tenant\SaleNoteController@searchCustomers');
             Route::get('sale-notes/search/customer/{id}', 'Tenant\SaleNoteController@searchCustomerById');
             // Route::get('sale-notes/print/{external_id}/{format?}', 'Tenant\SaleNoteController@toPrint');
+            Route::get('sale-notes/change-state-payment/{salenote}/{stateEnum}', 'Tenant\SaleNoteController@changeStatePayment');
             Route::get('sale-notes/record2/{salenote}', 'Tenant\SaleNoteController@record2');
             Route::get('sale-notes/option/tables', 'Tenant\SaleNoteController@option_tables');
             Route::get('sale-notes/changed/{salenote}', 'Tenant\SaleNoteController@changed');
             Route::post('sale-notes/email', 'Tenant\SaleNoteController@email');
+            Route::post('sale-notes/send_email', 'Tenant\SaleNoteController@sendEmail');
             Route::get('sale-notes/print-a5/{sale_note_id}/{format}', 'Tenant\SaleNotePaymentController@toPrint');
             Route::get('sale-notes/dispatches', 'Tenant\SaleNoteController@dispatches');
             Route::delete('sale-notes/destroy_sale_note_item/{sale_note_item}', 'Tenant\SaleNoteController@destroy_sale_note_item');
@@ -880,7 +963,6 @@ if ($hostname) {
             // Route::get('testtheme', function () {
             //     return view('tenant.layouts.partials.testtheme');
             // });
-
         });
     });
 } else {
@@ -923,7 +1005,7 @@ if ($hostname) {
             Route::post('clients/locked_emission', 'System\ClientController@lockedEmission');
             Route::post('clients/locked_tenant', 'System\ClientController@lockedTenant');
             Route::post('clients/config_system_env', 'System\ClientController@config_system_env');
-            
+
             Route::post('clients/active_tenant', 'System\ClientController@activeTenant');
             // Route::post('clients/locked_tenant', 'System\ClientController@lockedTenant'); //Linea repetida
 
@@ -1009,7 +1091,7 @@ if ($hostname) {
             Route::get('configurations/apiruc', 'System\ConfigurationController@apiruc');
             Route::get('configurations/apkurl', 'System\ConfigurationController@apkurl');
 
-           Route::get('config urations/update-tenant-discount-type-base', 'System\ConfigurationController@updateTenantDiscountTypeBase');
+            Route::get('config urations/update-tenant-discount-type-base', 'System\ConfigurationController@updateTenantDiscountTypeBase');
 
 
             // backup

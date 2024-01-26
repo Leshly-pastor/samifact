@@ -25,53 +25,55 @@ $thridLevel = $path[2] ?? null;
                 </a>
             </li>
         @endif
-        @if ($configuration->chatboot)
-            <li class="mega">
-                <a href="#whatsapp" data-bs-toggle="collapse" data-role="button"
-                    aria-expanded="{{ $firstLevel === 'whatsapp' ? true : false }}{{ $firstLevel === 'questions' ? true : false }}{{ $firstLevel === 'answers' ? true : false }}"
-                    class="{{ $firstLevel === 'whatsapp' ? 'active' : '' }}{{ $firstLevel === 'questions' ? 'active' : '' }}{{ $firstLevel === 'answers' ? 'active' : '' }}"
-                    data-clicked="{{ $firstLevel === 'whatsapp' ? true : false }}{{ $firstLevel === 'questions' ? true : false }}{{ $firstLevel === 'answers' ? true : false }}">
-                    <i class="bi bi-whatsapp"></i>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                        class="bi bi-whatsapp" viewBox="0 0 16 16">
-                        <path
-                            d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.933 7.933 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.898 7.898 0 0 0 13.6 2.326zM7.994 14.521a6.573 6.573 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.557 6.557 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592zm3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.729.729 0 0 0-.529.247c-.182.198-.691.677-.691 1.654 0 .977.71 1.916.81 2.049.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232z" />
-                    </svg>
-                    <span class="label">Whatsapp</span>
-                </a>
-                <ul id="whatsapp">
-                    <li>
-                        <a href="{{ route('tenant.account.whatsapp') }}"
-                            class="{{ $path[0] === 'whatsapp' ? 'active' : '' }}">
-                            <span class="label">Cuenta de Whatsapp</span>
-                        </a>
-                    </li>
-                    <li class="mega">
-                        <a href="#chatboot" data-bs-toggle="collapse" data-role="button"
-                            aria-expanded="{{ $firstLevel === 'questions' ? true : false }}{{ $firstLevel === 'answers' ? true : false }}"
-                            class="{{ $firstLevel === 'questions' ? 'active' : '' }}{{ $firstLevel === 'answers' ? 'active' : '' }}"
-                            data-clicked="{{ $firstLevel === 'questions' ? true : false }}{{ $firstLevel === 'answers' ? true : false }}">
+        @if (in_array('whatsapp', $vc_modules))
+            @if ($configuration->chatboot)
+                <li class="mega">
+                    <a href="#whatsapp" data-bs-toggle="collapse" data-role="button"
+                        aria-expanded="{{ $firstLevel === 'whatsapp' ? true : false }}{{ $firstLevel === 'questions' ? true : false }}{{ $firstLevel === 'answers' ? true : false }}"
+                        class="{{ $firstLevel === 'whatsapp' ? 'active' : '' }}{{ $firstLevel === 'questions' ? 'active' : '' }}{{ $firstLevel === 'answers' ? 'active' : '' }}"
+                        data-clicked="{{ $firstLevel === 'whatsapp' ? true : false }}{{ $firstLevel === 'questions' ? true : false }}{{ $firstLevel === 'answers' ? true : false }}">
+                        <i class="bi bi-whatsapp"></i>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                            class="bi bi-whatsapp" viewBox="0 0 16 16">
+                            <path
+                                d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.933 7.933 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.898 7.898 0 0 0 13.6 2.326zM7.994 14.521a6.573 6.573 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.557 6.557 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592zm3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.729.729 0 0 0-.529.247c-.182.198-.691.677-.691 1.654 0 .977.71 1.916.81 2.049.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232z" />
+                        </svg>
+                        <span class="label">Whatsapp</span>
+                    </a>
+                    <ul id="whatsapp">
+                        <li>
+                            <a href="{{ route('tenant.account.whatsapp') }}"
+                                class="{{ $path[0] === 'whatsapp' ? 'active' : '' }}">
+                                <span class="label">Cuenta de Whatsapp</span>
+                            </a>
+                        </li>
+                        <li class="mega">
+                            <a href="#chatboot" data-bs-toggle="collapse" data-role="button"
+                                aria-expanded="{{ $firstLevel === 'questions' ? true : false }}{{ $firstLevel === 'answers' ? true : false }}"
+                                class="{{ $firstLevel === 'questions' ? 'active' : '' }}{{ $firstLevel === 'answers' ? 'active' : '' }}"
+                                data-clicked="{{ $firstLevel === 'questions' ? true : false }}{{ $firstLevel === 'answers' ? true : false }}">
 
-                            <span class="label"> ChatBoot Whatsapp</span>
-                        </a>
-                        <ul id="chatboot"
-                            class="collapse {{ $firstLevel === 'questions' ? 'show' : '' }}{{ $firstLevel === 'answers' ? 'show' : '' }} ">
-                            <li>
-                                <a href="{{ route('tenant.questions') }}"
-                                    class="{{ $path[0] === 'questions' ? 'active' : '' }}">
-                                    <span class="label">Preguntas</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="{{ route('tenant.answers') }}"
-                                    class="{{ $path[0] === 'answers' ? 'active' : '' }}">
-                                    <span class="label">Respuestas</span>
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
-                </ul>
-            </li>
+                                <span class="label"> ChatBoot Whatsapp</span>
+                            </a>
+                            <ul id="chatboot"
+                                class="collapse {{ $firstLevel === 'questions' ? 'show' : '' }}{{ $firstLevel === 'answers' ? 'show' : '' }} ">
+                                <li>
+                                    <a href="{{ route('tenant.questions') }}"
+                                        class="{{ $path[0] === 'questions' ? 'active' : '' }}">
+                                        <span class="label">Preguntas</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="{{ route('tenant.answers') }}"
+                                        class="{{ $path[0] === 'answers' ? 'active' : '' }}">
+                                        <span class="label">Respuestas</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+            @endif
         @endif
         @if (in_array('documents', $vc_modules))
             <li class="mega">
@@ -105,13 +107,31 @@ $thridLevel = $path[2] ?? null;
                             </li>
                         @endif
                     @endif
-
+                    @php
+                        $is_integrate_system = \Modules\BusinessTurn\Models\BusinessTurn::isIntegrateSystem();
+                    @endphp
                     @if (in_array('sale_notes', $vc_module_levels))
                         <li>
                             <a class="{{ $firstLevel === 'sale-notes' ? 'active' : '' }}"
                                 href="{{ route('tenant.sale_notes.index') }}">Notas de venta</a>
                         </li>
                     @endif
+
+                    @if ($is_integrate_system)
+                        @if (in_array('production_orders', $vc_module_levels))
+                            <li>
+                                <a class="{{ $firstLevel === 'production-order' ? 'active' : '' }}"
+                                    href="{{ route('tenant.production_order.index') }}">Ordenes de producción</a>
+                            </li>
+                        @endif
+                        @if (in_array('dispatch_orders', $vc_module_levels))
+                            <li>
+                                <a class="{{ $firstLevel === 'dispatch-order' ? 'active' : '' }}"
+                                    href="{{ route('tenant.dispatch_order.index') }}">Ordenes de despacho</a>
+                            </li>
+                        @endif
+                    @endif
+
                     @if ($configuration->package_handlers)
                         <li>
                             <a class="{{ $firstLevel === 'package-handler' ? 'active' : '' }}"
@@ -159,19 +179,22 @@ $thridLevel = $path[2] ?? null;
                             </a>
                         </li>
                     @endif
-                    <li>
-                        <a class="{{ $firstLevel === 'summaries' ? 'active' : '' }}"
-                            href="{{ route('tenant.summaries.index') }}">
-                            Resúmenes
-                        </a>
-                    </li>
-                    <li>
-                        <a class="{{ $firstLevel === 'voided' ? 'active' : '' }}"
-                            href="{{ route('tenant.voided.index') }}">
-                            Anulaciones
-                        </a>
-                    </li>
-
+                    @if (in_array('summaries', $vc_module_levels))
+                        <li>
+                            <a class="{{ $firstLevel === 'summaries' ? 'active' : '' }}"
+                                href="{{ route('tenant.summaries.index') }}">
+                                Resúmenes
+                            </a>
+                        </li>
+                    @endif
+                    @if (in_array('voided', $vc_module_levels))
+                        <li>
+                            <a class="{{ $firstLevel === 'voided' ? 'active' : '' }}"
+                                href="{{ route('tenant.voided.index') }}">
+                                Anulaciones
+                            </a>
+                        </li>
+                    @endif
                     @if (in_array('sale-opportunity', $vc_module_levels))
                         <li>
                             <a class="{{ $firstLevel === 'sale-opportunities' ? 'active' : '' }}"
@@ -198,29 +221,31 @@ $thridLevel = $path[2] ?? null;
                             </a>
                         </li>
                     @endif
-                    <li class="mega">
-                        <a href="#contrato" data-bs-toggle="collapse" data-role="button"
-                            aria-expanded="{{ $firstLevel === 'contracts' ? true : false }}{{ $firstLevel === 'production-orders' ? true : false }}"
-                            class="{{ $firstLevel === 'contracts' ? 'active' : '' }}{{ $firstLevel === 'production-orders' ? 'active' : '' }}"
-                            data-clicked="{{ $firstLevel === 'contracts' ? true : false }}{{ $firstLevel === 'production-orders' ? true : false }}">
-                            <span class="label"> Contratos</span>
-                        </a>
-                        <ul id="contrato"
-                            class="collapse {{ $firstLevel === 'contracts' ? 'show' : '' }}{{ $firstLevel === 'production-orders' ? 'show' : '' }} ">
-                            <li>
-                                <a class="{{ $firstLevel === 'contracts' ? 'active' : '' }}"
-                                    href="{{ route('tenant.contracts.index') }}">
-                                    Listado
-                                </a>
-                            </li>
-                            <li>
-                                <a class="{{ $firstLevel === 'production-orders' ? 'active' : '' }}"
-                                    href="{{ route('tenant.production_orders.index') }}">
-                                    Ordenes de Producción
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
+                    @if (in_array('contracts', $vc_module_levels))
+                        <li class="mega">
+                            <a href="#contrato" data-bs-toggle="collapse" data-role="button"
+                                aria-expanded="{{ $firstLevel === 'contracts' ? true : false }}{{ $firstLevel === 'production-orders' ? true : false }}"
+                                class="{{ $firstLevel === 'contracts' ? 'active' : '' }}{{ $firstLevel === 'production-orders' ? 'active' : '' }}"
+                                data-clicked="{{ $firstLevel === 'contracts' ? true : false }}{{ $firstLevel === 'production-orders' ? true : false }}">
+                                <span class="label"> Contratos</span>
+                            </a>
+                            <ul id="contrato"
+                                class="collapse {{ $firstLevel === 'contracts' ? 'show' : '' }}{{ $firstLevel === 'production-orders' ? 'show' : '' }} ">
+                                <li>
+                                    <a class="{{ $firstLevel === 'contracts' ? 'active' : '' }}"
+                                        href="{{ route('tenant.contracts.index') }}">
+                                        Listado
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="{{ $firstLevel === 'production-orders' ? 'active' : '' }}"
+                                        href="{{ route('tenant.production_orders.index') }}">
+                                        Ordenes de Producción
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                    @endif
                     @if (in_array('incentives', $vc_module_levels))
                         <li class="mega">
                             <a href="#incentives" data-bs-toggle="collapse" data-role="button"
@@ -426,11 +451,13 @@ $thridLevel = $path[2] ?? null;
                             </a>
                         </li>
                     @endif
+                    @if (in_array('item_lots_group', $vc_module_levels))
                     <li class="{{ $firstLevel === 'item-lots-group' ? 'active' : '' }}">
                         <a class="nav-link" href="{{ route('tenant.item-lots-group.index') }}">
                             <span class="label">Lotes</span>
                         </a>
                     </li>
+                    @endif
                     @php
                         $isClothesShoes = \Modules\BusinessTurn\Models\BusinessTurn::isClothesShoes();
                         
@@ -485,13 +512,15 @@ $thridLevel = $path[2] ?? null;
                 </ul>
             </li>
         @endif
-        <li class="mega">
-            <a class="{{ $firstLevel === 'persons' && $secondLevel === 'suppliers' ? 'active' : '' }}"
-                href="{{ route('tenant.persons.index', ['type' => 'suppliers']) }}">
-                <i data-cs-icon="user" class="icon" data-cs-size="18"></i>
-                <span class="label">Proveedores</span>
-            </a>
-        </li>
+        @if (in_array('suppliers', $vc_modules))
+            <li class="mega">
+                <a class="{{ $firstLevel === 'persons' && $secondLevel === 'suppliers' ? 'active' : '' }}"
+                    href="{{ route('tenant.persons.index', ['type' => 'suppliers']) }}">
+                    <i data-cs-icon="user" class="icon" data-cs-size="18"></i>
+                    <span class="label">Proveedores</span>
+                </a>
+            </li>
+        @endif
 
         @if (auth()->user()->type != 'integrator')
             @if (in_array('purchases', $vc_modules))
@@ -602,12 +631,12 @@ $thridLevel = $path[2] ?? null;
                     id="inventory" data-parent="#accordionExample">
 
                     @if (in_array('inventory', $vc_module_levels))
-                    <li>
-                        <a class="{{ $firstLevel === 'inventory-reference' ? 'active' : '' }}"
-                            href="{{ route('tenant.inventory_references.index') }}">
-                            <span class="label">Referencias</span>
-                        </a>
-                    </li>
+                        <li>
+                            <a class="{{ $firstLevel === 'inventory-reference' ? 'active' : '' }}"
+                                href="{{ route('tenant.inventory_references.index') }}">
+                                <span class="label">Referencias</span>
+                            </a>
+                        </li>
                         <li>
                             <a class="{{ $firstLevel === 'inventory' ? 'active' : '' }}"
                                 href="{{ route('inventory.index') }}">
@@ -889,13 +918,13 @@ $thridLevel = $path[2] ?? null;
                     </li>
                     <li>
                         <a class="{{ $firstLevel === 'sire' && $secondLevel === 'purchase' ? 'active' : '' }}"
-                            href="{{route('tenant.sire.purchase')}}">
+                            href="{{ route('tenant.sire.purchase') }}">
                             <span class="label">Compras </span>
                         </a>
                     </li>
                     <li>
                         <a class="{{ $firstLevel === 'sire' && $secondLevel === 'sale' ? 'active' : '' }}"
-                            href="{{route('tenant.sire.sale')}}">
+                            href="{{ route('tenant.sire.sale') }}">
                             <span class="label">Ventas </span>
                         </a>
                     </li>

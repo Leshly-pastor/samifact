@@ -170,7 +170,6 @@ export default {
    
   
         async clickNewSale() {
-            console.log("xd");
             //create the item in localstorage called "option_pos" with value "t1"
             localStorage.setItem("option_pos", "t1");
             await this.initForm();

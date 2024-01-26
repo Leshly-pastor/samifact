@@ -1,22 +1,10 @@
 @php
-$establishment = $document->establishment;
-$establishment__ = \App\Models\Tenant\Establishment::find($document->establishment_id);
-$logo = $establishment__->logo ?? $company->logo;
-
-if ($logo === null && !file_exists(public_path("$logo}"))) {
-    $logo = "{$company->logo}";
-}
-
-if ($logo) {
-    $logo = "storage/uploads/logos/{$logo}";
-    $logo = str_replace("storage/uploads/logos/storage/uploads/logos/", "storage/uploads/logos/", $logo);
-}
-
-
+    $establishment = $document->establishment;
     $customer = $document->customer;
     //$path_style = app_path('CoreFacturalo'.DIRECTORY_SEPARATOR.'Templates'.DIRECTORY_SEPARATOR.'pdf'.DIRECTORY_SEPARATOR.'style.css');
     $accounts = \App\Models\Tenant\BankAccount::all();
-    $tittle = $document->prefix.'-'.str_pad($document->number ?? $document->id, 8, '0', STR_PAD_LEFT);
+    $tittle = $document->prefix.'-'.str_pad($document->id, 8, '0', STR_PAD_LEFT);
+    $configuration = \App\Models\Tenant\Configuration::first();
 
     $marca_agua = app_path('CoreFacturalo'.DIRECTORY_SEPARATOR.'Templates'.DIRECTORY_SEPARATOR.'pdf'.DIRECTORY_SEPARATOR.'custom_gasolution'.DIRECTORY_SEPARATOR.'marca_agua.png');
     $footer_image = app_path('CoreFacturalo'.DIRECTORY_SEPARATOR.'Templates'.DIRECTORY_SEPARATOR.'pdf'.DIRECTORY_SEPARATOR.'custom_gasolution'.DIRECTORY_SEPARATOR.'pie.png');
@@ -27,8 +15,8 @@ if ($logo) {
     {{--<link href="{{ $path_style }}" rel="stylesheet" />--}}
 </head>
 <body>
-<div class="item_watermark" style="position: absolute; text-align: center; top:31%;">
-    <img style="width: 100%" height="180px" src="data:{{mime_content_type($marca_agua)}};base64, {{base64_encode(file_get_contents($marca_agua))}}" alt="marca_agua" class="" style="opacity: 0.1;width: 95%">
+<div class="item_watermark" style="position: absolute; text-align: center; top:35%;">
+    <img style="width: 100%" height="180px" src="data:{{mime_content_type(public_path("storage/uploads/logos/{$company->logo}"))}};base64, {{base64_encode(file_get_contents(public_path("storage/uploads/logos/{$company->logo}")))}}" alt="marca_agua" class="" style="opacity: 0.2;width: 95%">
 </div>
 <table class="full-width">
     <tr>
@@ -71,7 +59,7 @@ if ($logo) {
             </div>
         </td>
         <td width="30%" class="border-box py-4 px-2 text-center">
-            <h5 class="text-center">{{ get_document_name('quotation', 'Cotización') }}</h5>
+            <h5 class="text-center">COTIZACIÓN</h5>
             <h3 class="text-center">{{ $tittle }}</h3>
         </td>
     </tr>
@@ -201,14 +189,14 @@ if ($logo) {
 <table class="full-width mt-10 mb-10">
     <thead class="">
     <tr class="bg-grey">
-        <th class="border-top-bottom text-center py-2" width="8%">Cant.</th>
-        <th class="border-top-bottom text-center py-2" width="8%">Unidad</th>
-        <th class="border-top-bottom text-left py-2">Descripción</th>
+        <th class="border-top-bottom text-center py-2" width="8%">CANT.</th>
+        <th class="border-top-bottom text-center py-2" width="8%">UNIDAD</th>
+        <th class="border-top-bottom text-left py-2">DESCRIPCIÓN</th>
         <th class="border-top-bottom text-left py-2">MARCA</th>
-        <th class="border-top-bottom text-left py-2">Modelo</th>
-        <th class="border-top-bottom text-right py-2" width="12%">P.Unit</th>
-        <th class="border-top-bottom text-right py-2" width="8%">Dto.</th>
-        <th class="border-top-bottom text-right py-2" width="12%">Total</th>
+        <th class="border-top-bottom text-left py-2">MODELO</th>
+        <th class="border-top-bottom text-right py-2" width="12%">P.UNIT</th>
+        <th class="border-top-bottom text-right py-2" width="8%">DTO.</th>
+        <th class="border-top-bottom text-right py-2" width="12%">TOTAL</th>
     </tr>
     </thead>
     <tbody>
@@ -225,7 +213,7 @@ if ($logo) {
                     {{ number_format($row->quantity, 0) }}
                 @endif
             </td>
-            <td class="text-center align-top">{{symbol_or_code( symbol_or_code($row->item->unit_type_id))}}</td>
+            <td class="text-center align-top">{{ $row->item->unit_type_id }}</td>
             <td class="text-left">
                   @if($row->item->name_product_pdf ?? false) {!!$row->item->name_product_pdf ?? ''!!} @else {!!$row->item->description!!} @endif
                 @if (!empty($row->item->presentation)) {!!$row->item->presentation->description!!} @endif
@@ -277,37 +265,37 @@ if ($logo) {
     @endforeach
         @if($document->total_exportation > 0)
             <tr>
-                <td colspan="7" class="text-right font-bold">Op. Exportación: {{ $document->currency_type->symbol }}</td>
+                <td colspan="7" class="text-right font-bold">OP. EXPORTACIÓN: {{ $document->currency_type->symbol }}</td>
                 <td class="text-right font-bold">{{ number_format($document->total_exportation, 2) }}</td>
             </tr>
         @endif
         @if($document->total_free > 0)
             <tr>
-                <td colspan="7" class="text-right font-bold">Op. Gratuitas: {{ $document->currency_type->symbol }}</td>
+                <td colspan="7" class="text-right font-bold">OP. GRATUITAS: {{ $document->currency_type->symbol }}</td>
                 <td class="text-right font-bold">{{ number_format($document->total_free, 2) }}</td>
             </tr>
         @endif
         @if($document->total_unaffected > 0)
             <tr>
-                <td colspan="7" class="text-right font-bold">Op. Inafectas: {{ $document->currency_type->symbol }}</td>
+                <td colspan="7" class="text-right font-bold">OP. INAFECTAS: {{ $document->currency_type->symbol }}</td>
                 <td class="text-right font-bold">{{ number_format($document->total_unaffected, 2) }}</td>
             </tr>
         @endif
         @if($document->total_exonerated > 0)
             <tr>
-                <td colspan="7" class="text-right font-bold">Op. Exoneradas: {{ $document->currency_type->symbol }}</td>
+                <td colspan="7" class="text-right font-bold">OP. EXONERADAS: {{ $document->currency_type->symbol }}</td>
                 <td class="text-right font-bold">{{ number_format($document->total_exonerated, 2) }}</td>
             </tr>
         @endif
         @if($document->total_taxed > 0)
             <tr>
-                <td colspan="7" class="text-right font-bold">Op. Gravadas: {{ $document->currency_type->symbol }}</td>
+                <td colspan="7" class="text-right font-bold">OP. GRAVADAS: {{ $document->currency_type->symbol }}</td>
                 <td class="text-right font-bold">{{ number_format($document->total_taxed, 2) }}</td>
             </tr>
         @endif
        @if($document->total_discount > 0)
             <tr>
-                <td colspan="7" class="text-right font-bold">{{(($document->total_prepayment > 0) ? 'Anticipo':'Descuento TOTAL')}}: {{ $document->currency_type->symbol }}</td>
+                <td colspan="7" class="text-right font-bold">{{(($document->total_prepayment > 0) ? 'ANTICIPO':'DESCUENTO TOTAL')}}: {{ $document->currency_type->symbol }}</td>
                 <td class="text-right font-bold">{{ number_format($document->total_discount, 2) }}</td>
             </tr>
         @endif
@@ -316,7 +304,7 @@ if ($logo) {
             <td class="text-right font-bold">{{ number_format($document->total_igv, 2) }}</td>
         </tr>
         <tr>
-            <td colspan="7" class="text-right font-bold">Total a pagar: {{ $document->currency_type->symbol }}</td>
+            <td colspan="7" class="text-right font-bold">TOTAL A PAGAR: {{ $document->currency_type->symbol }}</td>
             <td class="text-right font-bold">{{ number_format($document->total, 2) }}</td>
         </tr>
     </tbody>
@@ -353,7 +341,7 @@ if ($logo) {
 <table class="full-width">
 <tr>
     <td>
-    <strong>Pagos:</strong> </td></tr>
+    <strong>PAGOS:</strong> </td></tr>
         @php
             $payment = 0;
         @endphp
@@ -363,13 +351,15 @@ if ($logo) {
                 $payment += (float) $row->payment;
             @endphp
         @endforeach
-        <tr><td><strong>Saldo:</strong> {{ $document->currency_type->symbol }} {{ number_format($document->total - $payment, 2) }}</td>
+        <tr><td><strong>SALDO:</strong> {{ $document->currency_type->symbol }} {{ number_format($document->total - $payment, 2) }}</td>
     </tr>
 
 </table>
 
 <div class="text-center">
-    <img style="width: 45%" height="80px" src="data:{{mime_content_type($footer_image)}};base64, {{base64_encode(file_get_contents($footer_image))}}" alt="image" class="">
+    @if($configuration->header_image)
+    <img style="width: 45%" height="80px" src="data:{{mime_content_type(public_path("storage/uploads/header_images/{$configuration->header_image}"))}};base64, {{base64_encode(file_get_contents(public_path("storage/uploads/header_images/{$configuration->header_image}")))}}" alt="image" class="">
+    @endif
 </div>
 </body>
 </html>

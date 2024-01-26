@@ -99,7 +99,7 @@ if ($logo) {
     $gudie = "";
     if ($document->guides) {
         foreach ($document->guides as $item) {
-            $gudie .= $item->document_type_description . " : " . $item->number . "<br>";
+            $gudie .= $item->document_type_description . " : " . $item->number . " ";
         }
 
     }

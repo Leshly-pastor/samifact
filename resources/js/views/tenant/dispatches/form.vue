@@ -534,6 +534,7 @@ export default {
         }
     },
     created() {
+        console.log("aqui es?");
         this.loadConfiguration()
         this.$store.commit('setConfiguration', this.configuration)
         this.initForm();

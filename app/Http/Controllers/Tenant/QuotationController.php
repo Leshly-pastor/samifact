@@ -51,6 +51,7 @@ use Modules\Inventory\Models\Warehouse as ModuleWarehouse;
 use App\CoreFacturalo\Requests\Inputs\Common\EstablishmentInput;
 use App\Models\Tenant\QuotationProject;
 use App\Models\Tenant\QuotationProjectItem;
+use Modules\BusinessTurn\Models\BusinessTurn;
 
 class QuotationController extends Controller
 {
@@ -65,12 +66,19 @@ class QuotationController extends Controller
     public function index()
     {
         $data = NameQuotations::first();
+        $isCommercial = auth()->user()->integrate_user_type_id == 2;
         $quotations_optional =  $data != null ? $data->quotations_optional : null;
         $quotations_optional_value =  $data != null ? $data->quotations_optional_value : null;
         $company = Company::select('soap_type_id')->first();
         $soap_company = $company->soap_type_id;
         $generate_order_note_from_quotation = Configuration::getRecordIndividualColumn('generate_order_note_from_quotation');
-        return view('tenant.quotations.index', compact('soap_company', 'generate_order_note_from_quotation', 'quotations_optional', 'quotations_optional_value'));
+        return view('tenant.quotations.index', compact(
+            'isCommercial',
+            'soap_company',
+            'generate_order_note_from_quotation',
+            'quotations_optional',
+            'quotations_optional_value'
+        ));
     }
 
 
@@ -198,6 +206,7 @@ class QuotationController extends Controller
     public function tables()
     {
 
+        $is_integrate_system = BusinessTurn::isIntegrateSystem();
         $customers = $this->table('customers');
         $establishments = Establishment::where('id', auth()->user()->establishment_id)->get();
         $currency_types = CurrencyType::whereActive()->get();
@@ -211,7 +220,7 @@ class QuotationController extends Controller
         $payment_method_types = PaymentMethodType::orderBy('id', 'desc')->get();
         $payment_destinations = $this->getPaymentDestinations();
         $configuration = Configuration::select('package_handlers', 'quotation_projects', 'destination_sale')->first();
-
+        $affectation_igv_types = AffectationIgvType::whereActive()->get();
         $serie = Series::where('document_type_id', "COT")->where("establishment_id", $establishments[0]->id)->first();
         $series = collect(Series::where(
             'establishment_id',
@@ -239,6 +248,8 @@ class QuotationController extends Controller
         $sellers = User::GetSellers(false)->get();
 
         return compact(
+            'affectation_igv_types',
+            'is_integrate_system',
             'series',
             'categories',
             'brands',
@@ -262,7 +273,7 @@ class QuotationController extends Controller
     {
         $establishment = Establishment::where('id', auth()->user()->establishment_id)->first();
         $series = Series::where('establishment_id', $establishment->id)->get();
-        $document_types_invoice = DocumentType::whereIn('id', ['01', '03'])->where('active',true)->get();
+        $document_types_invoice = DocumentType::whereIn('id', ['01', '03'])->where('active', true)->get();
         // $payment_method_types = PaymentMethodType::all();
         $payment_method_types = PaymentMethodType::getPaymentMethodTypes();
         $payment_destinations = $this->getPaymentDestinations();
@@ -509,7 +520,7 @@ class QuotationController extends Controller
         $configuration = Configuration::first();
         $get_last_quotation = Quotation::orderBy('id', 'desc')->first();
         $number = $get_last_quotation->number + 1;
-        if(!$number){
+        if (!$number) {
             $number = $get_last_quotation->id + 1;
         }
         $obj = Quotation::find($request->id);
@@ -1118,6 +1129,18 @@ class QuotationController extends Controller
         }
     }
 
+    public function changed_description(Request $request, $id)
+    {
+        $description = $request->description;
+        $record = Quotation::find($id);
+        $record->description = $description;
+        $record->save();
+
+        return [
+            'success' => true,
+            'message' => 'Observación actualizada correctamente'
+        ];
+    }
     public function changed($id)
     {
         $record = Quotation::find($id);

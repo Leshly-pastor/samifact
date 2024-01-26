@@ -10,29 +10,31 @@
                 </li>
             </ol>
             <div class="right-wrapper pull-right">
+                <template v-if="!isComercial">
+                    <button
+                        class="btn btn-custom btn-sm mt-2 mr-2"
+                        type="button"
+                        @click.prevent="clickExportMigration()"
+                    >
+                        <i class="fa fa-download"></i> Exportar Migración
+                    </button>
+                    <button
+                        class="btn btn-custom btn-sm mt-2 mr-2"
+                        type="button"
+                        @click.prevent="clickExport()"
+                    >
+                        <i class="fa fa-download"></i> Exportar
+                    </button>
+                    <button
+                        class="btn btn-custom btn-sm mt-2 mr-2"
+                        type="button"
+                        @click.prevent="clickImport()"
+                    >
+                        <i class="fa fa-upload"></i> Importar
+                    </button>
+                </template>
                 <button
-                    class="btn btn-custom btn-sm  mt-2 mr-2"
-                    type="button"
-                    @click.prevent="clickExportMigration()"
-                >
-                    <i class="fa fa-download"></i> Exportar Migración
-                </button>
-                <button
-                    class="btn btn-custom btn-sm  mt-2 mr-2"
-                    type="button"
-                    @click.prevent="clickExport()"
-                >
-                    <i class="fa fa-download"></i> Exportar
-                </button>
-                <button
-                    class="btn btn-custom btn-sm  mt-2 mr-2"
-                    type="button"
-                    @click.prevent="clickImport()"
-                >
-                    <i class="fa fa-upload"></i> Importar
-                </button>
-                <button
-                    class="btn btn-custom btn-sm  mt-2 mr-2"
+                    class="btn btn-custom btn-sm mt-2 mr-2"
                     type="button"
                     @click.prevent="clickCreate()"
                 >
@@ -78,7 +80,7 @@
                         <th v-if="configuration.college">Tipo</th>
                         <th v-if="driver">Vehiculo</th>
                         <th v-if="!driver">
-                            <template >Cód interno</template>
+                            <template>Cód interno</template>
                         </th>
                         <th class="text-end">Tipo de documento</th>
                         <th class="text-end">Número</th>
@@ -148,7 +150,7 @@
                         >
                             Distrito
                         </th>
-  <th
+                        <th
                             v-if="columns.address.visible === true"
                             class="text-center"
                         >
@@ -177,10 +179,9 @@
                                 getOpcionalName("children", "Hijo")
                             }}</template>
                         </td>
-                              <td v-if="driver">
-                                {{row.barcode}}
+                        <td v-if="driver">
+                            {{ row.barcode }}
                         </td>
-
 
                         <td v-if="!driver">{{ row.internal_code }}</td>
                         <td class="text-end">{{ row.document_type }}</td>
@@ -257,7 +258,7 @@
                         >
                             {{ row.district ? row.district.description : "" }}
                         </td>
- <td
+                        <td
                             v-if="columns.address.visible === true"
                             class="text-center"
                         >
@@ -291,7 +292,7 @@
                                     <div
                                         v-if="
                                             configuration.college &&
-                                                row.parent_id == 0
+                                            row.parent_id == 0
                                         "
                                     >
                                         <button
@@ -383,19 +384,20 @@ import { deletable } from "../../../mixins/deletable";
 export default {
     mixins: [deletable],
     props: [
+        "isComercial",
         "driver",
         "type",
         "typeUser",
         "api_service_token",
         "configuration",
-        "suscriptionames"
+        "suscriptionames",
     ],
     components: {
         PersonsForm,
         PersonsImport,
         PersonsExport,
         DataTable,
-        PersonsExportMigration
+        PersonsExportMigration,
     },
     data() {
         return {
@@ -408,60 +410,60 @@ export default {
             columns: {
                 address: {
                     title: "Dirección",
-                    visible: false
+                    visible: false,
                 },
                 observation: {
                     title: "Observacion",
-                    visible: false
+                    visible: false,
                 },
                 zone: {
                     title: "Zona",
-                    visible: false
+                    visible: false,
                 },
                 website: {
                     title: "Sitio Web",
-                    visible: false
+                    visible: false,
                 },
                 person_type: {
                     title: "Tipo de cliente",
-                    visible: false
+                    visible: false,
                 },
                 credit_days: {
                     title: "Días de crédito",
-                    visible: false
+                    visible: false,
                 },
                 seller: {
                     title: "Vendedor asignado",
-                    visible: false
+                    visible: false,
                 },
                 email: {
                     title: "Correo electrónico",
-                    visible: false
+                    visible: false,
                 },
                 telephone: {
                     title: "Teléfono",
-                    visible: false
+                    visible: false,
                 },
                 department: {
                     title: "Departamento",
-                    visible: false
+                    visible: false,
                 },
                 province: {
                     title: "Provincia",
-                    visible: false
+                    visible: false,
                 },
                 district: {
                     title: "Distrito",
-                    visible: false
-                }
+                    visible: false,
+                },
             },
-            showExportMigrationDialog: false
+            showExportMigrationDialog: false,
         };
     },
     created() {
         console.log(this.driver, " driver");
         this.title = this.type === "customers" ? "Clientes" : "Proveedores";
-        if(this.driver){
+        if (this.driver) {
             this.title = "Conductores";
         }
         this.getColumnsToShow();
@@ -476,7 +478,7 @@ export default {
             }
 
             return false;
-        }
+        },
     },
     methods: {
         getOpcionalName(key, defaultName) {
@@ -494,9 +496,9 @@ export default {
                 .post("/validate_columns", {
                     columns: this.columns,
                     report: "client_index", // Nombre del reporte.
-                    updated: updated !== undefined
+                    updated: updated !== undefined,
                 })
-                .then(response => {
+                .then((response) => {
                     if (updated === undefined) {
                         let currentCols = response.data.columns;
                         if (currentCols !== undefined) {
@@ -504,7 +506,7 @@ export default {
                         }
                     }
                 })
-                .catch(error => {
+                .catch((error) => {
                     console.error(error);
                 });
         },
@@ -554,7 +556,7 @@ export default {
             }
 
             window.open(`/${this.resource}/export/barcode/print?id=${row.id}`);
-        }
-    }
+        },
+    },
 };
 </script>

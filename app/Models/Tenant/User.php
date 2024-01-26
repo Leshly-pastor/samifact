@@ -37,7 +37,7 @@ use Modules\LevelAccess\Models\AuthorizedDiscountUser;
 use App\Notifications\Tenant\PasswordResetNotification;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Modules\DocumentaryProcedure\Models\DocumentaryFile;
-
+use Modules\LevelAccess\Models\ModuleLevelUser;
 
 /**
  * Class User
@@ -166,6 +166,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
+        'integrate_user_type_id',
         'auditor',
         'name',
         'email',
@@ -212,7 +213,9 @@ class User extends Authenticatable
         'multiple_default_document_types',
         'permission_force_send_by_summary',
         'worker_type_id',
-        'area_id'
+        'area_id',
+        'is_locked',
+        'msg_locked',
 
     ];
 
@@ -1271,5 +1274,41 @@ class User extends Authenticatable
         }
 
         return $show_modules;
+    }
+
+    public function setIntegrateUserType($integrate_user_type_id)
+    {
+        $module_levels = IntegrateUserLevelsModule::where('integrate_user_type_id', $integrate_user_type_id)->pluck('module_level_id')->toArray();
+        //recorre el array y busca en el modelo ModuleLevel por el id
+        DB::connection('tenant')
+            ->table('module_user')
+            ->where('user_id', $this->id)
+            ->delete();
+        DB::connection('tenant')
+            ->table('module_level_user')
+            ->where('user_id', $this->id)
+            ->delete();
+        foreach ($module_levels as $module_level) {
+
+            $module_level = ModuleLevel::where('id', $module_level)->first();
+            $module = DB::connection('tenant')
+                ->table('module_user')
+                ->where('module_id', $module_level->module_id)
+                ->where('user_id', $this->id)
+                ->first();
+            //si no existe lo crea
+            if (!$module) {
+                DB::connection('tenant')
+                    ->table('module_user')
+                    ->insert([
+                        'module_id' => $module_level->module_id,
+                        'user_id' => $this->id,
+                    ]);
+            }
+            ModuleLevelUser::create([
+                'module_level_id' => $module_level->id,
+                'user_id' => $this->id,
+            ]);
+        }
     }
 }

@@ -11,7 +11,14 @@ use App\Models\Tenant\Catalogs\Province;
 use App\Models\Tenant\Catalogs\UnitType;
 use App\Models\Tenant\NameDocument;
 use Illuminate\Support\Facades\Cache;
+use Modules\BusinessTurn\Models\BusinessTurn;
 
+if (!function_exists('is_integrate_system')) {
+    function is_integrate_system()
+    {
+        return BusinessTurn::isIntegrateSystem();
+    }
+}
 if (!function_exists('func_str_find_url')) {
     function func_str_find_url($text)
     {

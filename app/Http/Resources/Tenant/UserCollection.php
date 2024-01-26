@@ -45,6 +45,7 @@ class UserCollection extends ResourceCollection
                 'name' => strtoupper($row->name),
                 'api_token' => $row->api_token,
                 'pin' => $row->pin,
+                'is_locked'=> (bool) $row->is_locked,
                 'number' => $row->number,
                 'personal_cell_phone' => $row->personal_cell_phone,
                 'date_of_birth' =>  \Carbon\Carbon::parse($row->date_of_birth)->format('d-m-Y'),

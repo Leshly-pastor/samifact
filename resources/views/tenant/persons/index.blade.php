@@ -2,6 +2,7 @@
 
 @section('content')
     <tenant-persons-index 
+    :is-comercial="{{ json_encode($is_comercial) }}"
         :type-user="{{ json_encode(Auth::user()->type) }}" 
         :type="{{ json_encode($type) }}"
         :driver="{{ json_encode($driver) }}"

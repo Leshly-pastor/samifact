@@ -118,6 +118,7 @@ class Item extends ModelTenant
     public const SERVICE_UNIT_TYPE = 'ZZ';
 
     protected $fillable = [
+        'is_food_dealer',
         'meter',
         'has_sizes',
         'info_link',
@@ -191,6 +192,7 @@ class Item extends ModelTenant
     ];
 
     protected $casts = [
+        'is_food_dealer' => 'boolean',
         'meter' => 'float',
         'date_of_due' => 'date',
         'is_for_production' => 'boolean',
@@ -918,7 +920,7 @@ class Item extends ModelTenant
                 return $row->getCollectionData();
             });
         }
-   
+
         $data = [
             'meter' => $this->meter,
             'bonus_items' => $itemBonus,
@@ -995,7 +997,7 @@ class Item extends ModelTenant
             'warehouses' => collect($this->warehouses)->transform(function ($warehouses) use ($warehouse) {
                 $price = self::getSaleUnitPriceByWarehouse($this, $warehouses->warehouse_id);
                 return [
-                    'price' =>$price,
+                    'price' => $price,
                     'warehouse_description' => $warehouses->warehouse->description,
                     'stock'                 => (!empty($warehouses->stock)) ? $warehouses->stock : 0,
                     'warehouse_id'          => $warehouses->warehouse_id,
@@ -1018,12 +1020,12 @@ class Item extends ModelTenant
             'lots_enabled'   => (bool)$this->lots_enabled,
             'series_enabled' => (bool)$this->series_enabled,
             'is_set'         => (bool)$this->is_set,
-            'item_customer_prices' =>$this->clientTypePrices->transform(function ($row) {
+            'item_customer_prices' => $this->clientTypePrices->transform(function ($row) {
                 //si row es un array transformalo a objeto
                 if (is_array($row)) {
                     return $row;
                 }
-                
+
                 return [
                     'id' => $row->id,
                     'item_id' => $row->item_id,
@@ -1057,7 +1059,8 @@ class Item extends ModelTenant
 
         return $data;
     }
-    public function sizes(){
+    public function sizes()
+    {
         return $this->hasMany(ItemSizeStock::class);
     }
 
@@ -1071,12 +1074,15 @@ class Item extends ModelTenant
     {
         return CatDigemid::where('item_id', $this->id)->first();
     }
-    
+
     public static function AffectationIgvTypesExoneratedUnaffected()
     {
         return ['20', '21', '30', '31', '32', '33', '34', '35', '36', '37'];
     }
-
+    public function food_dealer()
+    {
+        return $this->belongsTo(ItemFoodDealer::class, 'id', 'item_id');
+    }
     public function getCollectionData(Configuration $configuration = null)
     {
         if (empty($configuration)) {
@@ -1149,6 +1155,7 @@ class Item extends ModelTenant
         $itemwarehouse = ItemWarehouse::where('warehouse_id', $this->warehouse_id)->where('item_id', $this->id)->first();
 
         return [
+            'is_food_dealer' => (bool)$this->is_food_dealer,
             'meter' => $this->meter,
             'has_sizes' => (bool)$this->has_sizes,
             'info_link' => $this->info_link,
@@ -1201,7 +1208,7 @@ class Item extends ModelTenant
                 $item_id = $row->item_id;
                 $warehouse_id = $row->warehouse_id;
                 $itemwarehouse = ItemWarehousePrice::where('warehouse_id', $warehouse_id)->where('item_id', $item_id)->first();
-                if($itemwarehouse){
+                if ($itemwarehouse) {
                     $price = $itemwarehouse->price;
                 }
                 return [
@@ -1259,7 +1266,7 @@ class Item extends ModelTenant
             }),
             'is_for_production' => $this->isIsForProduction(),
             'supplies' => $itemSupply,
-            'frequent' =>(bool) $this->frequent,
+            'frequent' => (bool) $this->frequent,
 
         ];
     }
@@ -2865,23 +2872,21 @@ class Item extends ModelTenant
     }
 
 
-    public function restoreStockSizes(){
+    public function restoreStockSizes()
+    {
 
         $has_sizes = (bool) $this->has_sizes;
-        if($has_sizes){
+        if ($has_sizes) {
             $item_id = $this->id;
             $warehouses_id = Warehouse::all()->pluck('id');
-            foreach($warehouses_id as $w_id){
+            foreach ($warehouses_id as $w_id) {
                 $stock = ItemSizeStock::where([['item_id', $item_id], ['warehouse_id', $w_id]])->sum('stock');
                 $item_warehouse = ItemWarehouse::where([['item_id', $item_id], ['warehouse_id', $w_id]])->first();
-                if($item_warehouse){
+                if ($item_warehouse) {
                     $item_warehouse->stock = $stock;
                     $item_warehouse->save();
                 }
-
-            } 
-           
+            }
         }
-
     }
 }

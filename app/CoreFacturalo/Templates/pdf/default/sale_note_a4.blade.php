@@ -119,7 +119,7 @@
                 <td colspan="3">{{ $document->hotelRent->destiny }}</td>
             </tr>
         @endif
-        @if ($document->observation)
+        @if ($document->observation && !is_integrate_system())
             <tr>
                 <td class="align-top">Observación:</td>
                 <td colspan="3">{{ $document->observation }}</td>
@@ -206,11 +206,11 @@
                             {!! $row->item->presentation->description !!}
                         @endif
                         @isset($row->item->sizes_selected)
-                        @if (count($row->item->sizes_selected)>0)
-                            @foreach ($row->item->sizes_selected as $size)
-                               <small> Talla {{$size->size}} | {{$size->qty}} und</small> <br>
-                            @endforeach
-                        @endif
+                            @if (count($row->item->sizes_selected) > 0)
+                                @foreach ($row->item->sizes_selected as $size)
+                                    <small> Talla {{ $size->size }} | {{ $size->qty }} und</small> <br>
+                                @endforeach
+                            @endif
                         @endisset
                         @if ($row->attributes)
                             @foreach ($row->attributes as $attr)
@@ -370,7 +370,41 @@
 
         </tbody>
     </table>
+    @if ($document->observation && is_integrate_system())
+        <table class="full-width">
+            @php
+            $cot = \App\Models\Tenant\Quotation::where('id', $document->quotation_id)->first();
+        @endphp
+        @if ($cot)
+            <tr>
+                <td width="23%" style="font-weight: bold;text-transform:uppercase;" class="align-top">
+                    Observación com.:</td>
+                <td style="font-weight: bold;text-transform:uppercase;text-align:left;" colspan="3">
+                    {{ $cot->description }}</td>
 
+            </tr>
+        @endif
+            <tr>
+                <td width="23%" style="font-weight: bold;text-transform:uppercase;" class="align-top">Observación adm.:
+                </td>
+                <td style="font-weight: bold;text-transform:uppercase;text-align:left;" colspan="3">
+                    {{ $document->additional_information }}</td>
+            </tr>
+           
+            @php
+                $prod = \App\Models\Tenant\ProductionOrder::where('sale_note_id', $document->id)->first();
+            @endphp
+            @if ($prod)
+                <tr>
+                    <td width="23%" style="font-weight: bold;text-transform:uppercase;" class="align-top">
+                        Observación prod.:</td>
+                    <td style="font-weight: bold;text-transform:uppercase;text-align:left;" colspan="3">
+                        {{ $prod->observation }}</td>
+
+                </tr>
+            @endif
+        </table>
+    @endif
     <table class="full-width">
         <tr>
             <td width="65%" style="text-align: top; vertical-align: top;">
@@ -435,7 +469,7 @@
         @endphp
         <tbody>
             <tr>
-                @if ($configuration->yape_qr_sale_notes &&  $establishment_data->yape_logo)
+                @if ($configuration->yape_qr_sale_notes && $establishment_data->yape_logo)
                     @php
                         $yape_logo = $establishment_data->yape_logo;
                     @endphp
@@ -472,7 +506,7 @@
                         </table>
                     </td>
                 @endif
-                @if ($configuration->plin_qr_sale_notes &&  $establishment_data->plin_logo)
+                @if ($configuration->plin_qr_sale_notes && $establishment_data->plin_logo)
                     @php
                         $plin_logo = $establishment_data->plin_logo;
                     @endphp

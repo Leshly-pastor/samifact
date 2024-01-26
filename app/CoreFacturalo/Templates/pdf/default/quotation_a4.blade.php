@@ -152,6 +152,7 @@ $establishment = $document->establishment;
                 @endif
             </td>
         </tr>
+        @if ($document->quotations_optional)
         <tr>
             <td class="align-top">
                 {{ $document->quotations_optional }}:</td>
@@ -161,6 +162,7 @@ $establishment = $document->establishment;
 
             </td>
         </tr>
+        @endif
 
         @if ($document->contact)
             <tr>
@@ -181,7 +183,7 @@ $establishment = $document->establishment;
     </table>
 
     <table class="full-width mt-3">
-        @if ($document->description)
+        @if ($document->description && !is_integrate_system())
             <tr>
                 <td width="15%" class="align-top">Observación: </td>
                 <td width="85%">{!! str_replace("\n", '<br/>', $document->description) !!}</td>
@@ -357,6 +359,16 @@ $establishment = $document->establishment;
                 <td class="text-right font-bold">{{ number_format($document->total, 2) }}</td>
             </tr>
         </tbody>
+    </table>
+
+    <table class="full-width mt-3">
+        @if ($document->description && is_integrate_system())
+            <tr>
+                <td style="font-weight: bold;text-transform:uppercase;" width="15%" class="align-top">Observación: </td>
+                <td style="font-weight: bold;text-transform:uppercase;" width="85%">{!! str_replace("\n", '<br/>', $document->description) !!}</td>
+                {{-- <td width="85%">{{ $document->description }}</td> --}}
+            </tr>
+        @endif
     </table>
     <table class="full-width">
         <tr>

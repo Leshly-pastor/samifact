@@ -170,6 +170,7 @@ Vue.component(
     require("./views/tenant/bank_accounts/index.vue").default
 );
 Vue.component("tenant-items-index", require("./views/tenant/items/index.vue").default);
+Vue.component("tenant-items-details", require("./views/tenant/items/form_readonly.vue").default);
 Vue.component(
     "tenant-persons-index",
     require("./views/tenant/persons/index.vue").default
@@ -376,6 +377,31 @@ Vue.component(
     "tenant-sale-notes-form",
     require("./views/tenant/sale_notes/form.vue").default
 );
+Vue.component(
+    "tenant-message-integrate-system-index",
+    require("./views/tenant/message_integrate_system/index.vue").default
+);
+//ORDENES DE PRODUCCION
+Vue.component(
+    "tenant-production-order-index",
+    require("./views/tenant/production_orders/index.vue").default
+);
+//
+Vue.component(
+    "tenant-production-order-form",
+    require("./views/tenant/production_orders/form.vue").default
+);
+//ORDENES DE DESPACHO
+Vue.component(
+    "tenant-dispatch-order-index",
+    require("./views/tenant/dispatch_orders/index.vue").default
+);
+Vue.component(
+    "tenant-dispatch-order-form",
+    require("./views/tenant/dispatch_orders/form.vue").default
+);
+
+
 Vue.component("tenant-pos-index", require("./views/tenant/pos/index.vue").default);
 Vue.component("cash-index", require("./views/tenant/cash/index.vue").default);
 Vue.component(

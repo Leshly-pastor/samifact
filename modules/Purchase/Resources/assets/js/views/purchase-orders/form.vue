@@ -537,8 +537,8 @@ export default {
         changePaymentMethodType(flag_submit = true) {
             let payment_method_type = _.find(this.payment_method_types, {'id': this.form.payment_method_type_id})
             if (payment_method_type.number_days) {
-                this.form.date_of_issue = moment().add(payment_method_type.number_days, 'days').format('YYYY-MM-DD');
-                this.changeDateOfIssue()
+                this.form.date_of_due = moment().add(payment_method_type.number_days, 'days').format('YYYY-MM-DD');
+                // this.changeDateOfIssue()
             } else {
                 if (flag_submit) {
                     this.form.date_of_issue = moment().format('YYYY-MM-DD')

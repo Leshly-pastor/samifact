@@ -93,7 +93,16 @@ class ItemResource extends JsonResource
             $name_digemid = $digemid_info->nom_prod;
         }
         $foods=Food::where('item_id',$this->id)->first();
+        $start = null;
+        $end = null;
+        if($this->is_food_dealer){
+            $start = $this->food_dealer->start_time;
+            $end = $this->food_dealer->end_time;
+        }
         return [
+            'start' => $start,
+            'end' => $end,
+            'is_food_dealer' => (bool) $this->is_food_dealer,
             'frequent' =>(bool) $this->frequent,
             'has_sizes' => (bool)$this->has_sizes,
             'info_link' => $this->info_link,

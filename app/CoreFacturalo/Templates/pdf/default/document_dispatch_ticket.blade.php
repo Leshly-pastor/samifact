@@ -20,17 +20,13 @@
     </tr>
 </table>
 <table class="full-width">
-    <tr >
-        <td width="" class="pt-1"><p class="desc">F. Emisión:</p></td>
-        <td width="" class="pt-1"><p class="desc">{{ $document->date_of_issue->format('Y-m-d') }}</p></td>
-    </tr>
-    <tr>
-        <td width="" ><p class="desc">H. Emisión:</p></td>
-        <td width="" ><p class="desc">{{ $document->time_of_issue }}</p></td>
-    </tr>
     <tr>
         <td class="align-top"><p class="desc">Cliente:</p></td>
-        <td><p class="desc">{{ $customer->name }}</p></td>
+        <td><p class="desc font-bold">{{ $customer->name }}</p></td>
+    </tr>
+    <tr >
+        <td width="" class="pt-1"><p class="desc">Fecha y hora:</p></td>
+        <td width="" class="pt-1"><p class="desc">{{ $document->date_of_issue->format('Y-m-d') }} {{ $document->time_of_issue }}</p></td>
     </tr>
 
     @if ($document->reference_data)

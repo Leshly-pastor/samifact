@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Tenant;
 
 use App\CoreFacturalo\Facturalo;
 use App\CoreFacturalo\Helpers\Storage\StorageDocument;
+use App\Exports\DispatchExport;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Tenant\DispatchRequest;
 use App\Http\Resources\Tenant\DispatchCollection;
@@ -45,8 +46,11 @@ use Modules\Order\Mail\DispatchEmail;
 use Modules\Order\Models\OrderNote;
 use App\Models\Tenant\PaymentCondition;
 use App\Models\Tenant\Catalogs\RelatedDocumentType;
+use App\Models\Tenant\DispatchOrder;
 use App\Models\Tenant\InventoryReference;
+use App\Models\Tenant\ProductionOrder;
 use App\Services\PseServiceDispatch;
+use Carbon\Carbon;
 
 /**
  * Class DispatchController
@@ -85,6 +89,15 @@ class DispatchController extends Controller
         $res = $pse->download_file();
 
         return $res;
+    }
+    public function exportExcel(Request $request)
+    {
+        $records = $this->getRecords($request);
+        $records = $records->get();
+
+        return (new DispatchExport)
+            ->records($records)
+            ->download('Reporte_Guia_Remision_' . Carbon::now()->format('Y-m-d') . '.xlsx');
     }
     public function records(Request $request)
     {
@@ -221,6 +234,7 @@ class DispatchController extends Controller
         $reference_sale_note_id = null;
         $reference_order_form_id = null;
         $reference_order_note_id = null;
+        $reference_dispatch_order_id = null;
 
         if ($parentTable === 'document') {
             $reference_document_id = $parentId;
@@ -236,6 +250,9 @@ class DispatchController extends Controller
             $query = OrderNote::query();
         } elseif ($parentTable === 'dispatch') {
             $query = Dispatch::query();
+        } elseif ($parentTable === 'dispatch_order') {
+            $reference_dispatch_order_id = $parentId;
+            $query = DispatchOrder::query();
         }
         $document = $query->find($parentId);
         $configuration = Configuration::query()->first();
@@ -294,6 +311,7 @@ class DispatchController extends Controller
                 'reference_sale_note_id' => $reference_sale_note_id,
                 'reference_order_form_id' => $reference_order_form_id,
                 'reference_order_note_id' => $reference_order_note_id,
+                'reference_dispatch_order_id' => $reference_dispatch_order_id,
             ];
         }
         $series = Series::where('document_type_id', "09")->where('establishment_id', auth()->user()->establishment_id)->first();

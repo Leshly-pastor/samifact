@@ -25,6 +25,7 @@ use App\Models\Tenant\Company;
 use Modules\Finance\Traits\FinanceTrait;
 use App\CoreFacturalo\Helpers\Functions\GeneralPdfHelper;
 use App\CoreFacturalo\Helpers\Storage\StorageDocument;
+use App\CoreFacturalo\Requests\Inputs\Functions;
 use App\Models\Tenant\CashDocument;
 use Carbon\Carbon;
 use Exception;
@@ -183,7 +184,8 @@ class IncomeController extends Controller
 
         $income =  DB::connection('tenant')->transaction(function () use ($data) {
             $cash = self::getCash();
-            $doc = Income::updateOrCreate(['id' => $data['id']], $data);
+            $id = Functions::valueKeyInArray($data, 'id');
+            $doc = Income::updateOrCreate(['id' => $id], $data);
             $doc->items()->delete();
             foreach ($data['items'] as $row) {
                 $doc->items()->create($row);

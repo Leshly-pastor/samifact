@@ -555,6 +555,126 @@
             </tr>
         </table>
     @endif
+
+    <table class="full-width border-box my-2">
+
+
+        <tr>
+            @if ($document->detraction)
+            <td width="80px">
+    
+                <td width="80px">Leyenda: Operación sujeta al Sistema de Pago de Obligaciones Tributarias con el Gobierno Central</td>
+    
+    
+     
+            @endif
+    </table>
+    
+    <table class="full-width border-box my-2">
+    
+    
+    
+    
+    
+    
+        <tr>
+            @if ($document->detraction)
+            <td width="210x">Bien o Servicio Sujeto a detracción</td>
+            <td width="8px">:</td>
+            @inject('detractionType', 'App\Services\DetractionTypeService')
+            <td width="220px">{{ $document->detraction->detraction_type_id }}
+                - {{ $detractionType->getDetractionTypeDescription($document->detraction->detraction_type_id) }}</td>
+        @endif
+    
+            @if ($document->detraction)
+                <td width="70px">Nro. Cta detracciones</td>
+                <td width="8px">:</td>
+                <td>{{ $document->detraction->bank_account }}</td>
+            @endif
+        </tr>
+    
+    
+        </tr>
+        <tr>
+    
+            @if ($document->detraction)
+            <td width="210x">Porcentaje Detracción</td>
+            <td width="8px">:</td>
+            <td>{{ $document->detraction->percentage }}%</td>
+        @endif
+    
+            @if ($document->detraction)
+            <td width="70px">Monto detracción</td>
+            <td width="8px">:</td>
+            <td>S/ {{ $document->detraction->amount }}</td>
+        @endif
+    
+    
+        </tr>
+        
+        <tr>
+            @if ($document->detraction)
+            <td width="210x">Medio de pago</td>
+            <td width="8px">:</td>
+            <td width="220px">
+            {{ $detractionType->getPaymentMethodTypeDescription($document->detraction->payment_method_id) }}
+        </td>
+    
+        @endif
+    
+        @if ($document->detraction)
+            <td width="120px"></td>
+            <td width="8px"></td>
+            <td width="20px">
+            
+        </td>
+        @endif
+        </tr>
+    
+        @if ($document->detraction && $invoice->operation_type_id == '1004')
+            <tr>
+                <td colspan="4"><strong>Detalle - Servicios de transporte de carga</strong></td>
+            </tr>
+            <tr>
+                <td class="align-top">Ubigeo origen</td>
+                <td>:</td>
+                <td>{{ $document->detraction->origin_location_id[2] }}</td>
+    
+                <td width="120px">Dirección origen</td>
+                <td width="8px">:</td>
+                <td>{{ $document->detraction->origin_address }}</td>
+            </tr>
+            <tr>
+                <td class="align-top">Ubigeo destino</td>
+                <td>:</td>
+                <td>{{ $document->detraction->delivery_location_id[2] }}</td>
+    
+                <td width="120px">Dirección destino</td>
+                <td width="8px">:</td>
+                <td>{{ $document->detraction->delivery_address }}</td>
+            </tr>
+            <tr>
+                <td class="align-top" width="170px">Valor referencial servicio de transporte</td>
+                <td>:</td>
+                <td>{{ $document->detraction->reference_value_service }}</td>
+    
+                <td width="170px">Valor referencia carga efectiva</td>
+                <td width="8px">:</td>
+                <td>{{ $document->detraction->reference_value_effective_load }}</td>
+            </tr>
+            <tr>
+                <td class="align-top">Valor referencial carga útil</td>
+                <td>:</td>
+                <td>{{ $document->detraction->reference_value_payload }}</td>
+    
+                <td width="120px">Detalle del viaje</td>
+                <td width="8px">:</td>
+                <td>{{ $document->detraction->trip_detail }}</td>
+            </tr>
+        @endif
+    
+    </table>
+    
 </body>
 
 </html>

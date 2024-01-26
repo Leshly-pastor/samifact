@@ -29,27 +29,38 @@
          */
         public function handle($request, Closure $next)
         {
-
+            //obtiene el primer modulo del usuario (asume que es documents)
+            //valida ciertas post que se necesitan usar asi no se pueda ingresar visualmente a "documents"
             $module = $request->user()->getModule();
+            //obtener el path de la ruta actual
             $path = explode('/', $request->path());
+            
+            // 
+            //todos los modulos del usuario
             $modules = $request->user()->getModules();
+            // 
+            //guardar el path de la ruta actual
             $this->route_path = $request->path();
 
 
             if (!$request->ajax()) {
-
+                //si tiene modulos
+                
                 if (count($modules)) {
                     // if(count($modules) < 15){
-
+                    //obtiene el grupo del path actual
                     $group = $this->getGroup($path, $module);
-
+                    
+                    //si encuentra el grupo
                     if ($group) {
+                        //si no tiene permiso al grupo, si en los modulos no hay ni uno
+                        //que tenga como valor el grupo actual
                         if ($this->getModuleByGroup($modules, $group) === 0) {
+                            //redirecciona al modulo que tiene permiso
+                            
                             return $this->redirectRoute($module);
                         }
                     }
-
-                    // }
 
                 }
             }
@@ -75,6 +86,8 @@
                 $firstLevel == "documents" ||
                 $firstLevel == "dashboard" ||
                 $firstLevel == "quotations" ||
+                // $firstLevel == "production-orders" ||
+                // $firstLevel == "dispatch_orders" ||
                 // $firstLevel == "items" ||
                 $firstLevel == "summaries" ||
                 $firstLevel == "voided") {
@@ -239,7 +252,7 @@
                     return redirect()->route('tenant.purchases.index');
 
                 case 'advanced':
-                    return redirect()->route('tenant.retentions.index');
+                    return redirect()->route('tenant.dispatches.index');
 
                 case 'reports':
                     return redirect()->route('tenant.reports.purchases.index');

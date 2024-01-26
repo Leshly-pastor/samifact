@@ -577,7 +577,28 @@
                             </template>
                         </div>
                     </el-tab-pane>
-
+    <template
+    v-if="isIntegrateSystem"
+    >
+    <el-tab-pane name="integrateSystemPane" v-if="form.id !=1">
+          <span slot="label">Sistema integrado</span>
+          <div class="row">
+            <div class="col-md-3 col-lg-3">
+                <label class="control-label">Tipo de usuario</label>
+                <el-select v-model="form.integrate_user_type_id"
+                clearable
+                 filterable>
+                    <el-option
+                        v-for="option in userTypes"
+                        :key="option.id"
+                        :label="option.name"
+                        :value="option.id"
+                    ></el-option>
+                </el-select>
+            </div>
+          </div>
+    </el-tab-pane>
+    </template>
                 </el-tabs>
             </div>
             <div class="form-actions text-end mt-4">
@@ -593,7 +614,7 @@
 
 <script>
 export default {
-    props: ["showDialog", "recordId", "typeUser"],
+    props: ["showDialog", "recordId", "typeUser","isIntegrateSystem"],
     data() {
         return {
             headers: headers_token,
@@ -642,6 +663,7 @@ export default {
             identity_document_types: [],
             document_types: [],
             loading: false,
+            userTypes :[],
         };
     },
     updated() {
@@ -667,6 +689,16 @@ export default {
         await this.initForm();
     },
     methods: {
+    getUserTypes(){
+        this.$http('/integrate-system/user-types')
+        .then(response => {
+            console.log("🚀 ~ file: form1.vue:674 ~ getUserTypes ~ response:", response)
+            this.userTypes = response.data.integrate_user_types;
+        })
+        .catch(error => {
+            console.log(error);
+        })
+    },
         onUploadSuccess(response, file, fileList) {
             if (response.success) 
             {
@@ -861,6 +893,7 @@ export default {
             return _.filter(this.series, { document_type_id : document_type_id })
         },
         async create() {
+            this.getUserTypes();
             this.titleDialog = this.recordId ? "Editar Usuario" : "Nuevo Usuario"
 
             this.loading = true

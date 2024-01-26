@@ -14,6 +14,7 @@ use App\Models\Tenant\Configuration;
 use App\Models\Tenant\Establishment;
 use App\Models\Tenant\NameQuotations;
 use App\CoreFacturalo\Requests\Inputs\Functions;
+use App\Models\Tenant\SaleNote;
 use Modules\Document\Http\Resources\ItemLotCollection;
 use Modules\Suscription\Models\Tenant\SuscriptionNames;
 use Modules\Inventory\Models\Warehouse as ModuleWarehouse;
@@ -47,10 +48,22 @@ class StoreController extends Controller
 
     public function getRecord($table, $table_id)
     {
-        $record = Quotation::query()->with(['person','payments'])->find($table_id);
+        $model = Quotation::query();
+        $relation = "quotation_id";
+        switch ($table) {
+            case 'sale-notes':
+                $relation = "sale_note_id";
+                $model = SaleNote::query();
+                break;
+         
+        }
+        $record = $model->with(['person','payments'])->find($table_id);
         $person = $record->person;
 
         $rec = $record->toArray();
+        if($relation === "sale_note_id"){
+            $rec['quotation_id'] = null;
+        }
         $document_type_id = $person->identity_document_type_id === '6' ? '01' : '03';
         $payments = Functions::valueKeyInArray($rec, 'payments', []);
         $series = Series::query()
@@ -81,10 +94,8 @@ class StoreController extends Controller
         $rec['unique_filename'] = '';
         $rec['user_rel_suscription_plan_id'] = 0;
         $rec['was_deducted_prepayment'] = 0;
-        $rec['quotation_id'] = $table_id;
-        $rec['quotation_id'] = $table_id;
-        $rec['additional_information'] = $rec['description'];
-
+        $rec["$relation"] = $table_id;
+        $rec['additional_information'] = Functions::valueKeyInArray($rec, 'additional_information', '');
         $this->setPaymentsFromQuotation($rec, $record);
 
         return [

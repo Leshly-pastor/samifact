@@ -74,6 +74,7 @@ class Dispatch extends ModelTenant
     protected $fillable = [
         'purchase_order',
         'inventory_reference_id',
+        'dispatch_order_id',
         'user_id',
         'external_id',
         'establishment_id',
@@ -123,6 +124,7 @@ class Dispatch extends ModelTenant
         'reference_quotation_id',
         'reference_order_note_id',
         'reference_order_form_id',
+        'reference_dispatch_order_id',
         'secondary_license_plates',
         'reference_sale_note_id',
         'soap_shipping_response',

@@ -254,7 +254,7 @@ class DocumentInput
                         $quantity_factor = $presentation['quantity_unit'];
                     }
                 }
-
+           
                 $arayItem = [
                     'item_id' => $item->id,
                     'item' => [
@@ -269,7 +269,7 @@ class DocumentInput
                         'amount_plastic_bag_taxes' => $item->amount_plastic_bag_taxes,
                         'is_set' => $item->is_set,
                         'lots' => self::lots($row),
-                        'IdLoteSelected' => (isset($row['IdLoteSelected']) ? $row['IdLoteSelected'] : (isset($row['item']['IdLoteSelected']) ? $row['item']['IdLoteSelected'] : null)),
+                        'IdLoteSelected' => (isset($row['IdLoteSelected']) ? $row['IdLoteSelected'] : ((isset($row['item']['IdLoteSelected']) ? $row['item']['IdLoteSelected'] : isset($row['item']['lots_group'])) ? $row['item']['lots_group'] : null)),
                         'model' => $item->model,
                         'sizes_selected' => (isset($row['sizes_selected']) ? $row['sizes_selected'] : (isset($row['item']['sizes_selected']) ? $row['item']['sizes_selected'] : null)),
                         'brand' => optional($item->brand)->name,

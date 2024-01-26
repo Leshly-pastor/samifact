@@ -189,8 +189,9 @@ class PurchaseController extends Controller
         $warehouses = Warehouse::get();
         $permissions = auth()->user()->getPermissionsPurchase();
         $global_discount_types = ChargeDiscountType::whereIn('id', ['02', '03'])->whereActive()->get();
-
+        $affectation_igv_types = AffectationIgvType::whereActive()->get();
         return compact(
+            'affectation_igv_types',
             'licenses',
             'responsibles',
             'suppliers',
