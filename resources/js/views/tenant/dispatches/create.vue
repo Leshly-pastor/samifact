@@ -46,8 +46,9 @@
                                     ></label
                                 >
                                 <el-select
+                                    
                                     v-model="form.series"
-                                    :disabled="generalDisabledSeries()"
+                                    :disabled="parentTable == 'dispatch'"
                                 >
                                     <el-option
                                         v-for="option in series"
@@ -745,7 +746,7 @@
                                 ></small>
                             </div>
                         </div>
-                        <div class="col-lg-3">
+                        <!-- <div class="col-lg-3">
                             <div class="form-group">
                                 <label class="control-label"
                                     >N° placa semirremolque</label
@@ -757,7 +758,7 @@
                                     "
                                 ></el-input>
                             </div>
-                        </div>
+                        </div> -->
                     </div>
                     <hr />
                     <div class="col-md-12">
@@ -1232,8 +1233,9 @@ export default {
             await this.changeEstablishment();
             if (this.parentTable !== "dispatch") {
                 this.setDefaults();
+                this.form.series = this.series_default;
             }
-            this.form.series = this.series_default;
+            
             //  this.setDefaultSeries()
         } else {
             this.searchRemoteCustomers("");
@@ -1372,7 +1374,7 @@ export default {
                 transshipment_indicator: false,
                 port_code: null,
                 unit_type_id: "KGM",
-                total_weight: 0, 
+                total_weight: 1, 
                 packages_number: 0,
                 container_number: null,
                 dispatcher_id: null,
@@ -1967,6 +1969,9 @@ export default {
                 this.weight += parseFloat(element.weight);
             });
             this.form.total_weight = this.weight;
+            if (this.form.total_weight === 0) {
+                this.form.total_weight = 1;
+            }
         },
         verifyQuantityItems() {
             let validate = true;

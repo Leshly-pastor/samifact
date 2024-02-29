@@ -91,10 +91,14 @@ class Facturalo
     protected $apply_change;
     protected $sendDocumentPse;
 
-    public function __construct()
+    public function __construct($company = null)
     {
         $this->configuration = Configuration::first();
-        $this->company = Company::active();
+        if ($company) {
+            $this->company = $company;
+        } else {
+            $this->company = Company::active();
+        }
         $this->isDemo = ($this->company->soap_type_id === '01') ? true : false;
         $this->isOse = ($this->company->soap_send_id === '02') ? true : false;
         $this->signer = new XmlSigned();
@@ -113,7 +117,8 @@ class Facturalo
         $new_pse = new PseServiceDispatch($this->document);
         $this->response = $new_pse->sendToPse();
     }
-    public function sendPseDispatch(){
+    public function sendPseDispatch()
+    {
         $new_pse = new PseServiceDispatch($this->document);
         $this->response = $new_pse->sendToPse();
     }
@@ -239,6 +244,7 @@ class Facturalo
                     $this->updatePrepaymentDocuments($inputs);
                     if ($inputs['hotel']) $document->hotel()->create($inputs['hotel']);
                     if ($inputs['transport']) $document->transport()->create($inputs['transport']);
+                    if ($inputs['transport_dispatch']) $document->transport_dispatch()->create($inputs['transport_dispatch']);
                     $document->invoice()->create($inputs['invoice']);
 
                     $this->document = Document::find($document->id);
@@ -310,6 +316,7 @@ class Facturalo
                     $this->updatePrepaymentDocuments($inputs);
                     if ($inputs->hotel) $this->document->hotel()->create($inputs->hotel);
                     if ($inputs->transport) $this->document->transport()->create($inputs->transport);
+                    if ($inputs->transport_dispatch) $this->document->transport_dispatch()->create($inputs->transport_dispatch);
                     Invoice::create(
                         [
                             'document_id' => $this->documents->id,
@@ -518,6 +525,7 @@ class Facturalo
 
     public function createPdf($document = null, $type = null, $format = null, $output = 'pdf')
     {
+        $configuration = Configuration::first();
 
         ini_set("pcre.backtrack_limit", "5000000");
         $template = new Template();
@@ -525,6 +533,12 @@ class Facturalo
         $format_pdf = $this->actions['format_pdf'] ?? null;
 
         $this->document = ($document != null) ? $document : $this->document;
+        if ($configuration->multi_companies &&  $this->document->alter_company) {
+            $company = Company::where('website_id', $this->document->alter_company->website_id)->first();
+            if ($company) {
+                $this->company = $company;
+            }
+        }
         $format_pdf = ($format != null) ? $format : $format_pdf;
         $this->type = ($type != null) ? $type : $this->type;
 
@@ -548,7 +562,7 @@ class Facturalo
         $pdf_margin_bottom = 15;
         $pdf_margin_left = 15;
 
-        if (in_array($base_pdf_template, ['personalizada_gonzalo_diseno', 'personalizada_famavet','famavet', 'personalizada_trujillosalud', 'hercold', 'personalizada_gonzalo_ultramix', 'personalizada_gonzalo_concremix', 'full_height', 'personalizada_drogueria', 'custom', 'personalizada_impacto', 'personalizada_default3_banks_valor', 'personalizada_default3_banks_precio', 'personalizada_pack_pro', 'personalizada_custom', 'perzonalizada_gonzalo_full_dorado', 'perzonalizada_gonzalo_full_negro', 'rounded'])) {
+        if (in_array($base_pdf_template, ['personalizada_gonzalo_diseno', 'personalizada_famavet', 'famavet', 'personalizada_trujillosalud', 'hercold', 'personalizada_gonzalo_ultramix', 'personalizada_gonzalo_concremix', 'full_height', 'personalizada_drogueria', 'custom', 'personalizada_impacto', 'personalizada_default3_banks_valor', 'personalizada_default3_banks_precio', 'personalizada_pack_pro', 'personalizada_custom', 'perzonalizada_gonzalo_full_dorado', 'perzonalizada_gonzalo_full_negro', 'rounded'])) {
             $pdf_margin_top = 5;
             $pdf_margin_right = 5;
             $pdf_margin_bottom = 5;
@@ -610,6 +624,7 @@ class Facturalo
             $quantity_rows     = count($this->document->items) + $was_deducted_prepayment;
             $document_payments     = count($this->document->payments ?? []);
             $document_transport     = ($this->document->transport) ? 30 : 0;
+            $document_transport_dispatch     = ($this->document->transport_dispatch) ? 30 : 0;
             $document_retention     = ($this->document->retention) ? 10 : 0;
 
             $extra_by_item_additional_information = 0;
@@ -692,6 +707,7 @@ class Facturalo
                         $extra_by_item_additional_information +
                         $height_legend +
                         $document_transport +
+                        $document_transport_dispatch +
                         $append_height +
                         $document_retention
                 ],
@@ -758,61 +774,61 @@ class Facturalo
                 'margin_bottom' => 0,
                 'margin_left' => 5
             ]);
-    } else if ($format_pdf === 'a5' && $this->type == 'dispatch') {
+        } else if ($format_pdf === 'a5' && $this->type == 'dispatch') {
 
-        $company_name      = (strlen($this->company->name) / 20) * 10;
-        $company_address   = (strlen($this->document->establishment->address) / 30) * 10;
-        $company_number    = $this->document->establishment->telephone != '' ? '10' : '0';
-        
+            $company_name      = (strlen($this->company->name) / 20) * 10;
+            $company_address   = (strlen($this->document->establishment->address) / 30) * 10;
+            $company_number    = $this->document->establishment->telephone != '' ? '10' : '0';
 
-        $total_exportation = $this->document->total_exportation != '' ? '10' : '0';
-        $total_free        = $this->document->total_free != '' ? '10' : '0';
-        $total_unaffected  = $this->document->total_unaffected != '' ? '10' : '0';
-        $total_exonerated  = $this->document->total_exonerated != '' ? '10' : '0';
-        $total_taxed       = $this->document->total_taxed != '' ? '10' : '0';
-        $total_plastic_bag_taxes       = $this->document->total_plastic_bag_taxes != '' ? '10' : '0';
-        $quantity_rows     = count($this->document->items);
 
-        $extra_by_item_description = 0;
-        $discount_global = 0;
-        foreach ($this->document->items as $it) {
+            $total_exportation = $this->document->total_exportation != '' ? '10' : '0';
+            $total_free        = $this->document->total_free != '' ? '10' : '0';
+            $total_unaffected  = $this->document->total_unaffected != '' ? '10' : '0';
+            $total_exonerated  = $this->document->total_exonerated != '' ? '10' : '0';
+            $total_taxed       = $this->document->total_taxed != '' ? '10' : '0';
+            $total_plastic_bag_taxes       = $this->document->total_plastic_bag_taxes != '' ? '10' : '0';
+            $quantity_rows     = count($this->document->items);
 
-            if (strlen($it->item->description) > 100) {
-                $extra_by_item_description += 24;
+            $extra_by_item_description = 0;
+            $discount_global = 0;
+            foreach ($this->document->items as $it) {
+
+                if (strlen($it->item->description) > 100) {
+                    $extra_by_item_description += 24;
+                }
+                if ($it->discounts) {
+                    $discount_global = $discount_global + 1;
+                }
             }
-            if ($it->discounts) {
-                $discount_global = $discount_global + 1;
-            }
-        }
-        $legends = $this->document->legends != '' ? '10' : '0';
+            $legends = $this->document->legends != '' ? '10' : '0';
 
 
-        $height = ($quantity_rows * 8) +
-            ($discount_global * 3) +
-            $company_name +
-            $company_address +
-            $company_number +
-     
-            $legends +
-            $total_exportation +
-            $total_free +
-            $total_unaffected +
-            $total_exonerated +
-            $total_taxed;
-        $diferencia = 148 - (float)$height;
+            $height = ($quantity_rows * 8) +
+                ($discount_global * 3) +
+                $company_name +
+                $company_address +
+                $company_number +
 
-        $pdf = new Mpdf([
-            'mode' => 'utf-8',
-            'format' => [
-                210,
-                $diferencia + $height
-            ],
-            'margin_top' => 2,
-            'margin_right' => 5,
-            'margin_bottom' => 0,
-            'margin_left' => 5
-        ]);
-    } else {
+                $legends +
+                $total_exportation +
+                $total_free +
+                $total_unaffected +
+                $total_exonerated +
+                $total_taxed;
+            $diferencia = 148 - (float)$height;
+
+            $pdf = new Mpdf([
+                'mode' => 'utf-8',
+                'format' => [
+                    210,
+                    $diferencia + $height
+                ],
+                'margin_top' => 2,
+                'margin_right' => 5,
+                'margin_bottom' => 0,
+                'margin_left' => 5
+            ]);
+        } else {
 
             if ($base_pdf_template === 'brand') {
                 $pdf_margin_top = 93.7;
@@ -863,7 +879,7 @@ class Facturalo
             }
         }
         $pdf->shrink_tables_to_fit = 1;
-        if (in_array($base_pdf_template, ['personalizada_gonzalo_diseno', 'hercold','maite'])) {
+        if (in_array($base_pdf_template, ['personalizada_gonzalo_diseno', 'hercold', 'maite'])) {
 
             $path_css = app_path('CoreFacturalo' . DIRECTORY_SEPARATOR . 'Templates' .
                 DIRECTORY_SEPARATOR . 'pdf' .
@@ -1144,9 +1160,9 @@ class Facturalo
 
         if ((int)$code === 0) {
             $this->updateState(self::ACCEPTED);
-            try{
+            try {
                 $this->sendFilesToWebService('vida');
-            }catch(Exception $e){
+            } catch (Exception $e) {
                 Log::error("No se envió");
                 Log::error($e->getMessage());
             }
@@ -1661,7 +1677,7 @@ class Facturalo
     public function sendFilesToWebService($type = null)
     {
         $company = Company::active();
-        if($company->isSmart() == false) {
+        if ($company->isSmart() == false) {
             return false;
         }
         $data = [
@@ -1687,7 +1703,7 @@ class Facturalo
             $pse_url . 'api/pse/download_files_others',
             [
                 'form_params' => $data,
-             
+
             ],
         );
 

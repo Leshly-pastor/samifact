@@ -108,7 +108,7 @@
                             <div
                                 class="form-group col-12 col-md-8"
                                 :class="{
-                                    'has-danger': errors['customer.name']
+                                    'has-danger': errors['customer.name'],
                                 }"
                             >
                                 <label>Nombres</label>
@@ -124,7 +124,7 @@
                             <div
                                 class="form-group col-12 col-md-4"
                                 :class="{
-                                    'has-danger': errors['customer.name']
+                                    'has-danger': errors['customer.name'],
                                 }"
                             >
                                 <label>Sexo</label>
@@ -147,7 +147,7 @@
                             <div
                                 class="form-group col-12 col-md-6"
                                 :class="{
-                                    'has-danger': errors['customer.address']
+                                    'has-danger': errors['customer.address'],
                                 }"
                             >
                                 <label>Dirección</label>
@@ -234,7 +234,8 @@
                             <div
                                 class="col-12 col-md-3 form-group"
                                 :class="{
-                                    'has-danger': errors.affectation_igv_type_id
+                                    'has-danger':
+                                        errors.affectation_igv_type_id,
                                 }"
                             >
                                 <label for="rate">Tipo de afectación</label>
@@ -265,6 +266,7 @@
                             >
                                 <label for="rate">Precio</label>
                                 <el-input-number
+                                    class="w-100"
                                     v-model="form.rate_price"
                                     controls-position="right"
                                     :min="0"
@@ -280,10 +282,11 @@
                             <div
                                 class="col-12 col-md-2 form-group"
                                 :class="{ 'has-danger': errors.duration }"
-                                v-if="rate"
+                                v-if="rate &&  !form.undefined_out"
                             >
                                 <label for="rate">Cant. noches</label>
                                 <el-input-number
+                                    class="w-100"
                                     v-model="form.duration"
                                     controls-position="right"
                                     @change="onUpdateTotalToPay"
@@ -295,7 +298,9 @@
                                     v-text="errors.duration[0]"
                                 ></small>
                             </div>
-                            <div class="col-12 col-md-2 text-center">
+                            <div class="col-12 col-md-2 text-center"
+                              v-if="!form.undefined_out"
+                            >
                                 <h6>
                                     Total a pagar:
                                     <br />
@@ -307,7 +312,7 @@
                             <div
                                 class="col-6 col-md-3 form-group"
                                 :class="{
-                                    'has-danger': errors.quantity_persons
+                                    'has-danger': errors.quantity_persons,
                                 }"
                             >
                                 <label>Cant. de personas</label>
@@ -350,6 +355,7 @@
                                 ></small>
                             </div>
                             <div
+                              v-if="!form.undefined_out"
                                 class="col-6 col-md-3 form-group"
                                 :class="{ 'has-danger': errors.output_date }"
                             >
@@ -367,6 +373,7 @@
                                 ></small>
                             </div>
                             <div
+                                v-if="!form.undefined_out"
                                 class="col-6 col-md-3 form-group"
                                 :class="{ 'has-danger': errors.output_time }"
                             >
@@ -380,6 +387,22 @@
                                     class="text-danger"
                                     v-if="errors.output_time"
                                     v-text="errors.output_time[0]"
+                                ></small>
+                            </div>
+                              <div
+                                class="col-6 col-md-3 form-group d-flex align-items-end"
+                                :class="{ 'has-danger': errors.undefined_out }"
+                            >
+                            
+                                <el-checkbox
+                                    v-model="form.undefined_out"
+                                >
+                                Salida indefinida
+                                </el-checkbox>
+                                <small
+                                    class="text-danger"
+                                    v-if="errors.undefined_out"
+                                    v-text="errors.undefined_out[0]"
                                 ></small>
                             </div>
                         </div>
@@ -418,19 +441,19 @@ import { mapState } from "vuex/dist/vuex.mjs";
 
 export default {
     components: {
-        PersonForm
+        PersonForm,
     },
     mixins: [functions],
     props: {
         room: {
             type: Object,
             required: true,
-            default: {}
+            default: {},
         },
         affectationIgvTypes: {
             type: Array,
-            required: true
-        }
+            required: true,
+        },
     },
     data() {
         return {
@@ -440,8 +463,9 @@ export default {
             customer_barcode: null,
             form: {
                 customer: {
-                    sex:"M"
+                    sex: "M",
                 },
+                undefined_out: false,
                 towels: 1,
                 rate: {},
                 duration: 1,
@@ -452,7 +476,7 @@ export default {
                 quantity_persons: 2,
                 affectation_igv_type_id: null,
                 date_of_issue: moment().format("YYYY-MM-DD"),
-                establishment_id: null
+                establishment_id: null,
             },
             rate: null,
             loading: false,
@@ -461,9 +485,9 @@ export default {
             input_person: {},
             configuration: {},
             errors: {
-                customer: {}
+                customer: {},
             },
-            recordItem: null
+            recordItem: null,
         };
     },
     async mounted() {
@@ -471,24 +495,24 @@ export default {
         this.onUpdateOutputDate();
     },
     async created() {
-        await this.$eventHub.$on("reloadDataPersons", customerId => {
+        await this.$eventHub.$on("reloadDataPersons", (customerId) => {
             this.reloadDataCustomers(customerId);
         });
     },
     computed: {
         ...mapState(["config"]),
-        getAllowedAffectationIgvTypes: function() {
-            return this.affectationIgvTypes.filter(item => {
+        getAllowedAffectationIgvTypes: function () {
+            return this.affectationIgvTypes.filter((item) => {
                 return ["10", "20"].includes(item.id);
             });
-        }
+        },
     },
     methods: {
         async onSubmit() {
             this.loading = true;
             await this.$http
                 .get(`/documents/search/item/${this.room.item_id}`)
-                .then(response => {
+                .then((response) => {
                     const payload = {};
                     const item = response.data.items[0];
 
@@ -503,11 +527,12 @@ export default {
 
                     // payload.affectation_igv_type_id = item.sale_affectation_igv_type_id;
 
-                    payload.affectation_igv_type_id = this.form.affectation_igv_type_id;
+                    payload.affectation_igv_type_id =
+                        this.form.affectation_igv_type_id;
                     payload.affectation_igv_type = _.find(
                         this.affectationIgvTypes,
                         {
-                            id: payload.affectation_igv_type_id
+                            id: payload.affectation_igv_type_id,
                         }
                     );
 
@@ -532,14 +557,14 @@ export default {
                             `/hotels/reception/${this.room.id}/rent/store`,
                             this.form
                         )
-                        .then(response => {
+                        .then((response) => {
                             this.$message({
                                 message: response.data.message,
-                                type: "success"
+                                type: "success",
                             });
                             this.onToBackPage();
                         })
-                        .catch(error => {
+                        .catch((error) => {
                             this.axiosError(error);
                         })
                         .finally(() => {
@@ -566,8 +591,8 @@ export default {
         },
         onSelectedRate() {
             const rate = this.room.rates
-                .filter(r => r.hotel_rate_id === this.form.hotel_rate_id)
-                .reduce(r => r);
+                .filter((r) => r.hotel_rate_id === this.form.hotel_rate_id)
+                .reduce((r) => r);
             this.rate = rate.rate;
             this.rate.price = rate.price;
             this.form.rate_price = rate.price;
@@ -576,7 +601,7 @@ export default {
         async reloadDataCustomers(customerId) {
             await this.$http
                 .get(`/persons/search/${customerId}`)
-                .then(response => {
+                .then((response) => {
                     this.customers = response.data.customers;
                     this.form.customer_id = customerId;
                     this.changeCustomer();
@@ -607,7 +632,7 @@ export default {
             this.loading = true;
             await this.$http
                 .get("/hotels/reception/tables")
-                .then(response => {
+                .then((response) => {
                     this.customers = response.data.customers;
                     this.configuration = response.data.configuration;
                     this.setAffectationIgvType();
@@ -633,11 +658,11 @@ export default {
 
                 const params = {
                     input: input,
-                    search_by_barcode: this.search_item_by_barcode ? 1 : 0
+                    search_by_barcode: this.search_item_by_barcode ? 1 : 0,
                 };
                 this.$http
                     .get(`/hotels/reception/tables/customers`, { params })
-                    .then(response => {
+                    .then((response) => {
                         this.customers = response.data.customers;
 
                         this.input_person.number = null;
@@ -655,8 +680,8 @@ export default {
         },
         changeCustomer() {
             this.customer = this.customers
-                .filter(c => c.id === this.form.customer_id)
-                .reduce(c => c);
+                .filter((c) => c.id === this.form.customer_id)
+                .reduce((c) => c);
 
             this.form.customer = { ...this.customer, sex: "M" };
         },
@@ -673,7 +698,7 @@ export default {
             if (status === "LIMPIEZA") {
                 return "badge-info";
             }
-        }
-    }
+        },
+    },
 };
 </script>

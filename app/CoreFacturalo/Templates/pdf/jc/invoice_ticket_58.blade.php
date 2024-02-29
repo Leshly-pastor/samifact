@@ -216,7 +216,7 @@ if ($logo) {
             </td>
             <td class="text-center desc-9 align-top">{{ $row->item->unit_type_id }}</td>
             <td class="text-left desc-9 align-top">
-                {!!$row->item->description!!} @if (!empty($row->item->presentation)) {!!$row->item->presentation->description!!} @endif
+                {!!$row->item->description!!}   
 
                 @foreach($row->additional_information as $information)
                     @if ($information)

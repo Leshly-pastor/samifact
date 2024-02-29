@@ -64,6 +64,7 @@ use App\Models\Tenant\ProductionOrderItem;
 use App\Models\Tenant\ProductionOrderPayment;
 use App\Models\Tenant\SaleNote;
 use Illuminate\Support\Facades\Auth;
+use Modules\BusinessTurn\Models\BusinessTurn;
 use Modules\Inventory\Models\InventoryConfiguration;
 
 class ProductionOrderController extends Controller
@@ -93,7 +94,8 @@ class ProductionOrderController extends Controller
         return view('tenant.production_orders.index', compact('soap_company', 'configuration'));
     }
 
-    public function responsibles(){
+    public function responsibles()
+    {
         $responsibles = User::where('type', '!=', 'admin')->select('id', 'name')->get();
         return compact('responsibles');
     }
@@ -106,15 +108,26 @@ class ProductionOrderController extends Controller
             $responsible_id = $request->input('responsible_id');
             $date_of_issue = $request->input('date_of_issue');
             $sale_note = SaleNote::find($sale_note_id);
-            $production_order = new ProductionOrder;
+            $production_order = ProductionOrder::where('sale_note_id', $sale_note_id)->first();
+            $is_update = false;
+            if ($production_order) {
+                $is_update = true;
+                $this->production_order = $production_order;
+                $this->deleteAllPayments($this->production_order->payments);
+                $this->deleteAllItems($this->production_order->items);
+            } else {
+                $production_order = new ProductionOrder;
+            }
             $production_order->fill($sale_note->toArray());
-            $production_order->id = null;
             $production_order->prefix = 'OP';
             $production_order->state_type_id = '01';
             $production_order->sale_note_id = $sale_note->id;
-            $production_order->date_of_issue = $date_of_issue;
-            $production_order->observation = $observation;
-            $production_order->responsible_id = $responsible_id;
+            if (!$is_update) {
+                $production_order->id = null;
+                $production_order->date_of_issue = $date_of_issue;
+                $production_order->observation = $observation;
+                $production_order->responsible_id = $responsible_id;
+            }
             $production_order->save();
             $this->production_order = $production_order;
             foreach ($sale_note->items as $item) {
@@ -206,6 +219,15 @@ class ProductionOrderController extends Controller
 
     public function columns()
     {
+
+        $is_integrate_system = BusinessTurn::isIntegrateSystem();
+        if ($is_integrate_system) {
+            return [
+                'customer' => 'Cliente',
+                'date_of_issue' => 'Fecha de emisión',
+                'quotation_number' => 'N° Cotización',
+            ];
+        }
         return [
             'date_of_issue' => 'Fecha de emisión',
             'customer' => 'Cliente',
@@ -239,11 +261,19 @@ class ProductionOrderController extends Controller
         $records = ProductionOrder::query();
 
 
-        if ($request->column == 'customer') {
+        if ($request->column == 'customer' && $request->value != null) {
             $records->whereHas('person', function ($query) use ($request) {
                 $query
                     ->where('name', 'like', "%{$request->value}%")
                     ->orWhere('number', 'like', "%{$request->value}%");
+            })
+                ->latest();
+        } else if ($request->column == 'quotation_number' && $request->value != null) {
+            // $records->where('quotation_number', 'like', "%{$request->value}%")
+            $records->whereHas('sale_note', function ($query) use ($request) {
+                $query->whereHas('quotation', function ($query) use ($request) {
+                    $query->where('number', 'like', "%{$request->value}%");
+                });
             })
                 ->latest();
         } else {
@@ -421,7 +451,7 @@ class ProductionOrderController extends Controller
     {
         $configuration = Configuration::first();
         $type_user = auth()->user()->type;
-    
+
         return $this->storeWithData($request->all());
     }
 
@@ -715,7 +745,8 @@ class ProductionOrderController extends Controller
         return $inputs;
     }
 
-    function message($state_id){
+    function message($state_id)
+    {
         $message = '';
         switch ($state_id) {
             case 2:
@@ -727,11 +758,15 @@ class ProductionOrderController extends Controller
             case 5:
                 $message = MessageIntegrateSystem::getMessage('production_order.5');
                 break;
+            case 6:
+                $message = MessageIntegrateSystem::getMessage('production_order.6');
+                break;
         }
         return $message;
     }
 
-    public function changeState($production_order_id,$state_id){
+    public function changeState($production_order_id, $state_id)
+    {
 
         $production_order = ProductionOrder::find($production_order_id);
         $production_order->production_order_state_id = $state_id;
@@ -739,11 +774,11 @@ class ProductionOrderController extends Controller
         $customer = Person::find($production_order->customer_id);
         $customer_email = $customer->email;
         $message = $this->message($state_id);
-        if($message != '' && $customer_email){
+        if ($message != '' && $customer_email) {
 
-            $mailable = new IntegrateSystemEmail($customer,$message);
+            $mailable = new IntegrateSystemEmail($customer, $message);
             $id = $production_order->id;
-            EmailController::SendMail($customer_email, $mailable,$id,6);
+            EmailController::SendMail($customer_email, $mailable, $id, 6);
         }
         return [
             'success' => true,
@@ -757,11 +792,13 @@ class ProductionOrderController extends Controller
     //        $this->createPdf();
     //    }
 
-    public function users(){
+    public function users()
+    {
         $users = User::where('type', '!=', 'admin')->select('id', 'name')->get();
         return compact('users');
     }
-    public function record2($production_order_id){
+    public function record2($production_order_id)
+    {
         $record = ProductionOrder::find($production_order_id);
         return new ProductionOrderResource2($record);
     }
@@ -772,7 +809,8 @@ class ProductionOrderController extends Controller
         $pdf_margin_left = 2;
         $base_height = 90;
     }
-    public function setResponsible($production_order_id,$responsible_id){
+    public function setResponsible($production_order_id, $responsible_id)
+    {
         $production_order = ProductionOrder::find($production_order_id);
         $production_order->responsible_id = $responsible_id;
         $production_order->save();

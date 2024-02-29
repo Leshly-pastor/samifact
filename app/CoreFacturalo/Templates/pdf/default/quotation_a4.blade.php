@@ -91,6 +91,7 @@ $establishment = $document->establishment;
                 <td width="15%">{{ $document->date_of_due }}</td>
             @endif
         </tr>
+       
         @if ($customer->address !== '')
             <tr>
                 <td class="align-top">Dirección:</td>
@@ -105,6 +106,12 @@ $establishment = $document->establishment;
                     <td width="15%">{{ $document->delivery_date }}</td>
                 @endif
             </tr>
+        @endif
+        @if(isset($customer->location) && $customer->location!= '')
+        <tr>
+            <td class="align-top">Ubicación:</td>
+            <td colspan="3">{{ $customer->location }}</td>
+        </tr>
         @endif
         @if ($document->payment_method_type)
             <tr>
@@ -245,9 +252,7 @@ $establishment = $document->establishment;
                         @else
                             {!! $row->item->description !!}
                         @endif
-                        @if (!empty($row->item->presentation))
-                            {!! $row->item->presentation->description !!}
-                        @endif
+   
                         @if ($row->attributes)
                             @foreach ($row->attributes as $attr)
                                 <br /><span style="font-size: 9px">{!! $attr->description !!} : {{ $attr->value }}</span>

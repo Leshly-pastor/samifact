@@ -4,6 +4,7 @@ namespace Modules\Report\Http\Resources;
 
 use App\Models\Tenant\Item;
 use Illuminate\Http\Resources\Json\ResourceCollection;
+use Illuminate\Support\Facades\Log;
 
 class SaleConsolidatedCollection extends ResourceCollection
 {
@@ -42,7 +43,7 @@ class SaleConsolidatedCollection extends ResourceCollection
 
                 }
                 // unit_price
-                if($unit_type_id !== 'ZZ'){
+                if($unit_type_id !== 'ZZ' && isset($row->item->internal_id)){
                     $item = Item::select('brand_id')->where('internal_id',$row->item->internal_id)->first();
                     if(!empty($item)){
                         $brand = $item->brand;
@@ -55,7 +56,7 @@ class SaleConsolidatedCollection extends ResourceCollection
                 }
 
             }
-
+            Log::info('unit_price: '.$row->relation_item->internal_id);
             return [
                 'id' => $row->id,
                 'item_internal_id' => $row->relation_item->internal_id,

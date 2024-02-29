@@ -51,15 +51,17 @@
                         <th>Orden de despacho</th>
                         <th>Encargado</th>
                         <th>Estado</th>
+                        <th>Guias</th>
+                        <th>Documentos</th>
+                        <th>Region</th>
 
-
-                        <th class="text-center">Pdf</th>
+                        <!-- <th class="text-center">Pdf</th> -->
                         <th class="text-center">Acciones</th>
                     </tr>
                     <tr slot-scope="{ index, row }">
                         <td>{{ index }}</td>
                         <td class="text-center">{{ row.date_of_issue }}</td>
-                
+
                         <td class="text-end">
                             {{ row.seller_name }}
                         </td>
@@ -69,23 +71,35 @@
                                 v-text="row.customer_number"
                             ></small>
                         </td>
-                        <td>{{ row.full_number }}</td>
+                        <td>
+                            <el-button
+                                type="primary"
+                                icon="fas fa-file-pdf"
+                                class="btn waves-effect waves-light btn-sm btn-info"
+                                size="mini"
+                                @click.prevent="clickOptions(row.id)"
+                            >
+                                {{ row.full_number }}
+                            </el-button>
+                        </td>
+
                         <td>
                             <template v-if="row.dispatch_order">
                                 <el-button
                                     type="primary"
-                                    
                                     icon="fas fa-file-pdf"
                                     class="btn waves-effect waves-light btn-sm btn-info"
                                     size="mini"
                                     @click.prevent="
-                                        clickDownloadDispatchOrden(
-                                            row.dispatch_order.external_id
+                                        clickOptions(
+                                            row.dispatch_order.id,
+                                            'dispatch-order'
                                         )
                                     "
                                 >
-                                    {{ row.dispatch_order.prefix
-                                    }}-{{ row.dispatch_order.number }}
+                                    {{ row.dispatch_order.prefix }}-{{
+                                        row.dispatch_order.number
+                                    }}
                                 </el-button>
                             </template>
                         </td>
@@ -142,9 +156,38 @@
                                 </el-dropdown-menu>
                             </el-dropdown>
                         </td>
-                
 
-                        <td class="text-end">
+                        <td>
+                            <template v-for="(dispatch, i) in row.dispatches">
+                                <el-button
+                                    type="primary"
+                                    :key="i"
+                                    :class="`state_${dispatch.state_id}_d`"
+                                    @click="
+                                        clickOptions(dispatch.id, 'dispatches')
+                                    "
+                                >
+                                    {{ dispatch.number }}
+                                </el-button>
+                            </template>
+                            <!-- guia -->
+                        </td>
+                        <td>
+                            <template v-for="(document, i) in row.documents">
+                                <el-button
+                                    type="primary"
+                                    :key="i"
+                                    :class="`state_${document.state_id}_d`"
+                                    @click="
+                                        clickOptions(document.id, 'documents')
+                                    "
+                                >
+                                    {{ document.number }}
+                                </el-button>
+                            </template>
+                            <!-- guia -->
+                        </td>
+                        <!-- <td class="text-end">
                             <button
                                 type="button"
                                 class="btn waves-effect waves-light btn-sm btn-info"
@@ -152,8 +195,10 @@
                             >
                                 <i class="fas fa-file-pdf"></i>
                             </button>
+                        </td> -->
+                        <td class="text-center">
+                            {{ row.customer_region }}
                         </td>
-
                         <td class="text-end">
                             <div class="ms-1">
                                 <button
@@ -339,6 +384,7 @@
         <sale-notes-options
             :showDialog.sync="showDialogOptions"
             :recordId="saleNotesNewId"
+            :resourceDocument="documentResource"
             :showClose="true"
             :configuration="config"
         ></sale-notes-options>
@@ -359,6 +405,18 @@
             :recordId="recordId"
             :dialogVisible.sync="showDialogGenerateDispatchOrder"
         ></dispatch-order>
+        <dispatch-finish
+            :recordId="dispatchId"
+            :showClose="true"
+            :send-sunat="false"
+            :showDialog.sync="showDialogFinish"
+        ></dispatch-finish>
+        <document-options
+            :showDialog.sync="showDialogDocumentOptions"
+            :recordId="documentId"
+            :showClose="true"
+            :configuration="configuration"
+        ></document-options>
         <!-- <ModalGenerateCPE :show.sync="showModalGenerateCPE"></ModalGenerateCPE>
         <ModalGenerateGuie :show.sync="showModalGenerateGuie"></ModalGenerateGuie> -->
     </div>
@@ -387,7 +445,11 @@
 }
 .state_pp_5 {
     color: white;
-    background:red;
+    background: #16a34f;
+}
+.state_pp_6 {
+    color: white;
+    background: red;
 }
 .el-dropdown {
     vertical-align: top;
@@ -412,7 +474,9 @@ import DispatchOrder from "./partials/dispatch_order.vue";
 // import ModalGenerateCPE from "./ModalGenerateCPE";
 // import ModalGenerateGuie from "./ModalGenerateGuie";
 import { mapActions, mapState } from "vuex/dist/vuex.mjs";
-
+import DispatchFinish from "../../tenant/dispatches/partials/finish.vue";
+import DocumentOptions from "../../tenant/documents/partials/options.vue";
+import Options from "./partials/options.vue";
 export default {
     props: ["soapCompany", "typeUser", "configuration", "userId"],
     mixins: [deletable],
@@ -424,6 +488,9 @@ export default {
         SaleNotesOptions,
         SaleNoteGenerate,
         ResponsibleModal,
+        DispatchFinish,
+        DocumentOptions,
+        Options,
         // ModalGenerateCPE,
         // UploadToOtherServer,
         // ModalGenerateGuie
@@ -450,6 +517,11 @@ export default {
             columns: {},
             isDriver: false,
             states: [],
+            dispatchId: null,
+            showDialogFinish: false,
+            documentId: null,
+            showDialogDocumentOptions: false,
+            documentResource: "production-order",
             // showDialogDeleteRelationInvoice: false,
             // dataDeleteRelation: {
             //     documents: {},
@@ -483,15 +555,22 @@ export default {
         },
     },
     methods: {
+        clickDocumentOptions(id) {
+            this.documentId = id;
+            this.showDialogDocumentOptions = true;
+        },
+        openDispatchFinish(id) {
+            this.dispatchId = id;
+            this.showDialogFinish = true;
+        },
         getRecords() {
             this.$refs.dataTable.getRecords();
         },
-          async generateDispatchOrder(id) {
+        async generateDispatchOrder(id) {
             try {
                 this.loading = true;
                 const response = await this.$http.post(
-                    `/dispatch-order/generate/${id}`,
-                    
+                    `/dispatch-order/generate/${id}`
                 );
                 if (response.status == 200) {
                     this.update();
@@ -637,7 +716,8 @@ export default {
                 "_blank"
             );
         },
-        clickOptions(recordId) {
+        clickOptions(recordId, type = "production-order") {
+            this.documentResource = type;
             this.saleNotesNewId = recordId;
             this.showDialogOptions = true;
         },

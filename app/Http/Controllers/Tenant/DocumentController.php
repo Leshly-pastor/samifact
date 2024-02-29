@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Tenant;
 use App\CoreFacturalo\Facturalo;
 use App\CoreFacturalo\Helpers\Storage\StorageDocument;
 use App\CoreFacturalo\Helpers\Template\ReportHelper;
+use App\CoreFacturalo\Requests\Inputs\Common\EstablishmentInput;
 use App\Exports\PaymentExport;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\SearchItemController;
@@ -71,25 +72,38 @@ use Modules\Item\Models\Brand;
 use Modules\Item\Models\Category;
 use Modules\Document\Helpers\DocumentHelper;
 use App\CoreFacturalo\Requests\Inputs\Functions;
+use App\Models\System\Client as SystemClient;
 use App\Models\Tenant\CashDocument;
 use App\Models\Tenant\CashDocumentCredit;
 use App\Models\Tenant\DocumentFee;
 use App\Models\Tenant\DocumentItem;
 use App\Models\Tenant\DocumentPayment;
 use App\Models\Tenant\ItemSeller;
+use App\Models\Tenant\ItemSizeStock;
+use App\Models\Tenant\ItemWarehouse;
 use App\Models\Tenant\Kardex;
 use App\Models\Tenant\Note;
 use App\Models\Tenant\SummaryDocument;
 use App\Models\Tenant\VoidedDocument;
 use App\Models\Tenant\NameQuotations;
 use App\Models\Tenant\Voided;
+use App\Providers\InventoryServiceProvider;
 use App\Services\PseService;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Hyn\Tenancy\Environment;
+use Hyn\Tenancy\Models\Hostname;
+use Hyn\Tenancy\Models\Website;
+use Illuminate\Support\Facades\Log;
 use Modules\BusinessTurn\Models\DocumentHotel;
 use Modules\BusinessTurn\Models\DocumentTransport;
+use Modules\Hotel\Models\HotelRent;
 use Modules\Inventory\Models\{
     InventoryConfiguration
 };
+use Modules\Inventory\Providers\InventoryKardexServiceProvider;
+use Modules\Inventory\Traits\InventoryTrait;
+use Modules\Item\Models\ItemLot;
+use Modules\Item\Models\ItemLotsGroup;
 use Modules\Suscription\Models\Tenant\SuscriptionNames;
 use Modules\Suscription\Models\Tenant\SuscriptionPayment;
 
@@ -99,6 +113,7 @@ class DocumentController extends Controller
     use OfflineTrait;
     use StorageDocument;
     use PrinterTrait;
+    use InventoryTrait;
     private $max_count_payment = 0;
     protected $document;
     protected $apply_change;
@@ -162,11 +177,148 @@ class DocumentController extends Controller
             'message' => 'Anexo ' . $appendix . ' cambiado'
         ];
     }
+    private function document_item_restore(DocumentItem $document_item){
+        // si es nota credito tipo 13, no se asocia a inventario
+        if ($document_item->document->isCreditNoteAndType13()) return;
+        if ($document_item->document->no_stock) return;
+
+        if (!$document_item->item->is_set) {
+            $presentationQuantity = (!empty($document_item->item->presentation)) ? $document_item->item->presentation->quantity_unit : 1;
+            $document = $document_item->document;
+            $factor = ($document->document_type_id === '07') ? 1 : -1;
+            $warehouse = ($document_item->warehouse_id) ? $this->findWarehouse($this->findWarehouseById($document_item->warehouse_id)->establishment_id) : $this->findWarehouse();
+            //$this->createInventory($document_item->item_id, $factor * $document_item->quantity, $warehouse->id);
+            $this->createInventoryKardex($document_item->document, $document_item->item_id, ($factor * ($document_item->quantity * $presentationQuantity)), $warehouse->id);
+
+            if (!$document_item->document->sale_note_id && !$document_item->document->order_note_id && !$document_item->document->dispatch_id && !$document_item->document->sale_notes_relateds) {
+                $this->updateStock($document_item->item_id, ($factor * ($document_item->quantity * $presentationQuantity)), $warehouse->id);
+            } else {
+                if ($document_item->document->dispatch) {
+                    if (!$document_item->document->dispatch->transfer_reason_type->discount_stock) {
+                        $this->updateStock($document_item->item_id, ($factor * ($document_item->quantity * $presentationQuantity)), $warehouse->id);
+                    }
+                }
+            }
+        } else {
+
+            $item = Item::findOrFail($document_item->item_id);
+
+            foreach ($item->sets as $it) {
+                /** @var Item $ind_item */
+                $ind_item = $it->individual_item;
+                $item_set_quantity = ($it->quantity) ? $it->quantity : 1;
+                $presentationQuantity = 1;
+                $document = $document_item->document;
+                $factor = ($document->document_type_id === '07') ? 1 : -1;
+                $warehouse = $this->findWarehouse();
+                $this->createInventoryKardex($document_item->document, $ind_item->id, ($factor * ($document_item->quantity * $presentationQuantity * $item_set_quantity)), $warehouse->id);
+
+                if (!$document_item->document->sale_note_id && !$document_item->document->order_note_id && !$document_item->document->dispatch_id && !$document_item->document->sale_notes_relateds) {
+                    $this->updateStock($ind_item->id, ($factor * ($document_item->quantity * $presentationQuantity * $item_set_quantity)), $warehouse->id);
+                } else {
+                    if ($document_item->document->dispatch) {
+                        if (!$document_item->document->dispatch->transfer_reason_type->discount_stock) {
+                            $this->updateStock($ind_item->id, ($factor * ($document_item->quantity * $presentationQuantity * $item_set_quantity)), $warehouse->id);
+                        }
+                    }
+                }
+            }
+        }
+
+        /*
+         * Calculando el stock por lote por factor según la unidad
+         */
+
+        if (!$document->isGeneratedFromExternalRecord()) {
+
+            if (isset($document_item->item->IdLoteSelected)) {
+                if ($document_item->item->IdLoteSelected != null) {
+                    if (is_array($document_item->item->IdLoteSelected)) {
+                        // presentacion - factor de lista de precios
+                        $quantity_unit = isset($document_item->item->presentation->quantity_unit) ? $document_item->item->presentation->quantity_unit : 1;
+                        $lotesSelecteds = $document_item->item->IdLoteSelected;
+                        $document_factor = ($document->document_type_id === '07') ? 1 : -1;
+                        $inventory_configuration = InventoryConfiguration::first();
+                        $inventory_configuration->stock_control;
+                        foreach ($lotesSelecteds as $item) {
+                            $lot = ItemLotsGroup::query()->find($item->id);
+                            $compromise_quantity = isset($item->compromise_quantity) ? $item->compromise_quantity : 1;
+                            $lot->quantity = $lot->quantity + ($quantity_unit * $compromise_quantity * $document_factor);
+                            if ($inventory_configuration->stock_control) {
+                                $this->validateStockLotGroup($lot, $document_item);
+                            }
+                            $lot->save();
+                        }
+                    } else {
+
+                        $lot = ItemLotsGroup::query()->find($document_item->item->IdLoteSelected);
+                        try {
+                            $quantity_unit = $document_item->item->presentation->quantity_unit;
+                        } catch (Exception $e) {
+                            $quantity_unit = 1;
+                        }
+                        if ($document->document_type_id === '07') {
+                            $quantity = $lot->quantity + ($quantity_unit * $document_item->quantity);
+                        } else {
+                            $quantity = $lot->quantity - ($quantity_unit * $document_item->quantity);
+                        }
+                        $lot->quantity = $quantity;
+                        $lot->save();
+                    }
+                }
+            }
+        }
+        if (isset($document_item->item->sizes_selected)) {
+            foreach ($document_item->item->sizes_selected as $size) {
+
+                $item_size = ItemSizeStock::where('item_id', $document_item->item_id)->where('size', $size->size)->first();
+                if ($item_size) {
+                    $item_size->stock = $item_size->stock - $size->qty;
+                    $item_size->save();
+                }
+            }
+        }
+        if (isset($document_item->item->lots)) {
+            foreach ($document_item->item->lots as $it) {
+
+                if ($it->has_sale == true) {
+                    $r = ItemLot::find($it->id);
+                    // $r->has_sale = true;
+                    $r->has_sale = ($document->document_type_id === '07') ? false : true;
+                    $r->save();
+                }
+            }
+            /*if($document_item->item->IdLoteSelected != null)
+            {
+                $lot = ItemLotsGroup::find($document_item->item->IdLoteSelected);
+                $lot->quantity = ($lot->quantity - $document_item->quantity);
+                $lot->save();
+            }*/
+        }
+ }
+ function recalculateStock($item_id){
+    $total = 0;
+    $item_warehouses = ItemWarehouse::where('item_id', $item_id)->get();
+    foreach ($item_warehouses as $item_warehouse) {
+        $total += $item_warehouse->stock;
+    }
+    $item = Item::find($item_id);
+    $item->stock = $total;
+    $item->save();
+ }
     public function change_state($state_id,  $document_id)
 
     {
         $document = Document::find($document_id);
         $document->state_type_id = $state_id;
+        if($state_id == '05'){
+            $document_items = DocumentItem::where('document_id', $document_id)->get();
+            foreach ($document_items as $item) {
+                $this->document_item_restore($item);
+                $this->recalculateStock($item->item_id);
+
+            }
+        }
         $document->auditor_state = 1;
         $document->save();
         return [
@@ -215,6 +367,7 @@ class DocumentController extends Controller
 
         //GuideFile
         $document->guide_files()->delete();
+        HotelRent::where('document_id', $id)->delete();
         //DocumentPayment
         DocumentPayment::where('document_id', $id)->delete();
         //Dispatch
@@ -405,6 +558,33 @@ class DocumentController extends Controller
     }
 
 
+    public function tablesCompany($id)
+    {   
+        $company = Company::find($id);
+        $company_active = Company::active();
+        $document_number = $company->document_number;
+        $website_id = $company->website_id;
+        if ($website_id && $company->id != $company_active->id) {
+            $hostname = Hostname::where('website_id', $website_id)->first();
+            $client = SystemClient::where('hostname_id', $hostname->id)->first();
+            $tenancy = app(Environment::class);
+            $tenancy->tenant($client->hostname->website);
+        }
+        $establishment = Establishment::find(1);
+        $establishment_info =EstablishmentInput::set($establishment->id);
+        $series = Series::FilterSeries(1)
+            ->get()
+            ->transform(function ($row)  use ($document_number) {
+                /** @var Series $row */
+                return $row->getCollectionData2($document_number);
+            })->where('disabled', false);
+        return [
+            'success' => true,
+            'data' => $company,
+            'series' => $series,
+            'establishment' => $establishment_info, 
+        ];
+    }
     public function tables()
     {
         $customers = $this->table('customers');
@@ -412,6 +592,7 @@ class DocumentController extends Controller
         if (\Auth::user()) {
             $user = \Auth::user();
         }
+        $companies = [];
         $document_id = $user->document_id;
         $series_id = $user->series_id;
         $establishment_id = $user->establishment_id;
@@ -420,7 +601,7 @@ class DocumentController extends Controller
         $series = $user->getSeries();
         // $prepayment_documents = $this->table('prepayment_documents');
         $establishments = Establishment::where('id', $establishment_id)->get(); // Establishment::all();
-        $document_types_invoice = DocumentType::whereIn('id', ['01', '03'])->where('active',true)->get();
+        $document_types_invoice = DocumentType::whereIn('id', ['01', '03'])->where('active', true)->get();
         $document_types_note = DocumentType::whereIn('id', ['07', '08'])->get();
         $note_credit_types = NoteCreditType::whereActive()->orderByDescription()->get();
         $note_debit_types = NoteDebitType::whereActive()->orderByDescription()->get();
@@ -466,8 +647,12 @@ class DocumentController extends Controller
         $affectation_igv_types = AffectationIgvType::whereActive()->get();
         $user = $userType;
         $global_discount_types = ChargeDiscountType::whereIn('id', ['02', '03'])->whereActive()->get();
-
+        $configuration = Configuration::select('multi_companies')->first();
+        if ($configuration->multi_companies) {
+            $companies = Company::all();
+        }
         return compact(
+            'companies',
             'document_id',
             'series_id',
             'customers',
@@ -789,8 +974,16 @@ class DocumentController extends Controller
             $this->associateSaleNoteToDocument($request, $document_id);
             return $res;
         } catch (Exception $e) {
+            $code = $e->getCode();
             $this->generalWriteErrorLog($e);
-            return $this->generalResponse(false, 'Ocurrió un error: ' . $e->getMessage() . " " . $e->getFile() . " " . $e->getLine());
+            Log::error($e->getMessage() . " " . $e->getFile() . " " . $e->getLine());
+            if($code == '23000'){
+                $message ="Debe eliminar los comprobantes de prueba antes de empezar a emitir comprobantes con valor legal.";
+                return $this->generalResponse(false, 'Ocurrió un error: ' . $message);
+            }else{
+
+                return $this->generalResponse(false, 'Ocurrió un error: ' . $e->getMessage() . " " . $e->getFile() . " " . $e->getLine());
+            }
             // return $this->generalResponse(false, 'Ocurrió un error: ' . $e->getMessage());
 
         }
@@ -865,8 +1058,31 @@ class DocumentController extends Controller
 
         self::setChildrenToData($data);
         $fact =  DB::connection('tenant')->transaction(function () use ($data, $duplicate, $type, $format) {
-            $facturalo = new Facturalo();
+            $company_id = $data['company_id'];
+            if ($company_id) {
+                $company = Company::find($company_id);
+                $facturalo = new Facturalo($company);
+            } else {
+                $facturalo = new Facturalo();
+                $company = Company::active();
+            }
             $result = $facturalo->save($data, $duplicate);
+            if ($company_id) {
+                //company tiene una propiedad llamada document_number, es un array
+                //necesito actualizar el numero y series del documento
+                $document_number = $company->document_number;
+                $document_result = $result->getDocument();
+                $series = $document_result->series;
+                $number = $document_result->number;
+                if ($document_number) {
+                    $document_number->$series = $number + 1;
+                } else {
+                    $document_number = new \stdClass();
+                    $document_number->$series = $number + 1;
+                }
+                $company->document_number = $document_number;
+                $company->save();
+            }
             $configuration = Configuration::first();
             if ($type == 'invoice' && $configuration->college) {
                 $document_id = $result->getDocument()->id;
@@ -886,7 +1102,6 @@ class DocumentController extends Controller
                     }
                 }
             }
-            $company = Company::active();
             //aqui
             if (isset($result->id) == true) {
                 $facturalo->createXmlUnsigned($result->id);
@@ -926,7 +1141,7 @@ class DocumentController extends Controller
         $base_url = url('/');
         $external_id = $document->external_id;
         $establishment = Establishment::where('id', auth()->user()->establishment_id)->first();
-        $print_format = $establishment->print_format??'ticket';
+        $print_format = $establishment->print_format ?? 'ticket';
         $url_print = "{$base_url}/print/document/{$external_id}/$print_format";
         return [
             'success' => true,

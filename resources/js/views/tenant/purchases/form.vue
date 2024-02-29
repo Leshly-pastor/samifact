@@ -30,7 +30,7 @@
                                             option, index
                                         ) in document_types"
                                         :key="index"
-                                        :label="option.description"
+                                        :label="option.description == 'NOTA DE ENTRADA' ? 'NOTA DE VENTA':option.description"
                                         :value="option.id"
                                     ></el-option>
                                 </el-select>

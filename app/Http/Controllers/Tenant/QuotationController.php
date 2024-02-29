@@ -206,6 +206,7 @@ class QuotationController extends Controller
     public function tables()
     {
 
+        $business_turns = BusinessTurn::where('active',true)->get();
         $is_integrate_system = BusinessTurn::isIntegrateSystem();
         $customers = $this->table('customers');
         $establishments = Establishment::where('id', auth()->user()->establishment_id)->get();
@@ -248,6 +249,7 @@ class QuotationController extends Controller
         $sellers = User::GetSellers(false)->get();
 
         return compact(
+            'business_turns',
             'affectation_igv_types',
             'is_integrate_system',
             'series',

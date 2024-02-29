@@ -1,13 +1,21 @@
 <template>
     <div>
         <div class="page-header pr-0">
-            <h2><a href="/dashboard"><i class="fas fa-tachometer-alt"></i></a></h2>
+            <h2>
+                <a href="/dashboard"><i class="fas fa-tachometer-alt"></i></a>
+            </h2>
             <ol class="breadcrumbs">
-                <li class="active"><span>{{ title }}</span></li>
+                <li class="active">
+                    <span>{{ title }}</span>
+                </li>
             </ol>
             <div class="right-wrapper pull-right">
-                <button type="button" class="btn btn-custom btn-sm  mt-2 mr-2" @click.prevent="clickCreate()"><i
-                    class="fa fa-plus-circle"></i> Nuevo
+                <button
+                    type="button"
+                    class="btn btn-custom btn-sm mt-2 mr-2"
+                    @click.prevent="clickCreate()"
+                >
+                    <i class="fa fa-plus-circle"></i> Nuevo
                 </button>
             </div>
         </div>
@@ -20,36 +28,69 @@
                     <tr slot="heading">
                         <th>#</th>
                         <th class="text-left">Nro. de Placa</th>
-                        <th class="text-left">Nro. de Placa secundaria</th>
-                        <th class="text-left">T.U.C.
-                            <el-tooltip class="item"
-                                        effect="dark"
-                                        content="Tarjeta Única de Circulación"
-                                        placement="top">
+                        <th class="text-left">Autorizacion placa principal</th>
+                        <th class="text-left">
+                            T.U.C.
+                            <el-tooltip
+                                class="item"
+                                effect="dark"
+                                content="Tarjeta Única de Circulación"
+                                placement="top"
+                            >
                                 <i class="el-icon-info"></i>
                             </el-tooltip>
-
+                        </th>
+                        <th class="text-left">Nro. de Placa secundaria</th>
+                        <th class="text-left">Autorizacion placa secundaria</th>
+                        <th class="text-left">
+                            T.U.C. (placa secundaria)
+                            <el-tooltip
+                                class="item"
+                                effect="dark"
+                                content="Tarjeta Única de Circulación"
+                                placement="top"
+                            >
+                                <i class="el-icon-info"></i>
+                            </el-tooltip>
                         </th>
                         <th class="text-left">Modelo</th>
                         <th class="text-left">Marca</th>
                         <th class="text-center">Predeterminado</th>
                         <th class="text-end">Acciones</th>
-                    <tr>
+                    </tr>
+
+                    <tr></tr>
                     <tr slot-scope="{ index, row }">
                         <td>{{ index }}</td>
                         <td class="text-left">{{ row.plate_number }}</td>
-                        <td class="text-left">{{ row.secondary_plate_number }}</td>
+                        <td class="text-left">{{ row.auth_plate_primary }}</td>
                         <td class="text-left">{{ row.tuc }}</td>
+
+                        <td class="text-left">
+                            {{ row.secondary_plate_number }}
+                        </td>
+                        <td class="text-left">
+                            {{ row.auth_plate_secondary }}
+                        </td>
+                        <td class="text-left">{{ row.tuc_secondary }}</td>
                         <td class="text-left">{{ row.model }}</td>
                         <td class="text-left">{{ row.brand }}</td>
                         <td class="text-center">{{ row.is_default }}</td>
                         <td class="text-end">
-                            <button type="button" class="btn waves-effect waves-light btn-sm btn-info"
-                                    @click.prevent="clickCreate(row.id)">Editar
+                            <button
+                                type="button"
+                                class="btn waves-effect waves-light btn-sm btn-info"
+                                @click.prevent="clickCreate(row.id)"
+                            >
+                                Editar
                             </button>
                             <template v-if="typeUser === 'admin'">
-                                <button type="button" class="btn waves-effect waves-light btn-sm btn-danger"
-                                        @click.prevent="clickDelete(row.id)">Eliminar
+                                <button
+                                    type="button"
+                                    class="btn waves-effect waves-light btn-sm btn-danger"
+                                    @click.prevent="clickDelete(row.id)"
+                                >
+                                    Eliminar
                                 </button>
                             </template>
                         </td>
@@ -57,48 +98,49 @@
                 </data-table>
             </div>
 
-            <transport-form :showDialog.sync="showDialog"
-                            :recordId="recordId"
-                            @success="successCreate"></transport-form>
+            <transport-form
+                :showDialog.sync="showDialog"
+                :recordId="recordId"
+                @success="successCreate"
+            ></transport-form>
         </div>
     </div>
 </template>
 
 <script>
-
-import TransportForm from './form'
-import DataTable from '@components/DataTable.vue'
-import {deletable} from '@mixins/deletable'
+import TransportForm from "./form";
+import DataTable from "@components/DataTable.vue";
+import { deletable } from "@mixins/deletable";
 
 export default {
-    name: 'DispatchTransportIndex',
+    name: "DispatchTransportIndex",
     mixins: [deletable],
-    props: ['typeUser'],
-    components: {TransportForm, DataTable},
+    props: ["typeUser"],
+    components: { TransportForm, DataTable },
     data() {
         return {
             title: null,
             showDialog: false,
-            resource: 'transports',
+            resource: "transports",
             recordId: null,
-        }
+        };
     },
     created() {
-        this.title = 'Vehículos'
+        this.title = "Vehículos";
     },
     methods: {
         clickCreate(recordId = null) {
-            this.recordId = recordId
-            this.showDialog = true
+            this.recordId = recordId;
+            this.showDialog = true;
         },
         clickDelete(id) {
             this.destroy(`/${this.resource}/${id}`).then(() =>
-                this.$eventHub.$emit('reloadData')
-            )
+                this.$eventHub.$emit("reloadData")
+            );
         },
         successCreate() {
-            this.$eventHub.$emit('reloadData')
-        }
-    }
-}
+            this.$eventHub.$emit("reloadData");
+        },
+    },
+};
 </script>

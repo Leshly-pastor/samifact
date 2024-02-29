@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\Tenant\BillOfExchangeController;
+use App\Http\Controllers\Tenant\BillOfExchangePayController;
+use App\Http\Controllers\Tenant\MultiCompanyController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Tenant\UserController;
 use App\Http\Controllers\Tenant\PersonController;
@@ -56,6 +58,32 @@ if ($hostname) {
                 Route::get('/search/customer/{id}', 'Tenant\PackageHandlerController@searchCustomerById');
             });
 
+            Route::prefix('multi-companies')->group(function () {
+                Route::get('/', [MultiCompanyController::class, 'index'])->name('tenant.multi_companies.index');
+                Route::post('/save-companies', [MultiCompanyController::class, 'saveCompanies']);
+                Route::post('/save-configuration', [MultiCompanyController::class, 'saveConfiguration']);
+                Route::post('/login', [MultiCompanyController::class, 'login']);
+
+            });
+            Route::prefix('bill-of-exchange-pay')->group(function () {
+                Route::get('/', [BillOfExchangePayController::class, 'index'])->name('tenant.bill_of_exchange_pay.index');
+                Route::post('/', [BillOfExchangePayController::class, 'store']);
+                // Route::get('create/{packagehandler?}', [BillOfExchangeController::class,'create'])->name('tenant.package_handler.create');
+                Route::delete('/{id}', [BillOfExchangePayController::class, 'delete']);
+                Route::delete('/payment/{id}', [BillOfExchangePayController::class, 'delete_payment']);
+                Route::get('/records', [BillOfExchangePayController::class, 'records']);
+                Route::get('/pdf/{id}', [BillOfExchangePayController::class, 'pdf']);
+                Route::get('/payments/{id}', [BillOfExchangePayController::class, 'payments']);
+                Route::post('/payments', [BillOfExchangePayController::class, 'store_payment']);
+                Route::get('/record/{id}', [BillOfExchangePayController::class, 'record']);
+                Route::get('/document/{id}', [BillOfExchangePayController::class, 'document']);
+                Route::get('/columns', [BillOfExchangePayController::class, 'columns']);
+                Route::get('/columns', [BillOfExchangePayController::class, 'columns']);
+                Route::get('/list-by-client', [BillOfExchangePayController::class, 'documentsCreditByClient']);
+                Route::get('/tables', [BillOfExchangePayController::class, 'tables']);
+                // Route::get('/search/customer/{id}', [BillOfExchangeController::class,'searchCustomerById']);
+
+            });
             Route::prefix('bill-of-exchange')->group(function () {
                 Route::get('/', [BillOfExchangeController::class, 'index'])->name('tenant.bill_of_exchange.index');
                 Route::post('/', [BillOfExchangeController::class, 'store']);
@@ -346,6 +374,7 @@ if ($hostname) {
                 Route::get('accumulated-points/{id}', 'Tenant\PersonController@getAccumulatedPoints');
             });
             //Documents
+            Route::get('documents/tables-company/{company_id}', 'Tenant\DocumentController@tablesCompany');
             Route::get('documents/update-user/{user_id}/{document_id}', 'Tenant\DocumentController@updateUser');
             Route::get('documents/change_sire/{id}/{appendix}', 'Tenant\DocumentController@changeSire');
             Route::get('documents/check_pse/{id}', 'Tenant\DocumentController@checkPse');
@@ -542,6 +571,7 @@ if ($hostname) {
 
             Route::get('customers/listById/{id}', 'Tenant\PersonController@clientsForGenerateCPEById');
             Route::get('customers/list', 'Tenant\PersonController@clientsForGenerateCPE');
+            Route::get('suppliers/list', 'Tenant\PersonController@suppliersForGenerateCPE');
             Route::get('reports/consistency-documents', 'Tenant\ReportConsistencyDocumentController@index')->name('tenant.consistency-documents.index')->middleware('tenant.internal.mode');
             Route::post('reports/consistency-documents/lists', 'Tenant\ReportConsistencyDocumentController@lists');
 

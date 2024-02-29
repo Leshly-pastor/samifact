@@ -120,7 +120,7 @@ export default {
 
                     this.$message({
                         type: "success",
-                        message: "Se generó la orden de producción",
+                        message: "Se generó la orden de despacho",
                     });
                     this.handleClose();
                 }

@@ -23,7 +23,14 @@
                                         if ($establishment->logo) {
                                             $logo = "{$establishment->logo}";
                                         }
-                                        
+                                        $is_integrate_system = Modules\BusinessTurn\Models\BusinessTurn::isIntegrateSystem();
+                                        $quotation = null;
+                                        if ($is_integrate_system) {
+                                            $sale_note = \App\Models\Tenant\SaleNote::where('id', $document->sale_note_id)->first();
+                                            $quotation = \App\Models\Tenant\Quotation::select(['number', 'prefix', 'shipping_address'])
+                                                ->where('id', $sale_note->quotation_id)
+                                                ->first();
+                                        }
                                     @endphp
                                     <html>
 
@@ -138,14 +145,58 @@
                                                     </td>
                                                 </tr>
                                             @endif
+                                            @if($quotation && $quotation->shipping_address)
                                             <tr>
-                                                <td>Vendedor:</td>
+                                                <td class="align-top">
+                                                    <p class="desc">Dirección de envío:</p>
+                                                </td>
                                                 <td>
-                                                    @if ($document->seller_id != 0)
+                                                    <p class="desc">
+                                                        {{ strtoupper($quotation->shipping_address) }}
+                                                    </p>
+                                                </td>
+                                            </tr>
+                                        @endif
+                                            @if (isset($customer->location) && $customer->location !== '')
+                                            <tr>
+                                                <td class="align-top">
+                                                    <p class="desc">Ubicación:</p>
+                                                </td>
+                                                <td>
+                                                    <p class="desc">
+                                                        {{ $customer->location }}
+                                                    </p>
+                                                </td>
+                                            </tr>
+                                        @endif
+                                            <tr>
+                                                <td>
+                                                    <p class="desc">
+                                                        Teléfono:
+                                                    </p>
+                                                </td>
+                                                <td>
+                                                    <p class="desc">
+                                                        {{ $customer->telephone }}
+                                                    </p>
+
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <p class="desc">
+
+                                                        Vendedor:
+                                                    </p>
+                                                </td>
+                                                <td>
+                                                    <p class="desc">
+                                                        @if ($document->seller_id != 0)
                                                         {{ $document->seller->name }}
                                                     @else
                                                         {{ $document->user->name }}
                                                     @endif
+                                                    </p>
                                                 </td>
                                             </tr>
                                             @if ($document->hotelRent)
@@ -239,9 +290,7 @@
                                                             @else
                                                                 {!! $row->item->description !!}
                                                             @endif
-                                                            @if (!empty($row->item->presentation))
-                                                                {!! $row->item->presentation->description !!}
-                                                            @endif
+    
                                                             @if ($row->attributes)
                                                                 @foreach ($row->attributes as $attr)
                                                                     <br />{!! $attr->description !!} : {{ $attr->value }}
@@ -376,6 +425,16 @@
                                             @php
                                                 $sale_note = \App\Models\Tenant\SaleNote::where('id', $document->sale_note_id)->first();
                                             @endphp
+                                            @if($quotation)
+                                            <tr>
+                                                <td width="30%">
+                                                    <p class="desc">Cotización:</p>
+                                                </td>
+                                                <td>
+                                                    <p class="desc">{{$quotation->prefix }}-{{$quotation->number}}</p>
+                                                </td>
+                                            </tr>
+                                            @endif
                                             @if ($sale_note)
                                                 <tr>
                                                     <td width="30%">

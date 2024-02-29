@@ -39,6 +39,19 @@ class ItemSizeStockController extends Controller
 
     }
 
+    public function updateSize(Request $request,$id){
+        $itemSize = ItemSizeStock::findOrFail($id);
+        //checa si la talla ya existe, que no tenga el mismo id pero si el item_id
+        $itemSizeExist = ItemSizeStock::where('size',$request->size)->where('item_id',$itemSize->item_id)
+        ->where('id','!=',$id)
+        ->first();
+        if($itemSizeExist){
+            return response()->json(['success' => false, 'message' => 'La talla ya existe']);
+        }
+        $itemSize->size = $request->size;
+        $itemSize->save();
+        return response()->json(['success' => true, 'message' => 'Talla actualizada']);
+    }
     public function getRecords($request)
     {
 

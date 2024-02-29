@@ -3,6 +3,7 @@
 namespace Modules\Pos\Http\Controllers;
 
 use App\Http\Controllers\Tenant\EmailController;
+use App\Models\Tenant\BillOfExchangePayment;
 use App\Models\Tenant\Cash;
 use App\Models\Tenant\Company;
 use App\Models\Tenant\Configuration;
@@ -23,6 +24,7 @@ use Mpdf\Mpdf;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Modules\Expense\Models\ExpensePayment;
 use Modules\Finance\Models\GlobalPayment;
 use Modules\Finance\Models\IncomePayment;
@@ -112,6 +114,7 @@ class CashController extends Controller
     public function setDataToReport($cash_id = 0)
     {
 
+        Log::info("setDataToReport");
         set_time_limit(0);
         $data = [];
         /** @var Cash $cash */
@@ -136,7 +139,7 @@ class CashController extends Controller
 
         $sale_note_credit = SaleNote::whereHas('payment_method_type', function ($query) {
             $query->where('is_credit', true);
-        } )
+        })
             ->where('cash_id', $cash_id)
             ->get()->transform(
                 function ($row) {
@@ -150,8 +153,9 @@ class CashController extends Controller
                         "total" => $row->total,
                         "credit_type" => optional($row->payment_method_type)->description ?? "-",
                     ];
-                });
-        
+                }
+            );
+
         $document_credit = $document_credit->concat($sale_note_credit);
         $document_credit_total = $document_credit->sum('total');
         $establishment = $cash->user->establishment;
@@ -252,7 +256,7 @@ class CashController extends Controller
                         );
                         $cash_income += $sale_note_payment->payment;
                         $final_balance += $sale_note_payment->payment;
-                      
+
 
                         foreach ($methods_payment as $record) {
                             if ($sale_note_payment->payment_method_type_id == $record->id) {
@@ -296,42 +300,41 @@ class CashController extends Controller
                     foreach ($sale_note->items as $item) {
                         $items++;
                         array_push($all_items, $item);
-                    
+
                         $collection_items->push($item);
                     }
                 }
                 // dd($items);
                 // fin items
 
-            }
-            elseif (
+            } elseif (
                 $cash_document->payment_type == 'App\Models\Tenant\PackageHandlerPayment'
-            ){
+            ) {
                 $package_handler_payment = PackageHandlerPayment::find($cash_document->payment_id);
                 if ($package_handler_payment) {
                     $package_handler = $package_handler_payment->package_handler;
                     $pays = [];
                     // if (in_array($package_handler->state_type_id, $status_type_id)) {
-                        $record_total = 0;
-                        $total = self::CalculeTotalOfCurency(
-                            $package_handler->total,
-                            $package_handler->currency_type_id,
-                            $package_handler->exchange_rate_sale
-                        );
-                        $cash_income += $package_handler_payment->payment;
-                        $final_balance += $package_handler_payment->payment;
-                      
+                    $record_total = 0;
+                    $total = self::CalculeTotalOfCurency(
+                        $package_handler->total,
+                        $package_handler->currency_type_id,
+                        $package_handler->exchange_rate_sale
+                    );
+                    $cash_income += $package_handler_payment->payment;
+                    $final_balance += $package_handler_payment->payment;
 
-                        foreach ($methods_payment as $record) {
-                            if ($package_handler_payment->payment_method_type_id == $record->id) {
-                                $record->sum = ($record->sum + $package_handler_payment->payment);
-                                if ($record->id === '01') $data['total_payment_cash_01_sale_note'] += $package_handler_payment->payment;
-                                if ($record->id === '01') $cash_income_x += $package_handler_payment->payment;
-                            }
+
+                    foreach ($methods_payment as $record) {
+                        if ($package_handler_payment->payment_method_type_id == $record->id) {
+                            $record->sum = ($record->sum + $package_handler_payment->payment);
+                            if ($record->id === '01') $data['total_payment_cash_01_sale_note'] += $package_handler_payment->payment;
+                            if ($record->id === '01') $cash_income_x += $package_handler_payment->payment;
                         }
+                    }
 
-                        $data['total_cash_income_pmt_01'] += $package_handler_payment->payment;
-                        $data['total_tips'] +=0;
+                    $data['total_cash_income_pmt_01'] += $package_handler_payment->payment;
+                    $data['total_tips'] += 0;
                     // }
 
                     $order_number = 3;
@@ -344,7 +347,7 @@ class CashController extends Controller
                     $temp = [
                         'type_transaction'          => 'Venta',
                         'document_type_description' => 'TICKET DE ENCOMIENDA',
-                        'number'                    => $package_handler->series."-".$package_handler->number,
+                        'number'                    => $package_handler->series . "-" . $package_handler->number,
                         'date_of_issue'             => $date_payment,
                         'date_sort'                 => $package_handler->date_of_issue,
                         'customer_name'             => $package_handler->sender->name,
@@ -363,7 +366,7 @@ class CashController extends Controller
                     foreach ($package_handler->items as $item) {
                         $items++;
                         array_push($all_items, $item);
-                      
+
                         $collection_items->push($item);
                     }
                 }
@@ -396,9 +399,9 @@ class CashController extends Controller
                                 $usado .= '<br>Se usan los pagos<br>';
                                 foreach ($methods_payment as $record) {
                                     if ($document_payment->payment_method_type_id == $record->id) {
-                                  
+
                                         $record->sum = ($record->sum + $document_payment->payment);
-                                        
+
                                         if (!empty($record_total)) {
                                             $usado .= self::getStringPaymentMethod($record->id) . '<br>Se usan los pagos Tipo ' . $record->id . '<br>';
                                         }
@@ -411,7 +414,7 @@ class CashController extends Controller
                         } else {
 
                             foreach ($methods_payment as $record) {
-                             
+
                                 if ($record->id === '01') $data['total_payment_cash_01_document'] += $document_payment->payment;
                                 // }
                             }
@@ -438,13 +441,13 @@ class CashController extends Controller
                                     $usado .= '<br>Se usan los pagos Credito Tipo ' . $record->id . ' ****<br>';
                                     // $record->sum += $document->total;
 
-                             
+
                                     $credit += $document->total - $total_paid;
                                     // $credit += $document_payment->payment;
                                 } elseif ($record_total != 0) {
                                     if ((in_array($record->id, $methods_payment_credit))) {
 
-                                        
+
                                         $record->sum += $document_payment->payment;
                                         $pagado += $document_payment->payment;
                                         $cash_income += $document_payment->payment;
@@ -533,7 +536,6 @@ class CashController extends Controller
                                     if (!empty($record_total)) {
                                         $usado .= self::getStringPaymentMethod($record->id) . '<br>Se usan los pagos Tipo ' . $record->id . '<br>';
                                     }
-                                 
                                 }
                             }
                             $data['total_cash_income_pmt_01'] += $technical_service_payment->payment;
@@ -674,7 +676,7 @@ class CashController extends Controller
 
                     $payments = $purchase->purchase_payments;
                     $record_total = 0;
-              
+
                     if (count($payments) > 0) {
                         $pays = $payments;
                         foreach ($methods_payment as $record) {
@@ -719,16 +721,16 @@ class CashController extends Controller
                     if (in_array($quotation->state_type_id, $status_type_id)) {
                         $record_total = 0;
 
-                        $total = self::CalculeTotalOfCurency(
-                            $quotation->total,
-                            $quotation->currency_type_id,
-                            $quotation->exchange_rate_sale
-                        );
+                        // $total = self::CalculeTotalOfCurency(
+                        //     $quotation->total,
+                        //     $quotation->currency_type_id,
+                        //     $quotation->exchange_rate_sale
+                        // );
 
                         $cash_income += $quotation_payment->payment;
                         $final_balance += $quotation_payment->payment;
 
-                      
+
 
                         foreach ($methods_payment as $record) {
                             if ($record->id === '01') $cash_income_x += $quotation_payment->payment;
@@ -760,7 +762,134 @@ class CashController extends Controller
                     ];
                 }
                 /** Cotizaciones */
-            }
+            } 
+            // else if ($cash_document->payment_type == 'App\Models\Tenant\BillOfExchangePayment') {
+            //     $record_total = 0;
+            //     // $document = $cash_document->document;
+            //     $document_payment = BillOfExchangePayment::find($cash_document->payment_id);
+            //     if ($document_payment) {
+            //         $document = $document_payment->bill_of_exchange;
+            //         $payment_condition_id = $document->payment_condition_id;
+            //         $pays = $document->payments;
+            //         $pagado = 0;
+            //         if (in_array($document->state_type_id, $status_type_id)) {
+            //             if ($payment_condition_id == '01') {
+            //                 $total = self::CalculeTotalOfCurency(
+            //                     // $document->total,
+            //                     $document_payment->payment,
+            //                     $document->currency_type_id,
+            //                     $document->exchange_rate_sale
+            //                 );
+            //                 $usado .= '<br>Tomado para income<br>';
+            //                 $cash_income += $document_payment->payment;
+            //                 $final_balance += $document_payment->payment;
+            //                 if (count($pays) > 0) {
+            //                     $usado .= '<br>Se usan los pagos<br>';
+            //                     foreach ($methods_payment as $record) {
+            //                         if ($document_payment->payment_method_type_id == $record->id) {
+
+            //                             $record->sum = ($record->sum + $document_payment->payment);
+
+            //                             if (!empty($record_total)) {
+            //                                 $usado .= self::getStringPaymentMethod($record->id) . '<br>Se usan los pagos Tipo ' . $record->id . '<br>';
+            //                             }
+
+            //                             if ($record->id === '01') $data['total_payment_cash_01_document'] += $document_payment->payment;
+            //                             if ($record->id === '01') $cash_income_x += $document_payment->payment;
+            //                         }
+            //                     }
+            //                 }
+            //             } else {
+
+            //                 foreach ($methods_payment as $record) {
+
+            //                     if ($record->id === '01') $data['total_payment_cash_01_document'] += $document_payment->payment;
+            //                     // }
+            //                 }
+            //                 $usado .= '<br> state_type_id: ' . $document->state_type_id . '<br>';
+            //                 foreach ($methods_payment as $record) {
+
+            //                     $record_total = $pays
+            //                         ->where('payment_method_type_id', $record->id)
+            //                         ->whereIn('document.state_type_id', $status_type_id)
+            //                         ->transform(function ($row) {
+            //                             if (!empty($row->change) && !empty($row->payment)) {
+            //                                 return (object)[
+            //                                     'payment' => $row->change * $row->payment,
+            //                                 ];
+            //                             }
+            //                             return (object)[
+            //                                 'payment' => $row->payment,
+            //                             ];
+            //                         })
+            //                         ->sum('payment');
+            //                     $usado .= "Id de documento {$document->id} - " . self::getStringPaymentMethod($record->id) . " /* $record_total */<br>";
+            //                     $total_paid = $document->payments->sum('payment');
+            //                     if ($record->id == '09') {
+            //                         $usado .= '<br>Se usan los pagos Credito Tipo ' . $record->id . ' ****<br>';
+            //                         // $record->sum += $document->total;
+
+
+            //                         $credit += $document->total - $total_paid;
+            //                         // $credit += $document_payment->payment;
+            //                     } elseif ($record_total != 0) {
+            //                         if ((in_array($record->id, $methods_payment_credit))) {
+
+
+            //                             $record->sum += $document_payment->payment;
+            //                             $pagado += $document_payment->payment;
+            //                             $cash_income += $document_payment->payment;
+            //                             $credit -= $document->total == $total_paid ? 0 : $document_payment->payment;
+            //                             $final_balance += $document_payment->payment;
+            //                         } else {
+            //                             $record->sum += $document_payment->payment;
+            //                             // $credit += $record_total;
+            //                             $credit += $document->total == $total_paid ? 0 : $document_payment->payment;
+            //                         }
+            //                     }
+            //                 }
+            //                 foreach ($methods_payment as $record) {
+            //                     if ($record->id == '09') {
+            //                         $record->sum += $document->total - $total_paid;
+            //                     }
+            //                 }
+            //             }
+
+            //             $data['total_tips'] += $document->tip ? $document->tip->total : 0;
+            //             // $data['total_cash_income_pmt_01'] += $this->getIncomeEgressCashDestination($document->payments);
+            //             $data['total_cash_income_pmt_01'] += $document_payment->payment;
+            //         }
+            //         if ($record_total != $document->total) {
+            //             $usado .= '<br> Los montos son diferentes ' . $document->total . " vs " . $pagado . "<br>";
+            //         }
+            //         $date_payment = Carbon::now()->format('Y-m-d');
+            //         if (count($pays) > 0) {
+            //             foreach ($pays as $value) {
+            //                 $date_payment = $value->date_of_payment->format('Y-m-d');
+            //             }
+            //         }
+            //         $order_number = $document->document_type_id === '01' ? 1 : 2;
+            //         $temp = [
+            //             'type_transaction'          => 'Venta',
+            //             'document_type_description' => 'Letra por cobrar',
+            //             'number'                    => $document->number_full,
+            //             'date_of_issue'             => $date_payment,
+            //             'date_sort'                 => $document->date_of_issue,
+            //             'customer_name'             => $document->customer->name,
+            //             'customer_number'           => $document->customer->number,
+            //             'total'                     => (!in_array($document->state_type_id, $status_type_id)) ? 0
+            //                 : $document->total,
+            //             'currency_type_id'          => $document->currency_type_id,
+            //             'usado'                     => $usado . " " . __LINE__,
+
+            //             'tipo' => 'document',
+            //             'total_payments'            => (!in_array($document->state_type_id, $status_type_id)) ? 0 : $document_payment->payment,
+            //             'type_transaction_prefix'   => 'income',
+            //             'order_number_key'          => $order_number . '_' . $document->date_of_due->format('Ymd') . '_'.$document->number,
+
+            //         ];
+            //     }
+            // }
 
             if (!empty($temp)) {
                 $temp['usado'] = isset($temp['usado']) ? $temp['usado'] : '--';
@@ -819,7 +948,7 @@ class CashController extends Controller
                 }
             }
         }
-        
+
         $data['all_documents'] = $all_documents;
         $temp = [];
 
@@ -835,7 +964,7 @@ class CashController extends Controller
                 'payment_method_type_id'       => $item->id ?? null,
             ];
         }
-        
+
         $data['nota_credito'] = $nota_credito;
         $data['nota_debito'] = $nota_debito;
         $data['methods_payment'] = $temp;
@@ -895,7 +1024,7 @@ class CashController extends Controller
         $group_cat = [];
         foreach ($grouped as $group) {
             $id = $group[0]->item_id;
-        
+
             $name = $group[0]->item->description;
             $unit_price = $group[0]->unit_price;
             $quantity = 0;

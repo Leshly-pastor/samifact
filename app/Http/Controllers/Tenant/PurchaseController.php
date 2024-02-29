@@ -470,14 +470,24 @@ class PurchaseController extends Controller
 
                             // factor de lista de precios
                             $presentation_quantity = (isset($p_item->item->presentation->quantity_unit)) ? $p_item->item->presentation->quantity_unit : 1;
-
-                            $item_lots_group = ItemLotsGroup::create([
-                                'code' => $row['lot_code'],
-                                'quantity' => $row['quantity'] * $presentation_quantity,
-                                // 'quantity' => $row['quantity'],
-                                'date_of_due' => $row['date_of_due'],
-                                'item_id' => $row['item_id']
-                            ]);
+                            $date_of_due = $row['date_of_due'];
+                            $code = $row['lot_code'];
+                            $item_id = $row['item_id'];
+                            $item_lots_group = ItemLotsGroup::where('code', $code)->where('item_id', $item_id)->first();
+                            if($item_lots_group){
+                                $item_lots_group->quantity = $item_lots_group->quantity + ($row['quantity'] * $presentation_quantity);
+                                // $item_lots_group->update();
+                                $item_lots_group->save();
+                            }else{
+                                $item_lots_group = ItemLotsGroup::create([
+                                    'code' => $row['lot_code'],
+                                    'quantity' => $row['quantity'] * $presentation_quantity,
+                                    // 'quantity' => $row['quantity'],
+                                    'date_of_due' => $row['date_of_due'],
+                                    'item_id' => $row['item_id']
+                                ]);
+                            }
+                           
 
                             $p_item->item_lot_group_id = $item_lots_group->id;
                             $p_item->update();

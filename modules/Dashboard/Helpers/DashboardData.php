@@ -93,22 +93,23 @@ class DashboardData
     private function sale_note_totals($establishment_id, $date_start, $date_end)
     {
 
+        $sale_notes = SaleNote::query()->whereNull('document_id')->where('establishment_id', $establishment_id)
+            ->where('changed', false)
+
+            ->whereStateTypeAccepted();
         if ($date_start && $date_end) {
-            $sale_notes = SaleNote::query()->where('establishment_id', $establishment_id)
-                ->where('changed', false)
-                ->whereStateTypeAccepted()
-                ->whereBetween('date_of_issue', [$date_start, $date_end])->get();
+
+            $sale_notes = $sale_notes->whereBetween('date_of_issue', [$date_start, $date_end])->get();
         } else {
-            $sale_notes = SaleNote::query()->where('establishment_id', $establishment_id)
-                ->where('changed', false)
-                ->whereStateTypeAccepted()
-                ->get();
+            // $sale_notes = SaleNote::query()->where('establishment_id', $establishment_id)
+            // ->where('changed', false)
+            // ->whereStateTypeAccepted()
+            $sale_notes = $sale_notes->get();
         }
 
         //PEN
         $sale_note_total_pen = 0;
         $sale_note_total_payment_pen = 0;
-
         $sale_note_total_pen = collect($sale_notes->where('currency_type_id', 'PEN'))->sum('total');
 
         //USD
@@ -117,7 +118,8 @@ class DashboardData
 
         //TWO CURRENCY
         foreach ($sale_notes as $sale_note) {
-
+            $sale_note_id = $sale_note->id;
+            // $document_massive = 
             if ($sale_note->currency_type_id == 'PEN') {
 
                 $sale_note_total_payment_pen += collect($sale_note->payments)->sum('payment');
@@ -193,20 +195,21 @@ class DashboardData
 
         //TWO CURRENCY
         foreach ($sale_notes as $sale_note) {
+            // $change_massive = Document::whereJsonContains('sale_notes_relateds', ['id' => $sale_note->id])->first();
 
-            if ($sale_note->currency_type_id == 'PEN') {
+                if ($sale_note->currency_type_id == 'PEN') {
 
-                $sale_note_total_payment_pen += collect($sale_note->payments)->sum('payment');
-            } else {
+                    $sale_note_total_payment_pen += collect($sale_note->payments)->sum('payment');
+                } else {
 
-                $sale_note_total_usd += $sale_note->total * $sale_note->exchange_rate_sale;
-                $sale_note_total_payment_usd += collect($sale_note->payments)->sum('payment') * $sale_note->exchange_rate_sale;
-            }
+                    $sale_note_total_usd += $sale_note->total * $sale_note->exchange_rate_sale;
+                    $sale_note_total_payment_usd += collect($sale_note->payments)->sum('payment') * $sale_note->exchange_rate_sale;
+                }
+           
         }
 
         //TOTALS
         $sale_note_total = $sale_note_total_pen + $sale_note_total_usd;
-
         return number_format($sale_note_total, 2, ".", "");
     }
 
@@ -218,20 +221,31 @@ class DashboardData
      */
     private function document_totals($establishment_id, $date_start, $date_end)
     {
-
+        $documents = Document::query()
+            ->where('establishment_id', $establishment_id)
+            ->whereIn('state_type_id', ['01', '03', '05', '07', '13']);
         if ($date_start && $date_end) {
-            $documents = Document::query()
-                ->where('establishment_id', $establishment_id)
-                ->whereBetween('date_of_issue', [$date_start, $date_end])
-                ->whereIn('state_type_id', ['01', '03', '05', '07', '13'])
+
+            $documents = $documents->whereBetween('date_of_issue', [$date_start, $date_end])
                 ->get();
         } else {
-            $documents = Document::query()
-                ->where('establishment_id', $establishment_id)
-                ->whereIn('state_type_id', ['01', '03', '05', '07', '13'])
-                ->get();
+            // $documents = Document::query()
+            // ->where('establishment_id', $establishment_id)
+            // ->whereIn('state_type_id', ['01', '03', '05', '07', '13'])
+            $documents = $documents->get();
         }
-        //PEN
+        // $to_rest_documents = $documents->whereNotNull('sale_notes_relateds');
+        // $to_rest_pen = 0;
+        // $to_rest_usd = 0;
+        // foreach ($to_rest_documents as $document) {
+        //     if ($document->currency_type_id == 'PEN') {
+        //         $to_rest_pen += $document->total;
+        //     } else {
+        //         $to_rest_usd += $document->total * $document->exchange_rate_sale;
+        //     }
+        // }
+        // $to_rest = $to_rest_pen + $to_rest_usd;
+        // //PEN
         $document_total_pen = 0;
         $document_total_payment_pen = 0;
         $document_total_note_credit_pen = 0;
@@ -285,6 +299,7 @@ class DashboardData
 
         $document_total = round(($document_total - $document_total_note_credit), 2);
         $document_total_to_pay = $document_total - $document_total_payment;
+
 
         // dd($document_total , $document_total_payment);
         // dd($document_total, $document_total_pen, $document_total_note_credit, $document_total_payment, $document_total_to_pay);
@@ -402,14 +417,17 @@ class DashboardData
         if ($date_start && $date_end) {
             $sale_notes = SaleNote::query()->where('establishment_id', $establishment_id)
                 ->where('changed', false)
+                ->whereNull('document_id')
                 ->whereBetween('date_of_issue', [$date_start, $date_end])
                 ->whereStateTypeAccepted()
                 ->get();
 
             $documents = Document::query()->where('establishment_id', $establishment_id)->whereBetween('date_of_issue', [$date_start, $date_end])->get();
         } else {
-            $sale_notes = SaleNote::query()->where('establishment_id', $establishment_id)
+            $sale_notes = SaleNote::query()
+                ->where('establishment_id', $establishment_id)
                 ->where('changed', false)
+                ->whereNull('document_id')
                 ->whereStateTypeAccepted()
                 ->get();
 

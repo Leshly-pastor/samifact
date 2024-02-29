@@ -56,5 +56,9 @@ class BillOfExchange extends ModelTenant
     {
         return $this->hasMany(BillOfExchangePayment::class);
     }
+    public function getNumberFullAttribute()
+    {
+        return $this->series . '-' . $this->number;
+    }
    
 }

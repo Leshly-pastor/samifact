@@ -62,6 +62,7 @@
                     :isDriver="isDriver"
                     ref="dataTable"
                     :resource="resource"
+                    :isIntegrateSystem="isIntegrateSystem"
                 >
                     <tr slot="heading">
                         <th>#</th>
@@ -131,7 +132,12 @@
                             Por pagar
                         </th>
 
-                        <th class="text-center">Comprobantes</th>
+                        <th class="text-center" v-if="!isIntegrateSystem">
+                            Comprobantes
+                        </th>
+                        <th class="text-center" v-if="isIntegrateSystem">
+                            Condición de Pago
+                        </th>
                         <th class="text-center">Estado pago</th>
                         <th v-if="isIntegrateSystem" class="text-center">
                             Confirmación de pago
@@ -147,6 +153,7 @@
                             <th class="text-center">Logistica</th>
                             <th class="text-center">Guia de traslado</th>
                             <th class="text-center">G. remisión</th>
+                            <th class="text-center">Comprobantes</th>
                         </template>
                         <th
                             class="text-center"
@@ -154,9 +161,9 @@
                         >
                             Recurrencia
                         </th>
-                        <td class="text-end" v-if="columns.region.visible">
+                        <th class="text-end" v-if="columns.region.visible">
                             Region
-                        </td>
+                        </th>
                         <th
                             class="text-center"
                             v-if="columns.type_period.visible"
@@ -169,6 +176,7 @@
                         >
                             Cantidad Periodo
                         </th>
+
                         <th class="text-center" v-if="columns.paid.visible">
                             Estado de Pago
                         </th>
@@ -247,7 +255,17 @@
                             {{ row.total_igv }}
                         </td>
                         <td class="text-end">{{ row.total }}</td>
-
+                        <td class="text-center" v-if="isIntegrateSystem">
+                            <span
+                                v-for="(
+                                    payment_method, i
+                                ) in row.payments_methods"
+                                :key="i"
+                                class="badge bg-primary text-white me-1"
+                            >
+                                {{ payment_method }}
+                            </span>
+                        </td>
                         <td
                             class="text-center"
                             v-if="columns.total_paid.visible"
@@ -261,7 +279,7 @@
                             {{ row.total_pending_paid }}
                         </td>
 
-                        <td>
+                        <td v-if="!isIntegrateSystem">
                             <template v-for="(document, i) in row.documents">
                                 <label
                                     :key="i"
@@ -437,6 +455,23 @@
                                     </el-button>
                                 </template>
                             </td>
+                            <td>
+                                <template
+                                    v-for="(document, i) in row.documents"
+                                >
+                                    <button
+                                        :key="i"
+                                        v-text="document.number_full"
+                                        class="d-block btn btn-success btn-sm"
+                                        @click.prevent="
+                                            openDocumentOptions(
+                                                document.id,
+                                                document.email_send_it
+                                            )
+                                        "
+                                    ></button>
+                                </template>
+                            </td>
                         </template>
                         <td class="text-end" v-if="columns.recurrence.visible">
                             <template
@@ -481,8 +516,203 @@
                         <td class="text-end" v-if="columns.observation.visible">
                             {{ row.observation }}
                         </td>
+
                         <td class="text-end">
-                            <div class="ms-1">
+                            <el-dropdown trigger="click"  @command="manageIndexCommand">
+                                <el-button type="primary">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </el-button>
+
+                                <el-dropdown-menu
+                                    slot="dropdown"
+                                   
+                                >
+                                    <template v-if="isCommercial">
+                                        <el-dropdown-item
+                                            v-if="row.dispatches.length > 0"
+                                            :command="[
+                                                'openDispatchFinish',
+                                                row.dispatches[0].id,
+                                            ]"
+                                        >
+                                            Enviar guía
+                                        </el-dropdown-item>
+
+                                        <el-dropdown-item
+                                            v-if="row.documents.length > 0"
+                                            :command="[
+                                                'openDocumentOptions',
+                                                row.document_id,
+                                            ]"
+                                        >
+                                            Enviar Documento
+                                        </el-dropdown-item>
+                                    </template>
+                                    <el-dropdown-item
+                                        v-if="
+                                            row.quotation_id &&
+                                            isIntegrateSystem
+                                        "
+                                        :command="[
+                                            'clickOpenObservationQuotation',
+                                            row.quotation_id,
+                                        ]"
+                                    >
+                                        Editar observaciones cotizaciones
+                                    </el-dropdown-item>
+                                    <el-dropdown-item
+                                        v-if="row.state_type_id != '11'"
+                                        :command="['clickVoided', row.id]"
+                                    >
+                                        Anular
+                                    </el-dropdown-item>
+                                    <el-dropdown-item
+                                        v-if="
+                                            row.btn_generate &&
+                                            row.state_type_id != '11' &&
+                                            row.not_blocked
+                                        "
+                                        :command="['clickCreate', row.id]"
+                                    >
+                                        Editar
+                                    </el-dropdown-item>
+                                    <el-dropdown-item
+                                        :command="[
+                                            'clickGenerateProductionOrder',
+                                            row.id,
+                                        ]"
+                                        v-if="
+                                            isIntegrateSystem &&
+                                            !row.production_order &&
+                                            !isCommercial
+                                        "
+                                    >
+                                        Generar Orden de producción
+                                    </el-dropdown-item>
+                                    <template v-if="isIntegrateSystem">
+                                        <el-dropdown-item
+                                            :command="[
+                                                'clickGenerateUrl',
+                                                row.id,
+                                            ]"
+                                            v-if="
+                                                !row.changed &&
+                                                row.state_type_id != '11' &&
+                                                soapCompany != '03' &&
+                                                !isCommercial
+                                            "
+                                        >
+                                            Generar comprobante
+                                        </el-dropdown-item>
+                                    </template>
+                                    <template v-else>
+                                        <el-dropdown-item
+                                            :command="['clickGenerate', row.id]"
+                                            v-if="
+                                                !row.changed &&
+                                                row.state_type_id != '11' &&
+                                                soapCompany != '03'
+                                            "
+                                        >
+                                            Generar comprobante
+                                        </el-dropdown-item>
+                                    </template>
+
+                                    <el-tooltip
+                                        v-if="!isCommercial"
+                                        class="item"
+                                        effect="dark"
+                                        content="Generar guía desde CPE"
+                                        placement="top-start"
+                                    >
+                                        <template
+                                            v-for="(
+                                                document, i
+                                            ) in row.documents"
+                                        >
+                                            <el-dropdown-item
+                                                :command="[
+                                                    'createDispatch',
+                                                    document.id,
+                                                ]"
+                                                v-if="row.changed"
+                                                :key="i"
+                                            >
+                                                Generar guía desde
+                                            </el-dropdown-item>
+                                        </template>
+                                    </el-tooltip>
+
+                                    <el-tooltip
+                                        v-if="!isCommercial"
+                                        class="item"
+                                        effect="dark"
+                                        content="Generar guía desde Nota Venta"
+                                        placement="left"
+                                    >
+                                        <el-dropdown-item
+                                            :command="[
+                                                'createDispatchSaleNote',
+                                                row.id,
+                                            ]"
+                                        >
+                                            Generar guía
+                                        </el-dropdown-item>
+                                    </el-tooltip>
+
+                                    <el-dropdown-item
+                                        v-if="row.state_type_id != '11'"
+                                        :command="['clickOptions', row.id]"
+                                    >
+                                        Imprimir
+                                    </el-dropdown-item>
+                                    <el-dropdown-item
+                                        :command="['duplicate', row.id]"
+                                    >
+                                        Duplica la nota de venta
+                                    </el-dropdown-item>
+                                    <el-dropdown-item
+                                        :command="['clickKillDocument', row.id]"
+                                        v-if="
+                                            configuration.delete_documents &&
+                                            !isCommercial
+                                        "
+                                    >
+                                        Eliminar
+                                    </el-dropdown-item>
+                                    <el-dropdown-item
+                                        v-if="
+                                            row.state_type_id != '11' &&
+                                            row.send_other_server === true &&
+                                            !isCommercial
+                                        "
+                                        :command="['sendToServer', row.id]"
+                                    >
+                                        Enviar a otro servidor
+                                    </el-dropdown-item>
+
+                                    <el-dropdown-item
+                                        v-if="
+                                            configuration.delete_relation_note_to_invoice &&
+                                            row.documents.length > 0 &&
+                                            !isCommercial
+                                        "
+                                        :command="[
+                                            'sendDeleteRelationInvoice',
+                                            row.id,
+                                        ]"
+                                    >
+                                        Eliminar factura relacionada
+                                    </el-dropdown-item>
+                                    <el-dropdown-item
+                                        v-if="isIntegrateSystem"
+                                        :command="['openSendEmailModal', row]"
+                                    >
+                                        Enviar nota de venta
+                                    </el-dropdown-item>
+                                </el-dropdown-menu>
+                            </el-dropdown>
+                            <!-- <div class="ms-1">
                                 <button
                                     class="btn btn-light btn-sm"
                                     type="button"
@@ -508,7 +738,6 @@
                                                 )
                                             "
                                         >
-                                            <!--                                <i class="fas fa-trash"></i>-->
                                             Enviar guía
                                         </button>
 
@@ -525,7 +754,6 @@
                                                 )
                                             "
                                         >
-                                            <!--                                <i class="fas fa-trash"></i>-->
                                             Enviar Documento
                                         </button>
                                     </template>
@@ -545,7 +773,6 @@
                                             )
                                         "
                                     >
-                                        <!--                                <i class="fas fa-trash"></i>-->
                                         Editar observaciones cotizaciones
                                     </button>
                                     <button
@@ -557,7 +784,6 @@
                                         class="dropdown-item"
                                         @click.prevent="clickVoided(row.id)"
                                     >
-                                        <!--                                <i class="fas fa-trash"></i>-->
                                         Anular
                                     </button>
                                     <button
@@ -573,7 +799,6 @@
                                             row.not_blocked
                                         "
                                     >
-                                        <!--                                        <i class="dropdown-item fas fa-file-signature"></i>-->
                                         Editar
                                     </button>
                                     <button
@@ -591,7 +816,6 @@
                                             !isCommercial
                                         "
                                     >
-                                        <!--                                <i class="dropdown-item fas fa-file-excel"></i>-->
                                         Generar Orden de producción
                                     </button>
                                     <template v-if="isIntegrateSystem">
@@ -630,7 +854,6 @@
                                                 soapCompany != '03'
                                             "
                                         >
-                                            <!--                                <i class="dropdown-item fas fa-file-excel"></i>-->
                                             Generar comprobante
                                         </button>
                                     </template>
@@ -653,7 +876,6 @@
                                                 v-if="row.changed"
                                                 :key="i"
                                             >
-                                                <!--                                        <i class="dropdown-item fas fa-file-alt"></i>-->
                                                 Generar guía desde
                                             </a>
                                         </template>
@@ -683,7 +905,6 @@
                                         class="dropdown-item"
                                         @click.prevent="clickOptions(row.id)"
                                     >
-                                        <!--                                <i class="dropdown-item fas fa-print"></i>-->
                                         Imprimir
                                     </button>
                                     <button
@@ -692,7 +913,6 @@
                                         type="button"
                                         class="dropdown-item"
                                     >
-                                        <!--                                <i class="dropdown-item fas fa-copy"></i>-->
                                         Duplica la nota de venta
                                     </button>
                                     <button
@@ -721,7 +941,6 @@
                                         class="dropdown-item"
                                         @click.prevent="sendToServer(row.id)"
                                     >
-                                        <!--                                <i class="dropdown-item fas fa-wifi"></i>-->
                                         Enviar a otro servidor
                                     </button>
 
@@ -754,7 +973,7 @@
                                         Enviar nota de venta
                                     </button>
                                 </div>
-                            </div>
+                            </div> -->
                         </td>
                         <td v-if="configuration.college">
                             <el-button type="primary" @click="openPeriod(row)">
@@ -841,12 +1060,21 @@
             :quotationId="quotationId"
         ></quotation-observation>
         <document-options
+            :documentEmailSendIt="documentEmailSendIt"
+            :showClose="true"
             :showDialog.sync="showDialogDocumentOptions"
             :recordId="documentId"
         ></document-options>
     </div>
 </template>
 <style>
+.el-dropdown-link {
+    cursor: pointer;
+    color: #409eff;
+}
+.el-icon-arrow-down {
+    font-size: 12px;
+}
 .state_1_p {
     color: white;
     background: #ffcc00;
@@ -873,9 +1101,12 @@
 }
 .state_5_p {
     color: white;
+    background: #16a34f;
+}
+.state_6_p {
+    color: white;
     background: red;
 }
-
 .state_1_d {
     color: white;
     background: #ffcc00;
@@ -922,7 +1153,7 @@ import ModalGenerateGuie from "./ModalGenerateGuie";
 import { mapActions, mapState } from "vuex/dist/vuex.mjs";
 import GuideModalView from "./partials/guide_modal_view.vue";
 import QuotationObservation from "./partials/quotation_observation.vue";
-import DocumentOptions from "../../tenant/documents/partials/options.vue"
+import DocumentOptions from "../../tenant/documents/partials/options.vue";
 export default {
     props: [
         "soapCompany",
@@ -946,13 +1177,14 @@ export default {
         GuideModalView,
         DispatchFinish,
         QuotationObservation,
-        DocumentOptions
+        DocumentOptions,
     },
     computed: {
         ...mapState(["config"]),
     },
     data() {
         return {
+            documentEmailSendIt: false,
             showDialogQuotationObservation: false,
             quotationId: null,
             showDialogFinish: false,
@@ -1059,8 +1291,8 @@ export default {
             //     id: ''
             // }
             dispatch_order: {},
-            documentId:null,
-            showDialogDocumentOptions:false,
+            documentId: null,
+            showDialogDocumentOptions: false,
         };
     },
     created() {
@@ -1091,9 +1323,62 @@ export default {
         },
     },
     methods: {
-        openDocumentOptions(id){
+        manageIndexCommand([command, arg1 = null, arg2 = null]) {
+            console.log("🚀 ~ file: index.vue:1327 ~ manageIndexCommand ~ command:", command)
+            switch (command) {
+                case "openDispatchFinish":
+                    this.openDispatchFinish(arg1);
+                    break;
+                case "openDocumentOptions":
+                    this.openDocumentOptions(arg1, arg2);
+                    break;
+                case "clickOpenObservationQuotation":
+                    this.clickOpenObservationQuotation(arg1);
+                    break;
+                case "clickVoided":
+                    this.clickVoided(arg1);
+                    break;
+                case "clickCreate":
+                    this.clickCreate(arg1);
+                    break;
+                case "clickGenerateProductionOrder":
+                    this.clickGenerateProductionOrder(arg1);
+                    break;
+                case "clickGenerateUrl":
+                    this.clickGenerateUrl(arg1);
+                    break;
+                case "clickGenerate":
+                    this.clickGenerate(arg1);
+                    break;
+                case "createDispatch":
+                    location.href = `/dispatches/create/${arg1}`;
+                    break;
+                case "createDispatchSaleNote":
+                    location.href = `/dispatches/create_new/sale_note/${arg1}`;
+                    break;
+                case "clickOptions":
+                    this.clickOptions(arg1);
+                    break;
+                case "clickKillDocument":
+                    this.clickKillDocument(arg1);
+                    break;
+                case "sendToServer":
+                    this.sendToServer(arg1);
+                    break;
+                case "sendDeleteRelationInvoice":
+                    this.sendDeleteRelationInvoice(arg1);
+                    break;
+                case "openSendEmailModal":
+                    this.openSendEmailModal(arg1);
+                    break;
+                default:
+                    break;
+            }
+        },
+        openDocumentOptions(id, emailSendIt = false) {
             this.documentId = id;
             this.showDialogDocumentOptions = true;
+            this.documentEmailSendIt = emailSendIt;
         },
         clickOpenObservationQuotation(quotation_id) {
             this.quotationId = quotation_id;

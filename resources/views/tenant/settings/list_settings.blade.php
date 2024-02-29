@@ -85,6 +85,11 @@
                                     Empresa</a>
                             </li>
                             <li>
+                                <a href="{{ route('tenant.multi_companies.index') }}">
+                                    <i data-cs-icon="database" class="icon" data-cs-size="18"></i>
+                                    MultiEmpresa</a>
+                            </li>
+                            <li>
                                 <a href="{{ route('tenant.bussiness_turns.index') }}">
                                     <i data-cs-icon="home-garage" class="icon" data-cs-size="18"></i>
                                     Giro de negocio</a>

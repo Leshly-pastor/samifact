@@ -43,7 +43,6 @@ class InventoryVoidedServiceProvider extends ServiceProvider
                             $warehouse = ($detail->warehouse_id) ? $this->findWarehouse($this->findWarehouseById($detail->warehouse_id)->establishment_id) : $this->findWarehouse($document['establishment_id']);
 
                             $presentationQuantity = (!empty($detail['item']->presentation)) ? $detail['item']->presentation->quantity_unit : 1;
-
                             $this->createInventoryKardex($document, $detail['item_id'], $detail['quantity'] * $presentationQuantity, $warehouse->id);
 
                             if(!$detail->document->sale_note_id && !$detail->document->order_note_id && !$detail->document->dispatch_id && !$detail->document->sale_notes_relateds){

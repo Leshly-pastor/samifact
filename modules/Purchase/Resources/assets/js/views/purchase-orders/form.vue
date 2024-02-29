@@ -173,7 +173,7 @@
                             <div class="col-lg-12 col-md-6 d-flex align-items-end mt-4">
                                 <div class="form-group">
                                     <button type="button" class="btn waves-effect waves-light btn-primary"
-                                            @click.prevent="showDialogAddItem = true">+ Agregar Producto
+                                            @click.prevent="clickAddNewItem">+ Agregar Producto
                                     </button>
                                 </div>
                             </div>
@@ -220,10 +220,17 @@
                                             </td>
                                             <td class="text-end">{{ currency_type.symbol }} {{ row.total }}</td>
                                             <td class="text-end">
+                                                   <button type="button"
+                                                        class="btn waves-effect waves-light btn-sm btn-primary"
+                                                        @click.prevent="editProduct(index)">
+                                                        <i class="fa fa-edit"></i>
+                                                </button>
                                                 <button type="button"
                                                         class="btn waves-effect waves-light btn-sm btn-danger"
                                                         @click.prevent="clickRemoveItem(index)">x
                                                 </button>
+                                             
+
                                             </td>
                                         </tr>
                                         </tbody>
@@ -310,7 +317,9 @@
             </div>
         </div>
 
-        <purchase-form-item :showDialog.sync="showDialogAddItem"
+        <purchase-form-item 
+        :item="item"
+        :showDialog.sync="showDialogAddItem"
                             :currency-type-id-active="form.currency_type_id"
                             :exchange-rate-sale="form.exchange_rate_sale"
                             :percentage-igv="percentage_igv"
@@ -351,6 +360,7 @@ export default {
             showDialogOptions: false,
             loading_submit: false,
             hide_button: false,
+            item:null,
             is_perception_agent: false,
             errors: {},
             loading_form: false,
@@ -410,6 +420,15 @@ export default {
 
     },
     methods: {
+        clickAddNewItem() {
+            this.showDialogAddItem = true
+            this.item = null
+        },
+        editProduct(idx){
+            this.showDialogAddItem = true
+            this.item = this.form.items[idx]
+            this.item.indexi = idx
+        },
         generateFromSaleOpportunity() {
 
             if (this.saleOpportunity) {
@@ -648,7 +667,13 @@ export default {
             this.filterSuppliers()
         },
         addRow(row) {
-            this.form.items.push(row)
+            if(this.item){
+                this.form.items[this.item.indexi] = row
+                this.item = null
+                }else{
+
+                    this.form.items.push(row)
+                }
             this.calculateTotal()
         },
         clickRemoveItem(index) {

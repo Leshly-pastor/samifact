@@ -120,6 +120,12 @@ class DispatchOrder extends ModelTenant
 
     ];
 
+    public function person(){
+        return $this->belongsTo(Person::class, 'customer_id');
+    }
+    public function sale_note(){
+        return $this->belongsTo(SaleNote::class);
+    }
     public function production_order()
     {
         return $this->belongsTo(ProductionOrder::class, 'production_order_id');
@@ -196,8 +202,9 @@ class DispatchOrder extends ModelTenant
         // }
         $payments = $this->payments;
         $sale_note = SaleNote::find($this->sale_note_id);
-
+        $can_create_dispatch = count($dispatches) == 0;
         return [
+            'can_create_dispatch' => $can_create_dispatch,
             'state_payment_id' => optional($sale_note)->state_payment_id,
             'total_canceled' => (bool) $sale_note->total_canceled,
             'can_edit' => $can_edit,

@@ -1,5 +1,5 @@
 @php
-$establishment = $document->establishment;
+    $establishment = $document->establishment;
     $logo = "storage/uploads/logos/{$company->logo}";
     if ($establishment->logo) {
         $logo = "{$establishment->logo}";
@@ -8,7 +8,7 @@ $establishment = $document->establishment;
     $invoice = $document->invoice;
     //$path_style = app_path('CoreFacturalo'.DIRECTORY_SEPARATOR.'Templates'.DIRECTORY_SEPARATOR.'pdf'.DIRECTORY_SEPARATOR.'style.css');
     $accounts = \App\Models\Tenant\BankAccount::all();
-    $tittle = $document->prefix . '-' . str_pad($document->number??$document->id, 8, '0', STR_PAD_LEFT);
+    $tittle = $document->prefix . '-' . str_pad($document->number ?? $document->id, 8, '0', STR_PAD_LEFT);
     
     $logo = "storage/uploads/logos/{$company->logo}";
     if ($establishment->logo) {
@@ -148,6 +148,18 @@ $establishment = $document->establishment;
                         {{ $customer->district_id !== '-' ? ', ' . $customer->district->description : '' }}
                         {{ $customer->province_id !== '-' ? ', ' . $customer->province->description : '' }}
                         {{ $customer->department_id !== '-' ? '- ' . $customer->department->description : '' }}
+                    </p>
+                </td>
+            </tr>
+        @endif
+        @if (isset($customer->location) && $customer->location)
+            <tr>
+                <td class="align-top">
+                    <p class="desc">Ubicación:</p>
+                </td>
+                <td>
+                    <p class="desc">
+                        {{ $customer->location }}
                     </p>
                 </td>
             </tr>
@@ -310,9 +322,7 @@ $establishment = $document->establishment;
                         @else
                             {!! $row->item->description !!}
                         @endif
-                        @if (!empty($row->item->presentation))
-                            {!! $row->item->presentation->description !!}
-                        @endif
+
                         @if ($row->attributes)
                             @foreach ($row->attributes as $attr)
                                 <br />{!! $attr->description !!} : {{ $attr->value }}
@@ -397,17 +407,17 @@ $establishment = $document->establishment;
         </tbody>
     </table>
     @if ($document->description && is_integrate_system())
-    <table class="full-width">
-        <tr>
-            <td class="align-top">
-                <p class="desc">Observación:</p>
-            </td>
-            <td>
-                <p class="desc">{!! str_replace("\n", '<br/>', $document->description) !!}</p>
-            </td>
-            {{-- <td><p class="desc">{{ $document->description }}</p></td> --}}
-        </tr>
-    </table>
+        <table class="full-width">
+            <tr>
+                <td class="align-top">
+                    <p class="desc">Observación:</p>
+                </td>
+                <td>
+                    <p class="desc">{!! str_replace("\n", '<br/>', $document->description) !!}</p>
+                </td>
+                {{-- <td><p class="desc">{{ $document->description }}</p></td> --}}
+            </tr>
+        </table>
     @endif
     <table class="full-width">
         <tr>
@@ -488,7 +498,7 @@ $establishment = $document->establishment;
         @endphp
         <tbody>
             <tr>
-                @if ($configuration->yape_qr_quotations && $establishment_data->yape_logo )
+                @if ($configuration->yape_qr_quotations && $establishment_data->yape_logo)
                     @php
                         $yape_logo = $establishment_data->yape_logo;
                     @endphp

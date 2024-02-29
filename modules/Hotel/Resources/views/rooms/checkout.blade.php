@@ -3,6 +3,7 @@
 @section('content')
     <tenant-hotel-rent-checkout
         :room='@json($room)'
+        :diff='@json($diff)'
         :customer='@json($customer)'
         :rent='@json($rent)'
         :payment-method-types='{{ $payment_method_types }}'

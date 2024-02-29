@@ -78,7 +78,7 @@ if ($logo) {
                 @endif
             </td>
             <td class="text-left align-top">
-                {!!$row->item->description!!} @if (!empty($row->item->presentation)) {!!$row->item->presentation->description!!} @endif
+                {!!$row->item->description!!}   
                 @if($row->attributes)
                     @foreach($row->attributes as $attr)
                         <br/>{!! $attr->description !!} : {{ $attr->value }}

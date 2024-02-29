@@ -151,7 +151,7 @@
                                 if (property_exists( $value->item,'presentation') &&  $value->item->presentation) {
                                     $unit_type_id = $value->item->presentation->unit_type_id;
                                 }
-                                if($unit_type_id !== 'ZZ'){
+                                if($unit_type_id !== 'ZZ' && isset($value->item->internal_id)){
                                     $item = \App\Models\Tenant\Item::select('brand_id')->where('internal_id',$value->item->internal_id)->first();
                                     if(!empty($item)){
                                         $brand = $item->brand;

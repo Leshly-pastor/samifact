@@ -369,7 +369,7 @@ function calculateRowItem(row_old, currency_type_id_new, exchange_rate_sale, pig
     //     row.total_plastic_bag_taxes = total_plastic_bag_taxes
     // }
 
-    // console.log(row)
+    // console.log(JSON.stringify(row))
     return row
 }
 
@@ -387,6 +387,7 @@ function getAmountFromInputDiscount(discount)
     if(discount.use_input_amount !== undefined && discount.use_input_amount === true)
     {
         value = _.round(discount.amount, 2)
+        // value = discount.amount;
     }
     else
     {

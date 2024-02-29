@@ -15,21 +15,29 @@ class CreateInventoryReference extends Migration
     {
       
 
-            Schema::create('inventory_references', function(Blueprint $table){
-                $table->increments('id');
-                $table->string('code', 10);
-                $table->string('description');
-            });
-            Schema::table("inventories", function (Blueprint $table)  {
-                $table->unsignedInteger("inventory_reference_id")->nullable()->after("warehouse_id");
-                $table->foreign("inventory_reference_id")->references("id")->on("inventory_references")->onDelete("cascade");
-            });
+              if (!Schema::hasTable('inventory_references')) {
+                Schema::create('inventory_references', function(Blueprint $table){
+                    $table->increments('id');
+                    $table->string('code', 10);
+                    $table->string('description');
+                });
+            }
 
+            if (!Schema::hasColumn('inventories', 'inventory_reference_id')) {
+                Schema::table("inventories", function (Blueprint $table)  {
+                    $table->unsignedInteger("inventory_reference_id")->nullable()->after("warehouse_id");
+                    $table->foreign("inventory_reference_id")->references("id")->on("inventory_references")->onDelete("cascade");
+                });
+            }
 
-            Schema::table("dispatches", function (Blueprint $table)  {
-                $table->unsignedInteger("inventory_reference_id")->nullable()->after("establishment_id");
-                $table->foreign("inventory_reference_id")->references("id")->on("inventory_references")->onDelete("cascade");
-             });
+            if (!Schema::hasColumn('dispatches', 'inventory_reference_id')) {
+                Schema::table("dispatches", function (Blueprint $table)  {
+                    $table->unsignedInteger("inventory_reference_id")->nullable()->after("establishment_id");
+                    $table->foreign("inventory_reference_id")->references("id")->on("inventory_references")->onDelete("cascade");
+                });
+            }
+
+           
      
     }
 

@@ -32,8 +32,14 @@
                         <th>Salida</th>
                         <th v-if="item_id">Saldo</th>
                         <th v-if="configuration.purchases_control">Placa</th>
-                        <th v-if="configuration.purchases_control">Responsable</th>
-                        <th v-if="configuration.purchases_control">Precio unitario</th>
+                        <th v-if="configuration.purchases_control">
+                            Responsable
+                        </th>
+                        <th v-if="configuration.purchases_control">
+                            Precio unitario
+                        </th>
+                        <th>Referencia</th>
+                        <th>Cliente/Proveedor</th>
                         <th></th>
                         <!--
                         <th >Almacen </th>
@@ -47,7 +53,8 @@
                         <td>{{ row.date_time }}</td>
                         <td
                             v-if="
-                                configuration.purchases_control  && all_warehouses
+                                configuration.purchases_control &&
+                                all_warehouses
                             "
                         >
                             {{ row.warehouse }}
@@ -64,15 +71,25 @@
                         <td>{{ row.output }}</td>
                         <td v-if="item_id">{{ row.balance }}</td>
                         <td v-if="configuration.purchases_control">
-                            {{row.license}}
+                            {{ row.license }}
                         </td>
                         <td v-if="configuration.purchases_control">
-                            {{row.responsible}}
+                            {{ row.responsible }}
                         </td>
                         <td v-if="configuration.purchases_control">
-                          <template v-if="row.unit_price">
-                              {{Number(row.unit_price ||0).toFixed(2)}}
-                          </template>
+                            <template v-if="row.unit_price">
+                                {{ Number(row.unit_price || 0).toFixed(2) }}
+                            </template>
+                        </td>
+                        <td>
+                            {{ row.reference }}
+                        </td>
+                        <td>
+                            <template v-if="row.person_name">
+                                {{ row.person_name }}
+                                <br />
+                                <small>{{ row.person_number }}</small>
+                            </template>
                         </td>
                         <td class="text-end">
                             <!-- <button @click="getStock(row)">Tesst</button> -->

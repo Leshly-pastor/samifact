@@ -23,7 +23,14 @@
                                         if ($establishment->logo) {
                                             $logo = "{$establishment->logo}";
                                         }
-                                        
+                                        $is_integrate_system = Modules\BusinessTurn\Models\BusinessTurn::isIntegrateSystem();
+                                        $quotation = null;
+                                        if ($is_integrate_system) {
+                                            $sale_note = \App\Models\Tenant\SaleNote::where('id', $document->sale_note_id)->first();
+                                            $quotation = \App\Models\Tenant\Quotation::select(['number', 'prefix', 'shipping_address'])
+                                                ->where('id', $sale_note->quotation_id)
+                                                ->first();
+                                        }
                                     @endphp
                                     <html>
 
@@ -138,6 +145,43 @@
                                                     </td>
                                                 </tr>
                                             @endif
+                                            @if($quotation && $quotation->shipping_address)
+                                                <tr>
+                                                    <td class="align-top">
+                                                        <p class="desc">Dirección de envío:</p>
+                                                    </td>
+                                                    <td>
+                                                        <p class="desc">
+                                                            {{ strtoupper($quotation->shipping_address) }}
+                                                        </p>
+                                                    </td>
+                                                </tr>
+                                            @endif
+                                            @if (isset($customer->location) && $customer->location !== '')
+                                                <tr>
+                                                    <td class="align-top">
+                                                        <p class="desc">Ubicación:</p>
+                                                    </td>
+                                                    <td>
+                                                        <p class="desc">
+                                                            {{ $customer->location }}
+                                                        </p>
+                                                    </td>
+                                                </tr>
+                                            @endif
+                                            <tr>
+                                                <td>
+                                                    <p class="desc">
+                                                        Teléfono:
+                                                    </p>
+                                                </td>
+                                                <td>
+                                                    <p class="desc">
+                                                        {{ $customer->telephone }}
+                                                    </p>
+
+                                                </td>
+                                            </tr>
                                             <tr>
                                                 <td>Vendedor:</td>
                                                 <td>
@@ -217,7 +261,8 @@
                                                     <th class="border-top-bottom desc-9 text-left">Unidad</th>
                                                     <th class="border-top-bottom desc-9 text-left">Descripción</th>
                                                     <th class="border-top-bottom desc-9 text-left">P.Unit</th>
-                                                    <th class="border-top-bottom desc-9 text-left">Total</th>
+                                                    {{-- <th class="border-top-bottom desc-9 text-left">Total</th> --}}
+                                                    <th class="border-top-bottom desc-9 text-left">Stock</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -239,9 +284,7 @@
                                                             @else
                                                                 {!! $row->item->description !!}
                                                             @endif
-                                                            @if (!empty($row->item->presentation))
-                                                                {!! $row->item->presentation->description !!}
-                                                            @endif
+
                                                             @if ($row->attributes)
                                                                 @foreach ($row->attributes as $attr)
                                                                     <br />{!! $attr->description !!} : {{ $attr->value }}
@@ -272,7 +315,28 @@
                                                         <td class="text-right desc-9 align-top">
                                                             {{ number_format($row->unit_price, 2) }}</td>
                                                         <td class="text-right desc-9 align-top">
-                                                            {{ number_format($row->total, 2) }}</td>
+                                                            {{-- {{ number_format($row->total, 2) }} --}}
+                                                        
+                                                            @php
+                                                            $warehouses = $row->item->warehouses;
+                                                            $warehouse_id = $row->warehouse_id;
+                                                            $stock = 0;
+                                                            if ($warehouses && count($warehouses) > 0) {
+                                                                if ($warehouse_id) {
+                                                                    $stock = 0;
+                                                                    foreach ($warehouses as $warehouse) {
+                                                                        if ($warehouse->warehouse_id == $warehouse_id) {
+                                                                            $stock = $warehouse->stock;
+                                                                            break;
+                                                                        }
+                                                                    }
+                                                                } else {
+                                                                    $stock = $warehouses[0]->stock;
+                                                                }
+                                                            }
+                                                        @endphp
+                                                        {{ number_format($stock, 2) }}
+                                                        </td>
                                                     </tr>
                                                     <tr>
                                                         <td colspan="5" class="border-bottom"></td>
@@ -363,6 +427,16 @@
                                             </tbody>
                                         </table>
                                         <table class="full-width">
+                                            @if($quotation)
+                                            <tr>
+                                                <td width="30%">
+                                                    <p class="desc">Cotización:</p>
+                                                </td>
+                                                <td>
+                                                    <p class="desc">{{$quotation->prefix }}-{{$quotation->number}}</p>
+                                                </td>
+                                            </tr>
+                                            @endif
                                             @if ($document->observation)
                                                 <tr>
                                                     <td width="30%">
@@ -376,6 +450,7 @@
                                             @php
                                                 $sale_note = \App\Models\Tenant\SaleNote::where('id', $document->sale_note_id)->first();
                                             @endphp
+                                               
                                             @if ($sale_note)
                                                 <tr>
                                                     <td width="30%">
@@ -403,21 +478,21 @@
                                                 </tr>
                                             @endif
                                             @php
-                                            $log = null;
-                                            if ($sale_note) {
-                                                $log = \App\Models\Tenant\DispatchOrder::where('sale_note_id', $sale_note->id)->first();
-                                            }
-                                        @endphp
-                                        @if ($log)
-                                            <tr>
-                                                <td width="30%">
-                                                    <p class="desc">Observación log.:</p>
-                                                </td>
-                                                <td>
-                                                    <p class="desc">{{ $log->observation }}</p>
-                                                </td>
-                                            </tr>
-                                        @endif
+                                                $log = null;
+                                                if ($sale_note) {
+                                                    $log = \App\Models\Tenant\DispatchOrder::where('sale_note_id', $sale_note->id)->first();
+                                                }
+                                            @endphp
+                                            @if ($log)
+                                                <tr>
+                                                    <td width="30%">
+                                                        <p class="desc">Observación log.:</p>
+                                                    </td>
+                                                    <td>
+                                                        <p class="desc">{{ $log->observation }}</p>
+                                                    </td>
+                                                </tr>
+                                            @endif
                                         </table>
                                         <table class="full-width">
                                             <tr>
@@ -425,8 +500,8 @@
                                                 @foreach (array_reverse((array) $document->legends) as $row)
                                             <tr>
                                                 @if ($row->code == '1000')
-                                                    <td class="desc pt-3" style="text-transform: uppercase;">Son: <span
-                                                            class="font-bold">{{ $row->value }}
+                                                    <td class="desc pt-3" style="text-transform: uppercase;">Son:
+                                                        <span class="font-bold">{{ $row->value }}
                                                             {{ $document->currency_type->description }}</span></td>
                                                     @if (count((array) $document->legends) > 1)
                                             <tr>

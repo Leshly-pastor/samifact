@@ -97,6 +97,8 @@
                             @if ($item_id)
                                 <th>Saldo</th>
                             @endif
+                            <th>Referencia</th>
+                            <th>Cliente/Proveedor</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -142,6 +144,17 @@
                                     <td class="celda">{{ number_format($itemKardex['balance'], 0) }}</td>
                                     {{-- <td class="celda">{{number_format($balance, 4, ".", "")}}</td> --}}
                                 @endif
+                                <td class="celda">
+                                    @if (isset($itemKardex['reference']))
+                                        {{ $itemKardex['reference'] }}
+                                    @endif
+                                </td>
+                                <td class="celd">
+                                    @if (isset($itemKardex['person_name']))
+                                        {{ $itemKardex['person_name'] }} -
+                                        {{ $itemKardex['person_number'] }}
+                                    @endif
+                                </td>
                             </tr>
                         @endforeach
                     </tbody>

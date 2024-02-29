@@ -337,7 +337,7 @@ $paymentDetailed = TemplateHelper::getDetailedPayment($document)
                 </td>
                 <td class="text-center align-top">{{symbol_or_code( symbol_or_code($row->item->unit_type_id))}}</td>
                 <td class="text-left align-top">
-                    {!!$row->item->description!!} @if (!empty($row->item->presentation)) {!!$row->item->presentation->description!!} @endif
+                    {!!$row->item->description!!}   
 
                     @foreach($row->additional_information as $information)
                     @if ($information)

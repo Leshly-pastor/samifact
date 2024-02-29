@@ -4,6 +4,7 @@ namespace App\Observers;
 
 use App\CoreFacturalo\Requests\Inputs\Functions;
 use App\Models\Tenant\Company;
+use App\Models\Tenant\Configuration;
 use App\Models\Tenant\Document;
 
 class DocumentObserver
@@ -16,16 +17,29 @@ class DocumentObserver
      */
     public function creating(Document $document)
     {
-        $company = Company::active();
-        $number = Functions::newNumber($document->soap_type_id,
-                                       $document->document_type_id,
-                                       $document->series,
-                                       $document->number, Document::class);
+        $configuration = Configuration::first();
+        if ($configuration->multi_companies && $document->alter_company && isset($document->alter_company->website_id)) {
+            $company_found = Company::where('website_id', $document->alter_company->website_id)->first();
+            if ($company_found) {
+                $company = $company_found;
+            } else {
+                $company = Company::active();
+            }
+        } else {
+            $company = Company::active();
+        }
+        $number = Functions::newNumber(
+            $document->soap_type_id,
+            $document->document_type_id,
+            $document->series,
+            $document->number,
+            Document::class,
+        );
         $document->number = $number;
 
         $document->filename = Functions::filename($company, $document->document_type_id, $document->series, $number);
         $document->unique_filename = $document->filename; //campo único para evitar duplicados
-
+        
     }
 
     /**

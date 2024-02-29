@@ -116,6 +116,7 @@ class Person extends ModelTenant
     ];
 
     protected $fillable = [
+        'location',
         'is_driver',
         'color',
         'type',
@@ -333,7 +334,8 @@ class Person extends ModelTenant
         return $this->hasMany(Contract::class, 'customer_id');
     }
 
-    public function dispatch_addresses(){
+    public function dispatch_addresses()
+    {
         return $this->hasMany(DispatchAddress::class);
     }
     /**
@@ -501,9 +503,9 @@ class Person extends ModelTenant
      *
      * @return array
      */
-    public function getCollectionData($withFullAddress = false, $childrens = false, $servers = false,$year = null)
-    {   
-        if($year == null){
+    public function getCollectionData($withFullAddress = false, $childrens = false, $servers = false, $year = null, $grade = null)
+    {
+        if ($year == null) {
             $year = Carbon::now()->year;
         }
         $addresses = $this->addresses;
@@ -577,7 +579,7 @@ class Person extends ModelTenant
 
         $data = [
             'dispatch_addresses' => $this->dispatch_addresses,
-
+            'location' => $this->location,
             'is_driver' => (bool)$this->is_driver,
             'id' => $this->id,
             'color' => $this->color,
@@ -635,9 +637,11 @@ class Person extends ModelTenant
             'location_id' => $location_id,
             'person_date' => $this->person_date ? Carbon::parse($this->person_date)->format('Y-m-d') : null,
             'months' => $this->parent_id != 0 ? $this->getPayForMonths($year) : null,
-            'student' => $this->student()->exists() ? $this->student()->latest()->first() : null ,
+            // 'student' => $this->student()->exists() ? $this->student()->latest()->first() : null,
+            'student' => $this->check_student($grade),
 
         ];
+
         if ($childrens == true) {
             $child = $this->children_person->transform(function ($row) {
                 return $row->getCollectionData();
@@ -668,6 +672,21 @@ class Person extends ModelTenant
 
         return $data;
     }
+    function check_student($grade = null)
+    {
+
+        $student = $this->student()->exists();
+        if ($student) {
+            if ($grade != null) {
+                $student = $this->student()->where('grade', $grade)->latest()->first();
+                if ($student) {
+                    return $student;
+                }
+            }
+            return $this->student()->latest()->first();
+        }
+        return null;
+    }
     function getPayForMonths($currentYear)
     {
         $months = [];
@@ -676,8 +695,8 @@ class Person extends ModelTenant
             $date = Carbon::createFromDate($currentYear, $month, 1)->format('Y-m-d');
 
             $payment_suscription = SuscriptionPayment::where('child_id', $this->id)
-            ->where('client_id', $this->parent_id)
-            ->where('period', $date)->get();
+                ->where('client_id', $this->parent_id)
+                ->where('period', $date)->get();
             $total = 0;
             foreach ($payment_suscription as $key => $value) {
                 if ($value->document) {
@@ -687,9 +706,8 @@ class Person extends ModelTenant
                     $periods = count($value->sale_note->periods) != 0 ? count($value->sale_note->periods) : 1;
                     $total += $value->sale_note->total / $periods;
                 }
-
             }
-          
+
             $months[] = $total;
         }
 

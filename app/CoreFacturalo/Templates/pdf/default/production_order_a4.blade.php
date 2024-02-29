@@ -11,6 +11,14 @@
     if ($establishment->logo) {
         $logo = "{$establishment->logo}";
     }
+    $is_integrate_system = Modules\BusinessTurn\Models\BusinessTurn::isIntegrateSystem();
+    $quotation = null;
+    if ($is_integrate_system) {
+        $sale_note = \App\Models\Tenant\SaleNote::where('id', $document->sale_note_id)->first();
+        $quotation = \App\Models\Tenant\Quotation::select(['number', 'prefix', 'shipping_address'])
+            ->where('id', $sale_note->quotation_id)
+            ->first();
+    }
     
 @endphp
 <html>
@@ -73,6 +81,7 @@
             @endif
 
         </tr>
+
         @if ($customer->address !== '')
             <tr>
                 <td class="align-top">Dirección:</td>
@@ -82,6 +91,21 @@
                     {{ $customer->province_id !== '-' ? ', ' . strtoupper($customer->province->description) : '' }}
                     {{ $customer->department_id !== '-' ? '- ' . strtoupper($customer->department->description) : '' }}
                 </td>
+            </tr>
+        @endif
+        @if ($quotation && $quotation->shipping_address)
+            <tr>
+                <td class="align-top">Dir. de envío:</td>
+                <td colspan="3">
+                    {{ strtoupper($quotation->shipping_address) }}
+                </td>
+            </tr>
+        @endif
+
+        @if (isset($customer->location) && $customer->location != '')
+            <tr>
+                <td class="align-top">Ubicación:</td>
+                <td colspan="3">{{ $customer->location }}</td>
             </tr>
         @endif
         <tr>
@@ -139,7 +163,7 @@
         @endif
     </table>
 
- 
+
 
 
     @if ($document->guides)
@@ -171,6 +195,7 @@
                 <th class="border-top-bottom text-right py-2" width="12%">P.Unit</th>
                 <th class="border-top-bottom text-right py-2" width="8%">Dto.</th>
                 <th class="border-top-bottom text-right py-2" width="12%">Total</th>
+                <th class="border-top-bottom text-right py-2" width="10%">Stock</th>
             </tr>
         </thead>
         <tbody>
@@ -190,15 +215,13 @@
                         @else
                             {!! $row->item->description !!}
                         @endif
-                        @if (!empty($row->item->presentation))
-                            {!! $row->item->presentation->description !!}
-                        @endif
+
                         @isset($row->item->sizes_selected)
-                        @if (count($row->item->sizes_selected)>0)
-                            @foreach ($row->item->sizes_selected as $size)
-                               <small> Talla {{$size->size}} | {{$size->qty}} und</small> <br>
-                            @endforeach
-                        @endif
+                            @if (count($row->item->sizes_selected) > 0)
+                                @foreach ($row->item->sizes_selected as $size)
+                                    <small> Talla {{ $size->size }} | {{ $size->qty }} und</small> <br>
+                                @endforeach
+                            @endif
                         @endisset
                         @if ($row->attributes)
                             @foreach ($row->attributes as $attr)
@@ -279,9 +302,30 @@
                         @endif
                     </td>
                     <td class="text-right align-top">{{ number_format($row->total, 2) }}</td>
+                    <td class="text-right align-top">
+                        @php
+                            $warehouses = $row->item->warehouses;
+                            $warehouse_id = $row->warehouse_id;
+                            $stock = 0;
+                            if ($warehouses && count($warehouses) > 0) {
+                                if ($warehouse_id) {
+                                    $stock = 0;
+                                    foreach ($warehouses as $warehouse) {
+                                        if ($warehouse->warehouse_id == $warehouse_id) {
+                                            $stock = $warehouse->stock;
+                                            break;
+                                        }
+                                    }
+                                } else {
+                                    $stock = $warehouses[0]->stock;
+                                }
+                            }
+                        @endphp
+                        {{ number_format($stock, 2) }}
+                    </td>
                 </tr>
                 <tr>
-                    <td colspan="8" class="border-bottom"></td>
+                    <td colspan="9" class="border-bottom"></td>
                 </tr>
             @endforeach
             @if ($document->total_exportation > 0)
@@ -289,6 +333,7 @@
                     <td colspan="7" class="text-right font-bold">Op. Exportación:
                         {{ $document->currency_type->symbol }}</td>
                     <td class="text-right font-bold">{{ number_format($document->total_exportation, 2) }}</td>
+                    <td></td>
                 </tr>
             @endif
             @if ($document->total_free > 0)
@@ -296,6 +341,7 @@
                     <td colspan="7" class="text-right font-bold">Op. Gratuitas:
                         {{ $document->currency_type->symbol }}</td>
                     <td class="text-right font-bold">{{ number_format($document->total_free, 2) }}</td>
+                    <td></td>
                 </tr>
             @endif
             @if ($document->total_unaffected > 0)
@@ -303,6 +349,7 @@
                     <td colspan="7" class="text-right font-bold">Op. Inafectas:
                         {{ $document->currency_type->symbol }}</td>
                     <td class="text-right font-bold">{{ number_format($document->total_unaffected, 2) }}</td>
+                    <td></td>
                 </tr>
             @endif
             @if ($document->total_exonerated > 0)
@@ -310,6 +357,7 @@
                     <td colspan="7" class="text-right font-bold">Op. Exoneradas:
                         {{ $document->currency_type->symbol }}</td>
                     <td class="text-right font-bold">{{ number_format($document->total_exonerated, 2) }}</td>
+                    <td></td>
                 </tr>
             @endif
             {{-- @if ($document->total_taxed > 0)
@@ -324,6 +372,7 @@
                         {{ $document->total_prepayment > 0 ? 'Anticipo' : 'Descuento TOTAL' }}:
                         {{ $document->currency_type->symbol }}</td>
                     <td class="text-right font-bold">{{ number_format($document->total_discount, 2) }}</td>
+                    <td></td>
                 </tr>
             @endif
             {{-- <tr>
@@ -333,9 +382,10 @@
 
             @if ($document->total_charge > 0 && $document->charges)
                 <tr>
-                    <td colspan="7" class="text-right font-bold">CARGOS ({{ $document->getTotalFactor() }}%):
+                    <td colspan="8" class="text-right font-bold">CARGOS ({{ $document->getTotalFactor() }}%):
                         {{ $document->currency_type->symbol }}</td>
                     <td class="text-right font-bold">{{ number_format($document->total_charge, 2) }}</td>
+                    <td></td>
                 </tr>
             @endif
 
@@ -343,13 +393,47 @@
                 <td colspan="7" class="text-right font-bold">Total a pagar: {{ $document->currency_type->symbol }}
                 </td>
                 <td class="text-right font-bold">{{ number_format($document->total, 2) }}</td>
+                <td></td>
             </tr>
 
-           
+
 
         </tbody>
     </table>
+    @if (is_integrate_system())
+        <table class="full-width">
+            @php
+                $cot = $quotation;
+            @endphp
+            @if ($cot)
+                <tr>
+                    <td width="23%" style="font-weight: bold;text-transform:uppercase;" class="align-top">
+                        Cotizacion :</td>
+                    <td style="font-weight: bold;text-transform:uppercase;text-align:left;" colspan="3">
+                        {{ $cot->prefix }}- {{ $cot->number }}</td>
 
+                </tr>
+            @endif
+            @if ($cot)
+                <tr>
+                    <td width="23%" style="font-weight: bold;text-transform:uppercase;" class="align-top">
+                        Observación com.:</td>
+                    <td style="font-weight: bold;text-transform:uppercase;text-align:left;" colspan="3">
+                        {{ $cot->description }}</td>
+
+                </tr>
+            @endif
+            <tr>
+                <td width="23%" style="font-weight: bold;text-transform:uppercase;" class="align-top">Observación
+                    prod.:
+                </td>
+                <td style="font-weight: bold;text-transform:uppercase;text-align:left;" colspan="3">
+                    {{ $document->observation }}</td>
+            </tr>
+
+
+        </table>
+    @endif
     <table class="full-width">
         <tr>
             <td width="65%" style="text-align: top; vertical-align: top;">
@@ -376,7 +460,7 @@
         @endphp
         <tbody>
             <tr>
-                @if ($configuration->yape_qr_sale_notes &&  $establishment_data->yape_logo)
+                @if ($configuration->yape_qr_sale_notes && $establishment_data->yape_logo)
                     @php
                         $yape_logo = $establishment_data->yape_logo;
                     @endphp
@@ -413,7 +497,7 @@
                         </table>
                     </td>
                 @endif
-                @if ($configuration->plin_qr_sale_notes &&  $establishment_data->plin_logo)
+                @if ($configuration->plin_qr_sale_notes && $establishment_data->plin_logo)
                     @php
                         $plin_logo = $establishment_data->plin_logo;
                     @endphp

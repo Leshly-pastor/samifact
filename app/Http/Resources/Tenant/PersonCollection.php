@@ -20,6 +20,7 @@ class PersonCollection extends ResourceCollection
             return  $row->getCollectionData();
             /** Pasado al modelo  */
             return [
+                'location' => $row->location,
                 'id' => $row->id,
                 'number' => $row->number,
                 'name' => $row->name,

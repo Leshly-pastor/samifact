@@ -716,12 +716,17 @@ class Item extends ModelTenant
 
     public static function getSaleUnitPriceByWarehouse(Item $item, int $warehouseId): string
     {
-        $warehousePrice = $item->warehousePrices->where('item_id', $item->id)
-            ->where('warehouse_id', $warehouseId)
-            ->first();
+        $configuration = Configuration::first();
+        if ($configuration->active_warehouse_prices) {
 
-        $price = $warehousePrice->price ?? $item->sale_unit_price;
-        return number_format($price, 4, ".", "");
+            $warehousePrice = $item->warehousePrices->where('item_id', $item->id)
+                ->where('warehouse_id', $warehouseId)
+                ->first();
+
+            $price = $warehousePrice->price ?? $item->sale_unit_price;
+            return number_format($price, 4, ".", "");
+        }
+        return number_format($item->sale_unit_price, 4, ".", "");
     }
 
     /**
@@ -1041,6 +1046,9 @@ class Item extends ModelTenant
             'original_affectation_igv_type_id'     => $this->sale_affectation_igv_type_id,
             'has_sizes' => (bool)$this->has_sizes,
             'sizes' => $this->sizes,
+            'image_url_medium' => ($this->image_medium !== 'imagen-no-disponible.jpg')
+                ? asset('storage' . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . 'items' . DIRECTORY_SEPARATOR . $this->image_medium)
+                : asset("/logo/{$this->image_medium}"),
             'has_isc' => (bool)$this->has_isc,
             'system_isc_type_id' => $this->system_isc_type_id,
             'percentage_isc' => $this->percentage_isc,

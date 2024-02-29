@@ -59,7 +59,7 @@ class DocumentItem extends ModelTenant
         'total_base_isc',
         'percentage_isc',
         'total_isc',
-
+        'discounts_acc',
         'total_base_other_taxes',
         'percentage_other_taxes',
         'total_other_taxes',
@@ -243,6 +243,15 @@ class DocumentItem extends ModelTenant
         $this->attributes['item'] = (is_null($value)) ? null : json_encode($value);
     }
 
+    public function getDiscountsAccAttribute($value)
+    {
+        return (is_null($value)) ? null : (object)json_decode($value);
+    }
+
+    public function setDiscountsAccAttribute($value)
+    {
+        $this->attributes['discounts_acc'] = (is_null($value)) ? null : json_encode($value);
+    }
     public function getAttributesAttribute($value)
     {
         return (is_null($value)) ? null : (object)json_decode($value);

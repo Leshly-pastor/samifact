@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\Tenant;
 
 use App\Models\Tenant\Catalogs\Country;
@@ -12,6 +13,7 @@ use App\Http\Resources\Tenant\EstablishmentResource;
 use App\Http\Resources\Tenant\EstablishmentCollection;
 use App\Models\Tenant\Warehouse;
 use App\Models\Tenant\Person;
+use App\Models\Tenant\Series;
 use Modules\Finance\Helpers\UploadFileHelper;
 use Exception;
 use Illuminate\Http\Request;
@@ -29,29 +31,29 @@ class EstablishmentController extends Controller
         return view('tenant.establishments.form');
     }
 
-    public function removeImage($type, Request $request){
+    public function removeImage($type, Request $request)
+    {
         $id = $request->input('id');
         $establishment = Establishment::findOrFail($id);
         //concatenar el tipo de imagen con la palabra logo como variable de establecimiento
-        $type = $type.'_logo';
-        if($establishment->$type){
+        $type = $type . '_logo';
+        if ($establishment->$type) {
             $path = $establishment->$type;
             $public_path = public_path($path);
-            if(file_exists($public_path) && unlink($public_path)){
+            if (file_exists($public_path) && unlink($public_path)) {
                 $establishment->$type = null;
                 $establishment->save();
                 return [
                     'success' => true,
                     'message' => 'Imagen eliminada con éxito'
                 ];
-            }else{
+            } else {
                 return [
                     'success' => false,
                     'message' => 'No se pudo eliminar la imagen'
                 ];
             }
-
-        }else{
+        } else {
             return [
                 'success' => false,
                 'message' => 'No se encontró la imagen'
@@ -65,10 +67,10 @@ class EstablishmentController extends Controller
         $provinces = Province::whereActive()->orderByDescription()->get();
         $districts = District::whereActive()->orderByDescription()->get();
 
-        $customers = Person::whereType('customers')->orderBy('name')->take(1)->get()->transform(function($row) {
+        $customers = Person::whereType('customers')->orderBy('name')->take(1)->get()->transform(function ($row) {
             return [
                 'id' => $row->id,
-                'description' => $row->number.' - '.$row->name,
+                'description' => $row->number . ' - ' . $row->name,
                 'name' => $row->name,
                 'number' => $row->number,
                 'identity_document_type_id' => $row->identity_document_type_id,
@@ -84,8 +86,8 @@ class EstablishmentController extends Controller
 
         return $record;
     }
-    
-    
+
+
     /**
      *
      * @param  EstablishmentRequest $request
@@ -93,8 +95,7 @@ class EstablishmentController extends Controller
      */
     public function store(EstablishmentRequest $request)
     {
-        try 
-        {
+        try {
             $id = $request->input('id');
             $has_igv_31556 = ($request->input('has_igv_31556') === 'true');
             $establishment = Establishment::firstOrNew(['id' => $id]);
@@ -109,16 +110,16 @@ class EstablishmentController extends Controller
                 $file->storeAs('public/uploads/logos', $filename);
                 $path = 'storage/uploads/logos/' . $filename;
                 $request->merge(['logo' => $path]);
-            }   
+            }
             if ($request->hasFile('file_yape') && $request->file('file_yape')->isValid()) {
-             
+
                 $request->validate(['file_yape' => 'mimes:jpeg,png,jpg|max:1024']);
                 $file = $request->file('file_yape');
                 $ext = $file->getClientOriginalExtension();
                 $filename = time() . '.' . $ext;
-                
+
                 UploadFileHelper::checkIfValidFile($filename, $file->getPathName(), true);
-                
+
                 $file->storeAs('public/uploads/logos', $filename);
                 $path = 'storage/uploads/logos/' . $filename;
                 $request->merge(['yape_logo' => $path]);
@@ -140,27 +141,62 @@ class EstablishmentController extends Controller
             $establishment->has_igv_31556 = $has_igv_31556;
             $establishment->save();
 
-            if(!$id) {
+            if (!$id) {
+                $this->create_series($establishment->id);
                 $warehouse = new Warehouse();
                 $warehouse->establishment_id = $establishment->id;
-                $warehouse->description = 'Almacén - '.$establishment->description;
+                $warehouse->description = 'Almacén - ' . $establishment->description;
                 $warehouse->save();
             }
 
             return [
                 'success' => true,
-                'message' => ($id)?'Establecimiento actualizado':'Establecimiento registrado'
+                'message' => ($id) ? 'Establecimiento actualizado' : 'Establecimiento registrado'
             ];
-        } 
-        catch(Exception $e)
-        {
+        } catch (Exception $e) {
             $this->generalWriteErrorLog($e);
 
-            return $this->generalResponse(false, 'Error desconocido: '.$e->getMessage());
+            return $this->generalResponse(false, 'Error desconocido: ' . $e->getMessage());
         }
     }
 
+    function create_series($id)
+    {
+        $document_types = [
+            "F00" => "01",
+            "B00" => "03",
+            "NV0" => "80",
+            "FC0" => "07",
+            "BC0" => "07",
+            "FD0" => "08",
+            "BD0" => "08",
+            "T00" => "09",
+            "V00" => "31",
+            "NIA" => "U2",
+            "NSA" => "U3",
+            "NTA" => "U4",
+        ];
 
+        foreach ($document_types as $series => $document_type_id) {
+            $serie = $this->format_serie($id, $series);
+            $exists = Series::where('establishment_id', $id)->where('document_type_id', $document_type_id)
+                ->where('number', $serie)->first();
+
+            if (!$exists) {
+                $series = new Series();
+                $series->establishment_id = $id;
+                $series->document_type_id = $document_type_id;
+                $series->number = $serie;
+                $series->save();
+            }
+        }
+    }
+    function format_serie($id, $serie)
+    {
+        //obtener el ultimo caracter de id
+        //si id tiene 1 digito solo concatenarlo a $serie  y regresar
+        return $serie . $id;
+    }
     public function records()
     {
         $records = Establishment::all();

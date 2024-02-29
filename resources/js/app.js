@@ -59,7 +59,10 @@ Vue.component(
     "whatsapp-answers",
     require("./views/system/answers/index.vue").default
 );
-
+Vue.component(
+    "tenant-multi-companies-index",
+    require("./views/tenant/multi_companies/index.vue").default
+);
 Vue.component(
     "whatsapp-index",
     require("./views/tenant/whatsapp/index.vue").default
@@ -1414,7 +1417,10 @@ Vue.component(
     "tenant-package-handler-form",
     require("./views/tenant/package_handler/form.vue").default
 )
-
+Vue.component(
+    "bill-of-exchange-pay-index",
+    require("./views/tenant/bill_of_exchange_pay/index.vue").default
+);
 Vue.component(
     "bill-of-exchange-index",
     require("./views/tenant/bill_of_exchange/index.vue").default

@@ -67,7 +67,7 @@ if ($logo) {
             </div>
         </td>
         <td width="30%" class="border-box py-4 px-2 text-center">
-            <h5 class="text-center">{{ $document->document_type->description}}</h5>
+            <h5 class="text-center">{{ $document->document_type->description == 'NOTA DE ENTRADA' ? 'NOTA DE VENTA' : $document->document_type->description}}</h5>
             <h3 class="text-center">{{ $tittle }}</h3>
         </td>
     </tr>
@@ -172,7 +172,7 @@ if ($logo) {
                     {!! $row->item->description !!}
                 @endif
                 
-                @if (!empty($row->item->presentation)) {!!$row->item->presentation->description!!} @endif
+                  
 
                 @if($row->total_isc > 0)
                     <br/><span style="font-size: 9px">ISC : {{ $row->total_isc }} ({{ $row->percentage_isc }}%)</span>

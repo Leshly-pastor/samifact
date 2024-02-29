@@ -135,7 +135,7 @@
                         <td>
                             {{ row.number }}<br />
                             <small
-                                v-text="row.document_type_description"
+                                v-text="row.document_type_description == 'NOTA DE ENTRADA' ? 'NOTA DE VENTA':row.document_type_description"
                             ></small
                             ><br />
                         </td>

@@ -646,13 +646,9 @@
                                 <small v-text="`${form.meter} mts`"></small>
                             </div>
                         </div>
-                          <div class="col-md-4 col-sm-4">
+                        <div class="col-md-4 col-sm-4">
                             <div
-                                v-if="
-                                    (form.item && form.item.meter) 
-                                  
-                                "
-                              
+                                v-if="form.item && form.item.meter"
                                 class="form-group"
                             >
                                 <label class="control-label">
@@ -665,7 +661,6 @@
                                     v-model="readonly_meters"
                                 ></el-input>
                             </div>
-                          
                         </div>
                     </template>
                     <!------------------------------------------------------->
@@ -768,7 +763,31 @@
                             :form="form"
                         ></tenant-item-aditional-info-selector>
                     </template>
-                    <template late v-if="!is_client">
+                    <template
+                        v-if="form.item_id && configuration.discounts_acc"
+                    >
+                        <span class="text-primary">Descuento</span>
+                        <a href="#" @click.prevent="addDiscount">[+ Agregar]</a>
+                        <div
+                            v-for="(discount, index) in discounts"
+                            :key="index"
+                        >
+                            <div class="col-md-3 col-lg-3 col-12">
+                                <el-input
+                                    v-model="discount.percentage"
+                                    type="number"
+                                    @input="calculateDiscount"
+                                >
+                                    <el-button
+                                        slot="append"
+                                        icon="el-icon-delete"
+                                        @click.prevent="removeDiscount(index)"
+                                    ></el-button>
+                                </el-input>
+                            </div>
+                        </div>
+                    </template>
+                    <template v-if="!is_client">
                         <div v-if="showDiscounts" class="col-md-12 mt-2">
                             <el-collapse v-model="activePanel">
                                 <el-collapse-item
@@ -834,32 +853,34 @@
                                                                 row.description
                                                             "
                                                         ></el-input>
-                                                        <br>
-                                                           <el-tooltip
-                                                                            class="item"
-                                                                            content="
+                                                        <br />
+                                                        <el-tooltip
+                                                            class="item"
+                                                            content="
                                                                               Aplicar 18% de IGV al descuento global
                                                                             "
-                                                                            effect="dark"
-                                                                            placement="top"
-                                                                        >
-                                                                            <i
-                                                                                class="fa fa-info-circle"
-                                                                            ></i>
-                                                                        </el-tooltip>
-                                                                        <el-checkbox
-                                                                            :disabled="!row.is_amount || row.amount == 0"
-                                                                            v-model="
-                                                                                row.is_split
-                                                                            "
-                                                                            class="ml-1 mr-1"
-                                                                            @change="
-                                                                                splitBase(index)
-                                                                            "
-                                                                        ></el-checkbox>
+                                                            effect="dark"
+                                                            placement="top"
+                                                        >
+                                                            <i
+                                                                class="fa fa-info-circle"
+                                                            ></i>
+                                                        </el-tooltip>
+                                                        <el-checkbox
+                                                            :disabled="
+                                                                !row.is_amount ||
+                                                                row.amount == 0
+                                                            "
+                                                            v-model="
+                                                                row.is_split
+                                                            "
+                                                            class="ml-1 mr-1"
+                                                            @change="
+                                                                splitBase(index)
+                                                            "
+                                                        ></el-checkbox>
                                                     </td>
                                                     <td>
-                                                      
                                                         <template
                                                             v-if="row.is_amount"
                                                         >
@@ -876,8 +897,8 @@
                                                                 "
                                                             ></el-input>
                                                         </template>
-                                                        <br>
-                                                          <el-checkbox
+                                                        <br />
+                                                        <el-checkbox
                                                             v-model="
                                                                 row.is_amount
                                                             "
@@ -1208,7 +1229,8 @@ export default {
     },
     data() {
         return {
-            temp_qty:null,
+            discounts: [],
+            temp_qty: null,
             readonly_meters: 0,
             hasTables: false,
             showDialogSelectSizes: false,
@@ -1424,20 +1446,84 @@ export default {
         },
     },
     methods: {
-        splitBase(index){
+        setDiscounts() {
+            
+            let {unit_price_value, quantity} = this.form;
+            let total = parseFloat(unit_price_value) * parseFloat(quantity);
+            let result = this.discounts.reduce((a, b) => {
+            
+                return a + parseFloat(b.result);
+            }, 0);
+        
+            let discount_type = this.discount_types.find((d) => d.id == "00");
+            // let total = this.form.total / 1.18;
+            let percentage = (result / total) * 100;
+            let factor = result / total;
+            this.form.discounts.push({
+                discount_type_id: discount_type.id,
+                discount_type,
+                description: "Descuentoss",
+                percentage,
+                factor,
+                amount: result ,
+                base: (result / total),
+                is_amount: true,
+                use_input_amount: true,
+                is_split: false,
+            });
+            console.log("🚀 ~ file: item.vue:1476 ~ setDiscounts ~ this.form.discounts:", this.form.discounts)
+            
+        },
+        calculateDiscount() {
+            if (this.discounts == null || this.discounts.length == 0) {
+                return;
+            }
+            let total = this.form.unit_price_value * this.form.quantity;
+            let {affectation_igv_type_id,has_igv} = this.form;
+  
+            for (let i = 0; i < this.discounts.length; i++) {
+                let { percentage } = this.discounts[i];
+                if (percentage != 0 || percentage != null) {
+                    let discount = total * (percentage / 100);
+          
+                    if(has_igv && affectation_igv_type_id == "10"){
+                        discount = discount / 1.18;
+                    }
+                    //redondear a dos decimales
+
+                    // discount = Math.round(discount * 100) / 100;
+
+                    this.discounts[i].result = discount;
+
+                    total = total - discount;
+                    this.discounts[i].base = total;
+                    this.discounts[i].original_price = this.form.unit_price_value;
+                }
+            }
+        },
+        removeDiscount(idx) {
+            this.discounts.splice(idx, 1);
+        },
+        addDiscount() {
+            this.discounts.push({
+                percentage: 0,
+                result: 0,
+            });
+        },
+        splitBase(index) {
             let row = this.form.discounts[index];
-            if(row.is_split){
-                row.amount  = row.amount / 1.18;
-            }else{
-                row.amount  = row.amount * 1.18;
+            if (row.is_split) {
+                row.amount = row.amount / 1.18;
+            } else {
+                row.amount = row.amount * 1.18;
             }
             //round two decimals
             row.amount = Math.round(row.amount * 100) / 100;
 
             this.calculateTotal();
         },
-        reChangeItem(bonus_items, random_key,qty=1) {
-            if(qty < 1){
+        reChangeItem(bonus_items, random_key, qty = 1) {
+            if (qty < 1) {
                 return;
             }
             bonus_items = bonus_items.map((b) => b.item_bonus);
@@ -1452,7 +1538,6 @@ export default {
             });
             this.temp_qty = null;
             this.items = temp;
-
         },
         getUnitPriceByTotal() {
             let { total, quantity } = this.form;
@@ -1785,6 +1870,7 @@ export default {
             //no avanzar hasta que loading_dialog sea false
             await this.waitForTrueCondition();
             //
+            this.discounts = [];
             this.extra_temp = undefined;
 
             this.titleDialog = this.recordItem
@@ -1820,11 +1906,14 @@ export default {
                     this.recordItem.total_plastic_bag_taxes > 0 ? true : false;
                 this.form.warehouse_id = this.recordItem.warehouse_id;
                 this.isUpdateWarehouseId = this.recordItem.warehouse_id;
-
                 if (this.isOpenFromInvoice) {
                     this.form.attributes = this.recordItem.attributes;
                     this.form.discounts = this.recordItem.discounts;
                     this.form.charges = this.recordItem.charges;
+                }
+                this.discounts = this.recordItem.discounts_acc || [];
+                if (this.discounts.length > 0) {
+                    this.form.discounts = [];
                 }
 
                 if (this.isEditItemNote) {
@@ -2032,7 +2121,6 @@ export default {
             this.form.unit_price_value = this.form.item.sale_unit_price;
             this.form.meter = this.form.item.meter;
             this.lots = this.form.item.lots;
-
             this.form.has_igv = this.form.item.has_igv;
             this.form.has_plastic_bag_taxes =
                 this.form.item.has_plastic_bag_taxes;
@@ -2109,17 +2197,18 @@ export default {
                 4
             );
             if (this.form.meter && this.form.meter > 0) {
-                    this.readonly_meters = _.round(
-                        this.form.quantity * this.form.meter,
-                        4
-                    );
-                    this.readonly_total_meter = _.round(
-                        this.form.quantity *
-                            this.form.unit_price_value *
-                            this.form.meter,
-                        4
-                    );
+                this.readonly_meters = _.round(
+                    this.form.quantity * this.form.meter,
+                    4
+                );
+                this.readonly_total_meter = _.round(
+                    this.form.quantity *
+                        this.form.unit_price_value *
+                        this.form.meter,
+                    4
+                );
             }
+            this.calculateDiscount();
         },
         calculateUnitPrice() {
             this.form.unit_price_value = _.round(
@@ -2159,6 +2248,15 @@ export default {
             );
         },
         async clickAddItem(key) {
+            let { affectation_igv_type_id: aff_id, unit_price_value: un_pr } =
+                this.form;
+            aff_id = Number(aff_id);
+            un_pr = Number(un_pr);
+            if (aff_id != 15 && un_pr <= 0) {
+                return this.$message.error(
+                    "El total debe ser mayor a 0 o elija tipo de afectación 'gravado bonificaciones'."
+                );
+            }
             if (this.isRestrictedForSale)
                 return this.$message.error(
                     "No puede agregar el producto, está restringido para venta."
@@ -2187,6 +2285,9 @@ export default {
             //     return this.$message.error(`La cantidad no puede ser inferior a ${this.getMinQuantity()}`);
             // }
             this.validateQuantity();
+            if (this.discounts.length != 0) {
+                this.setDiscounts();
+            }
 
             if (this.form.item.lots_enabled) {
                 if (!this.form.IdLoteSelected)
@@ -2234,7 +2335,7 @@ export default {
             this.form.item.unit_price = unit_price;
             // this.form.item.meter =
             this.form.item.presentation = this.item_unit_type;
-       
+
             this.form.affectation_igv_type = _.find(
                 this.affectation_igv_types,
                 { id: affectation_igv_type_id }
@@ -2246,11 +2347,10 @@ export default {
                 this.form,
                 this.currencyTypeIdActive,
                 this.exchangeRateSale,
-                this.percentageIgv,
-                
+                this.percentageIgv
             );
             this.row.update_price = this.form.update_price;
-     this.row.meter = this.form.item.meter;
+            this.row.meter = this.form.item.meter;
             this.row.item.name_product_pdf = this.row.name_product_pdf || "";
             if (this.recordItem) {
                 this.row.indexi = this.recordItem.indexi;
@@ -2305,14 +2405,20 @@ export default {
             this.row.document_item_id = document_item_id;
 
             this.showMessageDetraction();
-
+            if (this.discounts.length > 0) {
+                this.row.discounts_acc = this.discounts;
+            }
             this.$emit("add", this.row);
-
+            this.discounts = [];
             if (this.search_item_by_barcode) {
                 this.cleanItems();
             }
             if (has_bonus_item) {
-                this.reChangeItem(bonus_items, general_random_key,this.row.quantity);
+                this.reChangeItem(
+                    bonus_items,
+                    general_random_key,
+                    this.row.quantity
+                );
             }
             if (this.recordItem) {
                 this.close();

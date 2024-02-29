@@ -58,4 +58,5 @@ class BillOfExchangePayment extends ModelTenant
     {
         return $this->belongsTo(BillOfExchange::class, 'bill_of_exchange_id');
     }
+    
 }

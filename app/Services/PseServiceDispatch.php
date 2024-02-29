@@ -943,6 +943,10 @@ class PseServiceDispatch
             $name = $customer->name;
         }
 
+        if ($identity_document_type_description != "RUC" && $identity_document_type_description != "DNI") {
+            $identity_document_type_description = "OTROS";
+        }
+
         $name = $this->format_characters($name);
         $xml->addChild('tidoid', $identity_document_type_id);
         $xml->addChild('dedoid', $identity_document_type_description);

@@ -73,7 +73,6 @@
                         <th>Encargado</th>
                         <th>Estado</th>
 
-           
                         <th class="text-center">Guia de traslado</th>
 
                         <th class="text-center">Estado de pago</th>
@@ -85,7 +84,7 @@
                     <tr slot-scope="{ index, row }">
                         <td>{{ index }}</td>
                         <td class="text-center">{{ row.date_of_issue }}</td>
-                
+
                         <td class="text-end">
                             {{ row.seller_name }}
                         </td>
@@ -97,18 +96,16 @@
                         </td>
                         <td>{{ row.full_number }}</td>
                         <td>
-                         <template
-                                    v-for="(dispatch, i) in row.dispatches"
+                            <template v-for="(dispatch, i) in row.dispatches">
+                                <el-button
+                                    type="primary"
+                                    :key="i"
+                                    :class="`state_${dispatch.state_id}_d`"
+                                    @click="openDispatchFinish(dispatch.id)"
                                 >
-                                    <el-button
-                                        type="primary"
-                                        :key="i"
-                                        :class="`state_${dispatch.state_id}_d`"
-                                        @click="openDispatchFinish(dispatch.id)"
-                                    >
-                                        {{ dispatch.number }}
-                                    </el-button>
-                                </template>
+                                    {{ dispatch.number }}
+                                </el-button>
+                            </template>
                             <!-- guia -->
                         </td>
                         <td>
@@ -164,7 +161,7 @@
                                 </el-dropdown-menu>
                             </el-dropdown>
                         </td>
-                       
+
                         <td>
                             <button
                                 v-if="!row.has_agency_dispatch"
@@ -245,7 +242,19 @@
                                     >
                                         Anular
                                     </button> -->
-
+                                    <button
+                                        data-toggle="tooltip"
+                                        data-placement="top"
+                                        title="Generar guía"
+                                        type="button"
+                                        class="dropdown-item"
+                                        @click.prevent="
+                                            clickGenerateGuide(row.id)
+                                        "
+                                        v-if="row.can_create_dispatch"
+                                    >
+                                        Generar guia
+                                    </button>
                                     <button
                                         data-toggle="tooltip"
                                         data-placement="top"
@@ -432,7 +441,7 @@
             :showDialog.sync="showGuideModalView"
             :currentRecord="currentRecord"
         ></guide-modal-view>
-               <dispatch-finish
+        <dispatch-finish
             :recordId="dispatchId"
             :showClose="true"
             :send-sunat="false"
@@ -524,7 +533,7 @@ export default {
         // ModalGenerateCPE,
         // UploadToOtherServer,
         // ModalGenerateGuie
-        DispatchFinish
+        DispatchFinish,
     },
     computed: {
         ...mapState(["config"]),
@@ -662,10 +671,13 @@ export default {
         },
     },
     methods: {
-           openDispatchFinish(id) {
-            this.dispatchId = id;
-            this.showDialogFinish = true;
+        clickGenerateGuide(id) {
+            location.href = `/dispatches/create_new/dispatch_order/${id}`;
         },
+            openDispatchFinish(id) {
+                this.dispatchId = id;
+                this.showDialogFinish = true;
+            },
         viewGuide(row) {
             this.currentRecord = row;
             this.showGuideModalView = true;

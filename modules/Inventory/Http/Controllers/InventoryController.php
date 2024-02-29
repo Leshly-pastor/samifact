@@ -886,7 +886,11 @@ class InventoryController extends Controller
             ]);
 
             if (!$res['success']) {
-                throw new Exception($res['message']);
+                // throw new Exception($res['message']);
+                return [
+                    'success' => false,
+                    'message' => $res['message']
+                ];
             }
 
             $inventory->update([

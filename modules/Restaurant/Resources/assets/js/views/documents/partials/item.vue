@@ -1070,7 +1070,13 @@ export default {
 
             if (this.recordItem) {
                 this.form.item_id = await this.recordItem.item_id;
-                this.form.unit_price = this.recordItem.unit_price;
+
+                let {item:{has_igv},percentage_igv} = this.recordItem;
+                if(has_igv){
+                    this.form.unit_price = this.recordItem.unit_price;
+                }else{
+                    this.form.unit_price = this.recordItem.unit_price / (1 + percentage_igv / 100);
+                }
                 await this.searchRemoteItems(this.recordItem.item.description);
                 await this.changeItem();
                 this.form.quantity = this.recordItem.quantity;

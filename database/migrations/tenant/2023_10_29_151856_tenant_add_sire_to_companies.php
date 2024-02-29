@@ -13,12 +13,34 @@ class TenantAddSireToCompanies extends Migration
      */
     public function up()
     {
-        Schema::table('companies', function (Blueprint $table) {
-            $table->string('sire_client_id')->nullable();
-            $table->string('sire_client_secret')->nullable();
-            $table->string('sire_username')->nullable();
-            $table->string('sire_password')->nullable();
-        });
+        //si ya existe la columna no la vuelva a crear
+        if (!Schema::hasColumn('companies', 'sire_client_id')) {
+            Schema::table('companies', function (Blueprint $table) {
+                $table->string('sire_client_id')->nullable();
+            });
+        }
+        if (!Schema::hasColumn('companies', 'sire_client_secret')) {
+            Schema::table('companies', function (Blueprint $table) {
+                $table->string('sire_client_secret')->nullable();
+            });
+        }
+        if (!Schema::hasColumn('companies', 'sire_username')) {
+            Schema::table('companies', function (Blueprint $table) {
+                $table->string('sire_username')->nullable();
+            });
+        }
+        if (!Schema::hasColumn('companies', 'sire_password')) {
+            Schema::table('companies', function (Blueprint $table) {
+                $table->string('sire_password')->nullable();
+            });
+        }
+
+        // Schema::table('companies', function (Blueprint $table) {
+        //     $table->string('sire_client_id')->nullable();
+        //     $table->string('sire_client_secret')->nullable();
+        //     $table->string('sire_username')->nullable();
+        //     $table->string('sire_password')->nullable();
+        // });
     }
 
     /**

@@ -461,7 +461,7 @@ if ($logo) {
                     <br/><span style="font-size: 9px">ISC : {{ $row->total_isc }} ({{ $row->percentage_isc }}%)</span>
                 @endif
 
-                @if (!empty($row->item->presentation)) {!!$row->item->presentation->description!!} @endif
+                  
 
                 @if($row->attributes)
                     @foreach($row->attributes as $attr)

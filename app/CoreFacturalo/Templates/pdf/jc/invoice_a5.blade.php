@@ -318,7 +318,7 @@ $balance = ($document->total - $total_payment) - $document->payments->sum('chang
                     @if($row->name_product_pdf)
                     {!!$row->name_product_pdf!!}
                     @else
-                    {!!$row->item->description!!} @if (!empty($row->item->presentation)) {!!$row->item->presentation->description!!} @endif
+                    {!!$row->item->description!!}   
                     @endif
 
                     @foreach($row->additional_information as $information)

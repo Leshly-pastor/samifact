@@ -3,6 +3,7 @@
 namespace Modules\Finance\Models;
 
 use App\Models\Tenant\{
+    BillOfExchangePaymentPay,
     BillOfExchangePayment,
     DocumentPayment,
     SaleNotePayment,
@@ -37,6 +38,10 @@ class PaymentFile extends ModelTenant
         return $this->belongsTo(SaleNotePayment::class, 'payment_id')
             ->wherePaymentType(SaleNotePayment::class);
     }
+    public function bill_pay_payments(){
+        return $this->belongsTo(BillOfExchangePaymentPay::class, 'payment_id')
+            ->wherePaymentType(BillOfExchangePaymentPay::class);
+    }
     public function bill_payments()
     {
         return $this->belongsTo(BillOfExchangePayment::class, 'payment_id')
@@ -49,6 +54,7 @@ class PaymentFile extends ModelTenant
             DocumentPayment::class => 'document',
             SaleNotePayment::class => 'sale_note',
             BillOfExchangePayment::class => 'bill_of_exchange',
+            BillOfExchangePaymentPay::class => 'bill_of_exchange_pay',
         ];
 
         return $instance_type[$this->payment_type];
@@ -67,8 +73,12 @@ class PaymentFile extends ModelTenant
                 $description = 'NOTA DE VENTA';
                 break;
             case 'bill_of_exchange':
-                $description = 'LETRA DE CAMBIO';
+                $description = 'LETRA POR COBRAR';
                 break;
+            case 'bill_of_exchange_pay':
+                $description = 'LETRA POR PAGAR';
+                break;
+            
         }
 
         return $description;
@@ -83,6 +93,7 @@ class PaymentFile extends ModelTenant
 
             case 'document':
             case 'bill_of_exchange':
+            case 'bill_of_exchange_pay':
             case 'sale_note':
                 $person['name'] = $record->customer->name;
                 $person['number'] = $record->customer->number;
@@ -130,6 +141,12 @@ class PaymentFile extends ModelTenant
                         });
                 })
                 ->orWhereHas('bill_payments', function ($q) use ($params) {
+                    $q->whereBetween('date_of_payment', [$params->date_start, $params->date_end])
+                        ->whereHas('associated_record_payment', function ($p) {
+                            // $p->whereStateTypeAccepted()->whereTypeUser();
+                        });
+                })
+                ->orWhereHas('bill_pay_payments', function ($q) use ($params) {
                     $q->whereBetween('date_of_payment', [$params->date_start, $params->date_end])
                         ->whereHas('associated_record_payment', function ($p) {
                             // $p->whereStateTypeAccepted()->whereTypeUser();

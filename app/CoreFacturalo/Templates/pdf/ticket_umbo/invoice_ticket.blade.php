@@ -41,6 +41,7 @@ if ($logo) {
     </tr>
     <tr>
         <td class="text-center desc">{{ 'RUC: '.$company->number }}</td>
+     
     </tr>
     <tr>
         <td class="text-center desc" style="text-transform: uppercase;">
@@ -371,7 +372,7 @@ if ($logo) {
 
 
 
-<table class="full-width m-10" style="overflow: wrap" autosize="1">
+<table class="full-width m-10" autosize="1">
     <thead class="">
 
         
@@ -396,24 +397,32 @@ if ($logo) {
 
             </td>
 
-            <td colspan="3" style="" class="desc text-left align-top">
+            <td colspan="3" style="" class="desc text-left align-top" 
+            >
                 @if($row->name_product_pdf)
                 @php
                     $name_product_pdf = $row->name_product_pdf;
                     //remove <p></p> and <br/>
                     $name_product_pdf = str_replace(['<p>', '</p>', '<br/>'], '', $name_product_pdf);
-                    
+                    //cortar  el texto en 15 caracteres
+                    $name_product_pdf = substr($name_product_pdf, 0, 30);
                 @endphp
                     {!!$name_product_pdf!!}
                 @else
-                    {!!$row->item->description!!}
+                @php
+
+                    $description = $row->item->description;
+                    //cortar  el texto en 15 caracteres
+                    $description = substr($description, 0, 30);
+                    @endphp
+                    {!!$description!!}
                 @endif
 
                 @if($row->total_isc > 0)
                     <br/>ISC : {{ $row->total_isc }} ({{ $row->percentage_isc }}%)
                 @endif
 
-                @if (!empty($row->item->presentation)) {!!$row->item->presentation->description!!} @endif
+                  
 
                 @foreach($row->additional_information as $information)
                     @if ($information)

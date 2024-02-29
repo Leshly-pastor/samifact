@@ -162,12 +162,31 @@
             </cac:Despatch>
         </cac:Delivery>
         @if($document['transport_mode_type_id'] === '02')
+        {{-- @if($document['transport_plate_number'] ==! null) --}}
 {{--            @if($document['license_plate'])--}}
                 <cac:TransportHandlingUnit>
                     <cac:TransportEquipment>
                         <!-- VEHICULO PRINCIPAL -->
                         <!-- PLACA - VEHICULO PRINCIPAL -->
                         <cbc:ID>{{ $document['transport_plate_number'] }}</cbc:ID>
+                        @if($document['secondary_plate_number']!=null)
+                        <cac:AttachedTransportEquipment>
+                            <!-- PLACA SECUNDARIA -->
+                            <cbc:ID>{{$document['secondary_plate_number']}}</cbc:ID>
+                            @if($document['auth_plate_secondary']!=null)
+                            <cac:ShipmentDocumentReference>
+                            <!-- AUTORIZACIÓN PLACA SECUNDARIA -->
+                                <cbc:ID schemeID="06">{{$document['auth_plate_secondary']}}</cbc:ID>
+                            </cac:ShipmentDocumentReference>
+                            @endif
+                        </cac:AttachedTransportEquipment>
+                        @endif
+                        @if($document['auth_plate_primary']!=null)
+                        <cac:ShipmentDocumentReference>
+                             <!-- AUTORIZACIÓN PLACA PRINCIPAL -->
+                            <cbc:ID schemeID="06">{{$document['auth_plate_primary']}}</cbc:ID>
+                        </cac:ShipmentDocumentReference>
+                        @endif
                     </cac:TransportEquipment>
                 </cac:TransportHandlingUnit>
 {{--            @endif--}}

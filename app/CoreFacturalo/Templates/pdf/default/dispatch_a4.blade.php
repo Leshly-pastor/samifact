@@ -1,22 +1,21 @@
 @php
-$establishment = $document->establishment;
-$establishment__ = \App\Models\Tenant\Establishment::find($document->establishment_id);
-$logo = $establishment__->logo ?? $company->logo;
-
-if ($logo === null && !file_exists(public_path("$logo}"))) {
-    $logo = "{$company->logo}";
-}
-
-if ($logo) {
-    $logo = "storage/uploads/logos/{$logo}";
-    $logo = str_replace("storage/uploads/logos/storage/uploads/logos/", "storage/uploads/logos/", $logo);
-}
-
-
+    $establishment = $document->establishment;
+    $establishment__ = \App\Models\Tenant\Establishment::find($document->establishment_id);
+    $logo = $establishment__->logo ?? $company->logo;
+    
+    if ($logo === null && !file_exists(public_path("$logo}"))) {
+        $logo = "{$company->logo}";
+    }
+    
+    if ($logo) {
+        $logo = "storage/uploads/logos/{$logo}";
+        $logo = str_replace('storage/uploads/logos/storage/uploads/logos/', 'storage/uploads/logos/', $logo);
+    }
+    
     $customer = $document->customer;
     //$path_style = app_path('CoreFacturalo'.DIRECTORY_SEPARATOR.'Templates'.DIRECTORY_SEPARATOR.'pdf'.DIRECTORY_SEPARATOR.'style.css');
     
-    $document_number = $document->series. '-' . str_pad($document->number, 8, '0', STR_PAD_LEFT);
+    $document_number = $document->series . '-' . str_pad($document->number, 8, '0', STR_PAD_LEFT);
     // $document_type_driver = App\Models\Tenant\Catalogs\IdentityDocumentType::findOrFail($document->driver->identity_document_type_id);
     // dd($document->items);
 @endphp
@@ -133,11 +132,12 @@ if ($logo) {
                 @endif
             </tr>
             <tr>
-                <td colspan="2">P.Partida: {{$document->origin ? $document->origin->location_id :null }} - {{ $document->origin ? $document->origin->address : null }}
+                <td colspan="2">P.Partida: {{ $document->origin ? $document->origin->location_id : null }} -
+                    {{ $document->origin ? $document->origin->address : null }}
                 </td>
             </tr>
             <tr>
-                <td colspan="2">P.Llegada: {{  $document->delivery ? $document->delivery->location_id : null }} -
+                <td colspan="2">P.Llegada: {{ $document->delivery ? $document->delivery->location_id : null }} -
                     {{ $document->delivery ? $document->delivery->address : null }}</td>
             </tr>
             @if ($document->order_form_external)
@@ -164,25 +164,49 @@ if ($logo) {
                     <td>{{ $document_type_dispatcher->description }}: {{ $document->dispatcher->number }}</td>
                 </tr>
             @endif
+            <tr>
+                @if (isset($document->transport_data['plate_number']))
+                    <td>Número de placa del vehículo: {{ $document->transport_data['plate_number'] }}</td>
+                @endif
+                @if (isset($document->transport_data['auth_plate_primary']))
+                    <td>Autorización de placa principal: {{ $document->transport_data['auth_plate_primary'] }}</td>
+                @endif
+            </tr>
+            <tr>
+                @if (isset($document->transport_data['secondary_plate_number']))
+                    <td>Número de placa secundaria del vehículo:
+                        {{ $document->transport_data['secondary_plate_number'] }}</td>
+                @endif
+                @if (isset($document->transport_data['auth_plate_secondary']))
+                    <td>Autorización de placa secundaria: {{ $document->transport_data['auth_plate_secondary'] }}</td>
+                @endif
+            </tr>
+            <tr>
+                @if (isset($document->driver) && $document->driver->number)
+                    <td>Conductor: {{ $document->driver->number }}</td>
+                @endif
+
+                @if (isset($document->driver->license))
+                    <td>Licencia del conductor: {{ $document->driver->license }}</td>
+                @endif
+            </tr>
+            <tr>
+                @if ($document->secondary_license_plates)
+                    @if ($document->secondary_license_plates->semitrailer)
+                        <td>Número de placa semirremolque: {{ $document->secondary_license_plates->semitrailer }}
+                        </td>
+                    @endif
+                @endif
+            </tr>
+            @if ($document->transport_mode_type_id === '01')
                 <tr>
-                    @if (isset($document->transport_data['plate_number']))
-                        <td>Número de placa del vehículo: {{ $document->transport_data['plate_number'] }}</td>
-                    @endif
-                    @if (isset($document->driver) && $document->driver->number)
-                        <td>Conductor: {{ $document->driver->number }}</td>
-                    @endif
+                    @isset ($document->dispatcher->number_mtc)
+                        <td>Autorización MTC: {{ $document->dispatcher->number_mtc }}</td>
+                        </td>
+                    @endisset
                 </tr>
-                <tr>
-                    @if ($document->secondary_license_plates)
-                        @if ($document->secondary_license_plates->semitrailer)
-                            <td>Número de placa semirremolque: {{ $document->secondary_license_plates->semitrailer }}
-                            </td>
-                        @endif
-                    @endif
-                    @if (isset($document->driver->license))
-                        <td>Licencia del conductor: {{ $document->driver->license }}</td>
-                    @endif
-                </tr>
+            @endif
+
         </tbody>
     </table>
     <table class="full-width border-box mt-10 mb-10">
@@ -209,9 +233,7 @@ if ($logo) {
                             {!! $row->item->description !!}
                         @endif
 
-                        @if (!empty($row->item->presentation))
-                            {!! $row->item->presentation->description !!}
-                        @endif
+
 
                         @if ($row->attributes)
                             @foreach ($row->attributes as $attr)
@@ -244,10 +266,11 @@ if ($logo) {
                         @endif
                     </td>
                     <td class="text-left" style="vertical-align: top">{{ $row->item->model ?? '' }}</td>
-                    <td class="text-center" style="vertical-align: top">{{ symbol_or_code($row->item->unit_type_id) }}</td>
+                    <td class="text-center" style="vertical-align: top">{{ symbol_or_code($row->item->unit_type_id) }}
+                    </td>
                     <td class="text-center" style="vertical-align: top">{{ $row->item->weight }}</td>
                     <td class="text-right" style="vertical-align: top">
-        
+
                         @if ((int) $row->quantity != $row->quantity)
                             {{ $row->quantity }}
                         @else

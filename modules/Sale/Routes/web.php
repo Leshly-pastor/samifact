@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\Route;
 
 $current_hostname = app(Hyn\Tenancy\Contracts\CurrentHostname::class);
 
-if($current_hostname) {
+if ($current_hostname) {
     Route::domain($current_hostname->fqdn)->group(function () {
         Route::middleware(['auth', 'locked.tenant'])->group(function () {
 
@@ -28,7 +28,7 @@ if($current_hostname) {
              sale-opportunities/uploads
              sale-opportunities/download-file/{filename}
              */
-            Route::prefix('sale-opportunities')->group(function() {
+            Route::prefix('sale-opportunities')->group(function () {
 
                 Route::get('', 'SaleOpportunityController@index')->name('tenant.sale_opportunities.index')->middleware(['redirect.level']);
                 Route::post('', 'SaleOpportunityController@store');
@@ -53,7 +53,6 @@ if($current_hostname) {
                 Route::get('download-file/{filename}', 'SaleOpportunityFileController@download');
                 Route::get('search-items', 'SaleOpportunityFileController@searchItems');
                 Route::get('search/item/{item}', 'SaleOpportunityFileController@searchItemById');
-
             });
 
             Route::prefix('payment-method-types')->group(function () {
@@ -63,7 +62,6 @@ if($current_hostname) {
                 Route::get('/record/{id}', 'PaymentMethodTypeController@record');
                 Route::post('', 'PaymentMethodTypeController@store');
                 Route::delete('/{id}', 'PaymentMethodTypeController@destroy');
-
             });
 
             /**
@@ -117,7 +115,6 @@ if($current_hostname) {
                 Route::get('/record2/{contract}', 'ContractController@record2');
                 Route::get('/changed/{contract}', 'ContractController@changed');
                 Route::get('/generate-quotation/{quotation}', 'ContractController@generateContract')->middleware(['redirect.level']);
-
             });
 
             // agentes de ventas
@@ -131,7 +128,6 @@ if($current_hostname) {
                 Route::get('record/{id}', 'AgentController@record');
                 Route::delete('{id}', 'AgentController@destroy');
                 Route::get('search', 'AgentController@searchAgents');
-
             });
             // agentes de ventas
 
@@ -143,7 +139,6 @@ if($current_hostname) {
             Route::get('', 'ProductionOrderController@index')->name('tenant.production_orders.index')->middleware(['redirect.level']);
             Route::get('/columns', 'ProductionOrderController@columns');
             Route::get('/records', 'ProductionOrderController@records');
-
         });
 
         /**
@@ -157,7 +152,7 @@ if($current_hostname) {
          * technical-services/download/{id}/{format?}
          * technical-services/print/{id}/{format?}
          * technical-services/{id
-        */
+         */
         Route::prefix('technical-services')->group(function () {
 
             Route::get('', 'TechnicalServiceController@index')->name('tenant.technical_services.index')->middleware(['redirect.level']);
@@ -170,8 +165,8 @@ if($current_hostname) {
             Route::get('/search/customer/{id}', 'TechnicalServiceController@searchCustomerById');
             Route::get('/download/{id}/{format?}', 'TechnicalServiceController@download');
             Route::get('/print/{id}/{format?}', 'TechnicalServiceController@toPrint');
+            Route::get('/format_vehicle/{id}', 'TechnicalServiceController@format_vehicle');
             Route::delete('/{id}', 'TechnicalServiceController@destroy');
-
         });
 
 
@@ -184,7 +179,6 @@ if($current_hostname) {
             Route::post('', 'UserCommissionController@store');
             Route::get('/record/{id}', 'UserCommissionController@record');
             Route::delete('/{id}', 'UserCommissionController@destroy');
-
         });
 
         Route::prefix('quotation_payments')->group(function () {
@@ -200,7 +194,6 @@ if($current_hostname) {
             Route::get('/tables', 'QuotationPaymentController@tables');
             Route::post('', 'QuotationPaymentController@store');
             Route::delete('/{quotation_payment}', 'QuotationPaymentController@destroy');
-
         });
 
         /**
@@ -217,7 +210,6 @@ if($current_hostname) {
             Route::get('/tables', 'TechnicalServicePaymentController@tables');
             Route::post('', 'TechnicalServicePaymentController@store');
             Route::delete('/{record_payment}', 'TechnicalServicePaymentController@destroy');
-
         });
 
         /**
@@ -232,7 +224,7 @@ if($current_hostname) {
             Route::get('/tables', 'GenerateDocumentController@tables');
             Route::post('/', 'GenerateDocumentController@store');
             Route::post('/customers', 'GenerateDocumentController@customers');
-//            Route::post('/store_item', 'GenerateDocumentController@storeItem');
+            //            Route::post('/store_item', 'GenerateDocumentController@storeItem');
         });
     });
 }

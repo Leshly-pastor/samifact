@@ -10,6 +10,7 @@ class Inventory extends ModelTenant
         'description',
         'item_id',
         'warehouse_id',
+        'inventory_reference_id',
         'warehouse_destination_id',
         'quantity',
     ];
@@ -29,6 +30,10 @@ class Inventory extends ModelTenant
         return $this->belongsTo(Item::class);
     }
 
+    public function inventory_references()
+    {
+        return $this->hasMany(InventoryReference::class);
+    }
     /**
      * Se usa en la relacion con el inventario kardex en modules/Inventory/Traits/InventoryTrait.php.
      * Tambien se debe tener en cuenta modules/Inventory/Providers/InventoryKardexServiceProvider.php y

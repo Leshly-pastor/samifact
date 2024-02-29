@@ -63,6 +63,11 @@ class DispatchResource extends JsonResource
             'send_to_pse' => $this->send_to_pse,
             'response_signature_pse' => optional($this->response_signature_pse)->message,
             'response_send_cdr_pse' => optional($this->response_send_cdr_pse)->message,
+            'print_ticket' => url('')."/print/dispatch/{$this->external_id}/ticket",
+            'print_a4' => url('')."/print/dispatch/{$this->external_id}/a4",
+            'print_a5' => url('')."/print/dispatch/{$this->external_id}/a5",
+            'print_ticket_58' => url('')."/print/dispatch/{$this->external_id}/ticket_58",
+            'print_ticket_50' => url('')."/print/dispatch/{$this->external_id}/ticket_50",
 
         ];
     }

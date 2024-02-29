@@ -39,12 +39,37 @@
                             </el-date-picker>
                         </template>
                         <template v-else>
-                            <el-input
-                                placeholder="Nombre del cliente"
-                                v-model="search.value"
-                                style="width: 100%"
-                            >
-                            </el-input>
+                            <template v-if="search.column == 'customer_id'">
+                                <el-select
+                                    v-model="search.value"
+                                    :loading="loading"
+                                    :remote-method="searchRemoteCustomers"
+                                    clearable
+                                    filterable
+                                    placeholder="Escriba el nombre o número de documento del cliente"
+                                    popper-class="el-select-customers"
+                                    remote
+                                >
+                                    <el-option
+                                        v-for="option in customers"
+                                        :key="option.id"
+                                        :label="option.description"
+                                        :value="option.id"
+                                    ></el-option>
+                                </el-select>
+                            </template>
+                            <template v-else>
+                                <el-input
+                                    :placeholder="`${
+                                        search.column == 'quotation_number'
+                                            ? 'Número de cotización'
+                                            : 'Nombre del cliente'
+                                    }`"
+                                    v-model="search.value"
+                                    style="width: 100%"
+                                >
+                                </el-input>
+                            </template>
                         </template>
                     </div>
                     <div class="col-lg-2 col-md-2 form-group">
@@ -177,6 +202,7 @@ import queryString from "query-string";
 
 export default {
     props: {
+        isIntegrateSystem: Boolean,
         isDriver: Boolean,
         resource: String,
         applyFilter: {
@@ -204,6 +230,8 @@ export default {
             series: [],
             search_by_plate: false,
             recordItem: null,
+            customers: [],
+            loading: false,
         };
     },
     computed: {},
@@ -220,10 +248,11 @@ export default {
             .get(`/${_.head(column_resource)}/columns`)
             .then((response) => {
                 this.columns = response.data;
-                console.log("🚀 ~ file: DataTableSaleNote.vue:223 ~ .then ~ columns:", this.columns)
                 this.search.column = _.head(Object.keys(this.columns));
             });
-
+        if (this.isIntegrateSystem) {
+            this.search.column = "customer_id";
+        }
         await this.$http
             .get(`/${_.head(column_resource)}/columns2`)
             .then((response) => {
@@ -234,6 +263,20 @@ export default {
         await this.getTotals();
     },
     methods: {
+        searchRemoteCustomers(input) {
+            if (input.length > 0) {
+                this.loading = true;
+                let parameters = `input=${input}&document_type_id=&operation_type_id=`;
+
+                this.$http
+                    .get(`/documents/search/customers?${parameters}`)
+                    .then((response) => {
+                        this.customers = response.data.customers;
+                    })
+                    .catch((error) => console.log(error))
+                    .finally(() => (this.loading = false));
+            }
+        },
         clickDownload(type) {
             window.open(
                 `/package-handler/export/${type}?${this.getQueryParameters()}`,

@@ -142,6 +142,7 @@ class InventoryKardex extends ModelTenant
         if (!empty($warehouse)) {
             $warehouseName = $warehouse->description;
         }
+
         $data = [
             'id' => $this->id,
             'item_name' => $item->description,
@@ -253,6 +254,9 @@ class InventoryKardex extends ModelTenant
                     $data['type_transaction'] = $inventory_kardexable->description;
                     $data['date_of_issue'] = isset($inventory_kardexable->date_of_issue) ? $inventory_kardexable->date_of_issue->format('Y-m-d') : '';
                     $data['guide_id'] = null;
+                    if ($inventory_kardexable->inventory_reference) {
+                        $data['reference'] = $inventory_kardexable->inventory_reference->description;
+                    }
 
                     $guide = Guide::query()->where('id', $inventory_kardexable->guide_id)->first();
                     if ($guide) {
@@ -289,8 +293,7 @@ class InventoryKardex extends ModelTenant
                 $data['date_of_issue'] = isset($inventory_kardexable->date_of_issue) ? $inventory_kardexable->date_of_issue->format('Y-m-d') : '';
                 break;
             case $models[6]: // Dispatch
-                if((isset($inventory_kardexable->reference_document_id) && $inventory_kardexable->reference_document->no_stock == false)){
-
+                if ((isset($inventory_kardexable->reference_document_id) && $inventory_kardexable->reference_document->no_stock == false)) {
                 }
                 $data['input'] = ($qty > 0) ? (isset($inventory_kardexable->reference_sale_note_id) || isset($inventory_kardexable->reference_order_note_id) || isset($inventory_kardexable->reference_document_id) ? "-" : $qty) : "-";
                 $data['output'] = ($qty < 0) ? (isset($inventory_kardexable->reference_sale_note_id) || isset($inventory_kardexable->reference_order_note_id) || (isset($inventory_kardexable->reference_document_id) && $inventory_kardexable->reference_document->no_stock == false)  ? "-" : $qty) : "-";
@@ -309,6 +312,14 @@ class InventoryKardex extends ModelTenant
                 $data['type_transaction'] = ($qty < 0) ? "Anulación Liquidacion Compra" : "Liquidacion Compra";
                 $data['date_of_issue'] = isset($inventory_kardexable->date_of_issue) ? $inventory_kardexable->date_of_issue->format('Y-m-d') : '';
                 break;
+        }
+        if ($inventory_kardexable->customer) {
+            $data['person_name'] = $inventory_kardexable->customer->name;
+            $data['person_number'] = $inventory_kardexable->customer->number;
+        }
+        if ($inventory_kardexable->supplier) {
+            $data['person_name'] = $inventory_kardexable->supplier->name;
+            $data['person_number'] = $inventory_kardexable->supplier->number;
         }
         $data['date_of_register'] = isset($inventory_kardexable->date_of_issue) ? $inventory_kardexable->date_of_issue->format('Y-m-d') : '';
         $decimalRound = 6; // Cantidad de decimales a aproximar
@@ -474,7 +485,7 @@ class InventoryKardex extends ModelTenant
                     $data['price_balance'] = (session('balance_item') > 0) ? round($total_saldo / session('balance_item'), 2) : 0;;
                     $data['total_balance'] = round(session('total_saldo') - session('cost_purchase') * abs($this->quantity), 2);
                     session(['total_saldo' => round(session('total_saldo') - session('cost_purchase') * abs($this->quantity), 2)]);
-                    $this->save_average_history( null,$inventory_kardexable->id, null, $data['purchase_cost'], $data['total_purchase_cost'], $data['price_balance'], $data['input'], $data['output'], $data['balance'], 'Venta', $data['total_balance'], $data['total_sales'], $data['sales_cost'], $data['number']);
+                    $this->save_average_history(null, $inventory_kardexable->id, null, $data['purchase_cost'], $data['total_purchase_cost'], $data['price_balance'], $data['input'], $data['output'], $data['balance'], 'Venta', $data['total_balance'], $data['total_sales'], $data['sales_cost'], $data['number']);
                     break;
                 case $models[3]: {
                         $transaction = '';

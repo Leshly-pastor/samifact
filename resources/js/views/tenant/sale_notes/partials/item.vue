@@ -1086,6 +1086,12 @@ export default {
 
         this.$eventHub.$on("selectWarehouseId", (warehouse_id) => {
             this.form.warehouse_id = warehouse_id;
+              let warehouse = this.warehousesDetail.find(
+                (warehouse) => warehouse.warehouse_id == warehouse_id
+            );
+            if (warehouse) {
+                this.form.unit_price_value = Number(warehouse.price).toFixed(2);
+            }
         });
         this.canCreateProduct();
     },
@@ -1419,7 +1425,8 @@ export default {
         //     this.form.affectation_igv_type_id = this.affectation_igv_types[0].id
         // },
         async create() {
-            console.log(this.person_type_id);
+            let {active_warehouse_prices} = this.configuration;
+            console.log("🚀 ~ file: item.vue:1429 ~ create ~ active_warehouse_prices:", active_warehouse_prices)
             this.titleDialog = this.isUpdateItem
                 ? " Editar Producto o Servicio"
                 : " Agregar Producto o Servicio";
@@ -1791,6 +1798,15 @@ export default {
             // if(this.form.quantity < this.getMinQuantity()){
             //     return this.$message.error(`La cantidad no puede ser inferior a ${this.getMinQuantity()}`);
             // }
+            let { affectation_igv_type_id: aff_id, unit_price_value: un_pr } =
+                this.form;
+            aff_id = Number(aff_id);
+            un_pr = Number(un_pr);
+            if (aff_id != 15 && un_pr <= 0) {
+                return this.$message.error(
+                    "El total debe ser mayor a 0 o elija tipo de afectación 'gravado bonificaciones'."
+                );
+            }
             this.validateQuantity();
 
             const validate_id_lote_selected = this.validateIdLoteSelected();

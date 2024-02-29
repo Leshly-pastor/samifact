@@ -207,6 +207,11 @@
         }
 
 
+        public function  technical_service_car()
+        {
+            return $this->hasOne(TechnicalServiceCar::class);
+        }
+
         /**
          * @param $value
          *
@@ -405,8 +410,11 @@
                 $has_document_sale_note = true;
                 $number_document_sale_note = ($this->sale_note) ? $this->sale_note->number_full : $this->document->number_full;
             }
-
+            $has_vehicle_format = TechnicalServiceCar::where('technical_service_id', $this->id)->exists();
+            $vehicle = TechnicalServiceCar::where('technical_service_id', $this->id)->first();
             $data = array_merge($this->toArray(), [
+                'has_vehicle_format' => $has_vehicle_format,
+                'vehicle' => $vehicle,
                 'id' => $this->id,
                 'soap_type_id' => $this->soap_type_id,
                 'cellphone' => $this->cellphone,

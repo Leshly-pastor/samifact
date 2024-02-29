@@ -219,7 +219,7 @@ if ($logo) {
             </td>
             <td class="text-center align-top">{{symbol_or_code( symbol_or_code($row->item->unit_type_id))}}</td>
             <td class="text-left align-top">
-                {!!$row->item->description!!} @if (!empty($row->item->presentation)) {!!$row->item->presentation->description!!} @endif
+                {!!$row->item->description!!}   
                 @if($row->attributes)
                     @foreach($row->attributes as $attr)
                         @if($attr->description != 'Número de Placa')

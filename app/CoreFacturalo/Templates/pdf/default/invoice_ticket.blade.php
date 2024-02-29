@@ -445,6 +445,7 @@
 
 
     @if ($document->transport)
+
         <p class="desc"><strong>Transporte de pasajeros</strong></p>
 
         @php
@@ -546,7 +547,81 @@
 
         </table>
     @endif
-
+    
+    @if($document->transport_dispatch)
+        @php
+             $transport_dispatch = $document->transport_dispatch;
+            $sender_identity_document_type = $transport_dispatch->sender_identity_document_type->description;
+            $recipient_identity_document_type = $transport_dispatch->recipient_identity_document_type->description;
+        @endphp
+         <p class="desc"><strong>Información de encomienda</strong></p>
+          <table class="full-width mt-3">
+            <tr>
+                <td
+                class="desc"
+                colspan="2"
+                >
+                <strong>REMITENTE</strong>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <p class="desc">{{ $sender_identity_document_type }}:</p>
+                </td>
+                <td>
+                    <p class="desc">{{ $transport_dispatch->sender_number_identity_document }}</p>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <p class="desc">Nombre:</p>
+                </td>
+                <td>
+                    <p class="desc">{{ $transport_dispatch->sender_passenger_fullname }}</p>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <p class="desc">Teléfono:</p>
+                </td>
+                <td>
+                    <p class="desc">{{ $transport_dispatch->sender_telephone }}</p>
+                </td>
+            </tr>
+            <tr>
+                <td
+                class="desc"
+                colspan="2"
+                >
+                <strong>DESTINATARIO</strong>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <p class="desc">{{ $recipient_identity_document_type }}:</p>
+                </td>
+                <td>
+                    <p class="desc">{{ $transport_dispatch->recipient_number_identity_document }}</p>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <p class="desc">Nombre:</p>
+                </td>
+                <td>
+                    <p class="desc">{{ $transport_dispatch->recipient_passenger_fullname }}</p>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <p class="desc">Teléfono:</p>
+                </td>
+                <td>
+                    <p class="desc">{{ $transport_dispatch->recipient_telephone }}</p>
+                </td>
+            </tr>
+        </table>
+    @endif
 
     @if (count($document->reference_guides) > 0)
         <br />
@@ -613,9 +688,7 @@
                             <br />ISC : {{ $row->total_isc }} ({{ $row->percentage_isc }}%)
                         @endif
 
-                        @if (!empty($row->item->presentation))
-                            {!! $row->item->presentation->description !!}
-                        @endif
+   
 
                         @foreach ($row->additional_information as $information)
                             @if ($information)

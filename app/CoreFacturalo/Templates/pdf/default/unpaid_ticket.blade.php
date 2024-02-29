@@ -139,17 +139,18 @@ if ($logo) {
                 <br/>ISC : {{ $row->total_isc }} ({{ $row->percentage_isc }}%)
             @endif
 
-            @if (!empty($row->item->presentation)) {!!$row->item->presentation->description!!} @endif
+              
 
             @if($row->total_plastic_bag_taxes > 0)
                 <br/>ICBPER : {{ $row->total_plastic_bag_taxes }}
             @endif
-
+            @isset($row->additional_information)
             @foreach($row->additional_information as $information)
                 @if ($information)
                     <br/>{{ $information }}
                 @endif
             @endforeach
+            @endisset
 
             @if($row->attributes)
                 @foreach($row->attributes as $attr)

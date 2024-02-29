@@ -375,12 +375,12 @@
                                 ></el-input>
                             </div>
                         </div>
-                        <div class="col-lg-4">
+                        <!-- <div class="col-lg-4">
                             <div class="form-group">
                                 <label class="control-label">N° placa semirremolque</label>
                                 <el-input v-model="form.secondary_license_plates.semitrailer"></el-input>
                             </div>
-                        </div>
+                        </div> -->
                     </div>
                 </div>
                 <hr>

@@ -17,6 +17,7 @@ class InventoryCollection extends ResourceCollection
         return $this->collection->transform(function($row, $key) {
             return [
                 'id' => $row->id,
+                'item_id' => $row->item_id,
                 'item_internal_id' => $row->item->internal_id,
                 'item_description' => $row->item->description,
                 'item_fulldescription' => ($row->item->internal_id) ? "{$row->item->internal_id} - {$row->item->description}" :$row->item->description,

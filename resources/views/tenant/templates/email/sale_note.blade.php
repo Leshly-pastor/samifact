@@ -44,7 +44,6 @@
 <body>
     <p>
         Estimad@:
-        {{-- @dump($message) --}}
         {{ $customer->name }}
         @if ($localmessage == null)
             , informamos que su nota de venta ha sido emitida exitosamente.

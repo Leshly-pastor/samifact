@@ -52,6 +52,16 @@
                                 ></el-option>
                             </el-select>
                         </template>
+                         <template v-else-if="search.column == 'quotation_number'">
+                            <el-input
+                                placeholder="Número de Cotización"
+                                v-model="search.value"
+                                style="width: 100%"
+                                prefix-icon="el-icon-search"
+                                @input="getRecords"
+                            >
+                            </el-input>
+                        </template>
                         <template v-else-if="search.column == 'unit_type_id'">
                             <el-select
                                 v-model="search.value"

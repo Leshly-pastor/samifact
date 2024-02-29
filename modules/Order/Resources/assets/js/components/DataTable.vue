@@ -35,7 +35,7 @@
                         </template>
                     </div>
                     <div class="col-lg-3 col-md-4 col-sm-12 pb-2">
-                        <el-button type="primary" v-if="typeUser == 'admin' &&  soapCompany != '03'" @click.prevent="clickGenerateDocuments()" >
+                        <el-button type="primary" v-if="typeUser == 'admin'" @click.prevent="clickGenerateDocuments()" >
                             Generar comprobantes
                         </el-button>
                     </div>
@@ -67,7 +67,10 @@
             </div>
         </div>
 
-        <generate-documents :showDialog.sync="showDialogDocuments"></generate-documents>
+        <generate-documents 
+        :soapCompany="soapCompany"
+        :configuration="configuration"
+        :showDialog.sync="showDialogDocuments"></generate-documents>
     </div>
 </template>
 
@@ -81,6 +84,7 @@
     export default {
         components: {GenerateDocuments},
         props: {
+            configuration: Object,
             resource: String,
             typeUser: String,
             soapCompany: String,

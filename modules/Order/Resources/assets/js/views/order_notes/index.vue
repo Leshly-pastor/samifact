@@ -73,6 +73,7 @@
             </div>
             <div class="card-body">
                 <data-table
+                    :configuration="configuration"
                     :resource="resource"
                     :typeUser="typeUser"
                     :soapCompany="soapCompany"
@@ -278,7 +279,7 @@
                                 v-if="
                                     row.state_type_id != '11' &&
                                         seller_can_generate_cpe === true &&
-                                        soapCompany != '03'
+                                        soapCompany != '03' && row.can_generate
                                 "
                                 type="button"
                                 class="btn waves-effect waves-light btn-sm btn-info"

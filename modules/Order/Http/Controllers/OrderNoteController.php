@@ -79,7 +79,7 @@ class OrderNoteController extends Controller
 
     public function index()
     {
-        $company = Company::select('soap_type_id')->first();
+        $company = Company::orderBy('id')->select('soap_type_id')->first();
         $soap_company = $company->soap_type_id;
         $configuration = Configuration::first();
 
@@ -163,7 +163,7 @@ class OrderNoteController extends Controller
     public function generateDocuments(Request $request)
     {
 
-         DB::connection('tenant')->transaction(function () use ($request) {
+        DB::connection('tenant')->transaction(function () use ($request) {
 
             foreach ($request->documents as $row) {
 
@@ -400,38 +400,40 @@ class OrderNoteController extends Controller
 
         return $record;
     }
-    function getSerie($establishment_id){
+    function getSerie($establishment_id)
+    {
         $series = Series::where('establishment_id', $establishment_id)
-        ->where('document_type_id', 'PD')
-        ->get();
+            ->where('document_type_id', 'PD')
+            ->get();
         $serie = $series->first();
         if ($serie) {
             $serie = $serie->number;
         }
         return $serie;
     }
-    public function checkItemFoodDealer(Request $request){
+    public function checkItemFoodDealer(Request $request)
+    {
         $items_id = $request->items_id;
         $customer_id = $request->customer_id;
         $date_of_issue = $request->date_of_issue;
         $errors = [];
-        foreach($items_id as $item_id){
+        foreach ($items_id as $item_id) {
             $item = Item::find($item_id);
             $item_food_dealer = PersonFoodDealer::where('item_id', $item_id)
-            ->where('person_id', $customer_id)
-            ->where('date_of_issue', $date_of_issue)
-            ->first();
-            if($item_food_dealer){
+                ->where('person_id', $customer_id)
+                ->where('date_of_issue', $date_of_issue)
+                ->first();
+            if ($item_food_dealer) {
                 $order_note = OrderNote::find($item_food_dealer->order_note_id);
                 $errors[] = "El item {$item->description} ya fue entregado en la orden de venta {$order_note->number_full} para la fecha {$date_of_issue}";
             }
-        } 
-        if(count($errors) > 0){
+        }
+        if (count($errors) > 0) {
             return [
                 'success' => false,
                 'errors' => $errors
             ];
-        }else{
+        } else {
             return [
                 'success' => true,
             ];
@@ -446,14 +448,14 @@ class OrderNoteController extends Controller
     public function store(OrderNoteRequest $request)
     {
 
-        try{
+        try {
             $data = $this->mergeArray($request);
             $is_food_dealer = BusinessTurn::isFoodDealer();
             /* @todo Deberia pasarse a facturalo para tenerlo como standar */
-             DB::connection('tenant')->transaction(function () use ($data,$is_food_dealer) {
+            DB::connection('tenant')->transaction(function () use ($data, $is_food_dealer) {
                 $series = Functions::valueKeyInArray($data, "prefix", null);
                 $serie = $this->getSerie($data['establishment_id']);
-                if($serie){
+                if ($serie) {
                     $data["prefix"] = $serie;
                 }
                 if (OrderNote::count() == 0 && $series) {
@@ -463,18 +465,31 @@ class OrderNoteController extends Controller
                     $data["number"] = $number;
                 }
                 $number = Functions::valueKeyInArray($data, "number", null);
-                if(!$number){
+                if (!$number) {
                     $last_id = OrderNote::orderBy('id', 'desc')
-                    ->where('prefix', $series)
-                    ->first();
-                    $data["number"] = $last_id->id + 1;
+                        ->where('prefix', $series)
+                        ->first();
+                    if ($last_id) {
+                        $data["number"] = $last_id->id + 1;
+                    } else {
+                        $data["number"] = 1;
+                    }
+                }
+                $configuration = Configuration::first();
+                if ($configuration->discount_order_note) {
+                    $data["discount_order_note"] = true;
                 }
                 $this->order_note = OrderNote::create($data);
-    
+
                 foreach ($data['items'] as $row) {
+                    $warehouse_id = Functions::valueKeyInArray($row, "warehouse_id", null);
+                    if ($warehouse_id &&  $warehouse_id == 0) {
+                        $warehouse = Warehouse::where('establishment_id', auth()->user()->establishment_id)->first();
+                        $row['warehouse_id'] = $warehouse->id;
+                    }
                     $this->generalSetIdLoteSelectedToItem($row);
                     $this->order_note->items()->create($row);
-                    if($is_food_dealer){
+                    if ($is_food_dealer) {
                         $person_id = $data['customer_id'];
                         $item_id = $row['item_id'];
                         $date_of_issue = $data['date_of_issue'];
@@ -486,11 +501,11 @@ class OrderNoteController extends Controller
                         $person_food_dealer->save();
                     }
                 }
-    
+
                 $this->setFilename();
                 $this->createPdf($this->order_note, "a4", $this->order_note->filename);
             });
-    
+
             return [
                 'success' => true,
                 'data' => [
@@ -501,7 +516,7 @@ class OrderNoteController extends Controller
                     'print_ticket' => $this->order_note->getUrlPrintPdf('ticket'),
                 ],
             ];
-        }catch(Exception $e){
+        } catch (Exception $e) {
             return [
                 'success' => false,
                 'message' => $e->getMessage()
@@ -651,7 +666,7 @@ class OrderNoteController extends Controller
                 $discount_global = 0;
                 $extra_by_item_description = 0;
                 foreach ($document->items as $it) {
-                
+
                     if ($it->discounts) {
                         $discount_global = $discount_global + 1;
                     }
@@ -757,7 +772,7 @@ class OrderNoteController extends Controller
     public function update(OrderNoteRequest $request)
     {
 
-         DB::connection('tenant')->transaction(function () use ($request) {
+        DB::connection('tenant')->transaction(function () use ($request) {
 
 
             $this->order_note = OrderNote::firstOrNew(['id' => $request['id']]);
@@ -817,7 +832,7 @@ class OrderNoteController extends Controller
     public function destroy_order_note_item($id)
     {
 
-         DB::connection('tenant')->transaction(function () use ($id) {
+        DB::connection('tenant')->transaction(function () use ($id) {
 
             $item = OrderNoteItem::findOrFail($id);
             $item->delete();
@@ -856,7 +871,7 @@ class OrderNoteController extends Controller
 
     public function voided($id)
     {
-         DB::connection('tenant')->transaction(function () use ($id) {
+        DB::connection('tenant')->transaction(function () use ($id) {
             $obj = OrderNote::find($id);
             $obj->VoidOrderNote();
             $obj->update();

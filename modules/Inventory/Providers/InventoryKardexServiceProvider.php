@@ -2,6 +2,7 @@
 
 namespace Modules\Inventory\Providers;
 
+use App\Models\Tenant\Configuration;
 use App\Models\Tenant\DocumentItem;
 use App\Models\Tenant\Document;
 use App\Models\Tenant\Item;
@@ -96,6 +97,7 @@ class InventoryKardexServiceProvider extends ServiceProvider
     }
 
 
+
     /**
      * Se dispara cuando se realiza una venta
      */
@@ -114,8 +116,13 @@ class InventoryKardexServiceProvider extends ServiceProvider
                 $warehouse = ($document_item->warehouse_id) ? $this->findWarehouse($this->findWarehouseById($document_item->warehouse_id)->establishment_id) : $this->findWarehouse();
                 //$this->createInventory($document_item->item_id, $factor * $document_item->quantity, $warehouse->id);
                 $this->createInventoryKardex($document_item->document, $document_item->item_id, ($factor * ($document_item->quantity * $presentationQuantity)), $warehouse->id);
-
-                if (!$document_item->document->sale_note_id && !$document_item->document->order_note_id && !$document_item->document->dispatch_id && !$document_item->document->sale_notes_relateds) {
+                $discounted_order_note = false;
+                //$document_item->document->order_note_id
+                if ($document_item->document->order_note_id) {
+                    $order_note = OrderNote::find($document_item->document->order_note_id);
+                    $discounted_order_note = (bool) $order_note->discounted_stock;
+                }
+                if (!$document_item->document->sale_note_id && !$discounted_order_note  && !$document_item->document->dispatch_id && !$document_item->document->sale_notes_relateds) {
                     $this->updateStock($document_item->item_id, ($factor * ($document_item->quantity * $presentationQuantity)), $warehouse->id);
                 } else {
                     if ($document_item->document->dispatch) {
@@ -137,8 +144,13 @@ class InventoryKardexServiceProvider extends ServiceProvider
                     $factor = ($document->document_type_id === '07') ? 1 : -1;
                     $warehouse = $this->findWarehouse();
                     $this->createInventoryKardex($document_item->document, $ind_item->id, ($factor * ($document_item->quantity * $presentationQuantity * $item_set_quantity)), $warehouse->id);
-
-                    if (!$document_item->document->sale_note_id && !$document_item->document->order_note_id && !$document_item->document->dispatch_id && !$document_item->document->sale_notes_relateds) {
+                    $discounted_order_note = false;
+                    //$document_item->document->order_note_id
+                    if ($document_item->document->order_note_id) {
+                        $order_note = OrderNote::find($document_item->document->order_note_id);
+                        $discounted_order_note = (bool) $order_note->discounted_stock;
+                    }
+                    if (!$document_item->document->sale_note_id && !$discounted_order_note && !$document_item->document->dispatch_id && !$document_item->document->sale_notes_relateds) {
                         $this->updateStock($ind_item->id, ($factor * ($document_item->quantity * $presentationQuantity * $item_set_quantity)), $warehouse->id);
                     } else {
                         if ($document_item->document->dispatch) {
@@ -240,7 +252,16 @@ class InventoryKardexServiceProvider extends ServiceProvider
 
                 // $this->createInventoryKardex($sale_note_item->sale_note, $sale_note_item->item_id, (-1 * ($sale_note_item->quantity * $presentationQuantity)), $warehouse->id);
                 $this->createInventoryKardexSaleNote($sale_note_item->sale_note, $sale_note_item->item_id, (-1 * ($sale_note_item->quantity * $presentationQuantity)), $warehouse->id, $sale_note_item->id);
-                if (!$sale_note_item->sale_note->order_note_id) $this->updateStock($sale_note_item->item_id, (-1 * ($sale_note_item->quantity * $presentationQuantity)), $warehouse->id);
+                // if (!$sale_note_item->sale_note->order_note_id)
+                $discounted_order_note = false;
+                if ($sale_note_item->sale_note->order_note_id) {
+                    $order_note = OrderNote::find($sale_note_item->sale_note->order_note_id);
+                    $discounted_order_note = (bool) $order_note->discounted_stock;
+                }
+                if (!$discounted_order_note) {
+                    $this->updateStock($sale_note_item->item_id, (-1 * ($sale_note_item->quantity * $presentationQuantity)), $warehouse->id);
+                }
+                // $this->updateStock($sale_note_item->item_id, (-1 * ($sale_note_item->quantity * $presentationQuantity)), $warehouse->id);
             } else {
 
                 $item = Item::findOrFail($sale_note_item->item_id);
@@ -253,7 +274,14 @@ class InventoryKardexServiceProvider extends ServiceProvider
                     $warehouse = $this->findWarehouse($sale_note_item->sale_note->establishment_id);
                     // $this->createInventoryKardex($sale_note_item->sale_note, $ind_item->id , (-1 * ($sale_note_item->quantity * $presentationQuantity)), $warehouse->id);
                     $this->createInventoryKardexSaleNote($sale_note_item->sale_note, $ind_item->id, (-1 * ($sale_note_item->quantity * $presentationQuantity * $item_set_quantity)), $warehouse->id, $sale_note_item->id);
-                    if (!$sale_note_item->sale_note->order_note_id) $this->updateStock($ind_item->id, (-1 * ($sale_note_item->quantity * $presentationQuantity * $item_set_quantity)), $warehouse->id);
+                    // if (!$sale_note_item->sale_note->order_note_id)
+                    $discounted_order_note = false;
+                    if ($sale_note_item->sale_note->order_note_id) {
+                        $order_note = OrderNote::find($sale_note_item->sale_note->order_note_id);
+                        $discounted_order_note = (bool) $order_note->discounted_stock;
+                    }
+                    if (!$discounted_order_note)
+                        $this->updateStock($ind_item->id, (-1 * ($sale_note_item->quantity * $presentationQuantity * $item_set_quantity)), $warehouse->id);
                 }
             }
 
@@ -390,6 +418,7 @@ class InventoryKardexServiceProvider extends ServiceProvider
         OrderNoteItem::created(function (OrderNoteItem $order_note_item) {
             /** @todo bloque repetido, buscar colocar en funcion */
             $item = $order_note_item->item;
+            $configuration = Configuration::first();
             $document = $order_note_item->order_note;
             $warehouse_id = $order_note_item->warehouse_id;
 
@@ -409,13 +438,15 @@ class InventoryKardexServiceProvider extends ServiceProvider
                     $this->findWarehouse($this->findWarehouseById($warehouse_id)->establishment_id) :
                     $this->findWarehouse();
                 //$this->createInventory($item_id, $factor * $order_note_item->quantity, $warehouse->id);
-                $this->createInventoryKardex($document, $item_id, $quanty, $warehouse->id);
-                if (!$document->sale_note_id && !$document->order_note_id && !$document->dispatch_id) {
-                    $this->updateStock($item_id, ($quanty), $warehouse->id);
-                } else {
-                    if ($document->dispatch) {
-                        if (!$document->dispatch->transfer_reason_type->discount_stock) {
-                            $this->updateStock($item_id, ($quanty), $warehouse->id);
+                if ($configuration->discount_order_note) {
+                    $this->createInventoryKardex($document, $item_id, $quanty, $warehouse->id);
+                    if (!$document->sale_note_id && !$document->order_note_id && !$document->dispatch_id) {
+                        $this->updateStock($item_id, ($quanty), $warehouse->id);
+                    } else {
+                        if ($document->dispatch) {
+                            if (!$document->dispatch->transfer_reason_type->discount_stock) {
+                                $this->updateStock($item_id, ($quanty), $warehouse->id);
+                            }
                         }
                     }
                 }
@@ -433,14 +464,16 @@ class InventoryKardexServiceProvider extends ServiceProvider
                     $warehouse = $this->findWarehouse();
                     $quanty = $factor * ($order_note_item->quantity * $presentationQuantity * $item_set_quantity);
 
-                    $this->createInventoryKardex($document, $item_id, ($quanty), $warehouse->id);
 
-                    if (!$document->sale_note_id && !$document->order_note_id && !$document->dispatch_id) {
-                        $this->updateStock($item_id, ($quanty), $warehouse->id);
-                    } else {
-                        if ($document->dispatch) {
-                            if (!$document->dispatch->transfer_reason_type->discount_stock) {
-                                $this->updateStock($item_id, ($quanty), $warehouse->id);
+                    if ($configuration->discount_order_note) {
+                        $this->createInventoryKardex($document, $item_id, ($quanty), $warehouse->id);
+                        if (!$document->sale_note_id && !$document->order_note_id && !$document->dispatch_id) {
+                            $this->updateStock($item_id, ($quanty), $warehouse->id);
+                        } else {
+                            if ($document->dispatch) {
+                                if (!$document->dispatch->transfer_reason_type->discount_stock) {
+                                    $this->updateStock($item_id, ($quanty), $warehouse->id);
+                                }
                             }
                         }
                     }

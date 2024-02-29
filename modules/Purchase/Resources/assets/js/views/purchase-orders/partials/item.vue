@@ -18,10 +18,9 @@
                                 <a href="#"
                                    @click.prevent="showDialogNewItem = true">[+ Nuevo]</a>
                             </label>
-                            <template
+                            <!-- <template
                                 v-if="!search_item_by_barcode"
-                                id="select-append"
-                            >
+                            > -->
                             <div class="el-input el-input-group el-input-group--append">
                                     <el-select
                                         id="select-width"
@@ -38,7 +37,6 @@
                                         remote
                                         @change="changeItem"
                                         @focus="focusSelectItem"
-                                        @visible-change="focusTotalItem"
                                     >
                                         <el-tooltip
                                             v-for="option in items"
@@ -61,27 +59,9 @@
                                             ></el-option>
                                         </el-tooltip>
                                     </el-select>
-                                    <div class="el-input-group__append">
-                                    <el-tooltip
-                                        slot="append"
-                                        :disabled="isUpdateItem"
-                                        class="item"
-                                        content="Ver Stock del Producto"
-                                        effect="dark"
-                                        placement="bottom"
-                                    >
-                                        <el-button
-                                            :disabled="isUpdateItem"
-                                            @click.prevent="
-                                                clickWarehouseDetail()
-                                            "
-                                        >
-                                            <i class="fa fa-search"></i>
-                                        </el-button>
-                                    </el-tooltip>
-                                    </div>
+                                
                                 </div>
-                            </template>
+                            <!-- </template>
                             <template v-else>
                                 <div class="el-input el-input-group el-input-group--append">
                                     <el-select
@@ -126,7 +106,7 @@
                                         </el-tooltip>
                                     </div>
                                 </div>
-                            </template>
+                            </template> -->
                             <small v-if="errors.item_id"
                                    class="text-danger"
                                    v-text="errors.item_id[0]"></small>
@@ -279,7 +259,7 @@
                                         </tr>
                                         </thead>
                                         <tbody>
-                                        <tr v-for="(row, index) in form.discounts">
+                                        <tr v-for="(row, index) in form.discounts" :key="index">
                                             <td>
                                                 <el-select v-model="row.discount_type_id"
                                                            @change="changeDiscountType(index)">
@@ -322,7 +302,7 @@
                                         </tr>
                                         </thead>
                                         <tbody>
-                                        <tr v-for="(row, index) in form.charges">
+                                        <tr v-for="(row, index) in form.charges" :key="index">
                                             <td>
                                                 <el-select v-model="row.charge_type_id"
                                                            @change="changeChargeType(index)">
@@ -364,7 +344,7 @@
                                         </tr>
                                         </thead>
                                         <tbody>
-                                        <tr v-for="(row, index) in form.attributes">
+                                        <tr v-for="(row, index) in form.attributes" :key="index">
                                             <td>
                                                 <el-select v-model="row.attribute_type_id"
                                                            filterable
@@ -454,7 +434,8 @@ export default {
         'showDialog',
         'currencyTypeIdActive',
         'exchangeRateSale',
-        'percentageIgv'
+        'percentageIgv',
+        'item'
     ],
     components: {itemForm, LotsForm, 'vue-ckeditor': VueCkeditor.component},
 
@@ -502,7 +483,7 @@ export default {
             },
         }
     },
-    created() {
+   async created() {
         this.loadConfiguration()
         // this.$store.commit('setConfiguration', this.configuration)
         this.initForm()
@@ -516,7 +497,7 @@ export default {
             this.warehouses = response.data.warehouses
             // this.filterItems()
         })
-
+       
         this.$eventHub.$on('reloadDataItems', (item_id) => {
             this.reloadDataItems(item_id)
         })
@@ -652,8 +633,15 @@ export default {
         // initializeFields() {
         //     this.form.affectation_igv_type_id = this.affectation_igv_types[0].id
         // },
-        create() {
+        async create() {
             //     this.initializeFields()
+             if(this.item){
+               await this.reloadDataItems(this.item.item_id);
+                this.form.quantity = this.item.quantity;
+                this.form.unit_price_value =
+                    this.item.input_unit_price_value ||
+                    this.item.unit_price;
+        }
         },
         clickAddDiscount() {
             this.form.discounts.push({
@@ -756,6 +744,9 @@ export default {
             // this.initializeFields()
             this.$emit('add', this.row)
             this.setFocusSelectItem()
+            if(this.item){
+                this.close()
+            }
 
         },
         focusSelectItem() {
@@ -778,7 +769,17 @@ export default {
                 this.form.quantity = _.round((this.total_item / this.form.unit_price), 4)
             }
         },
-        reloadDataItems(item_id) {
+       async reloadDataItems(item_id) {
+            if(item_id){
+                await this.$http
+                    .get(`/${this.resource}/search/item/${item_id}`)
+                    .then((response) => {
+                        this.items = response.data.items;
+                        this.form.item_id = item_id;
+                        this.changeItem();
+                    });
+                    return;
+            }
             this.$http.get(`/${this.resource}/table/items`).then((response) => {
                 this.items = response.data
                 this.form.item_id = item_id

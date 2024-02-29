@@ -383,12 +383,12 @@
                         >
                     </div>
                 </div>
-                <div class="col-lg-6">
+                <div class="col-lg-6" v-if="form.order_note && !form.order_note.discounted_stock">
                     <label for="quantity">Número de comprobantes</label>
                     <el-input-number v-model="quantity" :min="1">
                     </el-input-number>
                 </div>
-                <div class="col-12" v-if="isSending">
+                <div class="col-12"  v-if="isSending && form.order_note && !form.order_note.discounted_stock">
                     <el-progress :percentage="progress"></el-progress>
                 </div>
                 <!-- propinas -->

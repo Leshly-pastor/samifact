@@ -85,6 +85,8 @@ class TransportController extends Controller
                     'is_default' => $row->is_default,
                     'tuc' => $row->tuc,
                     'secondary_plate_number' => $row->secondary_plate_number,
+                    'auth_plate_primary' => $row->auth_plate_primary,
+                    'auth_plate_secondary' => $row->auth_plate_secondary,
                 ];
             });
     }

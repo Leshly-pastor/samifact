@@ -143,7 +143,7 @@
 
         <document-options
             :recordId="this.documentId"
-            :showDialogOptions="showDialogOptions"
+            :showDialogOptions.sync="showDialogOptions"
             :showClose="showDialogClose"
             :type="this.type"
             :configuration="this.configuration"
@@ -173,6 +173,9 @@
     export default {
         props: ['showDialog', 'documentId','external','configuration'],
         mixins: [deletable],
+        components: {
+            DocumentOptions
+        },
         data() {
             return {
                 title: null,

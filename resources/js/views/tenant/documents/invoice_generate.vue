@@ -18,46 +18,74 @@
                     <div class="col-xl-12 col-md-12 col-12 align-self-center">
                         <div class="card">
                             <div class="row">
-                                <div
-                                    class="col-xl-2 col-md-2 col-12 align-self-center"
-                                >
-                                    <template v-if="establishment.length > 1">
-                                        <logo
-                                            :path_logo="establishment_auth.logo"
-                                            :position_class="'text-left'"
-                                            url="/"
-                                        ></logo>
-                                    </template>
-                                    <template v-else>
-                                        <logo
-                                            :path_logo="
-                                                company.logo != null
-                                                    ? `/storage/uploads/logos/${company.logo}`
-                                                    : ''
-                                            "
-                                            :position_class="'text-left'"
-                                            url="/"
-                                        ></logo>
-                                    </template>
-                                </div>
-                                <div
-                                    class="col-xl-2 col-md-2 col-12 pl-2 align-self-center"
-                                >
-                                    <address
-                                        class="mb-0"
-                                        style="line-height: initial"
+                                <template v-if="configuration.multi_companies">
+                                    <div
+                                        class="col-xl-4 col-md-4 col-12 align-self-center"
                                     >
-                                        <span class="font-weight-bold">{{
-                                            company.name
-                                        }}</span>
-                                        <br />
-                                        <span
-                                            v-if="establishment.address != '-'"
-                                            >{{ establishment.address }}
-                                        </span>
-                                        <br />
-                                    </address>
-                                </div>
+                                        <label> Empresas </label>
+                                        <el-select
+                                            v-model="form.company_id"
+                                            @change="changeCompany"
+                                        >
+                                            <el-option
+                                                v-for="(
+                                                    option, idx
+                                                ) in companies"
+                                                :key="idx"
+                                                :label="option.name"
+                                                :value="option.id"
+                                            ></el-option>
+                                        </el-select>
+                                    </div>
+                                </template>
+                                <template v-else>
+                                    <div
+                                        class="col-xl-2 col-md-2 col-12 align-self-center"
+                                    >
+                                        <template
+                                            v-if="establishment.length > 1"
+                                        >
+                                            <logo
+                                                :path_logo="
+                                                    establishment_auth.logo
+                                                "
+                                                :position_class="'text-left'"
+                                                url="/"
+                                            ></logo>
+                                        </template>
+                                        <template v-else>
+                                            <logo
+                                                :path_logo="
+                                                    company.logo != null
+                                                        ? `/storage/uploads/logos/${company.logo}`
+                                                        : ''
+                                                "
+                                                :position_class="'text-left'"
+                                                url="/"
+                                            ></logo>
+                                        </template>
+                                    </div>
+                                    <div
+                                        class="col-xl-2 col-md-2 col-12 pl-2 align-self-center"
+                                    >
+                                        <address
+                                            class="mb-0"
+                                            style="line-height: initial"
+                                        >
+                                            <span class="font-weight-bold">{{
+                                                company.name
+                                            }}</span>
+                                            <br />
+                                            <span
+                                                v-if="
+                                                    establishment.address != '-'
+                                                "
+                                                >{{ establishment.address }}
+                                            </span>
+                                            <br />
+                                        </address>
+                                    </div>
+                                </template>
                                 <div
                                     class="col-xl-2 col-md-2 col-12 pl-2 align-self-center"
                                 >
@@ -503,6 +531,98 @@
                                     </div>
                                     <!-- sistema por puntos -->
                                 </div>
+                                <div
+                                    class="row"
+                                    v-if="
+                                        configuration.show_favorites_documents
+                                    "
+                                >
+                                    <div class="form-group col-12 m">
+                                        <el-select
+                                            v-model="favorite_item_id"
+                                            :loading="loading_search_favorite"
+                                            :remote-method="searchRemoteItems"
+                                            filterable
+                                            @change="clickAddFavoriteItem"
+                                            placeholder="Buscar"
+                                            remote
+                                        >
+                                            <el-option
+                                                style="
+                                                    height: 100px;
+                                                    margin-bottom: 5px;
+                                                "
+                                                v-for="option in favoriteItems"
+                                                :key="option.id"
+                                                :label="option.full_description"
+                                                :value="option.id"
+                                            >
+                                                <img
+                                                    style="
+                                                        float: left;
+                                                        width: 100px;
+                                                        height: 100px;
+                                                        margin-right: 10px;
+                                                    "
+                                                    :src="
+                                                        option.image_url_medium
+                                                    "
+                                                />
+                                                <span style="float: left">{{
+                                                    option.full_description
+                                                }}</span>
+                                                <div style="float: right">
+                                                    <span
+                                                        style="
+                                                            color: red;
+                                                            font-size: 13px;
+                                                        "
+                                                    >
+                                                        STOCK
+                                                        {{ option.stock }}</span
+                                                    >
+                                                    <span
+                                                        style="
+                                                            color: #8492a6;
+                                                            font-size: 13px;
+                                                            margin-right: 10px;
+                                                        "
+                                                    >
+                                                        {{
+                                                            option.currency_type_symbol
+                                                        }}
+
+                                                        {{
+                                                            option.sale_unit_price
+                                                        }}</span
+                                                    >
+                                                    <br />
+                                                    <el-button
+                                                        type="primary"
+                                                        size="mini"
+                                                        @click.prevent="
+                                                            seeDetails(option)
+                                                        "
+                                                    >
+                                                        Ver detalle
+                                                    </el-button>
+                                                    <el-button
+                                                        type="primary"
+                                                        size="mini"
+                                                        @click.prevent="
+                                                            clickWarehouseDetail(
+                                                                option.warehouses,
+                                                                option.item_unit_types
+                                                            )
+                                                        "
+                                                    >
+                                                        Stock
+                                                    </el-button>
+                                                </div>
+                                            </el-option>
+                                        </el-select>
+                                    </div>
+                                </div>
                                 <div class="row" v-if="configuration.college">
                                     <div
                                         :class="{
@@ -756,6 +876,26 @@
                                             "
                                         >
                                             Datos de transporte
+                                        </button>
+                                    </el-tooltip>
+                                </div>
+                                <div
+                                    class="col-xl-3 col-md-3 col-12 pb-2"
+                                    v-if="isActiveBussinessTurn('transport')"
+                                >
+                                    <el-tooltip
+                                        content="Datos para transporte de pasajeros"
+                                        effect="dark"
+                                        placement="bottom-end"
+                                    >
+                                        <button
+                                            type="button"
+                                            class="btn btn-outline-primary mb-1"
+                                            @click.prevent="
+                                                clickAddDispatchTransport
+                                            "
+                                        >
+                                            Datos de encomienda
                                         </button>
                                     </el-tooltip>
                                 </div>
@@ -1590,7 +1730,28 @@
                                                         height: 40px !important;
                                                     "
                                                 >
-                                                    {{ row.quantity }}
+                                                    <template
+                                                        v-if="isEditingItems"
+                                                    >
+                                                        <el-input
+                                                            v-model="
+                                                                row.quantity
+                                                            "
+                                                            type="number"
+                                                            class="text-end"
+                                                            step="any"
+                                                            @input="
+                                                                changeQuantityItem(
+                                                                    row,
+                                                                    index
+                                                                )
+                                                            "
+                                                        >
+                                                        </el-input>
+                                                    </template>
+                                                    <template v-else>
+                                                        {{ row.quantity }}
+                                                    </template>
                                                 </td>
 
                                                 <td
@@ -1599,20 +1760,142 @@
                                                         height: 40px !important;
                                                     "
                                                 >
-                                                    {{ currency_type.symbol }}
-                                                    <template v-if="row.meter">
-                                                        {{
-                                                            getFormatUnitPriceRow(
-                                                                row.unit_price /
-                                                                    row.meter
-                                                            )
-                                                        }}
+                                                    <template
+                                                        v-if="isEditingItems"
+                                                    >
+                                                        <el-input
+                                                            v-model="
+                                                                row.unit_value_edit
+                                                            "
+                                                            type="number"
+                                                            step="0.0001"
+                                                            class="text-end"
+                                                            @input="
+                                                                changeUnitValueItem(
+                                                                    row,
+                                                                    index
+                                                                )
+                                                            "
+                                                        >
+                                                            <span
+                                                                slot="prepend"
+                                                                >{{
+                                                                    currency_type.symbol
+                                                                }}</span
+                                                            >
+                                                        </el-input>
                                                     </template>
                                                     <template v-else>
                                                         {{
+                                                            currency_type.symbol
+                                                        }}
+                                                        <template
+                                                            v-if="row.meter"
+                                                        >
+                                                            {{
+                                                                getFormatUnitPriceRow(
+                                                                    row.unit_price /
+                                                                        row.meter
+                                                                )
+                                                            }}
+                                                        </template>
+                                                        <template v-else>
+                                                            {{
+                                                                getFormatUnitPriceRow(
+                                                                    row.unit_value
+                                                                )
+                                                            }}
+                                                        </template>
+                                                    </template>
+                                                </td>
+                                                <td
+                                                    class="text-end"
+                                                    style="
+                                                        height: 40px !important;
+                                                    "
+                                                >
+                                                    <template
+                                                        v-if="isEditingItems"
+                                                    >
+                                                        <el-input
+                                                            v-model="
+                                                                row.unit_price_edit
+                                                            "
+                                                            type="number"
+                                                            step="0.0001"
+                                                            class="text-end"
+                                                            @input="
+                                                                changeUnitPriceItem(
+                                                                    row,
+                                                                    index
+                                                                )
+                                                            "
+                                                        >
+                                                            <span
+                                                                slot="prepend"
+                                                                >{{
+                                                                    currency_type.symbol
+                                                                }}</span
+                                                            >
+                                                        </el-input>
+                                                    </template>
+                                                    <template v-else>
+                                                        {{
+                                                            currency_type.symbol
+                                                        }}
+                                                        {{
                                                             getFormatUnitPriceRow(
-                                                                row.unit_value
+                                                                row.unit_price
                                                             )
+                                                        }}
+                                                    </template>
+                                                </td>
+
+                                                <td
+                                                    class="text-end"
+                                                    style="
+                                                        height: 40px !important;
+                                                    "
+                                                >
+                                                    <template
+                                                        v-if="isEditingItems"
+                                                    >
+                                                        <el-input
+                                                            v-model="
+                                                                row.total_value
+                                                            "
+                                                            @input="
+                                                                changeTotalValueItem(
+                                                                    row,
+                                                                    index
+                                                                )
+                                                            "
+                                                            step="0.01"
+                                                            type="number"
+                                                            class="text-end"
+                                                        >
+                                                            <span
+                                                                slot="prepend"
+                                                                >{{
+                                                                    currency_type.symbol
+                                                                }}</span
+                                                            >
+                                                        </el-input>
+                                                    </template>
+                                                    <template v-else>
+                                                        {{
+                                                            currency_type.symbol
+                                                        }}
+                                                        {{
+                                                            !isNaN(
+                                                                row.total_value
+                                                            )
+                                                                ? Number(
+                                                                      row.total_value
+                                                                  ).toFixed(
+                                                                      decimalQuantity
+                                                                  )
+                                                                : ""
                                                         }}
                                                     </template>
                                                 </td>
@@ -1622,47 +1905,43 @@
                                                         height: 40px !important;
                                                     "
                                                 >
-                                                    {{ currency_type.symbol }}
-                                                    {{
-                                                        getFormatUnitPriceRow(
-                                                            row.unit_price
-                                                        )
-                                                    }}
-                                                </td>
-
-                                                <td
-                                                    class="text-end"
-                                                    style="
-                                                        height: 40px !important;
-                                                    "
-                                                >
-                                                    {{ currency_type.symbol }}
-                                                    {{
-                                                        !isNaN(row.total_value)
-                                                            ? Number(
-                                                                  row.total_value
-                                                              ).toFixed(
-                                                                  decimalQuantity
-                                                              )
-                                                            : ""
-                                                    }}
-                                                </td>
-                                                <td
-                                                    class="text-end"
-                                                    style="
-                                                        height: 40px !important;
-                                                    "
-                                                >
-                                                    {{ currency_type.symbol }}
-                                                    {{
-                                                        !isNaN(row.total)
-                                                            ? Number(
-                                                                  row.total
-                                                              ).toFixed(
-                                                                  decimalQuantity
-                                                              )
-                                                            : ""
-                                                    }}
+                                                    <template
+                                                        v-if="isEditingItems"
+                                                    >
+                                                        <el-input
+                                                            v-model="row.total"
+                                                            type="number"
+                                                            step="0.01"
+                                                            class="text-end"
+                                                            @input="
+                                                                changeTotalItem(
+                                                                    row,
+                                                                    index
+                                                                )
+                                                            "
+                                                        >
+                                                            <span
+                                                                slot="prepend"
+                                                                >{{
+                                                                    currency_type.symbol
+                                                                }}</span
+                                                            >
+                                                        </el-input>
+                                                    </template>
+                                                    <template v-else>
+                                                        {{
+                                                            currency_type.symbol
+                                                        }}
+                                                        {{
+                                                            !isNaN(row.total)
+                                                                ? Number(
+                                                                      row.total
+                                                                  ).toFixed(
+                                                                      decimalQuantity
+                                                                  )
+                                                                : ""
+                                                        }}
+                                                    </template>
                                                 </td>
 
                                                 <td
@@ -2613,6 +2892,9 @@
                                                                                                 format="dd/MM/yyyy"
                                                                                                 type="date"
                                                                                                 value-format="yyyy-MM-dd"
+                                                                                                :picker-options="
+                                                                                                    pickerOptions
+                                                                                                "
                                                                                             ></el-date-picker>
                                                                                         </td>
                                                                                         <td>
@@ -3225,6 +3507,12 @@
             @addDocumentTransport="addDocumentTransport"
         ></document-transport-form>
 
+        <document-dispatch-form
+            :showDialog.sync="showDialogFormDispatch"
+            :dispatch="form.transport_dispatch"
+            @addDispatchTransport="addDispatchTransport"
+        ></document-dispatch-form>
+
         <document-detraction
             :currency-type-id-active="form.currency_type_id"
             :detraction="form.detraction"
@@ -3236,7 +3524,12 @@
             :detractionDecimalQuantity="detractionDecimalQuantity"
             @addDocumentDetraction="addDocumentDetraction"
         ></document-detraction>
-
+        <warehouses-detail
+            :item_unit_types="item_unit_types"
+            :showDialog.sync="showWarehousesDetail"
+            :warehouses="warehousesDetail"
+        >
+        </warehouses-detail>
         <store-item-series-index
             :show-dialog.sync="showDialogItemSeriesIndex"
             :item="recordItem"
@@ -3244,15 +3537,18 @@
             @success="successItemSeries"
         ></store-item-series-index>
         <result-excel-products
-        :showDialog.sync="showResultExcelProducts"
-        :registered="registered"
-        :errors="errors"
-        :hash="hash"
+            :showDialog.sync="showResultExcelProducts"
+            :registered="registered"
+            :errors="errors"
+            :hash="hash"
         ></result-excel-products>
     </div>
 </template>
 
 <style>
+.text-end .el-input__inner {
+    text-align: right;
+}
 .input-custom {
     width: 50% !important;
 }
@@ -3300,6 +3596,7 @@ import {
 import Logo from "../companies/logo.vue";
 import DocumentHotelForm from "../../../../../modules/BusinessTurn/Resources/assets/js/views/hotels/form.vue";
 import DocumentTransportForm from "../../../../../modules/BusinessTurn/Resources/assets/js/views/transports/form.vue";
+import DocumentDispatchForm from "../../../../../modules/BusinessTurn/Resources/assets/js/views/transports/dispatch_form.vue";
 import DocumentDetraction from "./partials/detraction.vue";
 import moment from "moment";
 import { mapActions, mapState } from "vuex/dist/vuex.mjs";
@@ -3308,6 +3605,7 @@ import StoreItemSeriesIndex from "../Store/ItemSeriesIndex";
 import DocumentReportCustomer from "./partials/report_customer.vue";
 import SetTip from "@components/SetTip.vue";
 import ResultExcelProducts from "@components/ResultExcelProducts.vue";
+import WarehousesDetail from "./../items/partials/warehouses.vue";
 export default {
     props: [
         "idUser",
@@ -3337,7 +3635,9 @@ export default {
         DocumentTransportForm,
         DocumentReportCustomer,
         SetTip,
-        ResultExcelProducts
+        ResultExcelProducts,
+        WarehousesDetail,
+        DocumentDispatchForm,
     },
     mixins: [
         functions,
@@ -3348,11 +3648,24 @@ export default {
     ],
     data() {
         return {
-
+            showDialogFormDispatch: false,
+            warehousesDetail: [],
+            item_unit_types: [],
+            showWarehousesDetail: false,
+            favorite_item_id: null,
+            loading_search_favorite: false,
+            pickerOptions: {
+                disabledDate(time) {
+                    return time.getTime() < Date.now();
+                },
+            },
+            favoriteItems: [],
+            isEditingItems: false,
+            companies: [],
             hash: null,
             showResultExcelProducts: false,
-            registered:0,
-            errors:[],
+            registered: 0,
+            errors: [],
             split_base: false,
             loading: false,
             person_type_id: null,
@@ -3465,6 +3778,7 @@ export default {
             report_to_customer_id: null,
             retention_query_data: null,
             yearCollegeName: null,
+            timer: null,
         };
     },
     computed: {
@@ -3521,16 +3835,21 @@ export default {
     async created() {
         this.loadConfiguration();
         this.$store.commit("setConfiguration", this.configuration);
-
+        console.log(
+            "🚀 ~ file: invoice_generate.vue:3700 ~ created ~ this.configuration:",
+            this.configuration
+        );
+        this.isEditingItems = this.configuration.edit_info_documents;
         let { decimal_quantity } = this.configuration;
         if (decimal_quantity) {
             this.decimalQuantity = decimal_quantity;
         }
         await this.initForm();
-
+        await this.searchRemoteItems();
         try {
             this.loading = true;
             const response = await this.$http.get(`/${this.resource}/tables`);
+            this.companies = response.data.companies;
             this.document_types = response.data.document_types_invoice;
             this.document_types_guide = response.data.document_types_guide;
             this.currency_types = response.data.currency_types;
@@ -3561,10 +3880,6 @@ export default {
                 this.document_types.length > 0
                     ? this.document_types[0].id
                     : null;
-            console.log(
-                "🚀 ~ file: invoice_generate.vue:3373 ~ created ~ this.form.document_type_id:",
-                this.form.document_type_id
-            );
             this.form.operation_type_id =
                 this.operation_types.length > 0
                     ? this.operation_types[0].id
@@ -3612,10 +3927,6 @@ export default {
             await this.$http
                 .get(`/documents/${this.documentId}/show`)
                 .then((response) => {
-                    console.log(
-                        "🚀 ~ file: invoice_generate.vue:3413 ~ .then ~ response:",
-                        response
-                    );
                     this.onSetFormData(response.data.data);
                 })
                 .finally(() => (this.loading_submit = false));
@@ -3629,7 +3940,6 @@ export default {
             await this.$http
                 .get(`/store/record/${this.table}/${this.tableId}`)
                 .then((response) => {
-                    console.log("🚀 ~ file: invoice_generate.vue:3632 ~ .then ~ response:", response)
                     this.onSetFormData(response.data.data);
                 })
                 .finally(() => (this.loading_submit = false));
@@ -3660,9 +3970,6 @@ export default {
                             this.percentage_igv
                         );
                     });
-                    console.log(
-                        "🚀 ~ file: invoice_generate.vue:3458 ~ .then ~ .:"
-                    );
                 });
         }
 
@@ -3681,9 +3988,6 @@ export default {
                         return this.setItemFromResponse(i, itemsParsed);
                     });
                     this.form.items = itemsResponse.map((i) => {
-                        console.log(
-                            "🚀 ~ file: invoice_generate.vue:3476 ~ this.form.items=itemsResponse.map ~ .:"
-                        );
                         return calculateRowItem(
                             i,
                             this.form.currency_type_id,
@@ -3734,34 +4038,199 @@ export default {
         this.formatTooltip(20);
     },
     methods: {
-       async uploadFileNewItems(event) {
+        clickAddFavoriteItem() {
+            let item = this.favoriteItems.find(
+                (item) => item.id == this.favorite_item_id
+            );
+            if (!item) return;
+            item.quantity = 1;
+            this.changeItem(item);
+            this.favorite_item_id = null;
+        },
+        clickWarehouseDetail(warehouses, item_unit_types) {
+            this.warehousesDetail = warehouses;
+            this.item_unit_types = item_unit_types;
+            this.showWarehousesDetail = true;
+        },
+        async searchRemoteItems(input) {
+            this.loading_search_favorite = true;
+            let parameters = `input=${input || ""}&favorite=1`;
+
+            await this.$http
+                .get(`/${this.resource}/search-items?${parameters}`)
+                .then((response) => {
+                    this.favoriteItems = response.data.items;
+                    this.loading_search_favorite = false;
+                });
+        },
+        changeTotalItem(item, index) {
+            let total = item.total;
+            let total_value = item.total_value;
+            let quantity = item.quantity;
+            let unit_value = total_value / quantity;
+            let unit_price = total / quantity;
+            item.item.unit_price = unit_price;
+            this.form.items[index] = calculateRowItem(
+                item,
+                this.form.currency_type_id,
+                this.form.exchange_rate_sale,
+                this.percentage_igv
+            );
+            this.form.items[index].unit_value_edit = _.round(unit_value, 4);
+            this.form.items[index].unit_price_edit = _.round(unit_price, 4);
+            this.$forceUpdate();
+            this.calculateTotal();
+        },
+
+        changeTotalValueItem(item, index) {
+            if (this.timer) clearTimeout(this.timer);
+            this.timer = setTimeout(() => {
+                let has_igv = item.item.has_igv;
+                let percentage_igv = item.percentage_igv;
+                let total_value = item.total_value;
+                let quantity = item.quantity;
+                let unit_value = total_value / quantity;
+
+                let unit_price = 0;
+                if (has_igv) {
+                    unit_price = unit_value * (1 + percentage_igv / 100);
+                } else {
+                    unit_price = unit_value;
+                }
+                item.item.unit_price = unit_price;
+                this.form.items[index] = calculateRowItem(
+                    item,
+                    this.form.currency_type_id,
+                    this.form.exchange_rate_sale,
+                    this.percentage_igv
+                );
+                this.form.items[index].unit_value_edit = _.round(unit_value, 4);
+                this.form.items[index].unit_price_edit = _.round(unit_price, 4);
+                this.$forceUpdate();
+                this.calculateTotal();
+            }, 150);
+        },
+        changeUnitPriceItem(item, index) {
+            let {
+                percentage_igv,
+                item: { has_igv },
+            } = item;
+            let unit_value = 0;
+            if (has_igv) {
+                unit_value = item.unit_price_edit / (1 + percentage_igv / 100);
+            } else {
+                unit_value = item.unit_price_edit;
+            }
+            let unit_price = item.unit_price_edit;
+            item.item.unit_price = unit_price;
+            this.form.items[index] = calculateRowItem(
+                item,
+                this.form.currency_type_id,
+                this.form.exchange_rate_sale,
+                this.percentage_igv
+            );
+            this.form.items[index].unit_value_edit = _.round(unit_value, 4);
+            this.form.items[index].unit_price_edit = _.round(unit_price, 4);
+            this.$forceUpdate();
+            this.calculateTotal();
+        },
+        changeUnitValueItem(item, index) {
+            if (this.timer) clearTimeout(this.timer);
+            this.timer = setTimeout(() => {
+                let {
+                    percentage_igv,
+                    item: { has_igv },
+                    unit_value_edit,
+                } = item;
+                let unit_price = 0;
+                if (has_igv) {
+                    unit_price = unit_value_edit * (1 + percentage_igv / 100);
+                } else {
+                    unit_price = unit_value_edit;
+                }
+                item.item.unit_price = unit_price;
+                this.form.items[index] = calculateRowItem(
+                    item,
+                    this.form.currency_type_id,
+                    this.form.exchange_rate_sale,
+                    this.percentage_igv
+                );
+                this.form.items[index].unit_price_edit = _.round(unit_price, 4);
+                this.form.items[index].unit_value_edit = _.round(
+                    unit_value_edit,
+                    4
+                );
+                this.$forceUpdate();
+                this.calculateTotal();
+            }, 150);
+        },
+        changeQuantityItem(item, index) {
+            let quantity = item.quantity;
+            if (quantity < 1) {
+                this.$message({
+                    type: "warning",
+                    message: "La cantidad no puede ser menor a 1",
+                });
+                item.quantity = 1;
+                return;
+            }
+            this.form.items[index] = calculateRowItem(
+                item,
+                this.form.currency_type_id,
+                this.form.exchange_rate_sale,
+                this.percentage_igv
+            );
+            this.$forceUpdate();
+            this.calculateTotal();
+        },
+        async changeCompany() {
+            try {
+                this.loading = true;
+                const response = await this.$http.get(
+                    `/documents/tables-company/${this.form.company_id}`
+                );
+                if (response.status == 200) {
+                    let { data } = response;
+                    let { series, establishment } = data;
+                    // this.all_series = series;
+                    this.form.establishment = establishment;
+                    this.$store.commit("setAllSeries", series);
+                    this.filterSeries();
+                }
+            } catch (e) {
+            } finally {
+                this.loading = false;
+            }
+        },
+        async uploadFileNewItems(event) {
             let file = event.target.files[0];
-       
 
             let url = `/items/items-document-news`;
             //mandar el archivo por post a esa url
             let formData = new FormData();
             formData.append("file", file);
-            formData.append("type","documents");
-            try{
-                this.loading=true;
-                  const response = await this.$http.post(url, formData);
-  
-            if (response.status == 200) {
-                const { data:{data} } = response;
-                let items = data.items;
+            formData.append("type", "documents");
+            try {
+                this.loading = true;
+                const response = await this.$http.post(url, formData);
 
-                for (let i = 0; i < items.length; i++) {
-                    const item = items[i];
-                    this.changeItem(item);
+                if (response.status == 200) {
+                    const {
+                        data: { data },
+                    } = response;
+                    let items = data.items;
+
+                    for (let i = 0; i < items.length; i++) {
+                        const item = items[i];
+                        this.changeItem(item);
+                    }
                 }
-            }
 
-            //limpiar el input file 
-            event.target.value = "";
-            }catch(e){
+                //limpiar el input file
+                event.target.value = "";
+            } catch (e) {
                 console.log(e);
-            }finally{
+            } finally {
                 this.loading = false;
             }
         },
@@ -3770,35 +4239,36 @@ export default {
             this.registered = 0;
             this.hash = null;
             let file = event.target.files[0];
-       
 
             let url = `/items/items-document`;
             //mandar el archivo por post a esa url
             let formData = new FormData();
             formData.append("file", file);
-            formData.append("type","documents");
-            try{
-                this.loading=true;
-                  const response = await this.$http.post(url, formData);
-  
-            if (response.status == 200) {
-                const { data:{data} } = response;
-                let items = data.items;
-                this.registered = data.registered;
-                this.errors = data.errors;
-                this.hash = data.hash;
-                for (let i = 0; i < items.length; i++) {
-                    const item = items[i];
-                    this.changeItem(item);
-                }
-            }
+            formData.append("type", "documents");
+            try {
+                this.loading = true;
+                const response = await this.$http.post(url, formData);
 
-            //limpiar el input file 
-            this.showResultExcelProducts = true;
-            event.target.value = "";
-            }catch(e){
+                if (response.status == 200) {
+                    const {
+                        data: { data },
+                    } = response;
+                    let items = data.items;
+                    this.registered = data.registered;
+                    this.errors = data.errors;
+                    this.hash = data.hash;
+                    for (let i = 0; i < items.length; i++) {
+                        const item = items[i];
+                        this.changeItem(item);
+                    }
+                }
+
+                //limpiar el input file
+                this.showResultExcelProducts = true;
+                event.target.value = "";
+            } catch (e) {
                 console.log(e);
-            }finally{
+            } finally {
                 this.loading = false;
             }
         },
@@ -3886,10 +4356,6 @@ export default {
         },
         formatItems(item) {
             let oldItem = this.createItem(item);
-
-            console.log(
-                "🚀 ~ file: invoice_generate.vue:3595 ~ formatItems ~ row:"
-            );
             let row = calculateRowItem(oldItem, "PEN", 1, 0.18);
 
             this.addRow(row);
@@ -4041,6 +4507,8 @@ export default {
             this.errors = {};
             this.split_base = false;
             this.form = {
+                transport_dispatch: {},
+                company_id: null,
                 dispatch_ticket_pdf_quantity: 1,
                 dispatch_ticket_pdf: false,
                 child_id: null,
@@ -4176,10 +4644,6 @@ export default {
                     { id: this.form.items[index].affectation_igv_type_id }
                 );
             }
-
-            console.log(
-                "🚀 ~ file: invoice_generate.vue:3879 ~ changeRowFreeAffectationIgv ~ .:"
-            );
             this.form.items[index] = await calculateRowItem(
                 row,
                 this.form.currency_type_id,
@@ -4278,15 +4742,32 @@ export default {
                 let tempItem = itemsParsed.find(
                     (ip) => ip.item_id == item.id || ip.id == item.id
                 );
+                console.log(
+                    "🚀 ~ file: invoice_generate.vue:4716 ~ setItemFromResponse ~ tempItem:",
+                    tempItem
+                );
                 if (tempItem !== undefined) {
                     item.quantity = tempItem.quantity;
                 }
             }
-
+            const unit_price_form_item_response = this.getPriceFromItemResponse(
+                item,
+                itemsParsed
+            );
+            if (unit_price_form_item_response > 0)
+                item.item.unit_price = unit_price_form_item_response;
             // item.quantity = itemsParsed.find(ip => ip.item_id == item.id).quantity;
             item.warehouse_id = null;
 
             return item;
+        },
+        getPriceFromItemResponse(item, itemsParsed) {
+            const group_items = itemsParsed.filter(
+                (ip) => ip.item_id == item.id || ip.id == item.id
+            );
+
+            let [row] = group_items;
+            return parseFloat(row.unit_price);
         },
         getQuantityFromItemResponse(item, itemsParsed) {
             const group_items = itemsParsed.filter(
@@ -4342,10 +4823,28 @@ export default {
             }
         },
         async onSetFormData(data) {
-            console.log(
-                "🚀 ~ file: invoice_generate.vue:4078 ~ onSetFormData ~ data:",
-                data
+            let exchange_rate_sale = this.form.exchange_rate_sale;
+            let exchange_rate_sale_today = parseFloat(
+                this.form.exchange_rate_sale
             );
+            let exchange_rate_sale_sale = parseFloat(data.exchange_rate_sale);
+            if (exchange_rate_sale_sale != exchange_rate_sale_today) {
+                await this.$confirm(
+                    `El tipo de cambio de la cotización es ${exchange_rate_sale_sale}, y el tipo de cambio de hoy es ${exchange_rate_sale_today}.`,
+                    "TIPO DE CAMBIO",
+                    {
+                        confirmButtonText: `Cambiar a ${exchange_rate_sale_today}`,
+                        cancelButtonText: `Mantener en ${exchange_rate_sale_sale}`,
+                        type: "warning",
+                    }
+                )
+                    .then(() => {
+                        exchange_rate_sale = this.form.exchange_rate_sale;
+                    })
+                    .catch(() => {
+                        exchange_rate_sale = data.exchange_rate_sale;
+                    });
+            }
             this.currency_type = await _.find(this.currency_types, {
                 id: data.currency_type_id,
             });
@@ -4373,6 +4872,7 @@ export default {
             this.form.customer_id = data.customer_id;
             this.form.currency_type_id = data.currency_type_id;
             // this.form.exchange_rate_sale = data.exchange_rate_sale;
+            this.form.exchange_rate_sale = exchange_rate_sale;
             this.form.external_id = data.external_id;
             this.form.reference_data = data.reference_data;
             this.form.dispatch_ticket_pdf = data.dispatch_ticket_pdf;
@@ -4513,7 +5013,7 @@ export default {
 
             this.establishment = data.establishment;
 
-            this.changeDateOfIssue();
+            // this.changeDateOfIssue();
             // await this.filterCustomers();
             this.updateChangeDestinationSale();
 
@@ -5155,6 +5655,9 @@ export default {
         clickAddDocumentHotel() {
             this.showDialogFormHotel = true;
         },
+        clickAddDispatchTransport() {
+            this.showDialogFormDispatch = true;
+        },
         clickAddDocumentTransport() {
             this.showDialogFormTransport = true;
         },
@@ -5163,6 +5666,9 @@ export default {
         },
         addDocumentTransport(transport) {
             this.form.transport = transport;
+        },
+        addDispatchTransport(dispatch) {
+            this.form.transport_dispatch = dispatch;
         },
         changeIsReceivable() {},
         clickAddPayment() {
@@ -5425,7 +5931,6 @@ export default {
             this.calculateAmountToPayments();
         },
         async changeDetractionType() {
-            // console.log("🚀 ~ file: invoice_generate.vue:5185 ~ changeDetractionType ~ this.form:", this.form)
             if (this.form.detraction) {
                 let transport = this.form.operation_type_id == "1004";
 
@@ -5631,6 +6136,10 @@ export default {
                     this.form.date_of_issue
                 ).then((response) => {
                     this.form.exchange_rate_sale = response;
+                    console.log(
+                        "🚀 ~ file: invoice_generate.vue:6109 ~ ).then ~ response:",
+                        response
+                    );
                 });
             } catch (e) {
                 this.form.exchange_rate_sale = 1;
@@ -5672,6 +6181,13 @@ export default {
             this.$store.commit("setSeries", series);
             this.form.series_id =
                 this.series.length > 0 ? this.series[0].id : null;
+            if (this.configuration.multi_companies) {
+                let [serie] = series;
+                if (serie && serie.next_number) {
+                    console.log("seteando");
+                    this.form.number = serie.next_number;
+                }
+            }
         },
         filterCustomers() {
             if (
@@ -5733,6 +6249,11 @@ export default {
             this.form.guides.splice(index, 1);
         },
         addRow(row) {
+            if (this.configuration.edit_info_documents) {
+                let { unit_value, unit_price } = row;
+                row.unit_value_edit = _.round(unit_value, 4);
+                row.unit_price_edit = _.round(unit_price, 4);
+            }
             if (this.form.seller_id) {
                 row.seller_id = this.form.seller_id;
             }
@@ -5943,7 +6464,6 @@ export default {
                 //sum discount no base
                 this.total_discount_no_base +=
                     this.sumDiscountsNoBaseByItem(row);
-
                 // isc
                 total_isc += parseFloat(row.total_isc);
                 total_base_isc += parseFloat(row.total_base_isc);
@@ -5978,12 +6498,10 @@ export default {
 
             this.form.subtotal = _.round(total, 2);
             this.form.total = _.round(total - this.total_discount_no_base, 2);
-
             // this.form.subtotal = _.round(total + this.form.total_plastic_bag_taxes, 2)
             // this.form.total = _.round(total + this.form.total_plastic_bag_taxes - this.total_discount_no_base, 2)
 
             if (this.enabled_discount_global) this.discountGlobal();
-
             if (this.prepayment_deduction) this.discountGlobalPrepayment();
 
             if (["1001", "1004"].includes(this.form.operation_type_id))
@@ -6236,16 +6754,7 @@ export default {
         },
         validatePaymentDestination() {
             let error_by_item = 0;
-
-            console.log(
-                "🚀 ~ file: invoice_generate.vue:5894 ~ this.form.payments.forEach ~ this.form.payments:",
-                this.form.payments
-            );
             this.form.payments.forEach((item) => {
-                console.log(
-                    "🚀 ~ file: invoice_generate.vue:5889 ~ this.form.payments.forEach ~ item:",
-                    item
-                );
                 if (!["05", "08", "09"].includes(item.payment_method_type_id)) {
                     if (item.payment_destination_id == null) error_by_item++;
                 }
@@ -6256,6 +6765,10 @@ export default {
             };
         },
         async submit() {
+            if (this.configuration.multi_companies && !this.form.company_id) {
+                this.$message.error("Debe seleccionar una empresa");
+                return false;
+            }
             if (this.configuration.enabled_dispatch_ticket_pdf) {
                 this.form.dispatch_ticket_pdf = true;
             }
@@ -6373,13 +6886,26 @@ export default {
             if (this.cash_id) {
                 this.form.cash_id = this.cash_id;
             }
+            if (this.configuration.multi_companies) {
+                let serie = _.find(this.series, { id: this.form.series_id });
+                this.form.series = serie.number;
+            } else {
+                delete this.form.establishment;
+                delete this.form.series;
+            }
             this.$http
                 .post(path, this.form)
                 .then((response) => {
                     try {
                         if (response.data.success) {
                             this.$eventHub.$emit("reloadDataItems", null);
+                            let company_id = this.form.company_id;
+
                             this.resetForm();
+                            if (this.configuration.multi_companies) {
+                                this.form.company_id = company_id;
+                                this.changeCompany();
+                            }
                             this.documentNewId = response.data.data.id;
                             console.log(response);
                             this.showOptionsDialog(response);
@@ -6395,7 +6921,7 @@ export default {
                             this.$message.error(response.data.message);
                         }
                     } catch (e) {
-                        location.href = "/documents";
+                        // location.href = "/documents";
                     }
                 })
                 .catch((error) => {
@@ -6607,7 +7133,7 @@ export default {
             this.form.date_of_due = moment().format("YYYY-MM-DD");
             this.form.fee.push({
                 id: null,
-                date: moment().format("YYYY-MM-DD"),
+                date: moment().add(1, "days").format("YYYY-MM-DD"),
                 currency_type_id: this.form.currency_type_id,
                 amount: 0,
             });
@@ -6750,7 +7276,6 @@ export default {
             return series.map((o) => o["series"]).join(", ");
         },
         async clickAddItem(form) {
-      
             let extra = form.item.extra;
 
             // if (this.validateTotalItem().total_item) return;
@@ -6784,7 +7309,6 @@ export default {
                 id: affectation_igv_type_id,
             });
 
-       
             let row = calculateRowItem(
                 form,
                 this.form.currency_type_id,

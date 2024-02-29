@@ -36,7 +36,9 @@ use Modules\Purchase\Models\FixedAssetPurchase;
 use App\Models\Tenant\{
     BillOfExchange,
     BillOfExchangeDocument,
+    BillOfExchangeDocumentPay,
     BillOfExchangePayment,
+    BillOfExchangePaymentPay,
     CashDocumentCredit,
     CashDocument,
     DocumentItem,
@@ -171,6 +173,8 @@ class OptionController extends Controller
     }
     public function deleteDocuments(Request $request)
     {
+        BillOfExchangePaymentPay::query()->delete();
+        BillOfExchangeDocumentPay::query()->delete();
         BillOfExchangePayment::query()->delete();
         BillOfExchangeDocument::query()->delete();
         BillOfExchange::query()->delete();
@@ -188,6 +192,7 @@ class OptionController extends Controller
         $quantity = Document::where('soap_type_id', '01')->count();
         //Document
         $this->deleteInventoryKardex(Document::class);
+        $this->deleteHotelRent(Document::class);
         Document::where('soap_type_id', '01')
         ->whereIn('document_type_id', ['07', '08'])->delete();
 
@@ -329,6 +334,22 @@ class OptionController extends Controller
         }
     }
 
+    
+
+    private function deleteHotelRent($model, $records = null){
+
+        if(!$records){
+            $records = $model::where('soap_type_id', '01')->get();
+        }
+
+        $this->delete_quantity += $records->count();
+
+        foreach ($records as $record) {
+
+            $record->hotelRent()->delete();
+
+        }
+    }
     private function updateStockAfterDelete(){
 
         // if($this->delete_quantity > 0){

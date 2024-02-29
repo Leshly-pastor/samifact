@@ -177,6 +177,8 @@ class DocumentCollection extends ResourceCollection
                 $btn_check_voided_pse = true;
             }
             return [
+                'sent_it_email' => $email_send_it,
+                'alter_company' => $row->alter_company,
                 'btn_pdf_voided' => $btn_pdf_voided,
                 'bill_of_exchange_id' => $row->bill_of_exchange_id,
                 'btn_check_voided_pse' => $btn_check_voided_pse, 

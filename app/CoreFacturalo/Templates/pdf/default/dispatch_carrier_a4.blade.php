@@ -89,12 +89,23 @@ if ($logo) {
 
         @if($company->mtc_auth)
         <tr>
-            <td>Número de autorización MTC: {{ $company->mtc_auth }}</td>
+            <td colspan="2">Número de autorización MTC: {{ $company->mtc_auth }}</td>
         </tr>
         @endif
     @if($document->transport_data)
         <tr>
             <td>Número de placa del vehículo: {{ $document->transport_data['plate_number'] }}</td>
+            @if (isset($document->transport_data['auth_plate_primary']))
+            <td>Autorización de placa principal: {{ $document->transport_data['auth_plate_primary'] }}</td>
+        @endif
+        </tr>
+        <tr>
+            @if (isset($document->transport_data['secondary_plate_number']))
+            <td>Número de placa secundaria del vehículo: {{ $document->transport_data['secondary_plate_number'] }}</td>
+        @endif
+        @if (isset($document->transport_data['auth_plate_secondary']))
+            <td>Autorización de placa secundaria: {{ $document->transport_data['auth_plate_secondary'] }}</td>
+        @endif
         </tr>
         <tr>
             <td>Modelo del vehículo: {{ $document->transport_data['model'] }}</td>
@@ -146,7 +157,7 @@ if ($logo) {
                     {!!$row->item->description!!}
                 @endif
 
-                @if (!empty($row->item->presentation)) {!!$row->item->presentation->description!!} @endif
+                  
 
                 @if($row->attributes)
                     @foreach($row->attributes as $attr)

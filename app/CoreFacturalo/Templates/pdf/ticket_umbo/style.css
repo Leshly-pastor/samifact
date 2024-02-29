@@ -1,7 +1,11 @@
 body {
     font-size: 12px;
-    font-family: Arial, sans-serif;
+    line-height: 1.5;
+
+    font-family: 'Arial Narrow', Arial, sans-serif;
+    font-weight: 100;
     margin: 125px;
+  letter-spacing: -1px;
 }
 table {
     border-spacing: 0;
@@ -17,7 +21,7 @@ table {
     font-size: 16px;
 }
 .font-bold {
-    font-weight: bold;
+    /* font-weight: bold; */
 }
 
 .company_logo {
@@ -31,6 +35,7 @@ table {
   max-height: 80px
 }
 th{
+  letter-spacing: -1px;
   font-weight: normal;
 }
 .contain {object-fit: cover;}
@@ -114,52 +119,56 @@ th{
 
 /* Headings */
 h1, h2, h3, h4, h5, h6 {
-    font-weight: 200;
+    /* font-weight: 200; */
     letter-spacing: -1px;
 }
 
 h1 {
     font-size: 32px;
     line-height: 44px;
-    font-weight: 500;
+    /* font-weight: 500; */
 }
 
 h2 {
     font-size: 24px;
-    font-weight: 500;
+    /* font-weight: 500; */
     line-height: 42px;
 }
 
 h3 {
     font-size: 18px;
-    font-weight: 400;
+    /* font-weight: 400; */
     letter-spacing: normal;
     line-height: 24px;
 }
 
 h4 {
     font-size: 16px;
-    font-weight: 400;
+    /* font-weight: 400; */
     letter-spacing: normal;
     line-height: 27px;
 }
 
 h5 {
     font-size: 13px;
-    font-weight: 300;
+    /* font-weight: 300; */
     letter-spacing: normal;
     line-height: 18px;
 }
 
 h6 {
     font-size: 10px;
-    font-weight: 300;
+    /* font-weight: 300; */
     letter-spacing: normal;
     line-height: 18px;
 }
 
 table, tr, td, th {
     font-size: 12px !important;
+    line-height: 1.5 !important;
+    font-family: Arial, sans-serif !important;
+    letter-spacing: -1px !important;
+    font-weight: 100 !important;
 }
 
 p {

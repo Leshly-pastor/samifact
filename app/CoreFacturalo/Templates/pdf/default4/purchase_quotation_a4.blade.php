@@ -98,7 +98,7 @@ if ($logo) {
             </td>
             <td class="text-center align-top">{{symbol_or_code( symbol_or_code($row->item->unit_type_id))}}</td>
             <td class="text-left">
-                {!!$row->item->description!!} @if (!empty($row->item->presentation)) {!!$row->item->presentation->description!!} @endif
+                {!!$row->item->description!!}   
 
             </td>
         </tr>

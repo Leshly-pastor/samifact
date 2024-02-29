@@ -109,6 +109,7 @@ if ($hostname) {
                 Route::get('', 'ItemSizeStockController@index')->name('tenant.item-sizes.index');
                 // Route::post('/', 'ItemSizeStockController@store');
                 Route::get('/records', 'ItemSizeStockController@records');
+                Route::put('/size/{id}', 'ItemSizeStockController@updateSize');
                 // Route::get('/tables', 'ItemSizeStockController@tables');
                 // Route::get('/update_state', 'ItemSizeStockController@update_state');
                 Route::get('/columns', 'ItemSizeStockController@columns');

@@ -73,7 +73,7 @@
                     {!!$row->item->description!!}
                 @endif
 
-                @if (!empty($row->item->presentation)) {!!$row->item->presentation->description!!} @endif
+                  
 
                 @if($row->item->is_set == 1)
                 <br>

@@ -139,7 +139,7 @@ class ReportSummarySalesController extends Controller
             $records->whereIn('users.id', $sellers);
         }
         if ($establishment_id) {
-            $records->where('establishment_id', $establishment_id);
+            $records->where('documents.establishment_id', $establishment_id);
         }
         $records->whereRaw('NOT EXISTS (SELECT * FROM document_payments WHERE document_payments.document_id = documents.id) OR (SELECT SUM(payment) FROM document_payments WHERE document_payments.document_id = documents.id) < documents.total');
 
@@ -173,7 +173,7 @@ class ReportSummarySalesController extends Controller
             $saleNotesQuery->whereIn('users.id', $sellers);
         }
         if ($establishment_id) {
-            $saleNotesQuery->where('establishment_id', $establishment_id);
+            $saleNotesQuery->where('sale_notes.establishment_id', $establishment_id);
         }
         if($person_id){
             $saleNotesQuery->where('customer_id', $person_id);

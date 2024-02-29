@@ -191,7 +191,7 @@ $establishment = $document->establishment;
                     {!!$row->item->description!!}
                 @endif
 
-                @if (!empty($row->item->presentation)) {!!$row->item->presentation->description!!} @endif
+                  
 
                 @isset($row->item->attributes)
                     @foreach($row->item->attributes as $attr)

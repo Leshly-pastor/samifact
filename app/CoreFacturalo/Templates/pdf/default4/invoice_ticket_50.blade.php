@@ -309,7 +309,7 @@ if ($logo) {
                     {!!$row->item->description!!}
                 @endif
 
-                @if (!empty($row->item->presentation)) {!!$row->item->presentation->description!!} @endif
+                  
 
                 @foreach($row->additional_information as $information)
                     @if ($information)

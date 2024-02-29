@@ -202,9 +202,7 @@
                         @else
                             {!! $row->item->description !!}
                         @endif
-                        @if (!empty($row->item->presentation))
-                            {!! $row->item->presentation->description !!}
-                        @endif
+   
                         @isset($row->item->sizes_selected)
                         @if (count($row->item->sizes_selected)>0)
                             @foreach ($row->item->sizes_selected as $size)

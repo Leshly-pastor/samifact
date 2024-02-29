@@ -241,7 +241,7 @@ class ProcessInventoryReport implements ShouldQueue
             foreach ($items as $row) {
                 $item = $row->item;
                 $data[] = [
-                    'laboratory' => optional($item->cat_digemid)->nom_titular,
+                'laboratory' => optional($item->cat_digemid)->nom_titular,
                 'num_reg_san' => optional($item->cat_digemid)->num_reg_san,
                 'kardex_quantity' => (float) $row->kardex_quantity ?? 0,
                 'lots_group' => $item->lots_group->transform(function ($row, $key) {
@@ -262,7 +262,7 @@ class ProcessInventoryReport implements ShouldQueue
 
                     'name' => $this->stripInvalidXml($item->description),
             
-                    'description' => htmlspecialchars($item->name, ENT_XML1),
+                    'description' => $this->stripInvalidXml($row->name),
 
                     'item_category_name' => optional($item->category)->name,
 
@@ -284,7 +284,7 @@ class ProcessInventoryReport implements ShouldQueue
     {
 
         $query = ItemWarehouse::with(['warehouse', 'item' => function ($query) {
-            $query->select('id', 'barcode', 'internal_id', 'description', 'category_id', 'brand_id', 'stock_min', 'sale_unit_price', 'purchase_unit_price', 'model', 'date_of_due');
+            $query->select('id', 'barcode', 'internal_id', 'description','name', 'category_id', 'brand_id', 'stock_min', 'sale_unit_price', 'purchase_unit_price', 'model', 'date_of_due');
             $query->with(['category', 'brand', 'cat_digemid','lots_group']);
             $query->without(['item_type', 'unit_type', 'currency_type', 'warehouses', 'item_unit_types', 'tags']);
         }])
@@ -312,7 +312,7 @@ class ProcessInventoryReport implements ShouldQueue
             //$query->where('stock', 0);
 
             $query = ItemWarehouse::with(['warehouse', 'item' => function ($query) {
-                $query->select('id', 'barcode', 'internal_id', 'description', 'category_id', 'brand_id', 'stock_min', 'sale_unit_price', 'purchase_unit_price', 'model', 'date_of_due');
+                $query->select('id', 'barcode', 'internal_id', 'description', 'name', 'category_id','brand_id', 'stock_min', 'sale_unit_price', 'purchase_unit_price', 'model', 'date_of_due');
                 $query->with(['category', 'brand', 'cat_digemid','lots_group']);
                 $query->without(['item_type', 'unit_type', 'currency_type', 'warehouses', 'item_unit_types', 'tags']);
             }])
@@ -332,7 +332,7 @@ class ProcessInventoryReport implements ShouldQueue
             //$add = ($stock > $item->stock_min);
 
             $query = ItemWarehouse::with(['warehouse', 'item' => function ($query) {
-                $query->select('id', 'barcode', 'internal_id', 'description', 'category_id', 'brand_id', 'stock_min', 'sale_unit_price', 'purchase_unit_price', 'model', 'date_of_due');
+                $query->select('id', 'barcode', 'internal_id', 'description','name', 'category_id', 'brand_id', 'stock_min', 'sale_unit_price', 'purchase_unit_price', 'model', 'date_of_due');
                 $query->with(['category', 'brand', 'cat_digemid','lots_group']);
                 $query->without(['item_type', 'unit_type', 'currency_type', 'warehouses', 'item_unit_types', 'tags']);
             }])

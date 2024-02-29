@@ -233,7 +233,7 @@ $establishment = $document->establishment;
                 @else
                     {!!$row->item->description!!}
                 @endif
-                @if (!empty($row->item->presentation)) {!!$row->item->presentation->description!!} @endif
+                  
                 @if($row->attributes)
                     @foreach($row->attributes as $attr)
                         <br/>{!! $attr->description !!} : {{ $attr->value }}
@@ -251,7 +251,7 @@ $establishment = $document->establishment;
                         {{$item}}<br>
                     @endforeach
                 @endif
-                @if($row->item->extra_attr_value != '')
+                @if(isset($row->item->extra_attr_value) && $row->item->extra_attr_value != '')
                     <br/><span style="font-size: 9px">{{$row->item->extra_attr_name}}: {{ $row->item->extra_attr_value }}</span>
                 @endif
             </td>

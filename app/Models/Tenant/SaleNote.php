@@ -12,6 +12,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Query\Builder;
+use Modules\BusinessTurn\Models\SaleNoteTransport;
+use Modules\BusinessTurn\Models\SaleNoteTransportDispatch;
 use Modules\Hotel\Models\HotelRent;
 use Modules\Item\Models\WebPlatform;
 use Modules\Order\Models\OrderNote;
@@ -134,7 +136,7 @@ use Modules\Suscription\Models\Tenant\SuscriptionPayment;
  * @property-read int|null                                  $kardexes_count
  * @property-read int|null                                  $sale_note_payments_count
  */
-class SaleNote extends ModelTenant
+class   SaleNote extends ModelTenant
 {
     use UsesTenantConnection;
     use SellerIdTrait;
@@ -871,7 +873,13 @@ class SaleNote extends ModelTenant
             $has_agency_dispatch = AgencyDispatchTable::where('dispatch_order_id',$dispatch_order["id"])->count() > 0;
 
         }
+
+        $payments_methods = $this->payments->map(function ($row) {
+            return $row["payment_method_type"]["description"];
+        
+        });
         return [
+            'payments_methods' => $payments_methods,
             'quotation_id' => $this->quotation_id,
             'has_agency_dispatch' => $has_agency_dispatch,
             'state_payment_id' => $this->state_payment_id,
@@ -905,9 +913,15 @@ class SaleNote extends ModelTenant
             'document_id' => $this->document_id,
             'documents' => $documents->transform(function ($row) {
                 /** @var Document $row */
+                $email_send_it = false;
+                $send_it = EmailSendLog::Document()->FindRelationId($row->id)->get();
+                if (count($send_it) > 0) {
+                    $email_send_it = true;
+                }
                 return [
                     'id' => $row->id,
                     'number_full' => $row->number_full,
+                    'email_send_it' => $email_send_it,
                 ];
             }),
             'btn_generate' => $btn_generate,
@@ -1060,6 +1074,12 @@ class SaleNote extends ModelTenant
             ->wherein("$item_table_name.id", $items)
             ->get();
     }
+    public function transport(){
+        return $this->hasOne(SaleNoteTransport::class);
+    }
+    public function transport_dispatch(){
+        return $this->hasOne(SaleNoteTransportDispatch::class);
+    }
     /**
      * Devuelve el vendedor asociado, Si seller id es nulo, devolverá el usuario del campo user.
      *
@@ -1197,6 +1217,7 @@ class SaleNote extends ModelTenant
             /** @var SaleNotePayment $payment */
             $payments[] = $payment->toArray();
         }
+     
         $attributes = $this->attributes;
 
         $customer = Person::find($this->customer_id);
@@ -1214,7 +1235,6 @@ class SaleNote extends ModelTenant
         $datos_del_cliente_o_receptor = $customer->toArray();
         $empty_ob = (object)[];
         $data = [
-
             'prefix' => $this->prefix,
             'series_id' => 10,
             'establishment_id' => null,

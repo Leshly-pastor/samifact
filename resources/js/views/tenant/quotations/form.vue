@@ -660,7 +660,33 @@
                                 </table>
                             </div>
                         </div>
-
+                        <div class="row mt-2">
+                            <div class="col-12" v-if="isIntegrateSystem">
+                                <div
+                                    class="form-group"
+                                    :class="{
+                                        'has-danger': errors.description,
+                                    }"
+                                >
+                                    <label class="control-label"
+                                        >Observación
+                                    </label>
+                                    <el-input
+                                        type="textarea"
+                                        :rows="3"
+                                        v-model="form.description"
+                                        maxlength="1000"
+                                        show-word-limit
+                                    >
+                                    </el-input>
+                                    <small
+                                        class="text-danger"
+                                        v-if="errors.description"
+                                        v-text="errors.description[0]"
+                                    ></small>
+                                </div>
+                            </div>
+                        </div>
                         <div class="row mt-2">
                             <div class="col-md-12">
                                 <el-collapse v-model="activePanel" accordion>
@@ -1200,29 +1226,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-12" v-if="isIntegrateSystem">
-                        <div
-                            class="form-group"
-                            :class="{
-                                'has-danger': errors.description,
-                            }"
-                        >
-                            <label class="control-label">Observación </label>
-                            <el-input
-                                type="textarea"
-                                :rows="3"
-                                v-model="form.description"
-                                maxlength="1000"
-                                show-word-limit
-                            >
-                            </el-input>
-                            <small
-                                class="text-danger"
-                                v-if="errors.description"
-                                v-text="errors.description[0]"
-                            ></small>
-                        </div>
-                    </div>
+
                     <div class="form-actions text-end mt-4">
                         <el-button @click.prevent="close()">Cancelar</el-button>
                         <el-button
@@ -1250,6 +1254,7 @@
             :percentage-igv="percentage_igv"
             :currency-types="currency_types"
             :show-option-change-currency="true"
+            :business-turns.sync="business_turns"
             @add="addRow"
         ></quotation-form-item>
 
@@ -1328,11 +1333,13 @@ export default {
         Logo,
         TermsCondition,
         "vue-ckeditor": VueCkeditor.component,
-        ResultExcelProducts
+        ResultExcelProducts,
     },
     mixins: [functions, exchangeRate],
     data() {
         return {
+            business_turns: [],
+
             hash: null,
             showResultExcelProducts: false,
             registered: 0,
@@ -1388,6 +1395,7 @@ export default {
         await this.initForm();
         await this.$http.get(`/${this.resource}/tables`).then((response) => {
             const data = response.data;
+            this.business_turns = data.business_turns;
             this.isIntegrateSystem = data.is_integrate_system;
             this.currency_types = data.currency_types;
             this.all_series = data.series;
@@ -1439,7 +1447,9 @@ export default {
         });
         this.$eventHub.$on("initInputPerson", () => {
             this.initInputPerson();
-        });
+        }); 
+
+     
 
         await this.createQuotationFromSO();
     },
@@ -1448,6 +1458,7 @@ export default {
     },
     mounted() {},
     methods: {
+      
         async clickAddItemQ(form) {
             if (form.item.lots_enabled) {
                 if (!form.IdLoteSelected)

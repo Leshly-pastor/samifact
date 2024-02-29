@@ -16,6 +16,10 @@ class Company extends ModelTenant
 {
     protected $with = ['identity_document_type'];
     protected $fillable = [
+        'document_number',
+        'not_principal',
+        'choose',
+        'website_id',
         'is_rus',
         'footer_text_template',
         'mtc_auth',
@@ -64,6 +68,7 @@ class Company extends ModelTenant
         'send_document_to_pse' => 'bool',
         'pse' => 'bool',
         'is_rus' => 'bool',
+        'document_number' => 'array'
     ];
 
     /**
@@ -250,4 +255,13 @@ class Company extends ModelTenant
         return "{$this->getTable()}_{$column}";
     }
 
+    public function getDocumentNumberAttribute($value)
+    {
+        return (is_null($value)) ? null : (object)json_decode($value);
+    }
+
+    public function setDocumentNumberAttribute($value)
+    {
+        $this->attributes['document_number'] = (is_null($value)) ? null : json_encode($value);
+    }
 }

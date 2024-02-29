@@ -17,7 +17,6 @@ class ActionInput
         }
 
         $configuration = Configuration::first();
-
         return [
             'send_email' => self::sendEmail($actions, $inputs, $configuration),
             'send_xml_signed' => self::sendXmlSigned($actions, $inputs, $configuration),
@@ -33,7 +32,7 @@ class ActionInput
     private static function sendXmlSigned($actions, $inputs, $configuration)
     {
         $send_xml_signed = Functions::valueKeyInArray($actions, 'send_xml_signed', true);
-
+        
         if(in_array($inputs['type'], ['invoice', 'credit', 'debit'])) {
 
             if($inputs['group_id'] === '02') 

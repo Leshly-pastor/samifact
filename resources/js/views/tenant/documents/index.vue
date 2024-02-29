@@ -47,7 +47,7 @@
                     class="btn btn-custom btn-sm mt-2 mr-2"
                     ><i class="fa fa-plus-circle"></i> Nuevo</a
                 >
-                <div class="btn-group flex-wrap"     v-if="!isComercial">
+                <div class="btn-group flex-wrap" v-if="!isComercial">
                     <button
                         type="button"
                         class="btn btn-custom btn-sm mt-2 mr-2 dropdown-toggle"
@@ -165,6 +165,7 @@
                         >
                             Fecha Vencimiento
                         </th>
+                        <th v-if="configuration.multi_companies">Empresa</th>
                         <th>Cliente</th>
                         <th>Número</th>
                         <th v-if="columns.document_type_id.visible">
@@ -313,6 +314,17 @@
                             v-if="columns.date_of_due.visible"
                         >
                             {{ row.date_of_due }}
+                        </td>
+                        <td v-if="configuration.multi_companies">
+                            <template v-if="row.alter_company && row.alter_company.name && row.alter_company.number">
+                                <strong>
+                                {{ row.alter_company.name.toUpperCase() }}
+                                </strong>
+                                <br />
+                                <small>
+                                    {{ row.alter_company.number }}
+                                </small>
+                            </template>
                         </td>
                         <td>
                             <a
@@ -760,7 +772,10 @@
                                 style="min-width: 41px"
                                 class="btn btn-outline-danger mb-1"
                                 @click.prevent="clickKillDocument(row.id)"
-                                v-if="configuration.delete_documents && !isComercial"
+                                v-if="
+                                    configuration.delete_documents &&
+                                    !isComercial
+                                "
                             >
                                 ELIMINAR
                             </button>
@@ -779,80 +794,86 @@
                                     <i class="fas fa-ellipsis-v"></i>
                                 </button>
                                 <div class="dropdown-menu dropdown-menu-end">
-                                   <template v-if="!isComercial">
-                                     <div
-                                        v-if="
-                                            configuration.permission_to_edit_cpe
-                                        "
-                                    >
-                                        <a
-                                            :href="`/documents/${row.id}/edit`"
-                                            class="dropdown-item"
+                                    <template v-if="!isComercial">
+                                        <div
                                             v-if="
-                                                row.state_type_id === '01' &&
-                                                userPermissionEditCpe &&
-                                                row.is_editable
+                                                configuration.permission_to_edit_cpe
                                             "
                                         >
-                                            Editar
-                                        </a>
-                                    </div>
-                                    <div v-else>
-                                        <a
-                                            :href="`/documents/${row.id}/edit`"
-                                            class="dropdown-item"
+                                            <a
+                                                :href="`/documents/${row.id}/edit`"
+                                                class="dropdown-item"
+                                                v-if="
+                                                    row.state_type_id ===
+                                                        '01' &&
+                                                    userPermissionEditCpe &&
+                                                    row.is_editable
+                                                "
+                                            >
+                                                Editar
+                                            </a>
+                                        </div>
+                                        <div v-else>
+                                            <a
+                                                :href="`/documents/${row.id}/edit`"
+                                                class="dropdown-item"
+                                                v-if="
+                                                    row.state_type_id ===
+                                                        '01' &&
+                                                    userId == row.user_id &&
+                                                    row.is_editable
+                                                "
+                                            >
+                                                Editar
+                                            </a>
+                                        </div>
+                                        <template
                                             v-if="
-                                                row.state_type_id === '01' &&
-                                                userId == row.user_id &&
-                                                row.is_editable
+                                                row.document_type_id == '03' ||
+                                                ((row.document_type_id ==
+                                                    '07' ||
+                                                    row.document_type_id ==
+                                                        '08') &&
+                                                    affectedReceived(
+                                                        row.affected_documents
+                                                    ) &&
+                                                    row.state_type_id == '01')
                                             "
                                         >
-                                            Editar
-                                        </a>
-                                    </div>
-                                    <template
-                                        v-if="
-                                            row.document_type_id == '03' ||
-                                            ((row.document_type_id == '07' ||
-                                                row.document_type_id == '08') &&
-                                                affectedReceived(
-                                                    row.affected_documents
-                                                ) &&
-                                                row.state_type_id == '01')
-                                        "
-                                    >
+                                            <button
+                                                class="dropdown-item"
+                                                @click.prevent="
+                                                    clickSendRes(row.id)
+                                                "
+                                            >
+                                                Cambiar a envío por resumen
+                                            </button>
+                                            <button
+                                                class="dropdown-item"
+                                                @click.prevent="
+                                                    clickSendInd(row.id)
+                                                "
+                                            >
+                                                Cambiar a envío individual
+                                            </button>
+                                        </template>
                                         <button
                                             class="dropdown-item"
                                             @click.prevent="
-                                                clickSendRes(row.id)
+                                                clickSendPSE(row.id)
                                             "
+                                            v-if="row.btn_send_pse"
                                         >
-                                            Cambiar a envío por resumen
+                                            Enviar (PSE)
                                         </button>
                                         <button
                                             class="dropdown-item"
-                                            @click.prevent="
-                                                clickSendInd(row.id)
-                                            "
+                                            @click.prevent="clickCheck(row.id)"
+                                            v-if="row.btn_check_pse"
                                         >
-                                            Cambiar a envío individual
+                                            Consultar (PSE)
                                         </button>
-                                    </template>
-                                    <button
-                                        class="dropdown-item"
-                                        @click.prevent="clickSendPSE(row.id)"
-                                        v-if="row.btn_send_pse"
-                                    >
-                                        Enviar (PSE)
-                                    </button>
-                                    <button
-                                        class="dropdown-item"
-                                        @click.prevent="clickCheck(row.id)"
-                                        v-if="row.btn_check_pse"
-                                    >
-                                        Consultar (PSE)
-                                    </button>
-                                    <!-- <button
+                                        <!-- <button
                                         class="dropdown-item"
                                         @click.prevent="clickJson(row.id)"
                                         v-if="
@@ -861,177 +882,185 @@
                                     >
                                          Consultar ticket anulation (PSE)
                                     </button> -->
-                                    <button
-                                        class="dropdown-item"
-                                        @click.prevent="clickJson(row.id)"
-                                        v-if="
-                                            row.btn_send_pse ||
-                                            row.btn_check_pse
-                                        "
-                                    >
-                                        Json (PSE)
-                                    </button>
-                                    <button
-                                        class="dropdown-item"
-                                        @click.prevent="clickResend(row.id)"
-                                        v-if="row.btn_resend && !isClient"
-                                    >
-                                        Reenviar
-                                    </button>
-                                    <button
-                                        class="dropdown-item"
-                                        @click.prevent="clickReStore(row.id)"
-                                        v-if="row.btn_recreate_document"
-                                    >
-                                        Volver a recrear
-                                    </button>
-                                    <button
-                                        class="dropdown-item"
-                                        @click.prevent="
-                                            clickChangeToRegisteredStatus(
-                                                row.id
-                                            )
-                                        "
-                                        v-if="
-                                            row.btn_change_to_registered_status
-                                        "
-                                    >
-                                        Cambiar a estado registrado
-                                    </button>
-                                    <a
-                                        :href="`/${resource}/note/${row.id}`"
-                                        class="dropdown-item"
-                                        v-if="row.btn_note"
-                                    >
-                                        Nota
-                                    </a>
-                                    <a
-                                        :href="`/dispatches/create_new/document/${row.id}`"
-                                        class="dropdown-item"
-                                        v-if="row.btn_guide"
-                                    >
-                                        Guía
-                                    </a>
-                                    <button
-                                        class="dropdown-item"
-                                        @click.prevent="clickVoided(row.id)"
-                                        v-if="row.btn_voided"
-                                    >
-                                        Anular
-                                    </button>
-                                    <button
-                                        class="dropdown-item"
-                                        @click.prevent="clickVoidedPse(row.id)"
-                                        v-if="row.btn_voided_pse"
-                                    >
-                                        Anular
-                                    </button>
-                                    <button
-                                        class="dropdown-item"
-                                        @click.prevent="
-                                            clickVoidedCheckPse(row.id)
-                                        "
-                                        v-if="row.btn_check_voided_pse"
-                                    >
-                                        Verificar anulación
-                                    </button>
-
-                                    <a
-                                        type="button"
-                                        class="dropdown-item"
-                                        @click.prevent="copy(row.id)"
-                                    >
-                                        Copiar
-                                    </a>
-                                    <a
-                                        type="button"
-                                        class="dropdown-item"
-                                        @click.prevent="duplicate(row.id)"
-                                    >
-                                        Duplicar
-                                    </a>
-                                    <a
-                                        type="button"
-                                        class="dropdown-item"
-                                        @click.prevent="
-                                            clickDeleteDocument(row.id)
-                                        "
-                                        v-if="row.btn_delete_doc_type_03"
-                                    >
-                                        Eliminar
-                                    </a>
-                                    <a
-                                        class="dropdown-item"
-                                        @click.prevent="clickSendOnline(row.id)"
-                                        v-if="isClient && !row.send_server"
-                                    >
-                                        Enviar Servidor
-                                    </a>
-                                    <a
-                                        class="dropdown-item"
-                                        @click.prevent="
-                                            clickCheckOnline(row.id)
-                                        "
-                                        v-if="
-                                            isClient &&
-                                            row.send_server &&
-                                            (row.state_type_id === '01' ||
-                                                row.state_type_id === '03')
-                                        "
-                                    >
-                                        Consultar Servidor
-                                    </a>
-                                    <a
-                                        v-if="row.btn_constancy_detraction"
-                                        class="dropdown-item"
-                                        @click.prevent="
-                                            clickCDetraction(row.id)
-                                        "
-                                    >
-                                        C. Detracción
-                                    </a>
-                                      <template
-                                        v-if="
-                                            row.btn_force_send_by_summary &&
-                                            typeUser === 'admin'
-                                        "
-                                    >
+                                        <button
+                                            class="dropdown-item"
+                                            @click.prevent="clickJson(row.id)"
+                                            v-if="
+                                                row.btn_send_pse ||
+                                                row.btn_check_pse
+                                            "
+                                        >
+                                            Json (PSE)
+                                        </button>
+                                        <button
+                                            class="dropdown-item"
+                                            @click.prevent="clickResend(row.id)"
+                                            v-if="row.btn_resend && !isClient"
+                                        >
+                                            Reenviar
+                                        </button>
                                         <button
                                             class="dropdown-item"
                                             @click.prevent="
-                                                clickForceSendBySummary(row.id)
+                                                clickReStore(row.id)
                                             "
+                                            v-if="row.btn_recreate_document"
                                         >
-                                            Enviar por resumen
+                                            Volver a recrear
                                         </button>
-                                    </template>
-
-                                    <button
-                                        class="dropdown-item"
-                                        @click.prevent="clickPayment(row.id)"
-                                    >
-                                        Pagos
-                                    </button>
-                                    <template v-if="row.btn_retention">
-                                        <div class="dropdown-divider"></div>
                                         <button
                                             class="dropdown-item"
                                             @click.prevent="
-                                                clickRetention(row.id)
+                                                clickChangeToRegisteredStatus(
+                                                    row.id
+                                                )
+                                            "
+                                            v-if="
+                                                row.btn_change_to_registered_status
                                             "
                                         >
-                                            Retención
+                                            Cambiar a estado registrado
                                         </button>
+                                        <a
+                                            :href="`/${resource}/note/${row.id}`"
+                                            class="dropdown-item"
+                                            v-if="row.btn_note"
+                                        >
+                                            Nota
+                                        </a>
+                                        <a
+                                            :href="`/dispatches/create_new/document/${row.id}`"
+                                            class="dropdown-item"
+                                            v-if="row.btn_guide"
+                                        >
+                                            Guía
+                                        </a>
+                                        <button
+                                            class="dropdown-item"
+                                            @click.prevent="clickVoided(row.id)"
+                                            v-if="row.btn_voided"
+                                        >
+                                            Anular
+                                        </button>
+                                        <button
+                                            class="dropdown-item"
+                                            @click.prevent="
+                                                clickVoidedPse(row.id)
+                                            "
+                                            v-if="row.btn_voided_pse"
+                                        >
+                                            Anular
+                                        </button>
+                                        <button
+                                            class="dropdown-item"
+                                            @click.prevent="
+                                                clickVoidedCheckPse(row.id)
+                                            "
+                                            v-if="row.btn_check_voided_pse"
+                                        >
+                                            Verificar anulación
+                                        </button>
+
+                                        <a
+                                            type="button"
+                                            class="dropdown-item"
+                                            @click.prevent="copy(row.id)"
+                                        >
+                                            Copiar
+                                        </a>
+                                        <a
+                                            type="button"
+                                            class="dropdown-item"
+                                            @click.prevent="duplicate(row.id)"
+                                        >
+                                            Duplicar
+                                        </a>
+                                        <a
+                                            type="button"
+                                            class="dropdown-item"
+                                            @click.prevent="
+                                                clickDeleteDocument(row.id)
+                                            "
+                                            v-if="row.btn_delete_doc_type_03"
+                                        >
+                                            Eliminar
+                                        </a>
+                                        <a
+                                            class="dropdown-item"
+                                            @click.prevent="
+                                                clickSendOnline(row.id)
+                                            "
+                                            v-if="isClient && !row.send_server"
+                                        >
+                                            Enviar Servidor
+                                        </a>
+                                        <a
+                                            class="dropdown-item"
+                                            @click.prevent="
+                                                clickCheckOnline(row.id)
+                                            "
+                                            v-if="
+                                                isClient &&
+                                                row.send_server &&
+                                                (row.state_type_id === '01' ||
+                                                    row.state_type_id === '03')
+                                            "
+                                        >
+                                            Consultar Servidor
+                                        </a>
+                                        <a
+                                            v-if="row.btn_constancy_detraction"
+                                            class="dropdown-item"
+                                            @click.prevent="
+                                                clickCDetraction(row.id)
+                                            "
+                                        >
+                                            C. Detracción
+                                        </a>
+                                        <template
+                                            v-if="
+                                                row.btn_force_send_by_summary &&
+                                                typeUser === 'admin'
+                                            "
+                                        >
+                                            <button
+                                                class="dropdown-item"
+                                                @click.prevent="
+                                                    clickForceSendBySummary(
+                                                        row.id
+                                                    )
+                                                "
+                                            >
+                                                Enviar por resumen
+                                            </button>
+                                        </template>
+
+                                        <button
+                                            class="dropdown-item"
+                                            @click.prevent="
+                                                clickPayment(row.id)
+                                            "
+                                        >
+                                            Pagos
+                                        </button>
+                                        <template v-if="row.btn_retention">
+                                            <div class="dropdown-divider"></div>
+                                            <button
+                                                class="dropdown-item"
+                                                @click.prevent="
+                                                    clickRetention(row.id)
+                                                "
+                                            >
+                                                Retención
+                                            </button>
+                                        </template>
                                     </template>
-                                   </template>
                                     <button
                                         class="dropdown-item"
                                         @click.prevent="clickOptions(row.id)"
                                     >
                                         Opciones
                                     </button>
-
-                                  
                                 </div>
                             </div>
                         </td>
@@ -1295,7 +1324,7 @@ export default {
         this.getUsers();
     },
     methods: {
-        voidedPdf(id){
+        voidedPdf(id) {
             window.open(`documents/voided_pdf/${id}`, "_blank");
         },
         async updateUser(user_id, document) {

@@ -544,9 +544,7 @@ $logo = $establishment__->logo ?? $company->logo;
                                 ({{ $row->percentage_isc }}%)</span>
                         @endif
 
-                        @if (!empty($row->item->presentation))
-                            {!! $row->item->presentation->description !!}
-                        @endif
+   
 
                         @if ($row->total_plastic_bag_taxes > 0)
                             <br /><span style="font-size: 9px">ICBPER : {{ $row->total_plastic_bag_taxes }}</span>

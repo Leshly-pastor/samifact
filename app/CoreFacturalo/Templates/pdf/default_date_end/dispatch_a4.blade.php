@@ -193,7 +193,7 @@ if ($logo) {
                     <b>{!!$row->item->description!!}</b>
                 @endif
 
-                @if (!empty($row->item->presentation)) {!!$row->item->presentation->description!!} @endif
+                  
 
                 @if($row->attributes)
                     @foreach($row->attributes as $attr)

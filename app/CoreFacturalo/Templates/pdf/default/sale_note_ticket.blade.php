@@ -23,6 +23,13 @@
                                         if ($establishment->logo) {
                                             $logo = "{$establishment->logo}";
                                         }
+                                        $is_integrate_system = Modules\BusinessTurn\Models\BusinessTurn::isIntegrateSystem();
+                                        $quotation = null;
+                                        if ($is_integrate_system) {
+                                            $quotation = \App\Models\Tenant\Quotation::select(['number', 'prefix', 'shipping_address'])
+                                                ->where('id', $document->quotation_id)
+                                                ->first();
+                                        }
                                         
                                     @endphp
                                     <html>
@@ -138,6 +145,30 @@
                                                     </td>
                                                 </tr>
                                             @endif
+                                            @if ($quotation && $quotation->shipping_address)
+                                                <tr>
+                                                    <td class="align-top">
+                                                        <p class="desc">Dir. de envío:</p>
+                                                    </td>
+                                                    <td>
+                                                        <p class="desc">
+                                                            {{ $quotation->shipping_address }}
+                                                        </p>
+                                                    </td>
+                                                </tr>
+                                            @endif
+                                            @if (isset($customer->location) && $customer->location !== '')
+                                                <tr>
+                                                    <td class="align-top">
+                                                        <p class="desc">Ubicación:</p>
+                                                    </td>
+                                                    <td>
+                                                        <p class="desc">
+                                                            {{ $customer->location }}
+                                                        </p>
+                                                    </td>
+                                                </tr>
+                                            @endif
                                             @if ($customer->telephone && $customer->telephone !== '')
                                                 <tr>
                                                     <td class="align-top">
@@ -233,7 +264,183 @@
                                             @endif
 
                                         </table>
+                                        @if ($document->transport)
 
+                                        <p class="desc"><strong>Transporte de pasajeros</strong></p>
+                                
+                                        @php
+                                            $transport = $document->transport;
+                                            $origin_district_id = (array) $transport->origin_district_id;
+                                            $destinatation_district_id = (array) $transport->destinatation_district_id;
+                                            $origin_district = Modules\Order\Services\AddressFullService::getDescription($origin_district_id[2]);
+                                            $destinatation_district = Modules\Order\Services\AddressFullService::getDescription($destinatation_district_id[2]);
+                                        @endphp
+                                
+                                
+                                        <table class="full-width mt-3">
+                                            <tr>
+                                                <td>
+                                                    <p class="desc">{{ $transport->identity_document_type->description }}:</p>
+                                                </td>
+                                                <td>
+                                                    <p class="desc">{{ $transport->number_identity_document }}</p>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <p class="desc">Nombre:</p>
+                                                </td>
+                                                <td>
+                                                    <p class="desc">{{ $transport->passenger_fullname }}</p>
+                                                </td>
+                                            </tr>
+                                
+                                
+                                            <tr>
+                                                <td>
+                                                    <p class="desc">N° Asiento:</p>
+                                                </td>
+                                                <td>
+                                                    <p class="desc">{{ $transport->seat_number }}</p>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <p class="desc">M. Pasajero:</p>
+                                                </td>
+                                                <td>
+                                                    <p class="desc">{{ $transport->passenger_manifest }}</p>
+                                                </td>
+                                            </tr>
+                                
+                                            <tr>
+                                                <td>
+                                                    <p class="desc">F. Inicio:</p>
+                                                </td>
+                                                <td>
+                                                    <p class="desc">{{ $transport->start_date }}</p>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <p class="desc">H. Inicio:</p>
+                                                </td>
+                                                <td>
+                                                    <p class="desc">{{ $transport->start_time }}</p>
+                                                </td>
+                                            </tr>
+                                
+                                
+                                            <tr>
+                                                <td>
+                                                    <p class="desc">U. Origen:</p>
+                                                </td>
+                                                <td>
+                                                    <p class="desc">{{ $origin_district }}</p>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <p class="desc">D. Origen:</p>
+                                                </td>
+                                                <td>
+                                                    <p class="desc">{{ $transport->origin_address }}</p>
+                                                </td>
+                                            </tr>
+                                
+                                            <tr>
+                                                <td>
+                                                    <p class="desc">U. Destino:</p>
+                                                </td>
+                                                <td>
+                                                    <p class="desc">{{ $destinatation_district }}</p>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <p class="desc">D. Destino:</p>
+                                                </td>
+                                                <td>
+                                                    <p class="desc">{{ $transport->destinatation_address }}</p>
+                                                </td>
+                                            </tr>
+                                
+                                        </table>
+                                    @endif
+                                    @if($document->transport_dispatch)
+                                    @php
+                                         $transport_dispatch = $document->transport_dispatch;
+                                        $sender_identity_document_type = $transport_dispatch->sender_identity_document_type->description;
+                                        $recipient_identity_document_type = $transport_dispatch->recipient_identity_document_type->description;
+                                    @endphp
+                                     <p class="desc"><strong>Información de encomienda</strong></p>
+                                      <table class="full-width mt-3">
+                                        <tr>
+                                            <td
+                                            class="desc"
+                                            colspan="2"
+                                            >
+                                            <strong>REMITENTE</strong>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <p class="desc">{{ $sender_identity_document_type }}:</p>
+                                            </td>
+                                            <td>
+                                                <p class="desc">{{ $transport_dispatch->sender_number_identity_document }}</p>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <p class="desc">Nombre:</p>
+                                            </td>
+                                            <td>
+                                                <p class="desc">{{ $transport_dispatch->sender_passenger_fullname }}</p>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <p class="desc">Teléfono:</p>
+                                            </td>
+                                            <td>
+                                                <p class="desc">{{ $transport_dispatch->sender_telephone }}</p>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td
+                                            class="desc"
+                                            colspan="2"
+                                            >
+                                            <strong>DESTINATARIO</strong>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <p class="desc">{{ $recipient_identity_document_type }}:</p>
+                                            </td>
+                                            <td>
+                                                <p class="desc">{{ $transport_dispatch->recipient_number_identity_document }}</p>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <p class="desc">Nombre:</p>
+                                            </td>
+                                            <td>
+                                                <p class="desc">{{ $transport_dispatch->recipient_passenger_fullname }}</p>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <p class="desc">Teléfono:</p>
+                                            </td>
+                                            <td>
+                                                <p class="desc">{{ $transport_dispatch->recipient_telephone }}</p>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                @endif
                                         <table class="full-width mt-10 mb-10">
                                             <thead class="">
                                                 <tr>
@@ -263,9 +470,7 @@
                                                             @else
                                                                 {!! $row->item->description !!}
                                                             @endif
-                                                            @if (!empty($row->item->presentation))
-                                                                {!! $row->item->presentation->description !!}
-                                                            @endif
+
                                                             @if ($row->attributes)
                                                                 @foreach ($row->attributes as $attr)
                                                                     <br />{!! $attr->description !!} : {{ $attr->value }}
@@ -386,12 +591,31 @@
 
                                             </tbody>
                                         </table>
-                                        @if ($document->observation && is_integrate_system())
+                                        @php
+                                            $quotation = \App\Models\Tenant\Quotation::select(['number', 'prefix', 'shipping_address'])
+                                                ->where('id', $document->quotation_id)
+                                                ->first();
+                                            
+                                        @endphp
+
+                                        @if (is_integrate_system())
                                             <table class="full-width">
                                                 @php
                                                     $cot = \App\Models\Tenant\Quotation::where('id', $document->quotation_id)->first();
                                                 @endphp
                                                 @if ($cot)
+                                                    <tr>
+
+
+                                                        <td>
+                                                            <p class="desc">Cotización:</p>
+                                                        </td>
+                                                        <td>
+                                                            <p class="desc">{{ $cot->prefix }}-{{ $cot->number }}
+                                                            </p>
+                                                        </td>
+
+                                                    </tr>
                                                     <tr>
 
 
@@ -439,7 +663,8 @@
                                                 @if ($row->code == '1000')
                                                     <td class="desc pt-3" style="text-transform: uppercase;">Son:
                                                         <span class="font-bold">{{ $row->value }}
-                                                            {{ $document->currency_type->description }}</span></td>
+                                                            {{ $document->currency_type->description }}</span>
+                                                    </td>
                                                     @if (count((array) $document->legends) > 1)
                                             <tr>
                                                 <td class="desc pt-3"><span class="font-bold">Leyendas</span></td>

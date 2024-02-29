@@ -323,7 +323,7 @@ if ($logo) {
                 @endisset
                
 
-                @if (!empty($row->item->presentation)) {!!$row->item->presentation->description!!} @endif
+                  
                 <br/><span style="font-size: 9px">{{$row->m_item->name}}</span>
                 @isset($row->item->lots)
                     @foreach($row->item->lots as $lot)

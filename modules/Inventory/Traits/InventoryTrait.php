@@ -380,6 +380,7 @@ trait InventoryTrait
      */
     private function updateStock($item_id, $quantity, $warehouse_id,$is_transfer = false)
     {
+        
         $configuration = Configuration::firstOrFail();
         if(!$configuration->list_items_by_warehouse && !$is_transfer) {
 

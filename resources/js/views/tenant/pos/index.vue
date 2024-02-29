@@ -785,7 +785,52 @@
                                                     'text-danger'
                                                 "
                                             >
-                                                {{ item.item.description }}
+                                                <template
+                                                    v-if="item.isEditingName"
+                                                >
+                                                    <el-input
+                                                    placeholder="Nombre del producto"
+                                                        v-model="
+                                                            item.name_product_pdf
+                                                        "
+                                                        @keyup.enter.native="
+                                                            keyupEnterNameProduct(index)
+                                                        "
+                                                        @blur="
+                                                            blurNameProduct(
+                                                                index
+                                                            )
+                                                        "
+                                                        size="mini"
+                                                        autofocus
+                                                    ></el-input>
+                                                </template>
+                                                <template v-else>
+                                                    <template
+                                                        v-if="
+                                                            item.name_product_pdf
+                                                        "
+                                                    >
+                                                        {{
+                                                            item.name_product_pdf
+                                                        }}
+                                                    </template>
+                                                    <template v-else>
+                                                        {{
+                                                            item.item
+                                                                .description
+                                                        }}
+                                                    </template>
+
+                                                    <i
+                                                        @click.prevent="
+                                                            clickEditItem(index)
+                                                        "
+                                                        style="margin-left: 5px"
+                                                        class="fas fa-edit text-primary pointer"
+                                                        role="button"
+                                                    ></i>
+                                                </template>
                                             </p>
                                             <small
                                                 v-if="
@@ -1477,6 +1522,33 @@ export default {
         }
     },
     methods: {
+        keyupEnterNameProduct(index) {
+            console.log("🚀 ~ file: index.vue:1525 ~ keyupEnterNameProduct ~ index:", index)
+            let item = this.form.items[index];
+            item.isEditingName = false;
+            if(item.name_product_pdf){
+                item.name_product_pdf = item.name_product_pdf.toUpperCase();
+            }
+            this.form.items[index] = item;
+       this.$forceUpdate();
+        },
+        blurNameProduct(index) {
+            console.log("🚀 ~ file: index.vue:1536 ~ blurNameProduct ~ index:", index)
+            let item = this.form.items[index];
+            item.isEditingName = false;
+            if(item.name_product_pdf){
+                item.name_product_pdf = item.name_product_pdf.toUpperCase();
+            }
+            this.form.items[index] = item;
+       this.$forceUpdate();
+        },
+        clickEditItem(index) {
+            let item = this.form.items[index];
+            item.isEditingName = true;
+            this.form.items[index] = item;
+            this.$forceUpdate();
+
+        },
         clickAddItemSize(event, size, item, index) {
             event.stopPropagation();
             // item.sizes = size;
@@ -1494,8 +1566,7 @@ export default {
             this.clickAddItem(item, index);
         },
         async clickSendOrderNote() {
-            
-            if(await this.checkFoodsDealer()) return;
+            if (await this.checkFoodsDealer()) return;
             if (!this.form.subtotal) {
                 //fix para agregar subtotal si no existe prop en json almacenado en local storage
                 this.form.subtotal = this.form.total;
@@ -2871,6 +2942,7 @@ export default {
                 if (this.user.id) {
                     this.row.seller_id = this.user.id;
                 }
+                this.row.isEditingName = false;
                 this.row.sizes_selected = item.sizes_selected || [];
                 this.form.items[pos] = this.row;
             } else {
@@ -3179,7 +3251,7 @@ export default {
         },
         async checkFoodsDealer() {
             let error = false;
-            if(!this.configuration.order_note_mode && !this.isFoodDealer){
+            if (!this.configuration.order_note_mode && !this.isFoodDealer) {
                 return error;
             }
             try {
@@ -3192,22 +3264,20 @@ export default {
                     "order-notes/check-item-food-dealer",
                     data
                 );
-                if(response.status == 200){
-                    let {success,errors} = response.data;
-                    if(!success){
+                if (response.status == 200) {
+                    let { success, errors } = response.data;
+                    if (!success) {
                         error = true;
-                        this.$message(
-                            {
-                                type: "error",
-                                dangerouslyUseHTMLString: true,
-                                message: errors.join("<br>"),
-                            }
-                        );
+                        this.$message({
+                            type: "error",
+                            dangerouslyUseHTMLString: true,
+                            message: errors.join("<br>"),
+                        });
                     }
                 }
             } catch (err) {
                 console.log(err);
-            }finally{
+            } finally {
                 return error;
             }
         },

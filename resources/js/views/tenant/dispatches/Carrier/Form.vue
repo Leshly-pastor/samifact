@@ -485,7 +485,7 @@
                                 ></small>
                             </div>
                         </div>
-                        <div class="col-12 col-md-4">
+                        <!-- <div class="col-12 col-md-4">
                             <label class="control-label">
                                 Tracto y carreta
                             </label>
@@ -499,7 +499,7 @@
                                 class="text-danger"
                                 v-text="errors.tracto_carreta[0]"
                             ></small>
-                        </div>
+                        </div> -->
                     </div>
                     <hr />
                     <div class="col-md-12">
@@ -937,8 +937,10 @@ export default {
         },
         initForm() {
             this.errors = {};
-            let customer_id = parseInt(this.config.establishment.customer_id);
-            let establishment_id = parseInt(this.config.establishment.id);
+
+            let customer_id = this.config && this.config.establishment && this.config.establishment.customer_id ? parseInt(this.config.establishment.customer_id) : null;
+            let establishment_id = this.config && this.config.establishment && this.config.establishment.id ? parseInt(this.config.establishment.id) : null;
+            // let establishment_id = isNaN(parseInt(this.config.establishment.id)) ? null : parseInt(this.config.establishment.id);
             if (isNaN(customer_id)) customer_id = null;
             if (isNaN(establishment_id)) establishment_id = null;
             this.form = {
@@ -956,7 +958,7 @@ export default {
                 transshipment_indicator: false,
                 port_code: null,
                 unit_type_id: "KGM",
-                total_weight: 1,
+                total_weight: 0,
                 packages_number: 1,
                 container_number: null,
                 driver_id: null,
@@ -1131,6 +1133,7 @@ export default {
             }
         },
         addItem(form) {
+            console.log("🚀 ~ file: Form.vue:1134 ~ addItem ~ form:", form);
             let it = form.item;
             let qty = form.quantity;
             let exist = this.form.items.find((item) => item.id == it.id);
@@ -1225,7 +1228,14 @@ export default {
                     }
                 }
             }
-            this.form.total_weight += total_weight;
+            if (total_weight > 0) {
+                this.form.total_weight += total_weight;
+            } else {
+                this.form.total_weight += form.weight;
+                if (this.form.total_weight == 0) {
+                    this.form.total_weight = 1;
+                }
+            }
         },
         clickRemoveItem(index) {
             this.decrementValueAttr(this.form.items[index]);
@@ -1320,6 +1330,10 @@ export default {
                     }
                 })
                 .catch((error) => {
+                    console.log(
+                        "🚀 ~ file: Form.vue:1323 ~ submit ~ error:",
+                        error
+                    );
                     this.loading_submit = false;
 
                     if (error.response.status === 422) {

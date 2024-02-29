@@ -4,6 +4,23 @@
             <h3 class="my-0">Dashboard Ventas - Compras</h3>
         </div>
         <div class="card-body">
+            <div class="row">
+                <div class="col-md-3">
+                    <label for="year">Año</label>
+                    <el-select
+                        v-model="year"
+                        placeholder="Seleccione el año"
+                        @change="changeYear"
+                    >
+                        <el-option
+                            v-for="item in years"
+                            :key="item"
+                            :label="item"
+                            :value="item"
+                        ></el-option>
+                    </el-select>
+                </div>
+            </div>
             <div class="table-responsive">
                 <table class="table">
                     <thead>
@@ -96,10 +113,13 @@ export default {
             resource: "sunat_purchase_sale",
             recordId: null,
             records: [],
-            months: []
+            months: [],
+            year: moment().format("YYYY"),
+            years : [],
         };
     },
     created() {
+        this.years = Array.from({length: 2}, (v, k) => moment().format("YYYY") - k);
         this.$eventHub.$on("reloadData", () => {
             this.getData();
         });
@@ -107,6 +127,10 @@ export default {
         this.setMonths();
     },
     methods: {
+        changeYear(){
+            this.getData();
+            this.setMonths(this.year);
+        },
        async  saveData(){
             let periods = this.months;
             const response = await this.$http.post(`/${this.resource}`, {periods});
@@ -136,7 +160,7 @@ export default {
             }
         },
         async getData() {
-            const response = await this.$http.get(`/${this.resource}/records/${moment().format("YYYY")}`);
+            const response = await this.$http.get(`/${this.resource}/records/${this.year}`);
                if(response.data.records.length > 0){
                  this.months = response.data.records.map((row) => {
                     row.show = row.show == 1 ? true : false;

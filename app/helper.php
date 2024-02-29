@@ -12,7 +12,48 @@ use App\Models\Tenant\Catalogs\UnitType;
 use App\Models\Tenant\NameDocument;
 use Illuminate\Support\Facades\Cache;
 use Modules\BusinessTurn\Models\BusinessTurn;
+use Modules\Order\Models\OrderNote;
 
+if(function_exists('stripInvalidXml') == false){
+    function stripInvalidXml($value) {
+        $ret = '';
+    
+        if (empty($value)) {
+            return $ret;
+        }
+    
+        $length = strlen($value);
+    
+        for ($i = 0; $i < $length; $i++) {
+            $current = ord($value[$i]);
+    
+            if (
+                ($current == 0x9) ||
+                ($current == 0xA) ||
+                ($current == 0xD) ||
+                (($current >= 0x20) && ($current <= 0xD7FF)) ||
+                (($current >= 0xE000) && ($current <= 0xFFFD)) ||
+                (($current >= 0x10000) && ($current <= 0x10FFFF))
+            ) {
+                $ret .= chr($current);
+            } else {
+                $ret .= ' ';
+            }
+        }
+    
+        return $ret;
+    }
+}
+if (!function_exists('order_note_discounted_stock')) {
+    function order_note_discounted_stock($id)
+    {
+        $order_note = OrderNote::find($id);
+        if ($order_note) {
+            return (bool) $order_note->discounted_stock;
+        }
+        return false;
+    }
+}
 if (!function_exists('is_integrate_system')) {
     function is_integrate_system()
     {

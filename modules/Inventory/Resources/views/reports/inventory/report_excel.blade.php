@@ -138,7 +138,17 @@
                     <td>{{ $row['barcode'] }}</td>
                     <td>{{ $row['internal_id'] }}</td>
                     <td>{{ $row['name'] }}</td>
-                    <td>{{ $row['description'] }}</td>
+                    <td>
+                        @php
+                            $description = $row['description'];
+                            $item = \App\Models\Tenant\Item::where('internal_id', $row['internal_id'])->first();
+                            if ($item) {
+                                $description = $item->name;
+                            }
+                        @endphp
+                        {{ $description }}
+
+                    </td>
                     <td>{{ $row['item_category_name'] }}</td>
                     @if ($configuration->is_pharmacy)
                         <td>{{ $row['laboratory'] }}</td>

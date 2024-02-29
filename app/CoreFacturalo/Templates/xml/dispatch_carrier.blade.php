@@ -92,6 +92,16 @@
             <cac:TransitPeriod>
                 <cbc:StartDate>{{ $document['date_of_shipping'] }}</cbc:StartDate>
             </cac:TransitPeriod>
+                @if($document["company_mtc_auth"])
+                <cac:CarrierParty>
+                    <cac:PartyIdentification>
+                        <cbc:ID schemeID="6"/>
+                    </cac:PartyIdentification>
+                    <cac:PartyLegalEntity>
+                        <cbc:CompanyID>{{$document["company_mtc_auth"]}}</cbc:CompanyID>
+                    </cac:PartyLegalEntity>
+                </cac:CarrierParty>
+                @endif
             <!-- CONDUCTOR PRINCIPAL -->
                 <cac:DriverPerson>
                     <!-- TIPO Y NUMERO DE DOCUMENTO DE IDENTIDAD -->
@@ -153,6 +163,37 @@
                 <!-- VEHICULO PRINCIPAL -->
                 <!-- PLACA - VEHICULO PRINCIPAL -->
                 <cbc:ID>{{ $document['transport_plate_number'] }}</cbc:ID>
+                @if($document['secondary_plate_number']!=null)
+                <cac:AttachedTransportEquipment>
+                    <!-- PLACA SECUNDARIA -->
+                    <cbc:ID>{{$document['secondary_plate_number']}}</cbc:ID>
+                    @if($document['tuc_secondary'])
+                    {{-- <cac:ApplicableTransportMeans> --}}
+                    <!-- TUC PLACA SECUNDARIA -->
+                        {{-- <cbc:RegistrationNationalityID>{{$document['tuc_secondary']}}</cbc:RegistrationNationalityID> --}}
+                    {{-- </cac:ApplicableTransportMeans> --}}
+                    @endif
+                    @if($document['auth_plate_secondary']!=null)
+                    <cac:ShipmentDocumentReference>
+                    <!-- AUTORIZACIÓN PLACA SECUNDARIA -->
+                        <cbc:ID schemeID="06">{{$document['auth_plate_secondary']}}</cbc:ID>
+                    </cac:ShipmentDocumentReference>
+                    @endif
+                </cac:AttachedTransportEquipment>
+                @endif
+                {{-- @if($document['tuc']!=null)
+                <cac:ApplicableTransportMeans>
+                    <!-- TUC PLACA PRINCIPAL -->
+                    <cbc:RegistrationNationalityID>{{ $document['tuc'] }}</cbc:RegistrationNationalityID>
+                </cac:ApplicableTransportMeans>
+                @endif --}}
+                @if($document['auth_plate_primary']!=null)
+                <cac:ShipmentDocumentReference>
+                     <!-- AUTORIZACIÓN PLACA PRINCIPAL -->
+                    <cbc:ID schemeID="06">{{$document['auth_plate_primary']}}</cbc:ID>
+                </cac:ShipmentDocumentReference>
+                @endif
+              
             </cac:TransportEquipment>
         </cac:TransportHandlingUnit>
     </cac:Shipment>

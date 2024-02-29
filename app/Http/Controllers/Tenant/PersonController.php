@@ -453,6 +453,28 @@ class PersonController extends Controller
             'data' => $persons,
         ], 200);
     }
+    public function suppliersForGenerateCPE(){
+        $typeFile = request('type');
+        $filter = request('name');
+        $persons = Person::without(['identity_document_type', 'country', 'department', 'province', 'district'])
+            ->select('id', 'name', 'identity_document_type_id', 'number')
+            ->where('type', 'suppliers')
+            ->orderBy('name');
+        if ($filter && $typeFile) {
+            if ($typeFile === 'document') {
+                $persons = $persons->where('number', 'like', "{$filter}%");
+            }
+            if ($typeFile === 'name') {
+                $persons = $persons->where('name', 'like', "%{$filter}%");
+            }
+        }
+        $persons = $persons->take(10)
+            ->get();
+        return response()->json([
+            'success' => true,
+            'data' => $persons,
+        ], 200);
+    }
     public function clientsForGenerateCPE()
     {
         $typeFile = request('type');

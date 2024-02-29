@@ -26,20 +26,49 @@ class DocumentInput
         $document_type_id = $inputs['document_type_id'];
         $series = $inputs['series'];
         $number = $inputs['number'];
-
+        $company_id = Functions::valueKeyInArray($inputs, 'company_id');
         $company = Company::active();
         $soap_type_id = $company->soap_type_id;
+        $alter_company = [];
 
+        if ($company_id ) {
+            $company_found = Company::where('id', $company_id)->first();
+            $alter_company = [
+                'id' => $company_found->id,
+                'name' => $company_found->name,
+                'number' => $company_found->number,
+                'trade_name' => $company_found->trade_name,
+                'website_id' => $company_found->website_id,
+            ];
+            $document_found = Document::where('series', $series)
+                ->where('document_type_id', $document_type_id)
+                ->where('alter_company->website_id', $company_found->website_id)
+                ->orderBy('number', 'desc')
+                ->first();
+            if ($document_found) {
+                $document_number = $document_found->number;
+                $document_number = $document_number + 1;
+                if ($document_number > $number) {
+                    $number = $document_number;
+                }
+            }else{
+
+            }
+            
+        }
         $offline_configuration = OfflineConfiguration::firstOrFail();
         // $number = Functions::newNumber($soap_type_id, $document_type_id, $series, $number, Document::class);
         $configuration = Configuration::getColumnsForDocuments();
-
         if ($number !== '#') {
-            Functions::validateUniqueDocument($soap_type_id, $document_type_id, $series, $number, Document::class);
+            Functions::validateUniqueDocument($soap_type_id, $document_type_id, $series, $number, Document::class,$company_id);
         }
 
         // $filename = Functions::filename($company, $document_type_id, $series, $number);
+        $alter_establishment = Functions::valueKeyInArray($inputs, 'establishment');
         $establishment = EstablishmentInput::set($inputs['establishment_id']);
+        if ($alter_establishment) {
+            $establishment = $alter_establishment;
+        }
         $customer = PersonInput::set($inputs['customer_id'], isset($inputs['customer_address_id']) ? $inputs['customer_address_id'] : null);
 
         if (in_array($document_type_id, ['01', '03'])) {
@@ -82,7 +111,12 @@ class DocumentInput
                 $cash_id = $cash->id;
             }
         }
+        $company_id = Functions::valueKeyInArray($inputs, 'company_id');
+
+       
         return [
+            'alter_company' => $alter_company,
+            'company_id' => $company_id,
             'cash_id' => $cash_id,
             'child_id' => Functions::valueKeyInArray($inputs, 'child_id'),
             'months' => Functions::valueKeyInArray($inputs, 'months', []),
@@ -155,6 +189,7 @@ class DocumentInput
             'note' => $note,
             'hotel' => self::hotel($inputs),
             'transport' => self::transport($inputs),
+            'transport_dispatch' => self::transport_dispatch($inputs),
             'additional_information' => Functions::valueKeyInArray($inputs, 'additional_information'),
             'additional_data' => Functions::valueKeyInArray($inputs, 'additional_data'),
             'plate_number' => Functions::valueKeyInArray($inputs, 'plate_number'),
@@ -254,7 +289,7 @@ class DocumentInput
                         $quantity_factor = $presentation['quantity_unit'];
                     }
                 }
-           
+
                 $arayItem = [
                     'item_id' => $item->id,
                     'item' => [
@@ -316,6 +351,7 @@ class DocumentInput
                     'additional_data' => Functions::valueKeyInArray($row, 'additional_data'),
                     'seller_id' => Functions::valueKeyInArray($row, 'seller_id'),
                     //                    'additional_data' => key_exists('additional_data', $row)?$row['additional_data']:null,
+                    'discounts_acc' => Functions::valueKeyInArray($row, 'discounts_acc', null),
                 ];
                 //                dd($arayItem);
                 Item::SaveExtraDataToRequest($arayItem, $row);
@@ -720,6 +756,16 @@ class DocumentInput
     {
         // dd($inputs);
         return key_exists('hotel', $inputs) ? $inputs['hotel'] : null;
+    }
+    private static function transport_dispatch($inputs)
+    {
+        // dd($inputs);
+        if (array_key_exists('transport_dispatch', $inputs)) {
+
+            return $inputs['transport_dispatch'];
+        }
+
+        return [];
     }
 
     private static function transport($inputs)

@@ -928,6 +928,8 @@
                         <div class="col-md-3">
                             <div>
                                 <el-checkbox v-model="form.has_bonus_item"
+
+                                    @change="changeHasBonusItem"
                                     >Producto con bonificación</el-checkbox
                                 >
                             </div>
@@ -939,7 +941,7 @@
                                 >
                                 <br />
                                 <el-button
-                                    v-if="form.has_sizes"
+                                    v-if="form.has_sizes && !recordId" 
                                     icon="el-icon-edit-outline"
                                     size="small"
                                     type="primary"
@@ -2598,6 +2600,12 @@ export default {
     },
 
     methods: {
+    changeHasBonusItem(){
+        let { has_bonus_item } = this.form;
+        if(!has_bonus_item){
+            this.form.bonus_items = [];
+        }
+    },
         clickDeleteBonusItem(idx) {
             this.form.bonus_items.splice(idx, 1);
         },

@@ -57,7 +57,15 @@
                         <div class="col-6 px-0">
                             <small
                                 class="font-weight-semibold m-0 m-b-0 text-secondary"
-                                >{{ item.item.description }}</small
+                                >
+                                <template v-if="item.name_product_pdf"
+                                >
+                                {{ item.name_product_pdf }}
+                                </template>
+                                <template v-else>
+                                    {{ item.item.description }}
+                                </template>
+                                </small
                             >
                             <!-- <p class="m-b-0">Descripción del producto</p> -->
                             <!-- <p class="text-muted m-b-0"><small>Descuento 2%</small></p> -->
@@ -352,7 +360,7 @@
                     </div>
                 </div>
 
-                <div class="col-lg-8">
+                <div class="col-lg-8" v-if="configuration.show_discount_seller_pos">
                     <div class="card card-default">
                         <div class="card-body text-center">
                             <div class="row col-lg-12">

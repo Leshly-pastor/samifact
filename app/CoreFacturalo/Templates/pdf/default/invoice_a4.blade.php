@@ -1,7 +1,7 @@
 @php
-$establishment = $document->establishment;
+    $establishment = $document->establishment;
     $establishment__ = \App\Models\Tenant\Establishment::find($document->establishment_id);
-$logo = $establishment__->logo ?? $company->logo;
+    $logo = $establishment__->logo ?? $company->logo;
     
     if ($logo === null && !file_exists(public_path("$logo}"))) {
         $logo = "{$company->logo}";
@@ -12,18 +12,17 @@ $logo = $establishment__->logo ?? $company->logo;
         $logo = str_replace('storage/uploads/logos/storage/uploads/logos/', 'storage/uploads/logos/', $logo);
     }
     $configurations = \App\Models\Tenant\Configuration::first();
-
-
+    
     $customer = $document->customer;
     $invoice = $document->invoice;
     $document_base = $document->note ? $document->note : null;
     
     //$path_style = app_path('CoreFacturalo'.DIRECTORY_SEPARATOR.'Templates'.DIRECTORY_SEPARATOR.'pdf'.DIRECTORY_SEPARATOR.'style.css');
-    $document_number = $document->series. '-' . str_pad($document->number, 8, '0', STR_PAD_LEFT);
+    $document_number = $document->series . '-' . str_pad($document->number, 8, '0', STR_PAD_LEFT);
     $accounts = \App\Models\Tenant\BankAccount::where('show_in_documents', true)->get();
     
     if ($document_base) {
-        $affected_document_number = $document_base->affected_document ? $document_base->affected_document->series. '-' . str_pad($document_base->affected_document->number, 8, '0', STR_PAD_LEFT) : $document_base->data_affected_document->series. '-' . str_pad($document_base->data_affected_document->number, 8, '0', STR_PAD_LEFT);
+        $affected_document_number = $document_base->affected_document ? $document_base->affected_document->series . '-' . str_pad($document_base->affected_document->number, 8, '0', STR_PAD_LEFT) : $document_base->data_affected_document->series . '-' . str_pad($document_base->data_affected_document->number, 8, '0', STR_PAD_LEFT);
     } else {
         $affected_document_number = null;
     }
@@ -36,9 +35,9 @@ $logo = $establishment__->logo ?? $company->logo;
     $balance = $document->total - $total_payment - $document->payments->sum('change');
     $bg = "storage/uploads/header_images/{$configurations->background_image}";
     $total_discount_items = 0;
-
+    
     $establishment__ = \App\Models\Tenant\Establishment::find($document->establishment_id);
-$logo = $establishment__->logo ?? $company->logo;
+    $logo = $establishment__->logo ?? $company->logo;
     
     if ($logo === null && !file_exists(public_path("$logo}"))) {
         $logo = "{$company->logo}";
@@ -73,11 +72,11 @@ $logo = $establishment__->logo ?? $company->logo;
         </div>
     @endif
     @if ($configurations->background_image)
-    <div class="centered">
-        <img src="data:{{ mime_content_type(public_path("{$bg}")) }};base64, {{ base64_encode(file_get_contents(public_path("{$bg}"))) }}"
-            alt="anulado" class="order-1">
-    </div>
-@endif
+        <div class="centered">
+            <img src="data:{{ mime_content_type(public_path("{$bg}")) }};base64, {{ base64_encode(file_get_contents(public_path("{$bg}"))) }}"
+                alt="anulado" class="order-1">
+        </div>
+    @endif
 
 
     <table class="full-width">
@@ -404,7 +403,72 @@ $logo = $establishment__->logo ?? $company->logo;
             </tr>
         </table>
     @endif
+    @if ($document->transport_dispatch)
+        <br>
+        <strong>Información de encomienda</strong>
+        @php
+            $transport_dispatch = $document->transport_dispatch;
+            $sender_identity_document_type = $transport_dispatch->sender_identity_document_type->description;
+            $recipient_identity_document_type = $transport_dispatch->recipient_identity_document_type->description;
+            $origin_district_id = (array) $transport->origin_district_id;
+            $destinatation_district_id = (array) $transport->destinatation_district_id;
+            $origin_district = Modules\Order\Services\AddressFullService::getDescription($origin_district_id[2]);
+            $destinatation_district = Modules\Order\Services\AddressFullService::getDescription($destinatation_district_id[2]);
+        @endphp
 
+        <table class="full-width mt-3">
+            <thead>
+                <tr>
+                    <th colspan="6" class="text-left">
+                        <strong>REMITENTE</strong>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td width="120px">{{ $sender_identity_document_type }}</td>
+                    <td width="8px">:</td>
+                    <td>{{ $transport_dispatch->sender_number_identity_document }}</td>
+                    <td width="120px">NOMBRE</td>
+                    <td width="8px">:</td>
+                    <td>{{ $transport_dispatch->sender_passenger_fullname }}</td>
+                </tr>
+                <tr>
+
+                </tr>
+                <tr>
+                    <td width="120px">TELÉFONO</td>
+                    <td width="8px">:</td>
+                    <td>{{ $transport_dispatch->sender_telephone }}</td>
+                    <td colspan="3"></td>
+                </tr>
+            </tbody>
+            <thead>
+                <tr>
+                    <th colspan="6" class="text-left">
+                        <strong>DESTINATARIO</strong>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td width="120px">{{ $recipient_identity_document_type }}</td>
+                    <td width="8px">:</td>
+                    <td>{{ $transport_dispatch->recipient_number_identity_document }}</td>
+                    <td width="120px">NOMBRE</td>
+                    <td width="8px">:</td>
+                    <td>{{ $transport_dispatch->recipient_passenger_fullname }}</td>
+                </tr>
+
+                <tr>
+                    <td width="120px">TELÉFONO</td>
+                    <td width="8px">:</td>
+                    <td>{{ $transport_dispatch->recipient_telephone }}</td>
+                    <td colspan="3"></td>
+                </tr>
+            </tbody>
+        </table>
+    @endif
     @if ($document->dispatch)
         <br />
         <strong>Guías de remisión</strong>
@@ -544,9 +608,9 @@ $logo = $establishment__->logo ?? $company->logo;
                                 ({{ $row->percentage_isc }}%)</span>
                         @endif
 
-                        @if (!empty($row->item->presentation))
-                            {!! $row->item->presentation->description !!}
-                        @endif
+                        {{-- 
+   
+                        --}}
 
                         @if ($row->total_plastic_bag_taxes > 0)
                             <br /><span style="font-size: 9px">ICBPER : {{ $row->total_plastic_bag_taxes }}</span>
@@ -560,11 +624,10 @@ $logo = $establishment__->logo ?? $company->logo;
                         @endif
                         @if ($row->discounts)
                             @foreach ($row->discounts as $dtos)
-                                    @if($dtos->is_amount == false)
+                                @if ($dtos->is_amount == false)
                                     <br /><span style="font-size: 9px">{{ $dtos->factor * 100 }}%
                                         {{ $dtos->description }}</span>
-                                   
-                                    @endif
+                                @endif
                             @endforeach
                         @endif
                         @isset($row->item->sizes_selected)
@@ -633,22 +696,38 @@ $logo = $establishment__->logo ?? $company->logo;
                     @endif
 
                     <td class="text-right align-top">
-                        @if ($row->discounts)
-                            @php
-                                $total_discount_line = 0;
-                                foreach ($row->discounts as $disto) {
-                                    $amount = $disto->amount;
-                                    if($disto->is_split){
-                                        $amount = $amount * 1.18;
-                                    }
-                                    $total_discount_line = $total_discount_line + $amount;
-                                    $total_discount_items += $total_discount_line;
-                                }
-                            @endphp
-                            {{ number_format($total_discount_line, 2) }}
+                        @if ($configurations->discounts_acc)
+                            @if ($row->discounts_acc)
+                                @php
+                                    $discounts_acc = (array) $row->discounts_acc;
+                                @endphp
+                                @foreach ($discounts_acc as $key => $disto)
+                                    <span style="font-size: 9px">{{ $disto->percentage }}%
+                                        @if ($key + 1 != count($discounts_acc))
+                                            +
+                                        @endif
+                                    </span>
+                                @endforeach
+                            @endif
                         @else
-                            0
+                            @if ($row->discounts)
+                                @php
+                                    $total_discount_line = 0;
+                                    foreach ($row->discounts as $disto) {
+                                        $amount = $disto->amount;
+                                        if ($disto->is_split) {
+                                            $amount = $amount * 1.18;
+                                        }
+                                        $total_discount_line = $total_discount_line + $amount;
+                                        $total_discount_items += $total_discount_line;
+                                    }
+                                @endphp
+                                {{ number_format($total_discount_line, 2) }}
+                            @else
+                                0
+                            @endif
                         @endif
+
                     </td>
                     <td class="text-right align-top">{{ number_format($row->total, 2) }}</td>
                 </tr>
@@ -758,18 +837,18 @@ $logo = $establishment__->logo ?? $company->logo;
                         {{ $document->total_prepayment > 0 ? 'Anticipo' : 'Descuento TOTAL' }}
                         : {{ $document->currency_type->symbol }}</td>
                     <td class="text-right font-bold">
-                      
-                        @php 
+
+                        @php
                             $total_discount = $document->total_discount;
-                            $discounts =  $document->discounts;
-                            if($discounts){
-                            $discounts = get_object_vars($document->discounts);
-                            $discount = $discounts[0];
-                            $is_split = $discount->is_split;
-                            if($is_split){
-                                $total_discount = $total_discount * 1.18;
-                            }
-                            }else{
+                            $discounts = $document->discounts;
+                            if ($discounts) {
+                                $discounts = get_object_vars($document->discounts);
+                                $discount = $discounts[0];
+                                $is_split = $discount->is_split;
+                                if ($is_split) {
+                                    $total_discount = $total_discount * 1.18;
+                                }
+                            } else {
                                 $total_discount = $total_discount_items;
                             }
                             

@@ -49,6 +49,7 @@
         protected $table = 'hotel_rents';
 
         protected $fillable = [
+            'undefined_out',
             'customer_id',
             'customer',
             'notes',

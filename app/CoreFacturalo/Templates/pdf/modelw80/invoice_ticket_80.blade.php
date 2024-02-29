@@ -169,7 +169,7 @@ if ($logo) {
             </td>
             <td class="text-center desc-9 align-top">{{ $row->item->unit_type_id }}</td>
             <td class="text-left desc-9 align-top">
-                {!!$row->item->description!!} @if (!empty($row->item->presentation)) {!!$row->item->presentation->description!!} @endif
+                {!!$row->item->description!!}   
                 @if($row->attributes)
                     @foreach($row->attributes as $attr)
                         <br/>{!! $attr->description !!} : {{ $attr->value }}

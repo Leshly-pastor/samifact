@@ -944,11 +944,7 @@ $thridLevel = $path[2] ?? null;
                 </a>
                 <ul class="collapse submenu list-unstyled {{ $firstLevel === 'finances' && in_array($secondLevel, ['global-payments', 'balance', 'payment-method-types', 'unpaid', 'to-pay', 'income', 'movements']) ? 'show' : '' }}"
                     id="finance" data-parent="#accordionExample">
-                    <li class="{{ $firstLevel === 'bill-of-exchange' ? 'active' : '' }}">
-                        <a class="nav-link" href="{{ route('tenant.bill_of_exchange.index') }}">
-                            <span class="label">Letras de cambio</span>
-                        </a>
-                    </li>
+                    
                     @if (in_array('finances_movements', $vc_module_levels))
                         <li class="{{ $firstLevel === 'finances' && $secondLevel == 'movements' ? 'active' : '' }}">
                             <a class="nav-link" href="{{ route('tenant.finances.movements.index') }}">
@@ -968,11 +964,21 @@ $thridLevel = $path[2] ?? null;
                             <a class="nav-link" href="{{ route('tenant.finances.unpaid.index') }}">Cuentas por
                                 cobrar</a>
                         </li>
+                        <li class="{{ $firstLevel === 'bill-of-exchange' ? 'active' : '' }}">
+                            <a class="nav-link" href="{{ route('tenant.bill_of_exchange.index') }}">
+                                <span class="label">Letras por cobrar</span>
+                            </a>
+                        </li>
                     @endif
                     @if (in_array('finances_to_pay', $vc_module_levels))
                         <li class="{{ $firstLevel === 'finances' && $secondLevel == 'to-pay' ? 'active' : '' }}">
                             <a class="nav-link" href="{{ route('tenant.finances.to_pay.index') }}">Cuentas por
                                 pagar</a>
+                        </li>
+                        <li class="{{ $firstLevel === 'bill-of-exchange-pay' ? 'active' : '' }}">
+                            <a class="nav-link" href="{{ route('tenant.bill_of_exchange_pay.index') }}">
+                                <span class="label">Letras por pagar</span>
+                            </a>
                         </li>
                     @endif
                     @if (in_array('finances_payments', $vc_module_levels))

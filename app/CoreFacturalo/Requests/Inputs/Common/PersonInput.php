@@ -26,6 +26,7 @@ class PersonInput
         }
 
         return [
+            'location' => $person->location,
             'identity_document_type_id' => $person->identity_document_type_id,
             'identity_document_type' => [
                 'id' => $person->identity_document_type_id,

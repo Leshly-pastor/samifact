@@ -85,12 +85,7 @@ $establishment = $document->establishment;
         <td class="font-bold font-md font-xs" style="vertical-align: top;">:</td>
         <td style="vertical-align: top;" class=" font-xs">{{$customer->number}}</td>
 
-        @if ($document->detraction)
 
-            <td width="120px" class="font-bold font-xs">PORC. DETRACCIÓN</td>
-            <td width="8px" class="font-xs">:</td>
-            <td width="8px" class="font-xs"> {{ $document->detraction->percentage}}%</td>
-        @endif
     </tr>
     <tr>
         <td style="vertical-align: top;" class="font-bold font-xs">Cliente</td>
@@ -103,11 +98,7 @@ $establishment = $document->establishment;
             @endif
 
 
-            @if ($document->detraction)
-            <td width="120px" class="font-bold font-xs">Nro. CUENTA DETR.</td>
-            <td width="8px" class="font-xs">:</td>
-            <td width="8px" class="font-xs"> {{ $document->detraction->bank_account}}</td>
-            @endif
+
 
 
 
@@ -128,11 +119,7 @@ $establishment = $document->establishment;
             {{ ($customer->department_id !== '-')? '- '.$customer->department->description : '' }}
         </td>
 
-        @if ($document->detraction)
-            <td width="120px" class="font-bold font-xs">Monto detracción</td>
-            <td width="8px" class="font-xs">:</td>
-            <td width="8px" class="font-xs"> S/ {{ $document->detraction->amount}}</td>
-        @endif
+
     </tr>
     @endif
     
@@ -412,7 +399,7 @@ $establishment = $document->establishment;
                     {!!$row->item->description!!} {!!$row->name_product_pdf!!} 
                 @endif
 
-                @if (!empty($row->item->presentation)) {!!$row->item->presentation->description!!} @endif
+                  
 
 
 
@@ -594,8 +581,18 @@ $establishment = $document->establishment;
                     <span> {{ $row->value }} </span>
                 @endif
 
+
             @endforeach
+
+            @if ($document->detraction)
+            @inject('detractionType', 'App\Services\DetractionTypeService')
+                <span style=""><br><span class="font-bold">{{ $document->detraction->detraction_type_id }} - {{ $detractionType->getDetractionTypeDescription($document->detraction->detraction_type_id) }}</span></span>               </span></span>
+                <span style="">Porcentaje <span class="font-bold">{{ $document->detraction->percentage}}%</span></span>
+                <span style="">Nro. de cuenta <span class="font-bold">{{ $document->detraction->bank_account}}</span></span>
+                <span style="">Monto <span class="font-bold">S/ {{ $document->detraction->amount}}</span></span>
+            @endif
 </div>
+
 <div style="margin-top: 10px"></div>
 <div class="border-box-number-1">
 

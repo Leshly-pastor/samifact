@@ -315,7 +315,7 @@
                                 </button>
                                 <div class="dropdown-menu dropdown-menu-end">
                                     <button
-                                        v-if="row.btn_options && !isComercial"
+                                        v-if="row.btn_options && !isIntegrateSystem"
                                         class="dropdown-item"
                                         @click.prevent="
                                             clickGenerateDocument(row.id)

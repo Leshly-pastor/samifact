@@ -15,11 +15,12 @@ class PersonCollection extends ResourceCollection
      */
     public function toArray($request)
     {
+        $grade = $request->input('grade');
         $year = $request->input('year');
-        return $this->collection->transform(function($row, $key) use ($year) {
+        return $this->collection->transform(function($row, $key) use ($year,$grade) {
 
             /** @var \App\Models\Tenant\Person $row */
-            return  $row->getCollectionData(true,true,false,$year);
+            return  $row->getCollectionData(true,true,false,$year,$grade);
         });
     }
 }

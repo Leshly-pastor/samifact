@@ -205,6 +205,7 @@ class ServiceDispatchController extends Controller
         return [
             'company_name' => $company->name,
             'company_number' => $company->number,
+            'company_mtc_auth' => $company->mtc_auth,
             'company_trade_name' => $company->trade_name,
             'customer_identity_document_type_id' => optional($record->customer)->identity_document_type_id,
             'customer_number' => optional($record->customer)->number,
@@ -234,6 +235,12 @@ class ServiceDispatchController extends Controller
             'driver_lastnames' => optional($record->driver)->name,
             'driver_license' => optional($record->driver)->license,
             'transport_plate_number' => $record->transport_data ? $record->transport_data['plate_number'] : null,
+            'secondary_plate_number' => $record->transport_data ? $record->transport_data['secondary_plate_number'] : null,
+            'tuc' => $record->transport_data ? $record->transport_data['tuc'] : null,
+            'tuc_secondary' => $record->transport_data ? $record->transport_data['tuc_secondary'] : null,
+            'auth_plate_primary' => $record->transport_data ? $record->transport_data['auth_plate_primary'] : null,
+            'auth_plate_secondary' => $record->transport_data ? $record->transport_data['auth_plate_secondary'] : null,
+            'tracto_carreta' => $record->tracto_carreta,
             'dispatcher_identity_document_type_id' => optional($record->dispatcher)->identity_document_type_id,
             'dispatcher_number' => optional($record->dispatcher)->number,
             'dispatcher_name' => optional($record->dispatcher)->name,
@@ -306,11 +313,13 @@ class ServiceDispatchController extends Controller
             'driver_lastnames' => optional($record->driver)->name,
             'driver_license' => optional($record->driver)->license,
             'transport_plate_number' => $record->transport_data ? $record->transport_data['plate_number'] : null,
+            'tracto_carreta' => $record->tracto_carreta,
 //            'dispatcher_identity_document_type_id' => optional($record->dispatcher)->identity_document_type_id,
 //            'dispatcher_number' => optional($record->dispatcher)->number,
 //            'dispatcher_name' => optional($record->dispatcher)->name,
 //            'dispatcher_number_mtc' => optional($record->dispatcher)->number_mtc,
             'items' => $items,
+            'tracto_carreta' => $record->tracto_carreta,
         ];
     }
 }

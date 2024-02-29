@@ -121,6 +121,7 @@ class OrderNote extends ModelTenant
     ];
 
     protected $fillable = [
+        'discounted_stock',
         'id',
         'number',
         'user_id',
@@ -176,6 +177,7 @@ class OrderNote extends ModelTenant
     ];
 
     protected $casts = [
+        'discounted_stock' => 'boolean',
         'dispatch_ticket_pdf' => 'boolean',
         'date_of_issue' => 'date',
         'date_of_due' => 'date',
@@ -591,9 +593,17 @@ class OrderNote extends ModelTenant
                 'order_number' => $miTiendaPe->order_number,
             ];
         }
-
+        $can_generate = true;
+        if ($this->discounted_stock) {
+            if (count($this->documents) > 0 || count($this->sale_notes) > 0) {
+                $can_generate = false;
+            }
+        }
+        
         return [
+            'can_generate' => $can_generate,
             'id' => $this->id,
+            'discounted_stock' => (bool) $this->discounted_stock,
             'quotation' => (object)$quotation,
             'soap_type_id' => $this->soap_type_id,
             'external_id' => $this->external_id,

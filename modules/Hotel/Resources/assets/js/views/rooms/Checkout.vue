@@ -232,6 +232,35 @@
                             </table>
                         </div>
                     </div>
+                    <div class="row">
+                        <div class="col -lg-3">
+                            <label for="" class="control-label">
+                                Destinatario del documento
+                            </label>
+                        </div>
+                        <el-select
+                            v-model="form.person_id"
+                            :loading="loading"
+                            :remote-method="searchRemoteCustomers"
+                            filterable
+                            placeholder="Escriba el nombre o número de documento del cliente"
+                            popper-class="el-select-customers"
+                            remote
+                            @change="changeCustomer"
+                        >
+                            <el-option
+                                v-for="option in customers"
+                                :key="option.id"
+                                :label="option.description"
+                                :value="option.id"
+                            ></el-option>
+                        </el-select>
+                        <small
+                            v-if="errors.person_id"
+                            class="text-danger"
+                            v-text="errors.person_id[0]"
+                        ></small>
+                    </div>
                     <div class="col-lg-3">
                         <div
                             :class="{ 'has-danger': errors.document_type_id }"
@@ -365,8 +394,9 @@
                                                 "
                                             >
                                                 <el-option
-                                                    v-for="(option,
-                                                    idx) in paymentMethodTypes"
+                                                    v-for="(
+                                                        option, idx
+                                                    ) in paymentMethodTypes"
                                                     :key="idx"
                                                     :label="option.description"
                                                     :value="option.id"
@@ -386,8 +416,9 @@
                                                 filterable
                                             >
                                                 <el-option
-                                                    v-for="(option,
-                                                    idx) in paymentDestinations"
+                                                    v-for="(
+                                                        option, idx
+                                                    ) in paymentDestinations"
                                                     :key="idx"
                                                     :label="option.description"
                                                     :value="option.id"
@@ -499,57 +530,60 @@ import SaleNoteOptions from "@views/sale_notes/partials/options.vue";
 import { calculateRowItem } from "../../../../../../../resources/js/helpers/functions";
 import {
     exchangeRate,
-    functions
+    functions,
 } from "../../../../../../../resources/js/mixins/functions";
 import { mapActions, mapState } from "vuex/dist/vuex.mjs";
 
 export default {
     components: {
         DocumentOptions,
-        SaleNoteOptions
+        SaleNoteOptions,
     },
     mixins: [exchangeRate, functions],
     props: {
+        diff: {
+            type: Number,
+        },
         rent: {
             type: Object,
-            required: true
+            required: true,
         },
         customer: {
             type: Object,
-            required: true
+            required: true,
         },
         room: {
             type: Object,
-            required: true
+            required: true,
         },
         paymentMethodTypes: {
             type: Array,
-            required: true
+            required: true,
         },
         paymentDestinations: {
             type: Array,
-            required: true
+            required: true,
         },
         allSeries: {
             type: Array,
-            required: true
+            required: true,
         },
         documentTypesInvoice: {
             type: Array,
-            required: true
+            required: true,
         },
         configuration: {
             type: Object,
-            required: false
+            required: false,
         },
         affectationIgvTypes: {
             type: Array,
-            required: true
-        }
+            required: true,
+        },
     },
     computed: {
         ...mapState(["config"]),
-        canMakePayment: function() {
+        canMakePayment: function () {
             if (
                 this.currentRent !== undefined &&
                 this.currentRent.status !== undefined &&
@@ -558,15 +592,18 @@ export default {
                 return true;
             }
             return false;
-        }
+        },
     },
     created() {
         this.loadConfiguration();
         this.$store.commit("setConfiguration", this.configuration);
         this.currentRent = this.rent;
+        this.customers = [this.currentRent.customer];
+        this.form.person_id = this.currentRent.customer.id;
     },
     data() {
         return {
+            customers: [],
             title: "",
             currentRent: {},
             arrears: 0,
@@ -576,7 +613,7 @@ export default {
             totalDebt: 0,
             response: {},
             document: {
-                payments: []
+                payments: [],
             },
             errors: {},
             series: [],
@@ -589,8 +626,9 @@ export default {
             showDialogSaleNoteOptions: false,
             form: {
                 establishment_id: null,
-                date_of_issue: null
-            }
+                date_of_issue: null,
+                person_id: null,
+            },
         };
     },
     async mounted() {
@@ -613,13 +651,13 @@ export default {
         this.title = `Checkout: Habitación ${this.currentRent.room.name}`;
         this.total = this.room.item.total;
 
-        this.document.items = await this.currentRent.items.map(i => {
+        this.document.items = await this.currentRent.items.map((i) => {
             if (
                 i.item.affectation_igv_type == undefined ||
                 _.isEmpty(i.item.affectation_igv_type)
             ) {
                 i.item.affectation_igv_type = _.find(this.affectationIgvTypes, {
-                    id: i.item.affectation_igv_type_id
+                    id: i.item.affectation_igv_type_id,
                 });
             }
 
@@ -633,9 +671,13 @@ export default {
         await this.clickAddPayment();
         this.validateIdentityDocumentType();
         const date = moment().format("YYYY-MM-DD");
-        await this.searchExchangeRateByDate(date).then(res => {
+        await this.searchExchangeRateByDate(date).then((res) => {
             this.document.exchange_rate_sale = res;
         });
+        if (this.diff > 0) {
+            this.room.item.quantity = this.diff;
+            this.changeNigth();
+        }
     },
     watch: {
         arrears(value) {
@@ -650,12 +692,42 @@ export default {
                 this.total = total;
                 this.onCalculatePaidAndDebts();
             }
-        }
+        },
     },
     methods: {
+        changeCustomer() {
+            let customer = this.customers.find(
+                (c) => c.id === this.form.person_id
+            );
+
+            if (customer) {
+                if (customer.identity_document_type_id == "6") {
+                    this.document.document_type_id = "01";
+                } else {
+                    this.document.document_type_id = "03";
+                }
+                this.document.customer = customer;
+                this.document.customer_id = customer.id;
+                this.changeDocumentType();
+            }
+        },
+        searchRemoteCustomers(input) {
+            if (input.length > 0) {
+                this.loading = true;
+                let parameters = `input=${input}&document_type_id=&operation_type_id=`;
+
+                this.$http
+                    .get(`/documents/search/customers?${parameters}`)
+                    .then((response) => {
+                        this.customers = response.data.customers;
+                    })
+                    .catch((error) => console.log(error))
+                    .finally(() => (this.loading = false));
+            }
+        },
         onCalculatePaidAndDebts() {
             this.totalPaid = this.currentRent.items
-                .map(i => {
+                .map((i) => {
                     if (i.payment_status === "PAID") {
                         return i.item.total;
                     }
@@ -663,7 +735,7 @@ export default {
                 })
                 .reduce((a, b) => a + b, 0);
             const totalDebt = this.currentRent.items
-                .map(i => {
+                .map((i) => {
                     if (i.payment_status === "DEBT") {
                         return i.item.total;
                     }
@@ -682,7 +754,7 @@ export default {
                 this.room.item.input_unit_price_value * this.room.item.quantity;
             let { item } = this.room;
             let idx = this.currentRent.items.findIndex(
-                i => i.item_id == item.item_id
+                (i) => i.item_id == item.item_id
             );
             if (idx >= 0) {
                 this.currentRent.items[idx].item = item;
@@ -693,7 +765,7 @@ export default {
         },
         ...mapActions(["loadConfiguration"]),
         validateIdentityDocumentType() {
-            let identity_document_types = ["0", "1"];
+            let identity_document_types = ["0", "1", "6"];
             let customer = this.document.customer;
 
             if (
@@ -701,8 +773,8 @@ export default {
                     customer.identity_document_type_id
                 )
             ) {
-                this.document_types = this.all_document_types.filter(row => {
-                    return ["03", "80"].includes(row.id);
+                this.document_types = this.all_document_types.filter((row) => {
+                    return ["03", "01", "80"].includes(row.id);
                 });
 
                 // this.document_types = _.filter(this.all_document_types, { id: "03" });
@@ -710,10 +782,15 @@ export default {
                 this.document_types = this.all_document_types;
             }
 
-            this.document.document_type_id =
-                this.document_types.length > 0
-                    ? this.document_types[0].id
-                    : null;
+            if (customer.identity_document_type_id == "6") {
+                this.document.document_type_id = "01";
+            } else {
+                this.document.document_type_id = "03";
+            }
+            // this.document.document_type_id =
+            //     this.document_types.length > 0
+            //         ? this.document_types[0].id
+            //         : null;
             this.changeDocumentType();
         },
         changeDateOfIssue() {
@@ -722,7 +799,7 @@ export default {
         changeDocumentType() {
             this.document.series_id = null;
             this.series = _.filter(this.allSeries, {
-                document_type_id: this.document.document_type_id
+                document_type_id: this.document.document_type_id,
             });
             this.document.series_id =
                 this.series.length > 0 ? this.series[0].id : null;
@@ -747,7 +824,7 @@ export default {
                 payment_method_type_id: "01",
                 payment_destination_id: null,
                 reference: null,
-                payment: payment
+                payment: payment,
             });
         },
         onExitPage() {
@@ -756,18 +833,18 @@ export default {
         validatePaymentDestination() {
             let error_by_item = 0;
 
-            this.document.payments.forEach(item => {
+            this.document.payments.forEach((item) => {
                 if (item.payment_destination_id == null) error_by_item++;
             });
 
             return {
-                error_by_item: error_by_item
+                error_by_item: error_by_item,
             };
         },
         initForm() {
             this.form_cash_document = {
                 document_id: null,
-                sale_note_id: null
+                sale_note_id: null,
             };
         },
         updateDataForSend() {
@@ -796,11 +873,32 @@ export default {
                 this.showDialogDocumentOptions = true;
             }
         },
+        validDocumentCustomer() {
+            let pass = true;
+            let customer = this.document.customer;
+            if (customer) {
+                if (
+                    customer.identity_document_type_id !== "6" &&
+                    this.document.document_type_id === "01"
+                ) {
+                    pass = false;
+                    this.$message.error(
+                        "El cliente no tiene RUC, no se puede emitir una Factura."
+                    );
+                }
+            } else {
+                pass = false;
+            }
+            return pass;
+        },
         async onGoToInvoice() {
-            console.log("onGoToInvoice");
+            if (!this.validDocumentCustomer()) {
+                return;
+            }
             await this.onUpdateItemsWithExtras();
             await this.onCalculateTotals();
-            let validate_payment_destination = this.validatePaymentDestination();
+            let validate_payment_destination =
+                this.validatePaymentDestination();
 
             if (validate_payment_destination.error_by_item > 0) {
                 return this.$message.error(
@@ -812,7 +910,7 @@ export default {
             this.loading = true;
             this.$http
                 .post(`/${this.resource_documents}`, this.document)
-                .then(response => {
+                .then((response) => {
                     if (response.data.success) {
                         this.documentNewId = response.data.data.id;
                         this.successGoToInvoice();
@@ -822,18 +920,16 @@ export default {
 
                         const payloadFinalizedRent = {
                             arrears: this.arrears,
-                            document_type_id:this.document.document_type_id,
+                            document_type_id: this.document.document_type_id,
                             id: this.documentNewId,
                         };
                         this.loading = true;
                         this.$http
                             .post(
-                                `/hotels/reception/${
-                                    this.currentRent.id
-                                }/rent/finalized`,
+                                `/hotels/reception/${this.currentRent.id}/rent/finalized`,
                                 payloadFinalizedRent
                             )
-                            .then(responseFinalize => {
+                            .then((responseFinalize) => {
                                 this.response = response.data;
                                 this.currentRent =
                                     responseFinalize.data.currentRent;
@@ -845,7 +941,7 @@ export default {
                         this.$message.error(response.data.message);
                     }
                 })
-                .catch(error => {
+                .catch((error) => {
                     if (error.response.status === 422) {
                         this.errors = error.response.data;
                     } else {
@@ -858,11 +954,9 @@ export default {
         },
         onUpdateItemsWithExtras() {
             console.log("onUpdateItemsWithExtras");
-            this.document.items = this.document.items.map(it => {
+            this.document.items = this.document.items.map((it) => {
                 if (it.item_id === this.room.item_id) {
-                    const name = `${this.room.item.item.description} x ${
-                        this.room.item.quantity
-                    } noche(s)`;
+                    const name = `${this.room.item.item.description} x ${this.room.item.quantity} noche(s)`;
                     it.item.description = name;
                     it.item.full_description = name;
                     it.name_product_pdf = name;
@@ -892,12 +986,12 @@ export default {
         saveCashDocument() {
             this.$http
                 .post(`/cash/cash_document`, this.form_cash_document)
-                .then(response => {
+                .then((response) => {
                     if (!response.data.success) {
                         this.$message.error(response.data.message);
                     }
                 })
-                .catch(error => {
+                .catch((error) => {
                     this.axiosError(error);
                 });
         },
@@ -942,13 +1036,13 @@ export default {
                 guides: [],
                 additional_information: null,
                 actions: {
-                    format_pdf: "a4"
+                    format_pdf: "a4",
                 },
                 dispatch_id: null,
                 dispatch: null,
                 is_receivable: false,
                 payments: [],
-                hotel: {}
+                hotel: {},
             };
         },
         onGotoBack() {
@@ -971,7 +1065,7 @@ export default {
             let total_plastic_bag_taxes = 0;
             let total_discount = 0;
             let total_charge = 0;
-            this.document.items.forEach(row => {
+            this.document.items.forEach((row) => {
                 total_discount += parseFloat(row.total_discount);
                 total_charge += parseFloat(row.total_charge);
 
@@ -1034,7 +1128,7 @@ export default {
                 total + this.document.total_plastic_bag_taxes,
                 2
             );
-        }
-    }
+        },
+    },
 };
 </script>

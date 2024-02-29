@@ -76,7 +76,9 @@ use Modules\Suscription\Models\Tenant\SuscriptionPayment;
 use App\CoreFacturalo\Requests\Inputs\Common\EstablishmentInput;
 use App\Exports\SaleNoteExport;
 use App\Mail\Tenant\IntegrateSystemEmail;
+use App\Models\Tenant\DispatchOrder;
 use App\Models\Tenant\MessageIntegrateSystem;
+use App\Models\Tenant\ProductionOrder;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Modules\BusinessTurn\Models\BusinessTurn;
 use Modules\Inventory\Models\InventoryConfiguration;
@@ -148,13 +150,13 @@ class SaleNoteController extends Controller
     {
         $sale_note = SaleNote::find($sale_note_id);
         $sale_note->state_payment_id = $state_payment_id;
-        if($state_payment_id == '02'){
+        if ($state_payment_id == '02') {
             $customer = Person::find($sale_note->customer_id);
             $customer_email = $customer->email;
             $message = MessageIntegrateSystem::getMessage('sale_note.02');
-            $mailable = new IntegrateSystemEmail($customer,$message);
+            $mailable = new IntegrateSystemEmail($customer, $message);
             $id = $sale_note->id;
-            EmailController::SendMail($customer_email, $mailable,$id,6);
+            EmailController::SendMail($customer_email, $mailable, $id, 6);
         }
         $sale_note->save();
         return [
@@ -527,6 +529,14 @@ class SaleNoteController extends Controller
 
     public function columns()
     {
+        $is_integrate_system = BusinessTurn::isIntegrateSystem();
+        if ($is_integrate_system) {
+            return [
+                'customer_id' => 'Cliente',
+                'date_of_issue' => 'Fecha de emisión',
+                'quotation_number' => 'N° Cotización',
+            ];
+        }
         return [
             'date_of_issue' => 'Fecha de emisión',
             'customer' => 'Cliente',
@@ -565,11 +575,9 @@ class SaleNoteController extends Controller
     private function getRecords($request)
     {
         $is_integrate_system = BusinessTurn::isIntegrateSystem();
-        if($is_integrate_system){
-            $records = SaleNote::query();
-        }else{
-            $records = SaleNote::whereTypeUser();
-        }
+
+        $records = SaleNote::whereTypeUser();
+
         // Solo devuelve matriculas
         if ($request != null && $request->has('onlySuscription') && (bool)$request->onlySuscription == true) {
             $records->whereNotNull('grade')->whereNotNull('section');
@@ -586,7 +594,18 @@ class SaleNoteController extends Controller
                     ->orWhere('number', 'like', "%{$request->value}%");
             })
                 ->latest();
-        } else {
+        }
+        else if ($request->column == 'customer_id' && $request->value != null) {
+            $records->where('customer_id', $request->value)
+                ->latest();
+        }
+        else if($request->column == 'quotation_number' && $request->value != null){
+            $records->whereHas('quotation', function ($query) use ($request) {
+                $query->where('number', 'like', "%{$request->value}%");
+            })
+                ->latest();
+        }
+        else {
             $records->where($request->column, 'like', "%{$request->value}%")
                 ->latest('id');
         }
@@ -651,6 +670,7 @@ class SaleNoteController extends Controller
         if (\Auth::user()) {
             $user = \Auth::user();
         }
+        $business_turns = BusinessTurn::where('active', true)->get();
         $establishment_id =  $user->establishment_id;
         $userId =  $user->id;
         $customers = $this->table('customers');
@@ -680,6 +700,7 @@ class SaleNoteController extends Controller
         $is_integrate_system = BusinessTurn::isIntegrateSystem();
 
         return compact(
+            'business_turns',
             'is_integrate_system',
             'customers',
             'establishments',
@@ -762,7 +783,9 @@ class SaleNoteController extends Controller
         return $this->storeWithData($request->all());
     }
 
-
+    function updateDispatchProductionOrdens($sale_note_id)
+    {
+    }
     public function storeWithData($inputs)
     {
 
@@ -791,7 +814,7 @@ class SaleNoteController extends Controller
                 }
                 $this->setIdLoteSelectedToItem($row);
                 $this->setSizesSelectedToItem($row);
-                if(isset($row['warehouse_id'])){
+                if (isset($row['warehouse_id'])) {
                     $row["warehouse_id"] = ($row["warehouse_id"] == 0) ? null : $row["warehouse_id"];
                 }
                 $sale_note_item->fill($row);
@@ -865,7 +888,8 @@ class SaleNoteController extends Controller
             }
             //pagos
             $this->savePayments($this->sale_note, $data['payments'], $data['cash_id']);
-
+            if (isset($data['transport']) && $data['transport']) $this->sale_note->transport()->create($data['transport']);
+            if (isset($data['transport_dispatch']) && $data['transport_dispatch']) $this->sale_note->transport_dispatch()->create($data['transport_dispatch']);
             $this->setFilename();
             $this->createPdf($this->sale_note, "a4", $this->sale_note->filename);
             $this->regularizePayments($data['payments']);
@@ -875,6 +899,17 @@ class SaleNoteController extends Controller
             $establishment = Establishment::where('id', auth()->user()->establishment_id)->first();
             $print_format = $establishment->print_format ?? 'ticket';
             $url_print = "{$base_url}/sale-notes/print/{$external_id}/$print_format";
+            $is_integrate_system = BusinessTurn::isIntegrateSystem();
+            if ($inputs['id'] && $is_integrate_system) {
+                $exist_production_order = ProductionOrder::where('sale_note_id', $inputs['id'])->first();
+                if ($exist_production_order) {
+                    //crea un objeto request 
+                    $request = new Request();
+                    (new ProductionOrderController)->generateFromSaleNote($request, $inputs['id']);
+
+                    $exist_dispatch_order = DispatchOrder::where('production_order_id', $exist_production_order->id)->first();
+                }
+            }
             return [
                 'success' => true,
                 'data' => [
@@ -1031,7 +1066,17 @@ class SaleNoteController extends Controller
                     ->orderBy('number', 'desc')
                     ->first();
 
-                $number = ($document) ? $document->number + 1 : 1;
+                if ($document) {
+                    $number = $document->number + 1;
+                } else {
+                    $series_configuration = SeriesConfiguration::where([['document_type_id', "80"], ['series', $series]])->first();
+                    if ($series_configuration) {
+                        $number = $series_configuration->number ?? 1;
+                    } else {
+                        $number = 1;
+                    }
+                }
+                // $number = ($document) ? $document->number + 1 : 1;
             }
         }
         $seller_id = isset($inputs['seller_id']) ? (int)$inputs['seller_id'] : 0;
@@ -1966,7 +2011,20 @@ class SaleNoteController extends Controller
                 }
             }
         }
+        $this->recalculateStock($item->item_id);
     }
+    function recalculateStock($item_id)
+    {
+        $total = 0;
+        $item_warehouses = ItemWarehouse::where('item_id', $item_id)->get();
+        foreach ($item_warehouses as $item_warehouse) {
+            $total += $item_warehouse->stock;
+        }
+        $item = Item::find($item_id);
+        $item->stock = $total;
+        $item->save();
+    }
+
     public function saleNotesByClientDispatch(Request $request)
     {
         $request->validate([
@@ -2068,7 +2126,7 @@ class SaleNoteController extends Controller
         } else {
 
             $items = SaleNoteItem::whereIn('sale_note_id', $request->notes_id)
-                ->select('item_id', 'quantity')
+                ->select('item_id', 'quantity', 'unit_price', 'affectation_igv_type_id', 'percentage_igv')
                 ->get();
         }
 

@@ -237,7 +237,10 @@ class DispatchInput
                 $transport = $inputs['transport'];
                 $plate_number = $transport['plate_number'];
                 $secondary_plate_number = Functions::valueKeyInArray($transport, 'secondary_plate_number');
+                $auth_plate_primary = Functions::valueKeyInArray($transport, 'auth_plate_primary');
+                $auth_plate_secondary = Functions::valueKeyInArray($transport, 'auth_plate_secondary');
                 $tuc = Functions::valueKeyInArray($transport, 'tuc');
+                $tuc_secondary = Functions::valueKeyInArray($transport, 'tuc_secondary');
                 $model = $transport['model'];
                 $brand = $transport['brand'];
 
@@ -245,8 +248,11 @@ class DispatchInput
                     'plate_number' => $plate_number,
                     'model' => $model,
                     'brand' => $brand,
+                    'auth_plate_secondary' => $auth_plate_secondary,
+                    'auth_plate_primary' => $auth_plate_primary,
                     'secondary_plate_number' => $secondary_plate_number,
                     'tuc' => $tuc,
+                    'tuc_secondary' => $tuc_secondary,
                 ];
             }
         }

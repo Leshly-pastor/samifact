@@ -249,7 +249,84 @@
                             ></small>
                         </div>
                     </div>
+                    <div class="row" v-if="isBusinessTurnActive('curtains')">
+                        <div class="col-md-4 col-sm-4">
+                            <div class="form-group">
+                                <label class="control-label"> Ancho </label>
 
+                                <el-input
+                                    type="number"
+                                    v-model="side.width"
+                                    :min="1"
+                                    step="any"
+                                    @input="calculateTotalCurtains"
+                                >
+                                    <el-button
+                                        slot="prepend"
+                                        icon="el-icon-minus"
+                                        style="
+                                            padding-right: 5px;
+                                            padding-left: 12px;
+                                        "
+                                        @click="clickDecreaseCurtains('width')"
+                                    ></el-button>
+                                    <el-button
+                                        slot="append"
+                                        icon="el-icon-plus"
+                                        style="
+                                            padding-right: 5px;
+                                            padding-left: 12px;
+                                        "
+                                        @click="clickIncreaseCurtains('width')"
+                                    ></el-button>
+                                </el-input>
+
+                                <small
+                                    v-if="errors.width"
+                                    class="text-danger"
+                                    v-text="errors.width[0]"
+                                ></small>
+                            </div>
+                        </div>
+                        <div class="col-md-4 col-sm-4">
+                            <div class="form-group">
+                                <label class="control-label"> Alto </label>
+
+                                <el-input
+                                    type="number"
+                                    v-model="side.height"
+                                    :min="1"
+                                    step="any"
+                                    @input="calculateTotalCurtains"
+                                >
+                                    <el-button
+                                        slot="prepend"
+                                        icon="el-icon-minus"
+                                        style="
+                                            padding-right: 5px;
+                                            padding-left: 12px;
+                                        "
+                                        @click="clickDecreaseCurtains('height')"
+                                    ></el-button>
+                                    <el-button
+                                        slot="append"
+                                        icon="el-icon-plus"
+                                        style="
+                                            padding-right: 5px;
+                                            padding-left: 12px;
+                                        "
+                                        @click="clickIncreaseCurtains('height')"
+                                    ></el-button>
+                                </el-input>
+
+                                <small
+                                    v-if="errors.height"
+                                    class="text-danger"
+                                    v-text="errors.height[0]"
+                                ></small>
+                            </div>
+                        </div>
+                    </div>
                     <div class="col-md-4 col-sm-4">
                         <div
                             :class="{ 'has-danger': errors.quantity }"
@@ -295,6 +372,7 @@
                         </div>
                     </div>
 
+                   
                     <div class="col-md-4 col-sm-4">
                         <div
                             :class="{ 'has-danger': errors.unit_price }"
@@ -366,7 +444,7 @@
                             <label class="control-label">Total</label>
                             <el-input
                                 type="number"
-                                   step="any"
+                                step="any"
                                 v-model="readonly_total"
                                 @input="calculateUnitPrice"
                             ></el-input>
@@ -990,6 +1068,7 @@ import {
 
 export default {
     props: [
+        "businessTurns",
         "headers",
         "recordItem",
         "showDialog",
@@ -1063,6 +1142,10 @@ export default {
             value1: "hello",
             readonly_total: 0,
             itemLastPrice: null,
+            side: {
+                width: 1,
+                height: 1,
+            },
             //item_unit_type: {}
         };
     },
@@ -1150,6 +1233,35 @@ export default {
         },
     },
     methods: {
+        calculateTotalCurtains() {
+            let width = this.side.width;
+            let height = this.side.height;
+
+            this.form.quantity = width * height;
+            this.calculateTotal();
+        },
+        clickDecreaseCurtains(side) {
+            if (this.side[side] <= 1) {
+                this.side[side] = 1;
+                return;
+            }
+            this.side[side] = Number(this.side[side]) - 1;
+            this.calculateTotalCurtains();
+        },
+        clickIncreaseCurtains(side) {
+            this.side[side] = Number(this.side[side]) + 1;
+            this.calculateTotalCurtains();
+        },
+        isBusinessTurnActive(value) {
+            if (this.businessTurns === undefined) return false;
+            let business_turn = this.businessTurns.find(
+                (business_turn) => business_turn.value == value
+            );
+            if (business_turn) {
+                return business_turn.active;
+            }
+            return false;
+        },
         calculateUnitPrice() {
             this.form.unit_price = _.round(
                 this.readonly_total / this.form.quantity,
@@ -1373,8 +1485,12 @@ export default {
         // },
         initForm() {
             this.errors = {};
-
+                this.side = {
+                    width: 1,
+                    height: 1,
+                };
             this.form = {
+                unit_price_curtain: 0,
                 // category_id: [1],
                 // edit: false,
                 item_id: null,
@@ -1417,8 +1533,6 @@ export default {
             this.has_list_prices = false;
         },
         async create() {
-            console.log(this.headers, " headers");
-            console.log(this.recordItem, " recordItem");
             let { quotation_projects } = this.config;
             this.isProject = quotation_projects;
             this.titleDialog = this.recordItem
@@ -1442,7 +1556,16 @@ export default {
                 this.form.item_id = await this.recordItem.item_id;
                 await this.changeItem();
                 this.form.quantity = this.recordItem.quantity;
-                this.form.unit_price = this.recordItem.unit_price;
+                let {
+                    item: { has_igv },
+                    percentage_igv,
+                } = this.recordItem;
+                if (has_igv) {
+                    this.form.unit_price = this.recordItem.unit_price;
+                } else {
+                    this.form.unit_price =
+                        this.recordItem.unit_price / (1 + percentage_igv / 100);
+                }
                 this.form.header = this.recordItem.header;
                 this.form.disponibilidad =
                     this.recordItem.disponibilidad ||
@@ -1664,6 +1787,15 @@ export default {
             this.total_item = null;
         },
         async clickAddItem() {
+            let { affectation_igv_type_id: aff_id, unit_price: un_pr } =
+                this.form;
+            aff_id = Number(aff_id);
+            un_pr = Number(un_pr);
+            if (aff_id != 15 && un_pr <= 0) {
+                return this.$message.error(
+                    "El total debe ser mayor a 0 o elija tipo de afectación 'gravado bonificaciones'."
+                );
+            }
             if (!this.validateItemProject()) return;
             this.validateQuantity();
             /*

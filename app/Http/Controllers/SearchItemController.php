@@ -8,6 +8,7 @@ use App\Models\Tenant\Item;
 use App\Models\Tenant\ItemSupply;
 use App\Models\Tenant\ItemUnitType;
 use App\Models\Tenant\ItemWarehouse;
+use App\Models\Tenant\ItemWarehousePrice;
 use App\Models\Tenant\Warehouse;
 use Carbon\Carbon;
 use Illuminate\Database\Query\Builder;
@@ -133,6 +134,7 @@ class SearchItemController extends Controller
         $filter_categorie = $request->input('filter_categorie');
         $factory_codes = $request->input('factory_codes');
         $filter_brand = $request->input('filter_brand');
+        $favorite = $request->input('favorite');
         $order_search_price = $request->input('order_search_price');
         $order_search_stock = $request->input('order_search_stock');
         $items_id = ($request->has('items_id')) ? $request->items_id : null;
@@ -167,7 +169,9 @@ class SearchItemController extends Controller
             $ItemToSearchBySeries->where('brand_id', $filter_brand);
         }
     
-
+        if($favorite == 1){
+            $item->where('frequent', true);
+        }
         if ($production !== false) {
             // busqueda de insumos, no se lista por codigo de barra o por series
             $search_item_by_series = false;
@@ -649,9 +653,19 @@ class SearchItemController extends Controller
 
         return $items->transform(function ($row) use ($warehouse_id, $warehouse, $configuration) {
             /** @var Item $row */
+            $sale_unit_price = number_format(round($row->sale_unit_price, 6), $configuration->decimal_quantity, ".", "");
+            if($configuration->active_warehouse_prices){
+                $establishment_id = auth()->user()->establishment_id;
+                $warehouse_id = Warehouse::where('establishment_id', $establishment_id)->first()->id;
+                $item_warehouse_price = ItemWarehousePrice::where('item_id', $row->id)->where('warehouse_id', $warehouse_id)->first();
+                if($item_warehouse_price){
+                    $sale_unit_price = number_format(round($item_warehouse_price->price, 6), $configuration->decimal_quantity, ".", "");
+                }
+            }
             $temp =   [
                 'id' => $row->id,
-                'sale_unit_price' => number_format(round($row->sale_unit_price, 6), $configuration->decimal_quantity, ".", ""),
+                // 'sale_unit_price' => number_format(round($row->sale_unit_price, 6), $configuration->decimal_quantity, ".", ""),
+                'sale_unit_price' => $sale_unit_price,
                 'purchase_unit_price' => number_format($row->purchase_unit_price, $configuration->decimal_quantity, ".", ","),
                 'unit_type_id' => $row->unit_type_id,
                 'sale_affectation_igv_type_id' => $row->sale_affectation_igv_type_id,
@@ -663,9 +677,16 @@ class SearchItemController extends Controller
                 'warehouses' => collect($row->warehouses)->transform(function ($row) use ($warehouse_id) {
                     /** @var ItemWarehouse $row */
                     /** @var Warehouse $c_warehouse */
+                    /** @var Ware $p_warehouse */
                     $c_warehouse = $row->warehouse;
-
+                    $price = ItemWarehousePrice::where('item_id', $row->item_id)->where('warehouse_id', $c_warehouse->id)->first();
+                    if($price){
+                        $price= $price->price;
+                    }else{
+                        $price=0;
+                    }
                     return [
+                        'price' => $price,
                         'warehouse_id' => $c_warehouse->id,
                         'warehouse_description' => $c_warehouse->description,
                         'stock' => $row->stock,

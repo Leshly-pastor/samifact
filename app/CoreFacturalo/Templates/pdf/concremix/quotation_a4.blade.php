@@ -125,7 +125,7 @@ if ($logo) {
             </td>
             <td class="text-left bg-grey2 border-grey mt-5 mb-5" style="padding-top: 10px; padding-bottom: 10px; padding-left: 5px;">
                   @if($row->item->name_product_pdf ?? false) {!!$row->item->name_product_pdf ?? ''!!} @else {!!$row->item->description!!} @endif
-                @if (!empty($row->item->presentation)) {!!$row->item->presentation->description!!} @endif
+                  
                 @if($row->attributes)
                     @foreach($row->attributes as $attr)
                         <br/><span style="font-size: 9px">{!! $attr->description !!} : {{ $attr->value }}</span>

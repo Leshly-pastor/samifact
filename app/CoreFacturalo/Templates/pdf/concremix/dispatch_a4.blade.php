@@ -205,7 +205,7 @@ if ($logo) {
                     {!!$row->item->description!!}
                 @endif
 
-                @if (!empty($row->item->presentation)) {!!$row->item->presentation->description!!} @endif
+                  
 
                 @if($row->attributes)
                     @foreach($row->attributes as $attr)

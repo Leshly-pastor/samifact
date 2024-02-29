@@ -1529,6 +1529,7 @@
                                     ></small>
                                 </div>
                             </div>
+                            
                             <div class="col-md-6 mt-4">
                                 <label class="control-label">
                                     Facturas/Boletas no afectan stock
@@ -1558,6 +1559,38 @@
                                         v-if="errors.document_no_stock"
                                         class="text-danger"
                                         v-text="errors.document_no_stock[0]"
+                                    ></small>
+                                </div>
+                            </div>
+                                <div class="col-md-6 mt-4">
+                                <label class="control-label">
+                                    Pedidos afectan stock
+                                    <el-tooltip
+                                        class="item"
+                                        content="Opción de afectar stock en pedidos"
+                                        effect="dark"
+                                        placement="top-start"
+                                    >
+                                        <i class="fa fa-info-circle"></i>
+                                    </el-tooltip>
+                                </label>
+
+                                <div
+                                    :class="{
+                                        'has-danger': errors.discount_order_note,
+                                    }"
+                                    class="form-group"
+                                >
+                                    <el-switch
+                                        v-model="form.discount_order_note"
+                                        active-text="Si"
+                                        inactive-text="No"
+                                        @change="submit"
+                                    ></el-switch>
+                                    <small
+                                        v-if="errors.discount_order_note"
+                                        class="text-danger"
+                                        v-text="errors.discount_order_note[0]"
                                     ></small>
                                 </div>
                             </div>
@@ -1898,6 +1931,104 @@
                                         v-text="
                                             errors.search_by_factory_code[0]
                                         "
+                                    ></small>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mt-4">
+                                <label class="control-label">
+                                    Descuentos acumulativos
+                                    <el-tooltip
+                                        class="item"
+                                        content="Poder acumular % de descuentos para un producto"
+                                        effect="dark"
+                                        placement="top-start"
+                                    >
+                                        <i class="fa fa-info-circle"></i>
+                                    </el-tooltip>
+                                </label>
+
+                                <div
+                                    :class="{
+                                        'has-danger': errors.discounts_acc,
+                                    }"
+                                    class="form-group"
+                                >
+                                    <el-switch
+                                        v-model="form.discounts_acc"
+                                        active-text="Si"
+                                        inactive-text="No"
+                                        @change="submit"
+                                    ></el-switch>
+                                    <small
+                                        v-if="errors.discounts_acc"
+                                        class="text-danger"
+                                        v-text="errors.discounts_acc[0]"
+                                    ></small>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mt-4">
+                                <label class="control-label">
+                                    Editar rápida - productos
+                                    <el-tooltip
+                                        class="item"
+                                        content="Edición rápida de los valores (precio, cantidad, valor, total) de los productos en el detalle del documento"
+                                        effect="dark"
+                                        placement="top-start"
+                                    >
+                                        <i class="fa fa-info-circle"></i>
+                                    </el-tooltip>
+                                </label>
+
+                                <div
+                                    :class="{
+                                        'has-danger':
+                                            errors.edit_info_documents,
+                                    }"
+                                    class="form-group"
+                                >
+                                    <el-switch
+                                        v-model="form.edit_info_documents"
+                                        active-text="Si"
+                                        inactive-text="No"
+                                        @change="submit"
+                                    ></el-switch>
+                                    <small
+                                        v-if="errors.edit_info_documents"
+                                        class="text-danger"
+                                        v-text="errors.edit_info_documents[0]"
+                                    ></small>
+                                </div>
+                            </div>
+                              <div class="col-md-6 mt-4">
+                                <label class="control-label">
+                                    Producto favoritos - acceso rápido
+                                    <el-tooltip
+                                        class="item"
+                                        content="Poder listar los productos favoritos en el detalle del documento"
+                                        effect="dark"
+                                        placement="top-start"
+                                    >
+                                        <i class="fa fa-info-circle"></i>
+                                    </el-tooltip>
+                                </label>
+
+                                <div
+                                    :class="{
+                                        'has-danger':
+                                            errors.show_favorites_documents,
+                                    }"
+                                    class="form-group"
+                                >
+                                    <el-switch
+                                        v-model="form.show_favorites_documents"
+                                        active-text="Si"
+                                        inactive-text="No"
+                                        @change="submit"
+                                    ></el-switch>
+                                    <small
+                                        v-if="errors.show_favorites_documents"
+                                        class="text-danger"
+                                        v-text="errors.show_favorites_documents[0]"
                                     ></small>
                                 </div>
                             </div>
@@ -2900,14 +3031,14 @@
                                             effect="dark"
                                             placement="top-start"
                                         >
-                                           <!-- un icono como boton pequeño para eliminar la imagen -->
-                                        <el-tag
-                                            type="danger"
-                                            role="button"
-                                            @click="removeImageHeader"
-                                        >
-                                            <i class="fa fa-trash"></i>
-                                        </el-tag>
+                                            <!-- un icono como boton pequeño para eliminar la imagen -->
+                                            <el-tag
+                                                type="danger"
+                                                role="button"
+                                                @click="removeImageHeader"
+                                            >
+                                                <i class="fa fa-trash"></i>
+                                            </el-tag>
                                         </el-tooltip>
                                     </label>
                                     <el-input
@@ -2988,20 +3119,20 @@
                                         >
                                             <i class="fa fa-info-circle"></i>
                                         </el-tooltip>
-                                             <el-tooltip
+                                        <el-tooltip
                                             class="item"
                                             content="Eliminar la imagen para del membretado"
                                             effect="dark"
                                             placement="top-start"
                                         >
-                                           <!-- un icono como boton pequeño para eliminar la imagen -->
-                                        <el-tag
-                                            type="danger"
-                                            role="button"
-                                            @click="removeMembrete"
-                                        >
-                                            <i class="fa fa-trash"></i>
-                                        </el-tag>
+                                            <!-- un icono como boton pequeño para eliminar la imagen -->
+                                            <el-tag
+                                                type="danger"
+                                                role="button"
+                                                @click="removeMembrete"
+                                            >
+                                                <i class="fa fa-trash"></i>
+                                            </el-tag>
                                         </el-tooltip>
                                     </label>
                                     <el-input
@@ -3952,7 +4083,50 @@
                                     </div>
                                 </div>
                             </div>
-
+                            <div class="col-6 mt-4">
+                                <div class="form-group">
+                                    <label>
+                                        Habilitar descuentos a vendedores - POS
+                                        <el-tooltip
+                                            class="item"
+                                            effect="dark"
+                                            placement="top-start"
+                                        >
+                                            <div slot="content">
+                                                - Permite registrar descuentos a
+                                                vendedores en POS
+                                            </div>
+                                            <i class="fa fa-info-circle"></i>
+                                        </el-tooltip>
+                                    </label>
+                                    <div
+                                        :class="{
+                                            'has-danger':
+                                                errors.show_discount_seller_pos,
+                                        }"
+                                        class="form-group"
+                                    >
+                                        <el-switch
+                                            v-model="
+                                                form.show_discount_seller_pos
+                                            "
+                                            active-text="Si"
+                                            inactive-text="No"
+                                            @change="submit"
+                                        ></el-switch>
+                                        <small
+                                            v-if="
+                                                errors.show_discount_seller_pos
+                                            "
+                                            class="text-danger"
+                                            v-text="
+                                                errors
+                                                    .show_discount_seller_pos[0]
+                                            "
+                                        ></small>
+                                    </div>
+                                </div>
+                            </div>
                             <div class="col-6 mt-4">
                                 <div class="form-group">
                                     <label>
@@ -4980,14 +5154,13 @@ export default {
         this.events();
     },
     methods: {
-        async removeMembrete(){
+        async removeMembrete() {
             this.form.background_image = null;
             await this.submit();
         },
         async removeImageHeader() {
             this.form.header_image = null;
             await this.submit();
-
         },
         ...mapActions(["loadConfiguration"]),
         events() {

@@ -188,6 +188,9 @@ export default {
               const it = {
                 id: i.item_id,
                 quantity: 0,
+                affectation_igv_type_id: i.affectation_igv_type_id,
+                unit_price: i.unit_price,
+                percentage_igv: i.percentage_igv,
               };
               items.map((ite) => {
                 if (ite.item_id === it.id) {
@@ -207,6 +210,7 @@ export default {
             localStorage.setItem("notes", JSON.stringify(notes));
             this.onClose();
             window.location.href = "/documents/create";
+            // window.open("/documents/create", "_blank");
           })
           .catch((error) => this.axiosError(error))
           .finally(() => (this.loading = false));

@@ -20,7 +20,7 @@ use Modules\Hotel\Http\Requests\HotelRentItemRequest;
 
 class HotelRentController extends Controller
 {
-    use FinanceTrait;
+	use FinanceTrait;
 
 	public function rent($roomId)
 	{
@@ -43,12 +43,17 @@ class HotelRentController extends Controller
 					'message' => 'La habitación seleccionada no esta disponible',
 				], 500);
 			}
-
+			$is_undefined_out = $request->undefined_out;
 			$request->merge(['hotel_room_id' => $roomId]);
 			$now = now();
 			$request->merge(['input_date' => $now->format('Y-m-d')]);
 			$request->merge(['input_time' => $now->format('H:i:s')]);
-			$rent = HotelRent::create($request->only('customer_id', 'customer', 'notes', 'towels', 'hotel_room_id', 'hotel_rate_id', 'duration', 'quantity_persons', 'payment_status', 'output_date', 'output_time', 'input_date', 'input_time','destiny'));
+			if ($is_undefined_out) {
+				//cambiar el valor de output_date, que sea un mes despues de la fecha de entrada
+				$request->merge(['output_date' => $now->addMonth()->format('Y-m-d')]);
+			}
+
+			$rent = HotelRent::create($request->only('undefined_out', 'customer_id', 'customer', 'notes', 'towels', 'hotel_room_id', 'hotel_rate_id', 'duration', 'quantity_persons', 'payment_status', 'output_date', 'output_time', 'input_date', 'input_time', 'destiny'));
 
 			$room->status = 'OCUPADO';
 			$room->save();
@@ -87,7 +92,8 @@ class HotelRentController extends Controller
 		], 200);
 	}
 
-	public function showFormAddProduct($rentId){
+	public function showFormAddProduct($rentId)
+	{
 		$rent = HotelRent::with('room')
 			->findOrFail($rentId);
 
@@ -103,7 +109,7 @@ class HotelRentController extends Controller
 
 	public function addProductsToRoom(HotelRentItemRequest $request, $rentId)
 	{
-        $idInRequest = [];
+		$idInRequest = [];
 		foreach ($request->products as $product) {
 			$item = HotelRentItem::where('hotel_rent_id', $rentId)
 				->where('item_id', $product['item_id'])
@@ -117,15 +123,15 @@ class HotelRentController extends Controller
 			$item->item = $product;
 			$item->payment_status = $product['payment_status'];
 			$item->save();
-            $idInRequest[] = $item->id;
+			$idInRequest[] = $item->id;
 		}
 
-        // Borrar los items que no esten asignados con PRO
-        $rent = HotelRent::find($rentId);
-        $itemsToDelete =$rent->items->where('type','PRO')->whereNotIn('id',$idInRequest);
-        foreach($itemsToDelete as $deleteable){
-            $deleteable->delete();
-        }
+		// Borrar los items que no esten asignados con PRO
+		$rent = HotelRent::find($rentId);
+		$itemsToDelete = $rent->items->where('type', 'PRO')->whereNotIn('id', $idInRequest);
+		foreach ($itemsToDelete as $deleteable) {
+			$deleteable->delete();
+		}
 		return response()->json([
 			'success' => true,
 			'message' => 'Información actualizada.'
@@ -136,28 +142,44 @@ class HotelRentController extends Controller
 	{
 		$rent = HotelRent::with('room', 'room.category', 'items')
 			->findOrFail($rentId);
-
+		$diff =0;
+		if ($rent->undefined_out) {
+			$now = now();
+			$rent->output_date = $now->format('Y-m-d');
+			$rent->output_time = $now->format('H:i:s');
+			//construir un date con input_date y input_time
+			$input_date = $rent->input_date . ' ' . $rent->input_time;
+			//calcular diferencia entre input_date y output_date
+			$diff = $now->diffInDays($input_date);
+		
+			
+			
+		}
+		$rent->duration = $diff;
+		$rent->save();
 		$room = $rent->items->firstWhere('type', 'HAB');
 
 		$customer = Person::withOut('department', 'province', 'district')
 			->findOrFail($rent->customer_id);
 
-        // $payment_method_types = PaymentMethodType::all();
-        $payment_method_types = PaymentMethodType::getPaymentMethodTypes();
-        $payment_destinations = $this->getPaymentDestinations();
-        $series = Series::where('establishment_id',  auth()->user()->establishment_id)->get();
-        $document_types_invoice = DocumentType::whereIn('id', ['01', '03', '80'])->get();
+		// $payment_method_types = PaymentMethodType::all();
+		$payment_method_types = PaymentMethodType::getPaymentMethodTypes();
+		$payment_destinations = $this->getPaymentDestinations();
+		$series = Series::where('establishment_id',  auth()->user()->establishment_id)->get();
+		$document_types_invoice = DocumentType::whereIn('id', ['01', '03', '80'])->get();
 		$affectation_igv_types = AffectationIgvType::whereActive()->get();
 
 		return view('hotel::rooms.checkout', compact(
-            'rent', 'room',
-            'customer',
-            'payment_method_types',
-            'payment_destinations',
-            'series',
-            'document_types_invoice',
+			'diff',
+			'rent',
+			'room',
+			'customer',
+			'payment_method_types',
+			'payment_destinations',
+			'series',
+			'document_types_invoice',
 			'affectation_igv_types'
-        ));
+		));
 	}
 
 	public function finalizeRent($rentId)
@@ -173,7 +195,7 @@ class HotelRentController extends Controller
 			'payment_status' => 'PAID',
 			'status'  => 'FINALIZADO'
 		]);
-		if($id){
+		if ($id) {
 			$rent->update([
 				$document_type => $id,
 			]);
@@ -187,11 +209,11 @@ class HotelRentController extends Controller
 			->update([
 				'status' => 'LIMPIEZA'
 			]);
-        $rent = HotelRent::with('room', 'room.category', 'items')->findOrFail($rentId);
+		$rent = HotelRent::with('room', 'room.category', 'items')->findOrFail($rentId);
 		return response()->json([
 			'success' => true,
 			'message' => 'Información procesada de forma correcta.',
-            'currentRent' => $rent
+			'currentRent' => $rent
 		], 200);
 	}
 
@@ -208,10 +230,10 @@ class HotelRentController extends Controller
 		if ($query && $search_by_barcode) {
 
 			$customers = $customers->where('barcode', 'like', "%{$query}%");
-		}else{
+		} else {
 			if (is_numeric($query)) {
 				$customers = $customers->where('number', 'like', "%{$query}%");
-			}else {
+			} else {
 				$customers = $customers->where('name', 'like', "%{$query}%");
 			}
 		}

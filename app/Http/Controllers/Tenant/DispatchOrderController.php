@@ -58,6 +58,7 @@ use App\Http\Resources\Tenant\DispatchOrderCollection;
 use App\Http\Resources\Tenant\DispatchOrderResource;
 use App\Http\Resources\Tenant\DispatchOrderResource2;
 use App\Mail\Tenant\IntegrateSystemEmail;
+use App\Models\Tenant\Dispatch;
 use App\Models\Tenant\DispatchOrder;
 use App\Models\Tenant\DispatchOrderItem;
 use App\Models\Tenant\DispatchOrderPayment;
@@ -65,6 +66,7 @@ use App\Models\Tenant\MessageIntegrateSystem;
 use App\Models\Tenant\ProductionOrder;
 use App\Models\Tenant\SaleNote;
 use Illuminate\Support\Facades\Auth;
+use Modules\BusinessTurn\Models\BusinessTurn;
 use Modules\Inventory\Models\InventoryConfiguration;
 
 class DispatchOrderController extends Controller
@@ -106,17 +108,28 @@ class DispatchOrderController extends Controller
             $observation = $request->input('observation');
             $responsible_id = $request->input('responsible_id');
             $date_of_issue = $request->input('date_of_issue');
+            $dispatch_order = DispatchOrder::where('production_order_id', $production_order_id)->first();
             $production_order = ProductionOrder::find($production_order_id);
-            $dispatch_order = new DispatchOrder;
+            $is_update = false;
+            if ($dispatch_order) {
+                $is_update = true;
+                $this->dispatch_order = $dispatch_order;
+                $this->deleteAllPayments($this->dispatch_order->payments);
+                $this->deleteAllItems($this->dispatch_order->items);
+            }else{
+                $dispatch_order = new DispatchOrder;
+            }
             $dispatch_order->fill($production_order->toArray());
-            $dispatch_order->id = null;
             $dispatch_order->prefix = 'OD';
             $dispatch_order->state_type_id = '01';
             $dispatch_order->sale_note_id = $production_order->sale_note_id;
-            $dispatch_order->production_order_id = $production_order->id;
-            $dispatch_order->observation = $observation ? $observation : $production_order->observation;
-            $dispatch_order->responsible_id = $responsible_id;
-            $dispatch_order->date_of_issue = $date_of_issue ? $date_of_issue : $production_order->date_of_issue;
+            $dispatch_order->production_order_id = $production_order_id;
+            if(!$is_update){
+                $dispatch_order->id = null;
+                $dispatch_order->date_of_issue = $date_of_issue;
+                $dispatch_order->observation = $observation;
+                $dispatch_order->responsible_id = $responsible_id;
+            }
             $dispatch_order->save();
             $this->dispatch_order = $dispatch_order;
             foreach ($production_order->items as $item) {
@@ -206,8 +219,17 @@ class DispatchOrderController extends Controller
         return !(strpos($text, $search) === false);
     }
 
+   
     public function columns()
     {
+        $is_integrate_system = BusinessTurn::isIntegrateSystem();
+        if ($is_integrate_system) {
+            return [
+                'customer' => 'Cliente',
+                'date_of_issue' => 'Fecha de emisión',
+                'quotation_number' => 'N° Cotización',
+            ];
+        }
         return [
             'date_of_issue' => 'Fecha de emisión',
             'customer' => 'Cliente',
@@ -248,7 +270,16 @@ class DispatchOrderController extends Controller
                     ->orWhere('number', 'like', "%{$request->value}%");
             })
                 ->latest();
-        } else {
+        }
+        else if ($request->column == 'quotation_number' && $request->value != null) {
+            $records->whereHas('sale_note', function ($query) use ($request) {
+                $query->whereHas('quotation', function ($query) use ($request) {
+                    $query->where('number', 'like', "%{$request->value}%");
+                });
+            })
+                ->latest();
+        }
+        else {
             $records->where($request->column, 'like', "%{$request->value}%")
                 ->latest('id');
         }

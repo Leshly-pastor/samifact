@@ -29,6 +29,7 @@ use Modules\Sale\Models\TechnicalService;
 use phpDocumentor\Reflection\Utils;
 use Modules\Pos\Models\Tip;
 use Illuminate\Support\Facades\DB;
+use Modules\BusinessTurn\Models\DocumentTransportDispatch;
 use Modules\Hotel\Models\HotelRent;
 use Modules\Sale\Models\Agent;
 use Modules\Suscription\Models\Tenant\SuscriptionPayment;
@@ -166,6 +167,8 @@ class Document extends ModelTenant
         'quotation'
     ];
     protected $fillable = [
+        'sent_it_email',
+        'alter_company',
         'bill_of_exchange_id',
         'no_stock',
         'cash_id',
@@ -308,6 +311,14 @@ class Document extends ModelTenant
         return (is_null($value)) ? null : (object) json_decode($value);
     }
 
+    public static function getNextNumber($document_type_id, $serie){
+        $document = Document::where('document_type_id', $document_type_id)->where('series', $serie)->orderBy('number', 'DESC')->first();
+        if($document){
+            return $document->number + 1;
+        }else{
+            return 1;
+        }
+    }
     public function setAdditionalDataAttribute($value)
     {
         $this->attributes['additional_data'] = (is_null($value)) ? null : json_encode($value);
@@ -685,7 +696,10 @@ class Document extends ModelTenant
     {
         return $this->hasOne(DocumentTransport::class);
     }
-
+    public function transport_dispatch()
+    {
+        return $this->hasOne(DocumentTransportDispatch::class);
+    }
     /**
      * @return string
      */
@@ -1243,7 +1257,14 @@ class Document extends ModelTenant
     {
         return (is_null($value)) ? null : (object)json_decode($value);
     }
-
+    public function getAlterCompanyAttribute($value)
+    {
+        return (is_null($value)) ? null : (object)json_decode($value);
+    }
+    public function setAlterCompanyAttribute($value)
+    {
+        $this->attributes['alter_company'] = (is_null($value)) ? null : json_encode($value);
+    }
     public function setResponseSignaturePseAttribute($value)
     {
         $this->attributes['response_signature_pse'] = (is_null($value)) ? null : json_encode($value);

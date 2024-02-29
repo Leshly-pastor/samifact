@@ -11,6 +11,14 @@
     if ($establishment->logo) {
         $logo = "{$establishment->logo}";
     }
+    $is_integrate_system = Modules\BusinessTurn\Models\BusinessTurn::isIntegrateSystem();
+    $quotation = null;
+    if ($is_integrate_system) {
+        $sale_note = \App\Models\Tenant\SaleNote::where('id', $document->sale_note_id)->first();
+        $quotation = \App\Models\Tenant\Quotation::select(['number', 'prefix', 'shipping_address'])
+            ->where('id', $sale_note->quotation_id)
+            ->first();
+    }
     
 @endphp
 <html>
@@ -73,6 +81,7 @@
             @endif
 
         </tr>
+
         @if ($customer->address !== '')
             <tr>
                 <td class="align-top">Dirección:</td>
@@ -82,6 +91,20 @@
                     {{ $customer->province_id !== '-' ? ', ' . strtoupper($customer->province->description) : '' }}
                     {{ $customer->department_id !== '-' ? '- ' . strtoupper($customer->department->description) : '' }}
                 </td>
+            </tr>
+        @endif
+        @if ($quotation && $quotation->shipping_address)
+            <tr>
+                <td class="align-top">Dir. de envío:</td>
+                <td colspan="3">
+                    {{ strtoupper($quotation->shipping_address) }}
+                </td>
+            </tr>
+        @endif
+        @if (isset($customer->location) && $customer->location != '')
+            <tr>
+                <td class="align-top">Ubicación:</td>
+                <td colspan="3">{{ $customer->location }}</td>
             </tr>
         @endif
         <tr>
@@ -139,7 +162,7 @@
         @endif
     </table>
 
- 
+
 
 
     @if ($document->guides)
@@ -190,15 +213,13 @@
                         @else
                             {!! $row->item->description !!}
                         @endif
-                        @if (!empty($row->item->presentation))
-                            {!! $row->item->presentation->description !!}
-                        @endif
+
                         @isset($row->item->sizes_selected)
-                        @if (count($row->item->sizes_selected)>0)
-                            @foreach ($row->item->sizes_selected as $size)
-                               <small> Talla {{$size->size}} | {{$size->qty}} und</small> <br>
-                            @endforeach
-                        @endif
+                            @if (count($row->item->sizes_selected) > 0)
+                                @foreach ($row->item->sizes_selected as $size)
+                                    <small> Talla {{ $size->size }} | {{ $size->qty }} und</small> <br>
+                                @endforeach
+                            @endif
                         @endisset
                         @if ($row->attributes)
                             @foreach ($row->attributes as $attr)
@@ -345,11 +366,49 @@
                 <td class="text-right font-bold">{{ number_format($document->total, 2) }}</td>
             </tr>
 
-           
+
 
         </tbody>
     </table>
+    @if (is_integrate_system())
+        <table class="full-width">
+            @php
+                $cot = $quotation;
+            @endphp
+            @if ($cot)
+                <tr>
+                    <td width="23%" style="font-weight: bold;text-transform:uppercase;" class="align-top">
+                        Cotizacion :</td>
+                    <td style="font-weight: bold;text-transform:uppercase;text-align:left;" colspan="3">
+                        {{ $cot->prefix }}- {{ $cot->number }}</td>
 
+                </tr>
+            @endif
+            @if ($cot)
+                <tr>
+                    <td width="23%" style="font-weight: bold;text-transform:uppercase;" class="align-top">
+                        Observación com.:</td>
+                    <td style="font-weight: bold;text-transform:uppercase;text-align:left;" colspan="3">
+                        {{ $cot->description }}</td>
+
+                </tr>
+            @endif
+            @php
+                $prod = \App\Models\Tenant\ProductionOrder::where('sale_note_id', $document->sale_note_id)->first();
+            @endphp
+            @if ($prod)
+                <tr>
+                    <td width="23%" style="font-weight: bold;text-transform:uppercase;" class="align-top">
+                        Observación prod.:</td>
+                    <td style="font-weight: bold;text-transform:uppercase;text-align:left;" colspan="3">
+                        {{ $prod->observation }}</td>
+
+                </tr>
+            @endif
+
+
+        </table>
+    @endif
     <table class="full-width">
         <tr>
             <td width="65%" style="text-align: top; vertical-align: top;">
@@ -376,7 +435,7 @@
         @endphp
         <tbody>
             <tr>
-                @if ($configuration->yape_qr_sale_notes &&  $establishment_data->yape_logo)
+                @if ($configuration->yape_qr_sale_notes && $establishment_data->yape_logo)
                     @php
                         $yape_logo = $establishment_data->yape_logo;
                     @endphp
@@ -413,7 +472,7 @@
                         </table>
                     </td>
                 @endif
-                @if ($configuration->plin_qr_sale_notes &&  $establishment_data->plin_logo)
+                @if ($configuration->plin_qr_sale_notes && $establishment_data->plin_logo)
                     @php
                         $plin_logo = $establishment_data->plin_logo;
                     @endphp

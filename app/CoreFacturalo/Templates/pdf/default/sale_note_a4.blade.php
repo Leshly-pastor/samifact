@@ -11,6 +11,13 @@
     if ($establishment->logo) {
         $logo = "{$establishment->logo}";
     }
+    $is_integrate_system = Modules\BusinessTurn\Models\BusinessTurn::isIntegrateSystem();
+    $quotation = null;
+    if ($is_integrate_system) {
+        $quotation = \App\Models\Tenant\Quotation::select(['number', 'prefix', 'shipping_address'])
+            ->where('id', $document->quotation_id)
+            ->first();
+    }
     
 @endphp
 <html>
@@ -73,6 +80,12 @@
             @endif
 
         </tr>
+        @if (isset($customer->location) && $customer->location != '')
+            <tr>
+                <td class="align-top">Ubicación:</td>
+                <td colspan="3">{{ $customer->location }}</td>
+            </tr>
+        @endif
         @if ($customer->address !== '')
             <tr>
                 <td class="align-top">Dirección:</td>
@@ -84,6 +97,13 @@
                 </td>
             </tr>
         @endif
+        @if ($quotation && $quotation->shipping_address)
+            <tr>
+                <td class="align-top">Dir. de envío:</td>
+                <td colspan="3">{{ $quotation->shipping_address }}</td>
+            </tr>
+        @endif
+
         <tr>
             <td>Teléfono:</td>
             <td>{{ $customer->telephone }}</td>
@@ -171,7 +191,126 @@
             @endforeach
         </table>
     @endif
+    @if ($document->transport)
+    <br>
+    <strong>Transporte de pasajeros</strong>
+    @php
+        $transport = $document->transport;
+        $origin_district_id = (array) $transport->origin_district_id;
+        $destinatation_district_id = (array) $transport->destinatation_district_id;
+        $origin_district = Modules\Order\Services\AddressFullService::getDescription($origin_district_id[2]);
+        $destinatation_district = Modules\Order\Services\AddressFullService::getDescription($destinatation_district_id[2]);
+    @endphp
 
+    <table class="full-width mt-3">
+        <tr>
+            <td width="120px">{{ $transport->identity_document_type->description }}</td>
+            <td width="8px">:</td>
+            <td>{{ $transport->number_identity_document }}</td>
+            <td width="120px">NOMBRE</td>
+            <td width="8px">:</td>
+            <td>{{ $transport->passenger_fullname }}</td>
+        </tr>
+        <tr>
+            <td width="120px">N° ASIENTO</td>
+            <td width="8px">:</td>
+            <td>{{ $transport->seat_number }}</td>
+            <td width="120px">M. PASAJERO</td>
+            <td width="8px">:</td>
+            <td>{{ $transport->passenger_manifest }}</td>
+        </tr>
+        <tr>
+            <td width="120px">F. INICIO</td>
+            <td width="8px">:</td>
+            <td>{{ $transport->start_date }}</td>
+            <td width="120px">H. INICIO</td>
+            <td width="8px">:</td>
+            <td>{{ $transport->start_time }}</td>
+        </tr>
+        <tr>
+            <td width="120px">U. ORIGEN</td>
+            <td width="8px">:</td>
+            <td>{{ $origin_district }}</td>
+            <td width="120px">D. ORIGEN</td>
+            <td width="8px">:</td>
+            <td>{{ $transport->origin_address }}</td>
+        </tr>
+        <tr>
+            <td width="120px">U. DESTINO</td>
+            <td width="8px">:</td>
+            <td>{{ $destinatation_district }}</td>
+            <td width="120px">D. DESTINO</td>
+            <td width="8px">:</td>
+            <td>{{ $transport->destinatation_address }}</td>
+        </tr>
+    </table>
+@endif
+@if ($document->transport_dispatch)
+<br>
+<strong>Información de encomienda</strong>
+@php
+    $transport_dispatch = $document->transport_dispatch;
+    $sender_identity_document_type = $transport_dispatch->sender_identity_document_type->description;
+    $recipient_identity_document_type = $transport_dispatch->recipient_identity_document_type->description;
+    $origin_district_id = (array) $transport->origin_district_id;
+    $destinatation_district_id = (array) $transport->destinatation_district_id;
+    $origin_district = Modules\Order\Services\AddressFullService::getDescription($origin_district_id[2]);
+    $destinatation_district = Modules\Order\Services\AddressFullService::getDescription($destinatation_district_id[2]);
+@endphp
+
+<table class="full-width mt-3">
+    <thead>
+        <tr>
+            <th colspan="6" class="text-left">
+                <strong>REMITENTE</strong>
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td width="120px">{{ $sender_identity_document_type }}</td>
+            <td width="8px">:</td>
+            <td>{{ $transport_dispatch->sender_number_identity_document }}</td>
+            <td width="120px">NOMBRE</td>
+            <td width="8px">:</td>
+            <td>{{ $transport_dispatch->sender_passenger_fullname }}</td>
+        </tr>
+        <tr>
+
+        </tr>
+        <tr>
+            <td width="120px">TELÉFONO</td>
+            <td width="8px">:</td>
+            <td>{{ $transport_dispatch->sender_telephone }}</td>
+            <td colspan="3"></td>
+        </tr>
+    </tbody>
+    <thead>
+        <tr>
+            <th colspan="6" class="text-left">
+                <strong>DESTINATARIO</strong>
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td width="120px">{{ $recipient_identity_document_type }}</td>
+            <td width="8px">:</td>
+            <td>{{ $transport_dispatch->recipient_number_identity_document }}</td>
+            <td width="120px">NOMBRE</td>
+            <td width="8px">:</td>
+            <td>{{ $transport_dispatch->recipient_passenger_fullname }}</td>
+        </tr>
+
+        <tr>
+            <td width="120px">TELÉFONO</td>
+            <td width="8px">:</td>
+            <td>{{ $transport_dispatch->recipient_telephone }}</td>
+            <td colspan="3"></td>
+        </tr>
+    </tbody>
+</table>
+@endif
     <table class="full-width mt-10 mb-10">
         <thead class="">
             <tr class="bg-grey">
@@ -195,16 +334,18 @@
                             {{ number_format($row->quantity, 0) }}
                         @endif
                     </td>
-                    <td class="text-center align-top">{{ symbol_or_code($row->item->unit_type_id) }}</td>
+                    <td class="text-center align-top">{{  symbol_or_code($row->item->unit_type_id) }}</td>
                     <td class="text-left">
                         @if ($row->name_product_pdf)
                             {!! $row->name_product_pdf !!}
                         @else
                             {!! $row->item->description !!}
                         @endif
-                        @if (!empty($row->item->presentation))
-                            {!! $row->item->presentation->description !!}
-                        @endif
+                        {{-- 
+
+   
+                         --}}
+
                         @isset($row->item->sizes_selected)
                             @if (count($row->item->sizes_selected) > 0)
                                 @foreach ($row->item->sizes_selected as $size)
@@ -360,37 +501,48 @@
             @php
                 $change_payment = $document->getChangePayment();
             @endphp
-
+nsport
             @if ($change_payment < 0)
                 <tr>
-                    <td colspan="7" class="text-right font-bold">Vuelto: {{ $document->currency_type->symbol }}</td>
+                    <td colspan="7" class="text-right font-bold">Vuelto: {{ $document->currency_type->symbol }}
+                    </td>
                     <td class="text-right font-bold">{{ number_format(abs($change_payment), 2, '.', '') }}</td>
                 </tr>
             @endif
 
         </tbody>
     </table>
-    @if ($document->observation && is_integrate_system())
+    @if (is_integrate_system())
         <table class="full-width">
             @php
-            $cot = \App\Models\Tenant\Quotation::where('id', $document->quotation_id)->first();
-        @endphp
-        @if ($cot)
-            <tr>
-                <td width="23%" style="font-weight: bold;text-transform:uppercase;" class="align-top">
-                    Observación com.:</td>
-                <td style="font-weight: bold;text-transform:uppercase;text-align:left;" colspan="3">
-                    {{ $cot->description }}</td>
+                $cot = \App\Models\Tenant\Quotation::where('id', $document->quotation_id)->first();
+            @endphp
+            @if ($cot)
+                <tr>
+                    <td width="23%" style="font-weight: bold;text-transform:uppercase;" class="align-top">
+                        Cotizacion :</td>
+                    <td style="font-weight: bold;text-transform:uppercase;text-align:left;" colspan="3">
+                        {{ $cot->prefix }}- {{ $cot->number }}</td>
 
-            </tr>
-        @endif
+                </tr>
+            @endif
+            @if ($cot)
+                <tr>
+                    <td width="23%" style="font-weight: bold;text-transform:uppercase;" class="align-top">
+                        Observación com.:</td>
+                    <td style="font-weight: bold;text-transform:uppercase;text-align:left;" colspan="3">
+                        {{ $cot->description }}</td>
+
+                </tr>
+            @endif
             <tr>
-                <td width="23%" style="font-weight: bold;text-transform:uppercase;" class="align-top">Observación adm.:
+                <td width="23%" style="font-weight: bold;text-transform:uppercase;" class="align-top">Observación
+                    adm.:
                 </td>
                 <td style="font-weight: bold;text-transform:uppercase;text-align:left;" colspan="3">
                     {{ $document->additional_information }}</td>
             </tr>
-           
+
             @php
                 $prod = \App\Models\Tenant\ProductionOrder::where('sale_note_id', $document->id)->first();
             @endphp

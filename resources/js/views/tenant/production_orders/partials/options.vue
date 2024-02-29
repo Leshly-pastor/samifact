@@ -184,7 +184,7 @@
 
 <script>
 export default {
-    props: ['showDialog', 'recordId', 'showClose','configuration'],
+    props: ['showDialog', 'recordId', 'showClose','configuration','resourceDocument'],
     data() {
         return {
             serviceUrl:"https://ej2services.syncfusion.com/production/web-services/api/pdfviewer",
@@ -270,11 +270,25 @@ export default {
             }
         },
         create() {
+            this.resource = this.resourceDocument;
             this.$http.get(`/${this.resource}/record/${this.recordId}`)
                 .then(response => {
                     this.form = response.data.data
-                    console.log("🚀 ~ file: options.vue:276 ~ create ~ this.form:", this.form)
-                    this.titleDialog = `Orden de producción registrada:  ${this.form.prefix}-${this.form.number}`
+                    let document = "Orden de produccción";
+                    switch (this.resourceDocument) {
+                        case 'dispatches':
+                            document = "Guia de remisión";
+                            break;
+                        case 'documents':
+                            document = "Documento";
+                            break;
+                        case 'dispatch-order':
+                            document = "Orden de despacho";
+                            break;
+                        default:
+                            break;
+                    }
+                    this.titleDialog = `${document}: ${this.form.number}`
                 })
         },
         clickFinalize() {
@@ -328,10 +342,10 @@ export default {
         clickPrint(format) {
             if(format== 'receipt'){
 
-                window.open(`/production-order/receipt/${this.form.id}`, '_blank');
+                window.open(`/${this.resourceDocument}/receipt/${this.form.id}`, '_blank');
             }else{
 
-                window.open(`/production-order/print/${this.form.external_id}/${format}`, '_blank');
+                window.open(`/${this.resourceDocument}/print/${this.form.external_id}/${format}`, '_blank');
             }
         },
 

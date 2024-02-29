@@ -663,6 +663,24 @@
                                     ></small>
                                 </div>
                             </div>
+                            <div class="col-6">
+                                <div class="form-group">
+                                    <label class="control-label"
+                                        >Ubicación Google Maps
+                                    </label>
+                                    <el-input
+                                        v-model="form.location"
+                                        dusk="email"
+                                    >
+                                    </el-input>
+
+                                    <small
+                                        v-if="errors.location"
+                                        class="text-danger"
+                                        v-text="errors.location[0]"
+                                    ></small>
+                                </div>
+                            </div>
                             <!-- Correos electronicos alterno -->
                         </div>
                         <div class="row m-t-10">
@@ -1192,7 +1210,7 @@ export default {
 
             this.errors = {};
             this.form = {
-                dispatch_addresses:[],
+                dispatch_addresses: [],
                 id: null,
                 type: this.type,
                 credit_days: 0,

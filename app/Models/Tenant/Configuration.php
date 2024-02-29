@@ -141,6 +141,13 @@ use App\Models\Tenant\Skin;
 class Configuration extends ModelTenant
 {
     protected $fillable = [
+        'discount_order_note',
+        'show_discount_seller_pos',
+        'default_order_document',
+        'edit_info_documents',
+        'show_favorites_documents',
+        'discounts_acc',
+        'multi_companies',
         'group_items',
         'search_by_factory_code',
         'purchase_affectation_igv_type_id',
@@ -334,6 +341,12 @@ class Configuration extends ModelTenant
     ];
 
     protected $casts = [
+        'discount_order_note' => 'boolean',
+        'show_discount_seller_pos' => 'boolean',
+        'edit_info_documents' => 'boolean',
+        'show_favorites_documents' => 'boolean',
+        'discounts_acc' => 'boolean',
+        'multi_companies' => 'boolean',
         'group_items' => 'boolean',
         'search_by_factory_code' => 'boolean',
         'purchases_control' => 'boolean',
@@ -585,6 +598,13 @@ class Configuration extends ModelTenant
         $currency = CurrencyType::all();
         $skins = Skin::all();
         return [
+            'discount_order_note' => (bool)$this->discount_order_note,
+            'show_discount_seller_pos' => (bool)$this->show_discount_seller_pos,
+            'default_order_document' => $this->default_order_document,
+            'edit_info_documents' => (bool)$this->edit_info_documents,
+            'show_favorites_documents' => (bool)$this->show_favorites_documents,
+            'discounts_acc' => (bool)$this->discounts_acc,
+            'multi_companies' => (bool)$this->multi_companies,
             'group_items' => (bool)$this->group_items,
             'search_by_factory_code' => (bool)$this->search_by_factory_code,
             'purchase_affectation_igv_type_id' => $this->purchase_affectation_igv_type_id,

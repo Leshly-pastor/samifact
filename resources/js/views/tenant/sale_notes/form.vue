@@ -494,34 +494,34 @@
                                     ></small>
                                 </div>
                             </div>
-                               <div
-                                    class="col-xl-12 col-md-12"
-                                    v-if="
-                                        configuration.enabled_dispatch_ticket_pdf
-                                    "
-                                >
-                                    <div class="row">
-                                        <div class="col-3">
-                                            <label for="quantity">Número de tickets de
-                                            despacho</label>
-                                                   <el-input
+                            <div
+                                class="col-xl-12 col-md-12"
+                                v-if="configuration.enabled_dispatch_ticket_pdf"
+                            >
+                                <div class="row">
+                                    <div class="col-3">
+                                        <label for="quantity"
+                                            >Número de tickets de
+                                            despacho</label
+                                        >
+                                        <el-input
                                             v-model="
                                                 form.dispatch_ticket_pdf_quantity
                                             "
                                             type="number"
                                         ></el-input>
-                                        </div>
                                     </div>
-                                    <div class="row mt-2">
-                                        <div class="col-12">
-                                            Datos de referencia
-                                              <el-input
+                                </div>
+                                <div class="row mt-2">
+                                    <div class="col-12">
+                                        Datos de referencia
+                                        <el-input
                                             v-model="form.reference_data"
                                             type="textarea"
                                         ></el-input>
-                                        </div>
                                     </div>
                                 </div>
+                            </div>
                             <!-- Pagos -->
                             <div class="col-12 pt-3">
                                 <table>
@@ -865,13 +865,15 @@
                                                         row.affectation_igv_type
                                                             .description
                                                     }}</small>
-       <a href="#"
-                                            @click.prevent="seeDetails(row.item)"
-                                            class="text-info"
-                                            >
-                                            [Ver detalle] 
-                                            </a>
-
+                                                    <a
+                                                        href="#"
+                                                        @click.prevent="
+                                                            seeDetails(row.item)
+                                                        "
+                                                        class="text-info"
+                                                    >
+                                                        [Ver detalle]
+                                                    </a>
                                                 </td>
                                                 <td
                                                     v-if="
@@ -982,29 +984,64 @@
                                     </table>
                                 </div>
                             </div>
-                            <div
-                                class="col-lg-12 col-md-6 d-flex align-items-end"
-                            >
-                                <div class="form-group">
-                                    <el-popover
-                                        placement="top-start"
-                                        :open-delay="1000"
-                                        width="145"
-                                        trigger="hover"
-                                        content="Presiona F2"
+                            <div class="col-xl-3 col-md-3 col-12 pb-2">
+                                <el-popover
+                                    placement="top-start"
+                                    :open-delay="1000"
+                                    width="145"
+                                    trigger="hover"
+                                    content="Presiona F2"
+                                >
+                                    <button
+                                        slot="reference"
+                                        type="button"
+                                        class="btn btn-outline-primary mb-1"
+                                        @click.prevent="clickAddItem"
                                     >
-                                        <el-button
-                                            slot="reference"
-                                            type="button"
-                                            class="btn waves-effect waves-light btn-primary"
-                                            @click.prevent="clickAddItem"
-                                        >
-                                            + Agregar Producto
-                                        </el-button>
-                                    </el-popover>
-                                </div>
+                                        + Agregar Producto
+                                    </button>
+                                </el-popover>
                             </div>
-
+                            <div
+                                class="col-xl-3 col-md-3 col-12 pb-2"
+                                v-if="isActiveBussinessTurn('transport')"
+                            >
+                                <el-tooltip
+                                    content="Datos para transporte de pasajeros"
+                                    effect="dark"
+                                    placement="bottom-end"
+                                >
+                                    <button
+                                        type="button"
+                                        class="btn btn-outline-primary mb-1"
+                                        @click.prevent="
+                                            clickAddDocumentTransport
+                                        "
+                                    >
+                                        Datos de transporte
+                                    </button>
+                                </el-tooltip>
+                            </div>
+                            <div
+                                class="col-xl-3 col-md-3 col-12 pb-2"
+                                v-if="isActiveBussinessTurn('transport')"
+                            >
+                                <el-tooltip
+                                    content="Datos de encomienda"
+                                    effect="dark"
+                                    placement="bottom-end"
+                                >
+                                    <button
+                                        type="button"
+                                        class="btn btn-outline-primary mb-1"
+                                        @click.prevent="
+                                            clickAddDispatchTransport
+                                        "
+                                    >
+                                        Datos de encomienda
+                                    </button>
+                                </el-tooltip>
+                            </div>
                             <div class="col-md-8 mt-3"></div>
 
                             <div class="col-md-12">
@@ -1236,6 +1273,17 @@
             :showClose="false"
             :configuration="config"
         ></sale-notes-options>
+        <document-transport-form
+            :showDialog.sync="showDialogFormTransport"
+            :transport="form.transport"
+            @addDocumentTransport="addDocumentTransport"
+        ></document-transport-form>
+
+        <document-dispatch-form
+            :showDialog.sync="showDialogFormDispatch"
+            :dispatch="form.transport_dispatch"
+            @addDispatchTransport="addDispatchTransport"
+        ></document-dispatch-form>
     </div>
 </template>
 
@@ -1258,7 +1306,8 @@ import {
 import Logo from "../companies/logo.vue";
 import { mapActions, mapState } from "vuex/dist/vuex.mjs";
 import Keypress from "vue-keypress";
-
+import DocumentTransportForm from "../../../../../modules/BusinessTurn/Resources/assets/js/views/transports/form.vue";
+import DocumentDispatchForm from "../../../../../modules/BusinessTurn/Resources/assets/js/views/transports/dispatch_form.vue";
 export default {
     props: ["id", "typeUser", "configuration", "authUser", "cashid"],
     components: {
@@ -1267,6 +1316,8 @@ export default {
         SaleNotesOptions,
         Logo,
         Keypress,
+        DocumentTransportForm,
+        DocumentDispatchForm,
     },
     mixins: [functions, exchangeRate, cash],
     computed: {
@@ -1385,6 +1436,9 @@ export default {
             is_amount: true,
             total_global_discount: 0,
             cash_id: null,
+            business_turns: [],
+            showDialogFormDispatch: false,
+            showDialogFormTransport: false,
         };
     },
     async created() {
@@ -1397,6 +1451,7 @@ export default {
         this.isDriver = package_handlers;
         await this.initForm();
         await this.$http.get(`/${this.resource}/tables`).then((response) => {
+            this.business_turns = response.data.business_turns;
             this.currency_types = response.data.currency_types;
             this.establishments = response.data.establishments;
             this.all_customers = response.data.customers;
@@ -1457,9 +1512,26 @@ export default {
         this.changeCurrencyType();
     },
     methods: {
-          seeDetails(item){
-            let {id} = item;
-            window.open(`/items/details/${id}`, '_blank');
+        addDocumentTransport(transport) {
+            console.log("🚀 ~ file: form.vue:1516 ~ addDocumentTransport ~ transport:", transport)
+            this.form.transport = transport;
+        },
+        addDispatchTransport(dispatch) {
+            this.form.transport_dispatch = dispatch;
+        },
+        clickAddDispatchTransport() {
+            this.showDialogFormDispatch = true;
+        },
+        clickAddDocumentTransport() {
+            this.showDialogFormTransport = true;
+        },
+
+        isActiveBussinessTurn(value) {
+            return _.find(this.business_turns, { value: value }) ? true : false;
+        },
+        seeDetails(item) {
+            let { id } = item;
+            window.open(`/items/details/${id}`, "_blank");
         },
         async changeSeller() {
             let { seller_id } = this.form;
@@ -1889,8 +1961,10 @@ export default {
             this.collegeYear = [];
             this.errors = {};
             this.form = {
-                    dispatch_ticket_pdf_quantity:1, 
-                dispatch_ticket_pdf:false, 
+                transport:{},
+                transport_dispatch:{},
+                dispatch_ticket_pdf_quantity: 1,
+                dispatch_ticket_pdf: false,
                 id: null,
                 series_id: null,
                 prefix: "NV",
@@ -2364,7 +2438,7 @@ export default {
             };
         },
         async submit() {
-              if(this.configuration.enabled_dispatch_ticket_pdf){
+            if (this.configuration.enabled_dispatch_ticket_pdf) {
                 this.form.dispatch_ticket_pdf = true;
             }
             if (!this.hasCashOpen()) {

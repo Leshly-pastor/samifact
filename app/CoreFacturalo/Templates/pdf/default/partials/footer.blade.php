@@ -41,8 +41,11 @@
                     if ($document && $document->prefix == 'NV') {
                         $document_description = 'NOTA DE VENTA ELECTRÓNICA';
                     }
-                    if ($document && $document->document_type_id) {
-                        $document_description = $document->document_type->description;
+                    if ($document && $document->document_type_id && $document->document_type) {
+                   
+                            $document_description = $document->document_type->description;
+                      
+                 
                     }
                 }
 
