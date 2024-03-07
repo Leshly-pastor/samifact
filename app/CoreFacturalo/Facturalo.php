@@ -42,6 +42,7 @@ use App\CoreFacturalo\Helpers\Storage\StorageDocument;
 use App\CoreFacturalo\Services\Helpers\SendDocumentPse;
 use App\CoreFacturalo\WS\Validator\XmlErrorCodeProvider;
 use App\Models\Tenant\Catalogs\UnitType;
+use App\Models\Tenant\DispatchRelated;
 use App\Models\Tenant\Item;
 use App\Models\Tenant\ItemSeller;
 use App\Models\Tenant\ItemUnitType;
@@ -365,9 +366,23 @@ class Facturalo
                 break;
             default:
                 DispatchItem::query()->where('dispatch_id', $inputs['id'])->delete();
+                DispatchRelated::query()->where('dispatch_id', $inputs['id'])->delete();
                 $document = Dispatch::query()->updateOrCreate([
                     'id' => $inputs['id']
                 ], $inputs);
+                if ($inputs['dispatches_related']) {
+                    foreach ($inputs['dispatches_related'] as $row) {
+                        $serie = $row['serie_number'];
+                        $company_number = $row['company_number'];
+                        if ($serie && $company_number) {
+                            DispatchRelated::create([
+                                'dispatch_id' => $document->id,
+                                'serie_number' => $serie,
+                                'company_number' => $company_number,
+                            ]);
+                        }
+                    }
+                }
                 foreach ($inputs['items'] as $row) {
                     $document->items()->create($row);
                 }

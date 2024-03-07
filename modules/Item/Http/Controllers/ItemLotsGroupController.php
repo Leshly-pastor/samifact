@@ -8,6 +8,7 @@ use Illuminate\Routing\Controller;
 use Modules\Item\Models\ItemLotsGroup;
 use App\Models\Tenant\Item;
 use Carbon\Carbon;
+use Modules\Item\Exports\ItemLotGroupExport;
 use Modules\Item\Http\Resources\ItemLotGroupCollection;
 use Modules\Item\Models\ItemLotsGroupState;
 
@@ -37,6 +38,15 @@ class ItemLotsGroupController extends Controller
         ItemLotsGroup::where('id', $lot_id)->update(["state_id" => $state_id]);
 
         return ["success" => true];
+    }
+    public function export(Request $request){
+
+        $records = $this->getRecords($request)->get();
+
+        return (new ItemLotGroupExport)
+                ->records($records)
+                ->download('Lotes_'.Carbon::now().'.xlsx');
+
     }
     public function tables(Request $request)
     {

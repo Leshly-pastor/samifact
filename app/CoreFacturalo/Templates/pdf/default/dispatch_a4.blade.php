@@ -1,20 +1,23 @@
 @php
     $establishment = $document->establishment;
-    $establishment__ = \App\Models\Tenant\Establishment::find($document->establishment_id);
-    $logo = $establishment__->logo ?? $company->logo;
-    
+    $logo = null;
+    if (!$document->alter_company) {
+        $establishment__ = \App\Models\Tenant\Establishment::find($document->establishment_id);
+        $logo = $establishment__->logo ?? $company->logo;
+    }
+
     if ($logo === null && !file_exists(public_path("$logo}"))) {
         $logo = "{$company->logo}";
     }
-    
+
     if ($logo) {
         $logo = "storage/uploads/logos/{$logo}";
         $logo = str_replace('storage/uploads/logos/storage/uploads/logos/', 'storage/uploads/logos/', $logo);
     }
-    
+
     $customer = $document->customer;
     //$path_style = app_path('CoreFacturalo'.DIRECTORY_SEPARATOR.'Templates'.DIRECTORY_SEPARATOR.'pdf'.DIRECTORY_SEPARATOR.'style.css');
-    
+
     $document_number = $document->series . '-' . str_pad($document->number, 8, '0', STR_PAD_LEFT);
     // $document_type_driver = App\Models\Tenant\Catalogs\IdentityDocumentType::findOrFail($document->driver->identity_document_type_id);
     // dd($document->items);
@@ -62,7 +65,14 @@
     <table class="full-width border-box mt-10 mb-10">
         <thead>
             <tr>
-                <th class="border-bottom text-left">DESTINATARIO</th>
+                <th class="border-bottom text-left">
+
+                    @if (isset($document->transfer_reason_type->description) && $document->transfer_reason_type->description === 'Compra')
+                        PROVEEDOR
+                    @else
+                        DESTINATARIO
+                    @endif
+                </th>
             </tr>
         </thead>
         <tbody>
@@ -157,7 +167,9 @@
         <tbody>
             @if ($document->transport_mode_type_id === '01')
                 @php
-                    $document_type_dispatcher = App\Models\Tenant\Catalogs\IdentityDocumentType::findOrFail($document->dispatcher->identity_document_type_id);
+                    $document_type_dispatcher = App\Models\Tenant\Catalogs\IdentityDocumentType::findOrFail(
+                        $document->dispatcher->identity_document_type_id,
+                    );
                 @endphp
                 <tr>
                     <td>Nombre y/o razón social: {{ $document->dispatcher->name }}</td>
@@ -200,7 +212,7 @@
             </tr>
             @if ($document->transport_mode_type_id === '01')
                 <tr>
-                    @isset ($document->dispatcher->number_mtc)
+                    @isset($document->dispatcher->number_mtc)
                         <td>Autorización MTC: {{ $document->dispatcher->number_mtc }}</td>
                         </td>
                     @endisset
@@ -309,11 +321,17 @@
     @if ($document->data_affected_document)
         @php
             $document_data_affected_document = $document->data_affected_document;
-            
-            $number = property_exists($document_data_affected_document, 'number') ? $document_data_affected_document->number : null;
-            $Series = property_exists($document_data_affected_document, 'Series') ? $document_data_affected_document->series : null;
-            $document_type_id = property_exists($document_data_affected_document, 'document_type_id') ? $document_data_affected_document->document_type_id : null;
-            
+
+            $number = property_exists($document_data_affected_document, 'number')
+                ? $document_data_affected_document->number
+                : null;
+            $Series = property_exists($document_data_affected_document, 'Series')
+                ? $document_data_affected_document->series
+                : null;
+            $document_type_id = property_exists($document_data_affected_document, 'document_type_id')
+                ? $document_data_affected_document->document_type_id
+                : null;
+
         @endphp
         @if ($number !== null && $Series !== null && $document_type_id !== null)
             @php

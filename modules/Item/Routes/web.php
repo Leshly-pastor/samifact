@@ -98,6 +98,7 @@ if ($hostname) {
                 Route::get('', 'ItemLotsGroupController@index')->name('tenant.item-lots-group.index');
                 Route::post('/', 'ItemLotsGroupController@store');
                 Route::get('/records', 'ItemLotsGroupController@records');
+                Route::get('/export', 'ItemLotsGroupController@export');
                 Route::get('/tables', 'ItemLotsGroupController@tables');
                 Route::get('/update_state', 'ItemLotsGroupController@update_state');
                 Route::get('/columns', 'ItemLotsGroupController@columns');

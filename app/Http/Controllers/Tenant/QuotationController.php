@@ -49,8 +49,12 @@ use App\CoreFacturalo\Helpers\Storage\StorageDocument;
 use App\CoreFacturalo\Requests\Inputs\Common\PersonInput;
 use Modules\Inventory\Models\Warehouse as ModuleWarehouse;
 use App\CoreFacturalo\Requests\Inputs\Common\EstablishmentInput;
+use App\Models\System\Client;
 use App\Models\Tenant\QuotationProject;
 use App\Models\Tenant\QuotationProjectItem;
+use Hyn\Tenancy\Environment;
+use Hyn\Tenancy\Models\Hostname;
+use Illuminate\Support\Facades\Cache;
 use Modules\BusinessTurn\Models\BusinessTurn;
 
 class QuotationController extends Controller
@@ -202,11 +206,55 @@ class QuotationController extends Controller
         return compact('customers');
     }
 
-
+    public function tablesCompany($id)
+    {
+        $company = Company::where('website_id',$id)->first();
+        $company_active = Company::active();
+        $document_number = $company->document_number;
+        $website_id = $company->website_id;
+        $user = auth()->user()->id;
+        $user_to_save = User::find($user);
+        $user_to_save->company_active_id = $website_id;
+        $user_to_save->save();
+        $key = "cash_" . $user;
+        Cache::put($key, $website_id, 60);
+        $payment_destinations = $this->getPaymentDestinations();
+        if ($website_id && $company->id != $company_active->id) {
+            $hostname = Hostname::where('website_id', $website_id)->first();
+            $client = Client::where('hostname_id', $hostname->id)->first();
+            $tenancy = app(Environment::class);
+            $tenancy->tenant($client->hostname->website);
+        }
+        $establishment = Establishment::find(1);
+        $establishment_info = EstablishmentInput::set($establishment->id);
+        $series = Series::where('establishment_id', $establishment->id)->get()
+            ->transform(function ($row) {
+                return [
+                    'id' => $row->id,
+                    'contingency' => (bool)$row->contingency,
+                    'document_type_id' => $row->document_type_id,
+                    'establishment_id' => $row->establishment_id,
+                    'number' => $row->number,
+                ];
+            });
+        // $series = Series::FilterSeries(1)
+        //     ->get()
+        //     ->transform(function ($row)  use ($document_number) {
+        //         /** @var Series $row */
+        //         return $row->getCollectionData2($document_number);
+        //     })->where('disabled', false);
+        return [
+            'success' => true,
+            'data' => $company,
+            'payment_destinations' => $payment_destinations,
+            'series' => $series,
+            'establishment' => $establishment_info,
+        ];
+    }
     public function tables()
     {
 
-        $business_turns = BusinessTurn::where('active',true)->get();
+        $business_turns = BusinessTurn::where('active', true)->get();
         $is_integrate_system = BusinessTurn::isIntegrateSystem();
         $customers = $this->table('customers');
         $establishments = Establishment::where('id', auth()->user()->establishment_id)->get();
@@ -220,7 +268,12 @@ class QuotationController extends Controller
         $document_type_03_filter = config('tenant.document_type_03_filter');
         $payment_method_types = PaymentMethodType::orderBy('id', 'desc')->get();
         $payment_destinations = $this->getPaymentDestinations();
-        $configuration = Configuration::select('package_handlers', 'quotation_projects', 'destination_sale')->first();
+        $configuration = Configuration::select(
+            'multi_companies',
+            'package_handlers',
+            'quotation_projects',
+            'destination_sale'
+        )->first();
         $affectation_igv_types = AffectationIgvType::whereActive()->get();
         $serie = Series::where('document_type_id', "COT")->where("establishment_id", $establishments[0]->id)->first();
         $series = collect(Series::where(
@@ -247,8 +300,12 @@ class QuotationController extends Controller
             ->get();
         */
         $sellers = User::GetSellers(false)->get();
-
+        $companies = Company::all();
+        if ($configuration->multi_companies) {
+            $companies = Company::all();
+        }
         return compact(
+            'companies',
             'business_turns',
             'affectation_igv_types',
             'is_integrate_system',
@@ -271,18 +328,50 @@ class QuotationController extends Controller
     }
 
 
-    public function option_tables()
+    public function option_tables($quotation_id = null)
     {
-        $establishment = Establishment::where('id', auth()->user()->establishment_id)->first();
-        $series = Series::where('establishment_id', $establishment->id)->get();
-        $document_types_invoice = DocumentType::whereIn('id', ['01', '03'])->where('active', true)->get();
-        // $payment_method_types = PaymentMethodType::all();
-        $payment_method_types = PaymentMethodType::getPaymentMethodTypes();
+        $configuration = Configuration::select('multi_companies')->first();
+        $company_id = null;
+        $establishment_info = null;
+        $quotation = Quotation::find($quotation_id);
+        $alter_company = $quotation ? $quotation->alter_company : null;
         $payment_destinations = $this->getPaymentDestinations();
-        // $sellers = User::GetSellers(true)->get();
+        $document_types_invoice = DocumentType::whereIn('id', ['01', '03'])->where('active', true)->get();
+        $payment_method_types = PaymentMethodType::getPaymentMethodTypes();
         $sellers = User::where('establishment_id', auth()->user()->establishment_id)->whereIn('type', ['seller', 'admin'])->orWhere('id', auth()->user()->id)->get();
 
-        return compact('series', 'document_types_invoice', 'payment_method_types', 'payment_destinations', 'sellers');
+        if ($configuration->multi_companies && $quotation && $alter_company) {
+            $website_id = $alter_company->website_id;
+            $company_alter = Company::where('website_id', $website_id)->first();
+            $document_number = $company_alter->document_number;
+            $key = 'cash_' . auth()->user()->id;
+            $company_active_id = Cache::put($key, $website_id, 60);
+            User::find(auth()->user()->id)->update(['company_active_id' => $website_id]);
+            $payment_destinations = $this->getPaymentDestinations();
+            $company_id = $company_alter->website_id;
+            $hostname = Hostname::where('website_id', $website_id)->first();
+            $client = Client::where('hostname_id', $hostname->id)->first();
+            $tenancy = app(Environment::class);
+            $tenancy->tenant($client->hostname->website);
+            $establishment = Establishment::where('id', auth()->user()->establishment_id)->first();
+            $establishment_info = EstablishmentInput::set($establishment->id);
+            $series = Series::where('establishment_id', $establishment->id)->get();
+        } else {
+            $establishment = Establishment::where('id', auth()->user()->establishment_id)->first();
+            $series = Series::where('establishment_id', $establishment->id)->get();
+        }
+        // $payment_method_types = PaymentMethodType::all();
+        // $sellers = User::GetSellers(true)->get();
+
+        return compact(
+            'establishment_info',
+            'company_id',
+            'series',
+            'document_types_invoice',
+            'payment_method_types',
+            'payment_destinations',
+            'sellers'
+        );
     }
 
     public function item_tables()
@@ -395,9 +484,13 @@ class QuotationController extends Controller
     public function store(QuotationRequest $request)
     {
         DB::connection('tenant')->transaction(function () use ($request) {
+
             $configuration = Configuration::first();
             $is_project = $configuration->quotation_projects == 1;
+            $alter_establishment = Functions::valueKeyInArray($request, 'establishment');
             $data = $this->mergeData($request);
+            $company_id = $request['company_id'];
+
             $data['terms_condition'] = $this->getTermsCondition();
             $data['quotations_optional'] = $request->quotations_optional;
             $data['quotations_optional_value'] = $request->quotations_optional_value;
@@ -423,6 +516,42 @@ class QuotationController extends Controller
                         $data["number"] = $last_id->number + 1;
                     } else {
                         $data["number"] = $last_id->id + 1;
+                    }
+                }
+            }
+            if ($company_id) {
+                $prefix = Functions::valueKeyInArray($request, "prefix", null);
+                if ($prefix) {
+                    $data["prefix"] = $prefix;
+                }
+                $company_found = Company::where('website_id', $company_id)->first();
+                $alter_company = [
+                    'id' => $company_found->id,
+                    'name' => $company_found->name,
+                    'number' => $company_found->number,
+                    'trade_name' => $company_found->trade_name,
+                    'website_id' => $company_found->website_id,
+                ];
+                $data['alter_company'] = $alter_company;
+                // $alter_establishment = Functions::valueKeyInArray($request, 'establishment');
+                // dump($alter_establishment);
+                if ($alter_establishment) {
+                    $data['establishment'] = $alter_establishment;
+                }
+
+                $alter_number = Functions::valueKeyInArray($request, 'number');
+                if ($alter_number) {
+                    $data['number'] = $alter_number;
+                }
+                $document_found = Quotation::where('prefix', $data['prefix'])
+                    ->where('alter_company->website_id', $company_found->website_id)
+                    ->orderBy('number', 'desc')
+                    ->first();
+                if ($document_found) {
+                    $document_number = $document_found->number;
+                    $document_number = $document_number + 1;
+                    if ($document_number > $data['number']) {
+                        $data['number'] = $document_number;
                     }
                 }
             }
@@ -771,7 +900,12 @@ class QuotationController extends Controller
         $filename = ($filename != null) ? $filename : $this->quotation->filename;
 
         $configuration = Configuration::first();
-
+        if ($configuration->multi_companies &&  $document->alter_company) {
+            $company = Company::where('website_id', $document->alter_company->website_id)->first();
+            if ($company) {
+                $this->company = $company;
+            }
+        }
         $base_template = Establishment::find($document->establishment_id)->template_pdf;
         $is_project = $configuration->quotation_projects == 1;
         if ($is_project) {

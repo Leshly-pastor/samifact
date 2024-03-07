@@ -80,6 +80,7 @@ class ToPay
             ->table('purchases')
             ->whereIn('state_type_id', ['01', '03', '05', '07', '13'])
             ->whereIn('document_type_id', ['01', '03', 'GU75', 'NE76'])
+            ->whereNull('bill_of_exchange_pay_id')
             ->join('persons', 'persons.id', '=', 'purchases.supplier_id')
             ->leftJoinSub($purchase_payments, 'payments', function ($join) {
                 $join->on('purchases.id', '=', 'payments.purchase_id');
@@ -100,8 +101,8 @@ class ToPay
             " bills_of_exchange_pay.user_id, " .
             "IFNULL(payments.total_payment, 0) as total_payment, " .
             "'bill_of_exchange' AS 'type', " .
-            "'PEN' as currency_type_id, " .
-            "'1' as exchange_rate_sale";
+            "bills_of_exchange_pay.currency_type_id, " .
+            "bills_of_exchange_pay.exchange_rate_sale";
         $select = DB::raw('purchases.id as id, ' .
             "DATE_FORMAT(purchases.date_of_issue, '%Y/%m/%d') as date_of_issue, " .
             "DATE_FORMAT(purchases.date_of_due, '%Y/%m/%d') as date_of_due, " .

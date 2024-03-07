@@ -31,8 +31,8 @@ class DocumentInput
         $soap_type_id = $company->soap_type_id;
         $alter_company = [];
 
-        if ($company_id ) {
-            $company_found = Company::where('id', $company_id)->first();
+        if ($company_id) {
+            $company_found = Company::where('website_id', $company_id)->first();
             $alter_company = [
                 'id' => $company_found->id,
                 'name' => $company_found->name,
@@ -51,16 +51,18 @@ class DocumentInput
                 if ($document_number > $number) {
                     $number = $document_number;
                 }
-            }else{
-
+            } else {
+                //si number no es un numero
+                if (!is_numeric($number)) {
+                    $number = 1;
+                }
             }
-            
         }
         $offline_configuration = OfflineConfiguration::firstOrFail();
         // $number = Functions::newNumber($soap_type_id, $document_type_id, $series, $number, Document::class);
         $configuration = Configuration::getColumnsForDocuments();
         if ($number !== '#') {
-            Functions::validateUniqueDocument($soap_type_id, $document_type_id, $series, $number, Document::class,$company_id);
+            Functions::validateUniqueDocument($soap_type_id, $document_type_id, $series, $number, Document::class, $company_id);
         }
 
         // $filename = Functions::filename($company, $document_type_id, $series, $number);
@@ -113,7 +115,7 @@ class DocumentInput
         }
         $company_id = Functions::valueKeyInArray($inputs, 'company_id');
 
-       
+
         return [
             'alter_company' => $alter_company,
             'company_id' => $company_id,

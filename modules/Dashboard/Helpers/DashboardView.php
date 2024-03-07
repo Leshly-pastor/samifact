@@ -302,8 +302,8 @@ class DashboardView
             "null as total_credit_notes," .
             "bills_of_exchange.total - IFNULL(total_payment, 0)    as total_subtraction, " .
             "'bill_of_exchange' AS 'type', " .
-            "'PEN' as currency_type_id, " .
-            "'1' as exchange_rate_sale, " .
+            "bills_of_exchange.currency_type_id, " .
+            "bills_of_exchange.exchange_rate_sale, " .
             " bills_of_exchange.user_id, " .
             "users.name as username";
         $document_select = "documents.id as id, " .

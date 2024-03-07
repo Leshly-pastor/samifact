@@ -199,7 +199,7 @@
                         <!--                                       v-text="errors.packages_number[0]"></small>-->
                         <!--                            </div>-->
                         <!--                        </div>-->
-                        <div class="col-lg-6">
+                        <div class="col-lg-4">
                             <div
                                 :class="{ 'has-danger': errors.observations }"
                                 class="form-group"
@@ -219,6 +219,52 @@
                                     class="text-danger"
                                     v-text="errors.observations[0]"
                                 ></small>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="row">
+                                <div class="col-12">
+                                    <label class="control-label"
+                                        >Guias de remisión relacionadas
+
+                                        <a
+                                            href="#"
+                                            @click.prevent="addDispatchRealted"
+                                            >[+ Agregar]</a
+                                        >
+                                    </label>
+                                </div>
+                            </div>
+                            <div
+                                class="row"
+                                v-for="(dispatch, index) in dispatchesRelated"
+                                :key="index"
+                            >
+                                <div class="col-lg-4">
+                                    <el-input
+                                        v-model="dispatch.serie_number"
+                                        :placeholder="`T001-0000000${
+                                            index + 1
+                                        }`"
+                                    ></el-input>
+                                </div>
+                                <div class="col-lg-6">
+                                    <el-input
+                                        v-model="dispatch.company_number"
+                                        placeholder="20000000000"
+                                    >
+                                        <el-button
+                                            slot="append"
+                                            icon="el-icon-delete"
+                                            @click="
+                                                dispatchesRelated.splice(
+                                                    index,
+                                                    1
+                                                )
+                                            "
+                                        ></el-button>
+                                    </el-input>
+                                </div>
                             </div>
                         </div>
                         <!--                        <div class="col-lg-2" v-if="!order_form_id">-->
@@ -519,7 +565,10 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr v-for="(row, index) in form.items">
+                                    <tr
+                                        v-for="(row, index) in form.items"
+                                        :key="index"
+                                    >
                                         <td>{{ index + 1 }}</td>
                                         <td>{{ row.unit_type_id }}</td>
                                         <td>{{ row.description }}</td>
@@ -787,6 +836,7 @@ export default {
     },
     data() {
         return {
+            dispatchesRelated: [],
             title: "Nueva G.R. Transportista",
             can_add_new_product: false,
             showDialogNewItem: false,
@@ -880,10 +930,12 @@ export default {
 
         if (this.parentId) {
             this.form = Object.assign({}, this.form, this.document);
-            console.log(
-                "🚀 ~ file: Form.vue:882 ~ mounted ~ this.form:",
-                this.form
-            );
+            if (
+                this.form.dispatches_related &&
+                this.form.dispatches_related.length > 0
+            ) {
+                this.dispatchesRelated = this.form.dispatches_related;
+            }
             if (this.form.customer_id) {
                 this.form.receiver_id = this.form.customer_id;
             }
@@ -927,6 +979,90 @@ export default {
     },
     methods: {
         ...mapActions(["loadItems", "loadConfiguration"]),
+        addDispatchRealted() {
+            this.dispatchesRelated.push({
+                serie_number: "",
+                company_number: "",
+            });
+        },
+        validDispatchesRelated() {
+            let pass = true;
+            for (let i = 0; i < this.dispatchesRelated.length; i++) {
+                if (
+                    this.dispatchesRelated[i].serie_number == "" &&
+                    this.dispatchesRelated[i].company_number == ""
+                ) {
+                    pass = true;
+                } else {
+                    if (
+                        this.dispatchesRelated[i].serie_number == "" ||
+                        this.dispatchesRelated[i].company_number == ""
+                    ) {
+                        pass = false;
+                    } else {
+                        let document_number =
+                            this.dispatchesRelated[i].company_number;
+                        if (
+                            isNaN(document_number) &&
+                            document_number.length !== 11
+                        ) {
+                            this.$message.error(
+                                "El número de RUC debe tener 11 dígitos"
+                            );
+                            pass = false;
+                        }
+
+                        let serie_number =
+                            this.dispatchesRelated[i].serie_number;
+                        if (serie_number.indexOf("-") == -1) {
+                            this.$message.error(
+                                "La serie y número de la guía de remisión debe tener el formato XXXX-0000000X"
+                            );
+                            pass = false;
+                        } else {
+                            let parts = serie_number.split("-");
+                            let serie = parts[0];
+                            let number = parts[1];
+                            if (serie) {
+                                serie = serie.toUpperCase();
+                            }
+                            if (
+                                serie.substring(0, 1) != "T" &&
+                                serie.substring(0, 4) != "EG07" &&
+                                serie.substring(0, 4) !== "EG02"
+                            ) {
+                                this.$message.error(
+                                    "La serie de la guía de remisión debe empezar con T o EG"
+                                );
+                                pass = false;
+                            }
+                            if (isNaN(number)) {
+                                this.$message.error(
+                                    "El número de la guía de remisión debe ser un número"
+                                );
+                                pass = false;
+                            } else {
+                                let number_length = number.length;
+                                if (number_length < 8) {
+                                    let number_new = "";
+                                    for (
+                                        let i = 0;
+                                        i < 8 - number_length;
+                                        i++
+                                    ) {
+                                        number_new += "0";
+                                    }
+                                    number_new += number;
+                                    this.dispatchesRelated[i].serie_number =
+                                        serie + "-" + number_new;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return pass;
+        },
 
         async getDeliveryAddresses(customer_id) {
             await this.$http
@@ -938,12 +1074,23 @@ export default {
         initForm() {
             this.errors = {};
 
-            let customer_id = this.config && this.config.establishment && this.config.establishment.customer_id ? parseInt(this.config.establishment.customer_id) : null;
-            let establishment_id = this.config && this.config.establishment && this.config.establishment.id ? parseInt(this.config.establishment.id) : null;
+            let customer_id =
+                this.config &&
+                this.config.establishment &&
+                this.config.establishment.customer_id
+                    ? parseInt(this.config.establishment.customer_id)
+                    : null;
+            let establishment_id =
+                this.config &&
+                this.config.establishment &&
+                this.config.establishment.id
+                    ? parseInt(this.config.establishment.id)
+                    : null;
             // let establishment_id = isNaN(parseInt(this.config.establishment.id)) ? null : parseInt(this.config.establishment.id);
             if (isNaN(customer_id)) customer_id = null;
             if (isNaN(establishment_id)) establishment_id = null;
             this.form = {
+                dispatches_related: [],
                 purchase_order: null,
                 id: null,
                 establishment_id: establishment_id,
@@ -1242,6 +1389,13 @@ export default {
             this.form.items.splice(index, 1);
         },
         async submit() {
+            if (!this.validDispatchesRelated()) {
+                return;
+            } else {
+                this.form.dispatches_related = this.dispatchesRelated;
+            }
+            // console.log("🚀 ~ submit ~ return:", this.dispatchesRelated);
+            // return;
             if (this.config.affect_all_documents) {
                 this.form.terms_condition = this.config.terms_condition_sale;
             }
@@ -1347,6 +1501,7 @@ export default {
                     this.loading_submit = false;
                 });
         },
+
         verifyQuantityItems() {
             let validate = true;
             let v = 0;

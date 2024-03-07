@@ -1447,14 +1447,12 @@ export default {
     },
     methods: {
         setDiscounts() {
-            
-            let {unit_price_value, quantity} = this.form;
+            let { unit_price_value, quantity } = this.form;
             let total = parseFloat(unit_price_value) * parseFloat(quantity);
             let result = this.discounts.reduce((a, b) => {
-            
                 return a + parseFloat(b.result);
             }, 0);
-        
+
             let discount_type = this.discount_types.find((d) => d.id == "00");
             // let total = this.form.total / 1.18;
             let percentage = (result / total) * 100;
@@ -1465,28 +1463,30 @@ export default {
                 description: "Descuentoss",
                 percentage,
                 factor,
-                amount: result ,
-                base: (result / total),
+                amount: result,
+                base: result / total,
                 is_amount: true,
                 use_input_amount: true,
                 is_split: false,
             });
-            console.log("🚀 ~ file: item.vue:1476 ~ setDiscounts ~ this.form.discounts:", this.form.discounts)
-            
+            console.log(
+                "🚀 ~ file: item.vue:1476 ~ setDiscounts ~ this.form.discounts:",
+                this.form.discounts
+            );
         },
         calculateDiscount() {
             if (this.discounts == null || this.discounts.length == 0) {
                 return;
             }
             let total = this.form.unit_price_value * this.form.quantity;
-            let {affectation_igv_type_id,has_igv} = this.form;
-  
+            let { affectation_igv_type_id, has_igv } = this.form;
+
             for (let i = 0; i < this.discounts.length; i++) {
                 let { percentage } = this.discounts[i];
                 if (percentage != 0 || percentage != null) {
                     let discount = total * (percentage / 100);
-          
-                    if(has_igv && affectation_igv_type_id == "10"){
+
+                    if (has_igv && affectation_igv_type_id == "10") {
                         discount = discount / 1.18;
                     }
                     //redondear a dos decimales
@@ -1497,7 +1497,8 @@ export default {
 
                     total = total - discount;
                     this.discounts[i].base = total;
-                    this.discounts[i].original_price = this.form.unit_price_value;
+                    this.discounts[i].original_price =
+                        this.form.unit_price_value;
                 }
             }
         },
@@ -2092,6 +2093,7 @@ export default {
             this.clearExtraInfoItem();
 
             this.form.item = _.find(this.items, { id: this.form.item_id });
+            console.log("🚀 ~ changeItem ~ this.form.item:", JSON.stringify(this.form.item))
 
             if (this.person_type_id) {
                 let { item_customer_prices } = this.form.item;
@@ -2196,7 +2198,14 @@ export default {
                 this.form.quantity * this.form.unit_price_value,
                 4
             );
-            if (this.form.meter && this.form.meter > 0) {
+            if (
+                this.form.meter &&
+                this.form.meter > 0
+                // &&
+                // this.form.item_unit_type_id == null
+            ) {
+            
+
                 this.readonly_meters = _.round(
                     this.form.quantity * this.form.meter,
                     4

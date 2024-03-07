@@ -98,6 +98,10 @@ mix.webpackConfig({
                 __dirname,
                 'modules/Sire/Resources/assets/js/views'
             ),
+            '@viewsModuleOptometry': path.resolve(
+                __dirname,
+                'modules/Optometry/Resources/assets/js/views'
+            ),
         }
     }
 })

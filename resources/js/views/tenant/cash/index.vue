@@ -386,6 +386,7 @@
             :showDialog.sync="showDialog"
             :typeUser="typeUser"
             :recordId="recordId"
+            :configuration="configuration"
         ></cash-form>
 
         <cash-options

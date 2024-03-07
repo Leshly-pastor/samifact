@@ -30,17 +30,22 @@ class DispatchInput
         $document_type_id = $inputs['document_type_id'];
         $series = $inputs['series'];
         $number = $inputs['number'];
-
+        $company_id = Functions::valueKeyInArray($inputs, 'company_id');
         $company = Company::active();
         $soap_type_id = $company->soap_type_id;
         $number = Functions::newNumber($soap_type_id, $document_type_id, $series, $number, Dispatch::class);
-
+        
         if (is_null($inputs['id'])) {
-            Functions::validateUniqueDocument($soap_type_id, $document_type_id, $series, $number, Dispatch::class);
+            Functions::validateUniqueDocument($soap_type_id, $document_type_id, $series, $number, Dispatch::class,$company_id);
         }
-
+        
         $filename = Functions::filename($company, $document_type_id, $series, $number);
         $establishment = EstablishmentInput::set($inputs['establishment_id']);
+        $alter_establishment = Functions::valueKeyInArray($inputs, 'establishment');
+        if ($alter_establishment) {
+            $establishment = $alter_establishment;
+        }
+        
         $customer = PersonInput::set($inputs['customer_id']);
         $reference_sale_note_id = Functions::valueKeyInArray($inputs, 'reference_sale_note_id');
         if ($reference_sale_note_id) {
@@ -51,8 +56,38 @@ class DispatchInput
                 }
             }
         } 
+        $alter_company = [];
+        if ($company_id ) {
+            $company_found = Company::where('website_id', $company_id)->first();
+            $alter_company = [
+                'id' => $company_found->id,
+                'name' => $company_found->name,
+                'number' => $company_found->number,
+                'trade_name' => $company_found->trade_name,
+                'website_id' => $company_found->website_id,
+            ];
+            $document_found = Dispatch::where('series', $series)
+                ->where('document_type_id', $document_type_id)
+                ->where('alter_company->website_id', $company_found->website_id)
+                ->orderBy('number', 'desc')
+                ->first();
+            if ($document_found) {
+                $document_number = $document_found->number;
+                $document_number = $document_number + 1;
+                // if ($document_number > $number) {
+                $number = $document_number;
+                // }
+            }else{
+                if(!is_numeric($number)){
+                    $number = 1;
+                }
+            }
+            
+        }
         $inputs['type'] = 'dispatch';
+    
         $data = [
+            'alter_company' => $alter_company,
             'purchase_order' => Functions::valueKeyInArray($inputs, 'purchase_order'),
             'id' => Functions::valueKeyInArray($inputs, 'id'),
             'type' => $inputs['type'],
@@ -73,6 +108,7 @@ class DispatchInput
             'customer_id' => $inputs['customer_id'],
             'customer' => $customer,
             'observations' => $inputs['observations'],
+            'dispatches_related' => Functions::valueKeyInArray($inputs, 'dispatches_related'),
             'transport_mode_type_id' => Functions::valueKeyInArray($inputs, 'transport_mode_type_id'),
             'transfer_reason_type_id' => Functions::valueKeyInArray($inputs, 'transfer_reason_type_id'),
             'transfer_reason_description' => Functions::valueKeyInArray($inputs, 'transfer_reason_description'),

@@ -46,7 +46,8 @@ class BillOfExchangeCollection extends ResourceCollection
                 'establishment_id' => $row->establishment_id,
                 'user' => $row->user,
                 'total' => $total,
-                'currency_type_id' => 'PEN',
+                'exchange_rate_sale' => $row->exchange_rate_sale,
+                'currency_type_id' => $row->currency_type_id,
             ];
         });
     }

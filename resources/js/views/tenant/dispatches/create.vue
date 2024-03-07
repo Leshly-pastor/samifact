@@ -1,11 +1,27 @@
 <template>
-    <div class="card mb-0 pt-2 pt-md-0">
+    <div class="card mb-0 pt-2 pt-md-0" v-loading="loading">
         <div class="card-header">
             <h3 class="my-0">Nueva Guía de Remisión</h3>
         </div>
         <div class="card-body">
             <form autocomplete="off" @submit.prevent="submit">
                 <div class="form-body">
+                    <div class="row" v-if="configuration.multi_companies">
+                        <div class="col-xl-4 col-md-4 col-12 align-self-center">
+                            <label> Empresas </label>
+                            <el-select
+                                v-model="form.company_id"
+                                @change="changeCompany"
+                            >
+                                <el-option
+                                    v-for="(option, idx) in companies"
+                                    :key="idx"
+                                    :label="option.name"
+                                    :value="option.website_id"
+                                ></el-option>
+                            </el-select>
+                        </div>
+                    </div>
                     <div class="row">
                         <div class="col-lg-2">
                             <div
@@ -46,7 +62,6 @@
                                     ></label
                                 >
                                 <el-select
-                                    
                                     v-model="form.series"
                                     :disabled="parentTable == 'dispatch'"
                                 >
@@ -649,7 +664,7 @@
                         <div class="col-lg-6">
                             <label class="control-label">
                                 Datos del conductor
-                                       <template
+                                <template
                                     v-if="form.transport_mode_type_id === '02'"
                                 >
                                     <span class="text-danger">*</span>
@@ -660,7 +675,6 @@
                                     @click.prevent="showDialogDriverForm = true"
                                     >[+ Nuevo]</a
                                 >
-                         
                             </label>
 
                             <div
@@ -704,7 +718,7 @@
                             >
                                 <label class="control-label"
                                     >Datos del vehículo
-                                      <template
+                                    <template
                                         v-if="
                                             form.transport_mode_type_id === '02'
                                         "
@@ -719,7 +733,6 @@
                                         "
                                         >[+ Nuevo]</a
                                     >
-                                  
                                 </label>
                                 <el-select
                                     v-model="form.transport_id"
@@ -1095,6 +1108,7 @@ export default {
     },
     data() {
         return {
+            companies: [],
             references: [],
             currentItem: null,
             can_add_new_product: false,
@@ -1148,6 +1162,7 @@ export default {
             delivery_addresses: [],
             origin_addresses: [],
             send_sunat: false,
+            loading: false,
         };
     },
     async created() {
@@ -1201,6 +1216,7 @@ export default {
             .post(`/${this.resource}/tables`, payload)
             .then((response) => {
                 this.references = response.data.references;
+                this.companies = response.data.companies;
                 this.company = response.data.company;
                 this.identityDocumentTypes =
                     response.data.identityDocumentTypes;
@@ -1228,6 +1244,14 @@ export default {
 
         if (this.parentId) {
             this.form = Object.assign({}, this.form, this.document);
+            if (this.configuration.multi_companies) {
+                let { alter_company } = this.document;
+                if (alter_company) {
+                    console.log("🚀 ~ mounted ~ alter_company:", alter_company)
+                    this.form.company_id = alter_company.website_id;
+                    this.changeCompany();
+                }
+            }
             await this.reloadDataCustomers(this.form.customer_id);
             await this.getDeliveryAddresses(this.form.customer_id);
             await this.changeEstablishment();
@@ -1235,7 +1259,7 @@ export default {
                 this.setDefaults();
                 this.form.series = this.series_default;
             }
-            
+
             //  this.setDefaultSeries()
         } else {
             this.searchRemoteCustomers("");
@@ -1255,6 +1279,38 @@ export default {
         });
     },
     methods: {
+        async changeCompany() {
+            try {
+                this.loading = true;
+                const response = await this.$http.get(
+                    `/documents/tables-company/${this.form.company_id}`
+                );
+                if (response.status == 200) {
+                    let { data } = response;
+                    let { series, establishment, payment_destinations } = data;
+                    // this.all_series = series;
+                    this.form.establishment = establishment;
+                    this.payment_destinations = payment_destinations;
+
+                    this.seriesAll = series;
+                    this.changeEstablishment();
+                    if (this.configuration.multi_companies) {
+                        series = series.filter(
+                            (s) =>
+                                s.document_type_id ===
+                                this.form.document_type_id
+                        );
+                        let [serie] = series;
+                        if (serie && serie.next_number) {
+                            this.form.number = serie.next_number;
+                        }
+                    }
+                }
+            } catch (e) {
+            } finally {
+                this.loading = false;
+            }
+        },
         searchRemoteDrivers(input) {
             this.loading_search = true;
             if (input.length < 3) return;
@@ -1374,7 +1430,7 @@ export default {
                 transshipment_indicator: false,
                 port_code: null,
                 unit_type_id: "KGM",
-                total_weight: 1, 
+                total_weight: 1,
                 packages_number: 0,
                 container_number: null,
                 dispatcher_id: null,
@@ -1687,7 +1743,7 @@ export default {
             }
         },
         addItem(form) {
-            console.log("🚀 ~ file: create.vue:1699 ~ addItem ~ form:", form)
+            console.log("🚀 ~ file: create.vue:1699 ~ addItem ~ form:", form);
             let it = form.item;
 
             let qty = form.quantity;
@@ -1868,10 +1924,10 @@ export default {
                 this.form.driver = _.find(this.drivers, {
                     id: this.form.driver_id,
                 });
-                if(this.form.driver){
+                if (this.form.driver) {
                     this.form.driver_id = this.form.driver.id;
                 }
-                if(this.form.transport){
+                if (this.form.transport) {
                     this.form.transport_id = this.form.transport.id;
                 }
                 if (!this.form.dispatcher_id) {

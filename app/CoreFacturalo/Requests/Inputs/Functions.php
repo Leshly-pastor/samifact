@@ -59,7 +59,7 @@ class Functions
         if ($configuration->multi_companies && $company_id) {
             $company_number = null;
             if ($company_id) {
-                $company = Company::find($company_id);
+                $company = Company::where('website_id', $company_id)->first();
                 $company_number = $company->number;
             }
             $document = $model::where('soap_type_id', $soap_type_id)

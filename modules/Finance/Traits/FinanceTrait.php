@@ -2,7 +2,7 @@
 
 namespace Modules\Finance\Traits;
 
-use App\Models\Tenant\{DocumentPayment, PurchasePayment, SaleNotePayment, PurchaseSettlementPayment};
+use App\Models\Tenant\{Configuration, DocumentPayment, PurchasePayment, SaleNotePayment, PurchaseSettlementPayment};
 use App\Models\Tenant\BankAccount;
 use App\Models\Tenant\Cash;
 use App\Models\Tenant\Company;
@@ -18,7 +18,8 @@ use Modules\Sale\Models\ContractPayment;
 use Modules\Sale\Models\QuotationPayment;
 use Modules\Sale\Models\TechnicalServicePayment;
 use App\Models\Tenant\ExchangeRate;
-
+use Illuminate\Support\Facades\Cache;
+use PSpell\Config;
 
 trait FinanceTrait
 {
@@ -26,11 +27,11 @@ trait FinanceTrait
     /**
      * @return \Illuminate\Support\Collection
      */
-    public function getPaymentDestinations($user_id=null)
+    public function getPaymentDestinations($user_id = null)
     {
 
         $bank_accounts = self::getBankAccounts();
-       
+
         $cash = $this->getCash($user_id);
         // dd($cash);
         if ($cash) {
@@ -38,7 +39,6 @@ trait FinanceTrait
         }
 
         return $bank_accounts;
-
     }
 
 
@@ -57,29 +57,51 @@ trait FinanceTrait
     /**
      * @return array|null
      */
-    public function getCash($user_id=null)
+    public function getCash($user_id = null)
     {
-        if($user_id==null){
+        $configuration = Configuration::first();
+
+        if ($user_id == null) {
             $users_id = auth()->id();
-        }else{
+        } else {
             $users_id = $user_id;
         }
+        $user = auth()->user();
         // $cash = Cash::query()->where('state', true)->first();
-        $cash = Cash::query()->where('user_id',$users_id)->where('state', true)->first();
-        if ($cash) {
-            return [
-                'id' => 'cash',
-                'cash_id' => $cash->id,
-                'description' => ($cash->reference_number) ? "CAJA GENERAL - {$cash->reference_number}" : "CAJA GENERAL",
-                'user_id' => $cash->user_id,
-            ];
+        if (!$configuration->multi_companies && $user->company_active_id ==  null) {
+            $cash = Cash::query()->where('user_id', $users_id)->where('state', true)->first();
+            if ($cash) {
+                return [
+                    'id' => 'cash',
+                    'cash_id' => $cash->id,
+                    'description' => ($cash->reference_number) ? "CAJA GENERAL - {$cash->reference_number}" : "CAJA GENERAL",
+                    'user_id' => $cash->user_id,
+                ];
+            }
+            return null;
+        } else {
+            $company_active_id = Cache::get("cash_".$user->id);
+            if($company_active_id == null){
+                $company_active_id = $user->company_active_id;
+                // return null;
+            }
+            $cash = Cash::query()->where('user_id', $users_id)->where('state', true)->whereJsonContains('alter_company', ['website_id' => $company_active_id])->first();
+            Cache::forget("cash_".$user->id);
+            if ($cash) {
+                return [
+                    'id' => 'cash',
+                    'cash_id' => $cash->id,
+                    'description' => ($cash->reference_number) ? "CAJA GENERAL - {$cash->reference_number}" : "CAJA GENERAL",
+                    'user_id' => $cash->user_id,
+                ];
+            }
         }
         return null;
     }
 
     public function createGlobalPayment($model, $row)
     {
-        
+
         $destination = $this->getDestinationRecord($row);
         $company = Company::active();
         $model->global_payment()->create([
@@ -91,9 +113,9 @@ trait FinanceTrait
     }
 
     public function getDestinationRecord($row)
-    {   
+    {
         $user_id  = null;
-        if(isset($row['user_id'])){
+        if (isset($row['user_id'])) {
             $user_id = $row['user_id'];
         }
         if ($row['payment_destination_id'] === 'cash') {

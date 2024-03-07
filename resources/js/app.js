@@ -10,7 +10,7 @@ import locale from "element-ui/lib/locale";
 // import DatePicker from "v-calendar/lib/components/date-picker.umd";
 locale.use(lang);
 
-ElementUI.Select.computed.readonly = function() {
+ElementUI.Select.computed.readonly = function () {
     const isIE =
         !this.$isServer && !Number.isNaN(Number(document.documentMode));
     return !(this.filterable || this.multiple || !isIE) && !this.visible;
@@ -37,20 +37,23 @@ window.VueCalendarLang = () => ({
         "Setiembre",
         "Octubre",
         "Noviembre",
-        "Diciembre"
+        "Diciembre",
     ],
     notSelected: "Nada seleccionado",
     required: "Obligatorio",
-    search: "Buscar"
+    search: "Buscar",
 });
 // Vue.component("calendar", Calendar);
 // Vue.component("date-picker", DatePicker);
 Vue.component(
     "tenant-item-aditional-info-selector",
-    require("./views/tenant/components/partials/item_extra_info.vue").default);
+    require("./views/tenant/components/partials/item_extra_info.vue").default
+);
 Vue.component(
     "tenant-item-aditional-info-modal",
-    require("./views/tenant/components/partials/modal_item_info_attributes.vue").default);
+    require("./views/tenant/components/partials/modal_item_info_attributes.vue")
+        .default
+);
 Vue.component(
     "system-whatsapp-questions",
     require("./views/system/questions/index.vue").default
@@ -73,7 +76,6 @@ Vue.component(
     require("./views/tenant/shortcuts/index.vue").default
 );
 
-
 //
 Vue.component(
     "tenant-document-names",
@@ -90,15 +92,20 @@ Vue.component(
 
 Vue.component(
     "tenant-dashboard-index",
-    require("../../modules/Dashboard/Resources/assets/js/views/index.vue").default
+    require("../../modules/Dashboard/Resources/assets/js/views/index.vue")
+        .default
 );
 Vue.component(
     "tenant-dashboard-sales-by-product",
-    require("../../modules/Dashboard/Resources/assets/js/views/items/SalesByProduct.vue").default
+    require("../../modules/Dashboard/Resources/assets/js/views/items/SalesByProduct.vue")
+        .default
 );
 
 Vue.component("x-graph", require("./components/graph/src/Graph.vue").default);
-Vue.component("x-graph-line", require("./components/graph/src/GraphLine.vue").default);
+Vue.component(
+    "x-graph-line",
+    require("./components/graph/src/GraphLine.vue").default
+);
 
 // configuracion pse
 Vue.component(
@@ -160,11 +167,13 @@ Vue.component(
 );
 Vue.component(
     "tenant-configurations-preprinted-pdf",
-    require("./views/tenant/configurations/pdf_preprinted_templates.vue").default
+    require("./views/tenant/configurations/pdf_preprinted_templates.vue")
+        .default
 );
 Vue.component(
     "tenant-dialog-header-menu",
-    require("./views/tenant/configurations/partials/dialog_header_menu.vue").default
+    require("./views/tenant/configurations/partials/dialog_header_menu.vue")
+        .default
 );
 // Vue.component('tenant-establishments-form', require('./views/tenant/establishments/form.vue'));
 // Vue.component('tenant-series-form', require('./views/tenant/series/form.vue'));
@@ -172,17 +181,29 @@ Vue.component(
     "tenant-bank_accounts-index",
     require("./views/tenant/bank_accounts/index.vue").default
 );
-Vue.component("tenant-items-index", require("./views/tenant/items/index.vue").default);
-Vue.component("tenant-items-details", require("./views/tenant/items/form_readonly.vue").default);
+Vue.component(
+    "tenant-items-index",
+    require("./views/tenant/items/index.vue").default
+);
+Vue.component(
+    "tenant-items-details",
+    require("./views/tenant/items/form_readonly.vue").default
+);
 Vue.component(
     "tenant-persons-index",
     require("./views/tenant/persons/index.vue").default
 );
 // Vue.component('tenant-customers-index', require('./views/tenant/customers/index.vue'));
-Vue.component("tenant-person-form", require("./views/tenant/persons/form.vue").default);
+Vue.component(
+    "tenant-person-form",
+    require("./views/tenant/persons/form.vue").default
+);
 
 // Vue.component('tenant-suppliers-index', require('./views/tenant/suppliers/index.vue'));
-Vue.component("tenant-users-form", require("./views/tenant/users/form.vue").default);
+Vue.component(
+    "tenant-users-form",
+    require("./views/tenant/users/form.vue").default
+);
 Vue.component(
     "tenant-documents-index",
     require("./views/tenant/documents/index.vue").default
@@ -236,11 +257,16 @@ Vue.component(
 );
 Vue.component(
     "tenant-unit_types-index",
-    require("./views/tenant/unit_types/index.vue").default);
+    require("./views/tenant/unit_types/index.vue").default
+);
 Vue.component(
     "tenant-detraction_types-index",
-    require("./views/tenant/detraction_types/index.vue").default);
-Vue.component("tenant-users-index", require("./views/tenant/users/index.vue").default);
+    require("./views/tenant/detraction_types/index.vue").default
+);
+Vue.component(
+    "tenant-users-index",
+    require("./views/tenant/users/index.vue").default
+);
 Vue.component(
     "tenant-establishments-index",
     require("./views/tenant/establishments/index.vue").default
@@ -249,7 +275,10 @@ Vue.component(
     "tenant-charge_discounts-index",
     require("./views/tenant/charge_discounts/index.vue").default
 );
-Vue.component("tenant-banks-index", require("./views/tenant/banks/index.vue").default);
+Vue.component(
+    "tenant-banks-index",
+    require("./views/tenant/banks/index.vue").default
+);
 Vue.component(
     "tenant-exchange_rates-index",
     require("./views/tenant/exchange_rates/index.vue").default
@@ -344,8 +373,14 @@ Vue.component(
     require("./views/tenant/components/products.vue").default
 );
 
-Vue.component("tenant-tasks-lists", require("./views/tenant/tasks/lists.vue").default);
-Vue.component("tenant-tasks-form", require("./views/tenant/tasks/form.vue").default);
+Vue.component(
+    "tenant-tasks-lists",
+    require("./views/tenant/tasks/lists.vue").default
+);
+Vue.component(
+    "tenant-tasks-form",
+    require("./views/tenant/tasks/form.vue").default
+);
 Vue.component(
     "tenant-reports-consistency-documents-lists",
     require("./views/tenant/reports/consistency-documents/lists.vue").default
@@ -404,15 +439,23 @@ Vue.component(
     require("./views/tenant/dispatch_orders/form.vue").default
 );
 
-
-Vue.component("tenant-pos-index", require("./views/tenant/pos/index.vue").default);
+Vue.component(
+    "tenant-pos-index",
+    require("./views/tenant/pos/index.vue").default
+);
 Vue.component("cash-index", require("./views/tenant/cash/index.vue").default);
 Vue.component(
     "tenant-card-brands-index",
     require("./views/tenant/card_brands/index.vue").default
 );
-Vue.component("tenant-pos-fast", require("./views/tenant/pos/fast.vue").default);
-Vue.component("tenant-pos-garage", require("./views/tenant/pos/garage.vue").default);
+Vue.component(
+    "tenant-pos-fast",
+    require("./views/tenant/pos/fast.vue").default
+);
+Vue.component(
+    "tenant-pos-garage",
+    require("./views/tenant/pos/garage.vue").default
+);
 
 Vue.component(
     "tenant-payment-method-index",
@@ -426,7 +469,8 @@ Vue.component(
 // Modules
 Vue.component(
     "inventory-index",
-    require("../../modules/Inventory/Resources/assets/js/inventory/index.vue").default
+    require("../../modules/Inventory/Resources/assets/js/inventory/index.vue")
+        .default
 );
 //tenant-inventory-references-index
 
@@ -437,56 +481,69 @@ Vue.component(
 
 Vue.component(
     "inventory-transfers-index",
-    require("../../modules/Inventory/Resources/assets/js/transfers/index.vue").default
+    require("../../modules/Inventory/Resources/assets/js/transfers/index.vue")
+        .default
 );
 Vue.component(
     "warehouses-index",
-    require("../../modules/Inventory/Resources/assets/js/warehouses/index.vue").default
+    require("../../modules/Inventory/Resources/assets/js/warehouses/index.vue")
+        .default
 );
 Vue.component(
     "tenant-report-kardex-index",
-    require("../../modules/Inventory/Resources/assets/js/kardex/index.vue").default
+    require("../../modules/Inventory/Resources/assets/js/kardex/index.vue")
+        .default
 );
 Vue.component(
     "tenant-inventories-form",
-    require("../../modules/Inventory/Resources/assets/js/config/form.vue").default
+    require("../../modules/Inventory/Resources/assets/js/config/form.vue")
+        .default
 );
 Vue.component(
     "tenant-expenses-index",
-    require("../../modules/Expense/Resources/assets/js/views/expenses/index.vue").default
+    require("../../modules/Expense/Resources/assets/js/views/expenses/index.vue")
+        .default
 );
 Vue.component(
     "tenant-expenses-form",
-    require("../../modules/Expense/Resources/assets/js/views/expenses/form.vue").default
+    require("../../modules/Expense/Resources/assets/js/views/expenses/form.vue")
+        .default
 );
 Vue.component(
     "tenant-account-export",
-    require("../../modules/Account/Resources/assets/js/views/account/export.vue").default
+    require("../../modules/Account/Resources/assets/js/views/account/export.vue")
+        .default
 );
 Vue.component(
     "tenant-account-ple",
-    require("../../modules/Account/Resources/assets/js/views/ple/generate.vue").default
+    require("../../modules/Account/Resources/assets/js/views/ple/generate.vue")
+        .default
 );
 //
 Vue.component(
     "tenant-tax-return",
-    require("../../modules/Account/Resources/assets/js/views/tax_return/index.vue").default
+    require("../../modules/Account/Resources/assets/js/views/tax_return/index.vue")
+        .default
 );
 Vue.component(
     "tenant-account-summary-report",
-    require("../../modules/Account/Resources/assets/js/views/summary_report/index.vue").default
+    require("../../modules/Account/Resources/assets/js/views/summary_report/index.vue")
+        .default
 );
 Vue.component(
     "tenant-account-format",
-    require("../../modules/Account/Resources/assets/js/views/account/format.vue").default
+    require("../../modules/Account/Resources/assets/js/views/account/format.vue")
+        .default
 );
 Vue.component(
     "tenant-company-accounts",
-    require("../../modules/Account/Resources/assets/js/views/company_accounts/form.vue").default
+    require("../../modules/Account/Resources/assets/js/views/company_accounts/form.vue")
+        .default
 );
 Vue.component(
     "tenant-ledger-accounts",
-    require("../../modules/Account/Resources/assets/js/views/ledger_accounts/form.vue").default
+    require("../../modules/Account/Resources/assets/js/views/ledger_accounts/form.vue")
+        .default
 );
 
 Vue.component(
@@ -497,348 +554,429 @@ Vue.component(
 //
 Vue.component(
     "tenant-inventory-report",
-    require("../../modules/Inventory/Resources/assets/js/inventory/reports/index.vue").default
+    require("../../modules/Inventory/Resources/assets/js/inventory/reports/index.vue")
+        .default
 );
 //
 
 Vue.component(
     "tenant-inventory-color-index",
-    require("../../modules/Inventory/Resources/assets/js/extra_info/color/index.vue").default
+    require("../../modules/Inventory/Resources/assets/js/extra_info/color/index.vue")
+        .default
 );
 Vue.component(
     "tenant-inventory-item-units-per-package-index",
-    require("../../modules/Inventory/Resources/assets/js/extra_info/item_units_per_package/index.vue").default
+    require("../../modules/Inventory/Resources/assets/js/extra_info/item_units_per_package/index.vue")
+        .default
 );
 Vue.component(
     "tenant-inventory-item-units-business",
-    require("../../modules/Inventory/Resources/assets/js/extra_info/item_units_business/index.vue").default
+    require("../../modules/Inventory/Resources/assets/js/extra_info/item_units_business/index.vue")
+        .default
 );
 Vue.component(
     "tenant-inventory-item-package-measurements",
-    require("../../modules/Inventory/Resources/assets/js/extra_info/item_package_measurements/index.vue").default
+    require("../../modules/Inventory/Resources/assets/js/extra_info/item_package_measurements/index.vue")
+        .default
 );
 Vue.component(
     "tenant-inventory-mold-cavities",
-    require("../../modules/Inventory/Resources/assets/js/extra_info/item_mold_cavities/index.vue").default
+    require("../../modules/Inventory/Resources/assets/js/extra_info/item_mold_cavities/index.vue")
+        .default
 );
 Vue.component(
     "tenant-inventory-mold-property",
-    require("../../modules/Inventory/Resources/assets/js/extra_info/item_mold_property/index.vue").default
+    require("../../modules/Inventory/Resources/assets/js/extra_info/item_mold_property/index.vue")
+        .default
 );
 
 Vue.component(
     "tenant-inventory-size-property",
-    require("../../modules/Inventory/Resources/assets/js/extra_info/item_size/index.vue").default
+    require("../../modules/Inventory/Resources/assets/js/extra_info/item_size/index.vue")
+        .default
 );
 Vue.component(
     "tenant-inventory-item-status",
-    require("../../modules/Inventory/Resources/assets/js/extra_info/item_status/index.vue").default
+    require("../../modules/Inventory/Resources/assets/js/extra_info/item_status/index.vue")
+        .default
 );
 Vue.component(
     "tenant-inventory-item-product-family",
-    require("../../modules/Inventory/Resources/assets/js/extra_info/item_product_family/index.vue").default
+    require("../../modules/Inventory/Resources/assets/js/extra_info/item_product_family/index.vue")
+        .default
 );
 Vue.component(
     "tenant-inventory-extra-info-list",
-    require("../../modules/Inventory/Resources/assets/js/extra_info/index.vue").default
+    require("../../modules/Inventory/Resources/assets/js/extra_info/index.vue")
+        .default
 );
 
 Vue.component(
     "tenant-inventory-devolutions-index",
-    require("../../modules/Inventory/Resources/assets/js/devolutions/index.vue").default
+    require("../../modules/Inventory/Resources/assets/js/devolutions/index.vue")
+        .default
 );
 Vue.component(
     "tenant-inventory-devolutions-form",
-    require("../../modules/Inventory/Resources/assets/js/devolutions/form.vue").default
+    require("../../modules/Inventory/Resources/assets/js/devolutions/form.vue")
+        .default
 );
 
 Vue.component(
     "tenant-documents-not-sent",
-    require("../../modules/Document/Resources/assets/js/views/documents/not_sent.vue").default
+    require("../../modules/Document/Resources/assets/js/views/documents/not_sent.vue")
+        .default
 );
 Vue.component(
     "tenant-report-purchases-index",
-    require("../../modules/Report/Resources/assets/js/views/purchases/index.vue").default
+    require("../../modules/Report/Resources/assets/js/views/purchases/index.vue")
+        .default
 );
 Vue.component(
     "tenant-report-documents-index",
-    require("../../modules/Report/Resources/assets/js/views/documents/index.vue").default
+    require("../../modules/Report/Resources/assets/js/views/documents/index.vue")
+        .default
 );
 //
 Vue.component(
     "tenant-report-summary-sales-index",
-    require("../../modules/Report/Resources/assets/js/views/summary_sales/index.vue").default
+    require("../../modules/Report/Resources/assets/js/views/summary_sales/index.vue")
+        .default
 );
 Vue.component(
     "tenant-state-account-index",
-    require("../../modules/Report/Resources/assets/js/views/state_account/index.vue").default
+    require("../../modules/Report/Resources/assets/js/views/state_account/index.vue")
+        .default
 );
 Vue.component(
     "tenant-report-customers-index",
-    require("../../modules/Report/Resources/assets/js/views/customers/index.vue").default
+    require("../../modules/Report/Resources/assets/js/views/customers/index.vue")
+        .default
 );
 Vue.component(
     "tenant-report-items-index",
-    require("../../modules/Report/Resources/assets/js/views/items/index.vue").default
+    require("../../modules/Report/Resources/assets/js/views/items/index.vue")
+        .default
 );
 Vue.component(
     "tenant-report-items-extra-index",
-    require("../../modules/Report/Resources/assets/js/views/items/index_extra.vue").default
+    require("../../modules/Report/Resources/assets/js/views/items/index_extra.vue")
+        .default
 );
 
 Vue.component(
     "tenant-report-download-tray-index",
-    require("../../modules/Report/Resources/assets/js/views/download_tray/index.vue").default
+    require("../../modules/Report/Resources/assets/js/views/download_tray/index.vue")
+        .default
 );
 
 /** Reporte de guias */
 Vue.component(
     "tenant-report-guide-index",
-    require("../../modules/Report/Resources/assets/js/views/guide/index.vue").default
+    require("../../modules/Report/Resources/assets/js/views/guide/index.vue")
+        .default
 );
 Vue.component(
     "tenant-report-sale_notes-index",
-    require("../../modules/Report/Resources/assets/js/views/sale_notes/index.vue").default
+    require("../../modules/Report/Resources/assets/js/views/sale_notes/index.vue")
+        .default
 );
 Vue.component(
     "tenant-report-quotations-index",
-    require("../../modules/Report/Resources/assets/js/views/quotations/index.vue").default
+    require("../../modules/Report/Resources/assets/js/views/quotations/index.vue")
+        .default
 );
 Vue.component(
     "tenant-report-cash-index",
-    require("../../modules/Report/Resources/assets/js/views/cash/index.vue").default
+    require("../../modules/Report/Resources/assets/js/views/cash/index.vue")
+        .default
 );
 Vue.component(
     "tenant-index-configuration",
-    require("../../modules/BusinessTurn/Resources/assets/js/views/configurations/index.vue").default
+    require("../../modules/BusinessTurn/Resources/assets/js/views/configurations/index.vue")
+        .default
 );
 Vue.component(
     "tenant-report-document_hotels-index",
-    require("../../modules/Report/Resources/assets/js/views/document_hotels/index.vue").default
+    require("../../modules/Report/Resources/assets/js/views/document_hotels/index.vue")
+        .default
 );
 //
 Vue.component(
     "tenant-reports-hotel-mincetur",
-    require("../../modules/Report/Resources/assets/js/views/report_hotels_mincetur/index.vue").default
+    require("../../modules/Report/Resources/assets/js/views/report_hotels_mincetur/index.vue")
+        .default
 );
 Vue.component(
     "tenant-report_hotels-index",
-    require("../../modules/Report/Resources/assets/js/views/report_hotels/index.vue").default
+    require("../../modules/Report/Resources/assets/js/views/report_hotels/index.vue")
+        .default
 );
 Vue.component(
     "tenant-report-commercial_analysis-index",
-    require("../../modules/Report/Resources/assets/js/views/commercial_analysis/index.vue").default
+    require("../../modules/Report/Resources/assets/js/views/commercial_analysis/index.vue")
+        .default
 );
 Vue.component(
     "tenant-offline-configurations-index",
-    require("../../modules/Offline/Resources/assets/js/views/offline_configurations/index.vue").default
+    require("../../modules/Offline/Resources/assets/js/views/offline_configurations/index.vue")
+        .default
 );
 Vue.component(
     "tenant-series-configurations-index",
-    require("../../modules/Document/Resources/assets/js/views/series_configurations/index.vue").default
+    require("../../modules/Document/Resources/assets/js/views/series_configurations/index.vue")
+        .default
 );
 Vue.component(
     "tenant-validate-documents-index",
-    require("../../modules/Document/Resources/assets/js/views/validate_documents/index.vue").default
+    require("../../modules/Document/Resources/assets/js/views/validate_documents/index.vue")
+        .default
 );
 Vue.component(
     "tenant-report-document-detractions-index",
-    require("../../modules/Report/Resources/assets/js/views/document-detractions/index.vue").default
+    require("../../modules/Report/Resources/assets/js/views/document-detractions/index.vue")
+        .default
 );
 Vue.component(
     "tenant-report-commissions-index",
-    require("../../modules/Report/Resources/assets/js/views/commissions/index.vue").default
+    require("../../modules/Report/Resources/assets/js/views/commissions/index.vue")
+        .default
 );
 Vue.component(
     "tenant-report-order-notes-consolidated-index",
-    require("../../modules/Report/Resources/assets/js/views/order_notes_consolidated/index.vue").default
+    require("../../modules/Report/Resources/assets/js/views/order_notes_consolidated/index.vue")
+        .default
 );
 Vue.component(
     "tenant-report-general-items-index",
-    require("../../modules/Report/Resources/assets/js/views/general_items/index.vue").default
+    require("../../modules/Report/Resources/assets/js/views/general_items/index.vue")
+        .default
 );
 Vue.component(
     "tenant-report-order-notes-general-index",
-    require("../../modules/Report/Resources/assets/js/views/order_notes_general/index.vue").default
+    require("../../modules/Report/Resources/assets/js/views/order_notes_general/index.vue")
+        .default
 );
 Vue.component(
     "tenant-report-sales-consolidated-index",
-    require("../../modules/Report/Resources/assets/js/views/sales_consolidated/index.vue").default
+    require("../../modules/Report/Resources/assets/js/views/sales_consolidated/index.vue")
+        .default
 );
 Vue.component(
     "tenant-report-user-commissions-index",
-    require("../../modules/Report/Resources/assets/js/views/user_commissions/index.vue").default
+    require("../../modules/Report/Resources/assets/js/views/user_commissions/index.vue")
+        .default
 );
 Vue.component(
     "tenant-report-fixed-asset-purchases-index",
-    require("../../modules/Report/Resources/assets/js/views/fixed-asset-purchases/index.vue").default
+    require("../../modules/Report/Resources/assets/js/views/fixed-asset-purchases/index.vue")
+        .default
 );
 Vue.component(
     "tenant-report-massive-downloads-index",
-    require("../../modules/Report/Resources/assets/js/views/massive-downloads/index.vue").default
+    require("../../modules/Report/Resources/assets/js/views/massive-downloads/index.vue")
+        .default
 );
 Vue.component(
     "tenant-documents-regularize-shipping",
-    require("../../modules/Document/Resources/assets/js/views/documents/regularize_shipping.vue").default
+    require("../../modules/Document/Resources/assets/js/views/documents/regularize_shipping.vue")
+        .default
 );
 Vue.component(
     "tenant-report-commissions-detail-index",
-    require("../../modules/Report/Resources/assets/js/views/commissions_detail/index.vue").default
+    require("../../modules/Report/Resources/assets/js/views/commissions_detail/index.vue")
+        .default
 );
 
 Vue.component(
     "tenant-report-tips-index",
-    require("../../modules/Report/Resources/assets/js/views/tips/index.vue").default
+    require("../../modules/Report/Resources/assets/js/views/tips/index.vue")
+        .default
 );
 
 Vue.component(
     "tenant-categories-index",
-    require("../../modules/Item/Resources/assets/js/views/categories/index.vue").default
+    require("../../modules/Item/Resources/assets/js/views/categories/index.vue")
+        .default
 );
 Vue.component(
     "tenant-brands-index",
-    require("../../modules/Item/Resources/assets/js/views/brands/index.vue").default
+    require("../../modules/Item/Resources/assets/js/views/brands/index.vue")
+        .default
 );
 Vue.component(
     "tenant-zone-index",
-    require("../../modules/Item/Resources/assets/js/views/zone/index.vue").default
+    require("../../modules/Item/Resources/assets/js/views/zone/index.vue")
+        .default
 );
 Vue.component(
     "tenant-incentives-index",
-    require("../../modules/Item/Resources/assets/js/views/incentives/index.vue").default
+    require("../../modules/Item/Resources/assets/js/views/incentives/index.vue")
+        .default
 );
 Vue.component(
     "tenant-item-lots-index",
-    require("../../modules/Item/Resources/assets/js/views/item-lots/index.vue").default
+    require("../../modules/Item/Resources/assets/js/views/item-lots/index.vue")
+        .default
 );
 Vue.component(
     "tenant-item-sizes-index",
-    require("../../modules/Item/Resources/assets/js/views/item-sizes/index.vue").default
+    require("../../modules/Item/Resources/assets/js/views/item-sizes/index.vue")
+        .default
 );
 //
 Vue.component(
     "tenant-item-lots-group-index",
-    require("../../modules/Item/Resources/assets/js/views/item-lots-group/index.vue").default
+    require("../../modules/Item/Resources/assets/js/views/item-lots-group/index.vue")
+        .default
 );
 Vue.component(
     "tenant-ecommerce-configuration-columns",
-    require("../../modules/Ecommerce/Resources/assets/js/views/configuration_columns/index.vue").default
+    require("../../modules/Ecommerce/Resources/assets/js/views/configuration_columns/index.vue")
+        .default
 );
 Vue.component(
     "tenant-ecommerce-configuration-info",
-    require("../../modules/Ecommerce/Resources/assets/js/views/configuration/index.vue").default
+    require("../../modules/Ecommerce/Resources/assets/js/views/configuration/index.vue")
+        .default
 );
 Vue.component(
     "tenant-ecommerce-configuration-culqi",
-    require("../../modules/Ecommerce/Resources/assets/js/views/configuration_culqi/index.vue").default
+    require("../../modules/Ecommerce/Resources/assets/js/views/configuration_culqi/index.vue")
+        .default
 );
 Vue.component(
     "tenant-ecommerce-configuration-paypal",
-    require("../../modules/Ecommerce/Resources/assets/js/views/configuration_paypal/index.vue").default
+    require("../../modules/Ecommerce/Resources/assets/js/views/configuration_paypal/index.vue")
+        .default
 );
 Vue.component(
     "tenant-ecommerce-configuration-logo",
-    require("../../modules/Ecommerce/Resources/assets/js/views/configuration_logo/index.vue").default
+    require("../../modules/Ecommerce/Resources/assets/js/views/configuration_logo/index.vue")
+        .default
 );
 Vue.component(
     "tenant-ecommerce-configuration-social",
-    require("../../modules/Ecommerce/Resources/assets/js/views/configuration_social/index.vue").default
+    require("../../modules/Ecommerce/Resources/assets/js/views/configuration_social/index.vue")
+        .default
 );
 Vue.component(
     "tenant-ecommerce-configuration-tag",
-    require("../../modules/Ecommerce/Resources/assets/js/views/configuration_tags/index.vue").default
+    require("../../modules/Ecommerce/Resources/assets/js/views/configuration_tags/index.vue")
+        .default
 );
 Vue.component(
     "tenant-ecommerce-item-sets-index",
-    require("../../modules/Ecommerce/Resources/assets/js/views/item_sets/index.vue").default
+    require("../../modules/Ecommerce/Resources/assets/js/views/item_sets/index.vue")
+        .default
 );
 
 Vue.component(
     "tenant-purchase-quotations-index",
-    require("../../modules/Purchase/Resources/assets/js/views/purchase-quotations/index.vue").default
+    require("../../modules/Purchase/Resources/assets/js/views/purchase-quotations/index.vue")
+        .default
 );
 Vue.component(
     "tenant-purchase-quotations-form",
-    require("../../modules/Purchase/Resources/assets/js/views/purchase-quotations/form.vue").default
+    require("../../modules/Purchase/Resources/assets/js/views/purchase-quotations/form.vue")
+        .default
 );
 
 Vue.component(
     "tenant-purchase-orders-index",
-    require("../../modules/Purchase/Resources/assets/js/views/purchase-orders/index.vue").default
+    require("../../modules/Purchase/Resources/assets/js/views/purchase-orders/index.vue")
+        .default
 );
 Vue.component(
     "tenant-purchase-orders-form",
-    require("../../modules/Purchase/Resources/assets/js/views/purchase-orders/form.vue").default
+    require("../../modules/Purchase/Resources/assets/js/views/purchase-orders/form.vue")
+        .default
 );
 Vue.component(
     "tenant-purchase-orders-generate",
-    require("../../modules/Purchase/Resources/assets/js/views/purchase-orders/generate.vue").default
+    require("../../modules/Purchase/Resources/assets/js/views/purchase-orders/generate.vue")
+        .default
 );
 
 Vue.component(
     "moves-index",
-    require("../../modules/Inventory/Resources/assets/js/moves/index.vue").default
+    require("../../modules/Inventory/Resources/assets/js/moves/index.vue")
+        .default
 );
 Vue.component(
     "inventory-form-masive",
-    require("../../modules/Inventory/Resources/assets/js/transfers/form_masive.vue").default
+    require("../../modules/Inventory/Resources/assets/js/transfers/form_masive.vue")
+        .default
 );
 
 Vue.component(
     "tenant-report-kardex-master",
-    require("../../modules/Inventory/Resources/assets/js/kardex_master/index.vue").default
+    require("../../modules/Inventory/Resources/assets/js/kardex_master/index.vue")
+        .default
 );
 Vue.component(
     "tenant-report-kardex-lots",
-    require("../../modules/Inventory/Resources/assets/js/kardex/lots.vue").default
+    require("../../modules/Inventory/Resources/assets/js/kardex/lots.vue")
+        .default
 );
 Vue.component(
     "tenant-report-kardex-series",
-    require("../../modules/Inventory/Resources/assets/js/kardex/series.vue").default
+    require("../../modules/Inventory/Resources/assets/js/kardex/series.vue")
+        .default
 );
 
 Vue.component(
     "tenant-order-notes-index",
-    require("../../modules/Order/Resources/assets/js/views/order_notes/index.vue").default
+    require("../../modules/Order/Resources/assets/js/views/order_notes/index.vue")
+        .default
 );
 Vue.component(
     "tenant-order-notes-form",
-    require("../../modules/Order/Resources/assets/js/views/order_notes/form.vue").default
+    require("../../modules/Order/Resources/assets/js/views/order_notes/form.vue")
+        .default
 );
 Vue.component(
     "tenant-order-notes-edit",
-    require("../../modules/Order/Resources/assets/js/views/order_notes/form_edit.vue").default
+    require("../../modules/Order/Resources/assets/js/views/order_notes/form_edit.vue")
+        .default
 );
 Vue.component(
     "tenant-report-valued-kardex",
-    require("../../modules/Inventory/Resources/assets/js/valued_kardex/index.vue").default
+    require("../../modules/Inventory/Resources/assets/js/valued_kardex/index.vue")
+        .default
 );
 Vue.component(
     "tenant-date-stock",
-    require("../../modules/Inventory/Resources/assets/js/valued_kardex/stock_date.vue").default
+    require("../../modules/Inventory/Resources/assets/js/valued_kardex/stock_date.vue")
+        .default
 );
 Vue.component(
     "tenant-mitiendape-config",
-    require("../../modules/Order/Resources/assets/js/views/mi_tienda_pe/form.vue").default
+    require("../../modules/Order/Resources/assets/js/views/mi_tienda_pe/form.vue")
+        .default
 );
 
 //Finance
 Vue.component(
     "tenant-finance-global-payments-index",
-    require("../../modules/Finance/Resources/assets/js/views/global_payments/index.vue").default
+    require("../../modules/Finance/Resources/assets/js/views/global_payments/index.vue")
+        .default
 );
 Vue.component(
     "tenant-finance-balance-index",
-    require("../../modules/Finance/Resources/assets/js/views/balance/index.vue").default
+    require("../../modules/Finance/Resources/assets/js/views/balance/index.vue")
+        .default
 );
 Vue.component(
     "tenant-finance-modal-transfer-between-accounts",
-    require("../../modules/Finance/Resources/assets/js/views/transfer_between_accounts/options.vue").default
+    require("../../modules/Finance/Resources/assets/js/views/transfer_between_accounts/options.vue")
+        .default
 );
 
 Vue.component(
     "tenant-finance-payment-method-types-index",
-    require("../../modules/Finance/Resources/assets/js/views/payment_method_types/index.vue").default
+    require("../../modules/Finance/Resources/assets/js/views/payment_method_types/index.vue")
+        .default
 );
 Vue.component(
     "tenant-finance-unpaid-index",
@@ -910,6 +1048,11 @@ Vue.component(
     "tenant-technical-services-index",
     require("@viewsModuleSale/technical-services/index.vue").default
 );
+//optometry Services
+Vue.component(
+    "tenant-optometry-services-index",
+    require("@viewsModuleOptometry/optometry-services/index.vue").default
+);
 Vue.component(
     "tenant-user-commissions-index",
     require("@viewsModuleSale/user-commissions/index.vue").default
@@ -980,7 +1123,10 @@ Vue.component(
     "system-clients-form",
     require("./views/system/clients/form.vue").default
 );
-Vue.component("system-users-form", require("./views/system/users/form.vue").default);
+Vue.component(
+    "system-users-form",
+    require("./views/system/users/form.vue").default
+);
 
 Vue.component(
     "system-certificate-index",
@@ -1022,7 +1168,10 @@ Vue.component(
     require("@viewsModuleHotel/rooms/Reception.vue").default
 );
 // Hoteles :: Rentar habitación
-Vue.component("tenant-hotel-rent", require("@viewsModuleHotel/rooms/Rent.vue").default);
+Vue.component(
+    "tenant-hotel-rent",
+    require("@viewsModuleHotel/rooms/Rent.vue").default
+);
 // Hoteles :: Agregar producto a la habitación rentada
 Vue.component(
     "tenant-hotel-rent-add-product",
@@ -1078,12 +1227,19 @@ Vue.component(
     require("@viewsModuleDocumentary/files_simplify/FilesNew.vue").default
 );
 
-Vue.component("system-plans-index", require("./views/system/plans/index.vue").default);
-Vue.component("system-plans-form", require("./views/system/plans/form.vue").default);
+Vue.component(
+    "system-plans-index",
+    require("./views/system/plans/index.vue").default
+);
+Vue.component(
+    "system-plans-form",
+    require("./views/system/plans/form.vue").default
+);
 
 Vue.component(
     "x-input-service",
-    require("../../modules/ApiPeruDev/Resources/assets/js/components/InputService.vue").default
+    require("../../modules/ApiPeruDev/Resources/assets/js/components/InputService.vue")
+        .default
 ); // apiperu - porque cambiar el input si tiene el mismo contenido?
 // Vue.component('x-input-service', require('./components/InputService.vue'));
 
@@ -1095,7 +1251,10 @@ Vue.component(
     "tenant-ecommerce-cart",
     require("./views/tenant/ecommerce/cart_dropdown.vue").default
 );
-Vue.component("tenant-tags-index", require("./views/tenant/tags/index.vue").default);
+Vue.component(
+    "tenant-tags-index",
+    require("./views/tenant/tags/index.vue").default
+);
 Vue.component(
     "tenant-promotions-index",
     require("./views/tenant/promotions/index.vue").default
@@ -1126,10 +1285,16 @@ Vue.component(
 );
 
 //auto update
-Vue.component("system-update", require("./views/system/update/index.vue").default);
+Vue.component(
+    "system-update",
+    require("./views/system/update/index.vue").default
+);
 
 //auto update
-Vue.component("system-backup", require("./views/system/backup/index.vue").default);
+Vue.component(
+    "system-backup",
+    require("./views/system/backup/index.vue").default
+);
 
 //culqi
 Vue.component(
@@ -1156,7 +1321,6 @@ Vue.component(
     "system-configuration-digemid",
     require("./views/system/configuration/digemid.vue").default
 );
-
 
 //token
 Vue.component(
@@ -1186,7 +1350,10 @@ Vue.component(
 );
 
 // Configuración del login
-Vue.component("tenant-login-page", require("./views/tenant/login/index.vue").default);
+Vue.component(
+    "tenant-login-page",
+    require("./views/tenant/login/index.vue").default
+);
 
 /** Modulo DIGEMID **/
 Vue.component(
@@ -1197,19 +1364,23 @@ Vue.component(
 /** Modulo Suscripcion Escolar**/
 Vue.component(
     "tenant-suscription-client-index",
-    require("../../modules/Suscription/Resources/assets/js/clients/index.vue").default
+    require("../../modules/Suscription/Resources/assets/js/clients/index.vue")
+        .default
 );
 Vue.component(
     "tenant-suscription-name-index",
-    require("../../modules/Suscription/Resources/assets/js/suscription_names/index.vue").default
+    require("../../modules/Suscription/Resources/assets/js/suscription_names/index.vue")
+        .default
 );
 Vue.component(
     "tenant-suscription-plans-index",
-    require("../../modules/Suscription/Resources/assets/js/plans/index.vue").default
+    require("../../modules/Suscription/Resources/assets/js/plans/index.vue")
+        .default
 );
 Vue.component(
     "tenant-suscription-payments-index",
-    require("../../modules/Suscription/Resources/assets/js/payments/index.vue").default
+    require("../../modules/Suscription/Resources/assets/js/payments/index.vue")
+        .default
 );
 Vue.component(
     "data-table-payment-receipt",
@@ -1217,7 +1388,8 @@ Vue.component(
 );
 Vue.component(
     "tenant-index-payment-receipt",
-    require("../../modules/Suscription/Resources/assets/js/payment_receipt/index.vue").default
+    require("../../modules/Suscription/Resources/assets/js/payment_receipt/index.vue")
+        .default
 );
 
 // Grados y secciones
@@ -1233,81 +1405,98 @@ Vue.component(
 /** Modulo Suscripcion **/
 Vue.component(
     "tenant-full-suscription-client-index",
-    require("../../modules/FullSuscription/Resources/assets/js/clients/index.vue").default
+    require("../../modules/FullSuscription/Resources/assets/js/clients/index.vue")
+        .default
 );
 Vue.component(
     "tenant-full-suscription-plans-index",
-    require("../../modules/FullSuscription/Resources/assets/js/plans/index.vue").default
+    require("../../modules/FullSuscription/Resources/assets/js/plans/index.vue")
+        .default
 );
 Vue.component(
     "tenant-full-suscription-payments-index",
-    require("../../modules/FullSuscription/Resources/assets/js/payments/index.vue").default
+    require("../../modules/FullSuscription/Resources/assets/js/payments/index.vue")
+        .default
 );
 Vue.component(
     "tenant-full-suscription-index-payment-receipt",
-    require("../../modules/FullSuscription/Resources/assets/js/payment_receipt/index.vue").default
+    require("../../modules/FullSuscription/Resources/assets/js/payment_receipt/index.vue")
+        .default
 );
 
 /** Prestamos Bancarios **/
 Vue.component(
     "tenant-bankloans-index",
-    require("../../modules/Expense/Resources/assets/js/views/bank_loans/index.vue").default
+    require("../../modules/Expense/Resources/assets/js/views/bank_loans/index.vue")
+        .default
 );
 Vue.component(
     "tenant-bankloans-form",
-    require("../../modules/Expense/Resources/assets/js/views/bank_loans/form.vue").default
+    require("../../modules/Expense/Resources/assets/js/views/bank_loans/form.vue")
+        .default
 );
 
 /**Molino */
 Vue.component(
     "tenant-mill-index",
-    require("../../modules/Production/Resources/assets/js/view/mill/index.vue").default
+    require("../../modules/Production/Resources/assets/js/view/mill/index.vue")
+        .default
 );
 Vue.component(
     "tenant-mill-form",
-    require("../../modules/Production/Resources/assets/js/view/mill/form.vue").default
+    require("../../modules/Production/Resources/assets/js/view/mill/form.vue")
+        .default
 );
 /** Maquinaria */
 Vue.component(
     "tenant-machine-index",
-    require("../../modules/Production/Resources/assets/js/view/machine/index.vue").default
+    require("../../modules/Production/Resources/assets/js/view/machine/index.vue")
+        .default
 );
 Vue.component(
     "tenant-machine-type-index",
-    require("../../modules/Production/Resources/assets/js/view/machine/index_type.vue").default
+    require("../../modules/Production/Resources/assets/js/view/machine/index_type.vue")
+        .default
 );
 Vue.component(
     "tenant-machine-form",
-    require("../../modules/Production/Resources/assets/js/view/machine/form.vue").default
+    require("../../modules/Production/Resources/assets/js/view/machine/form.vue")
+        .default
 );
 Vue.component(
     "tenant-machine-type-form",
-    require("../../modules/Production/Resources/assets/js/view/machine/form_type.vue").default
+    require("../../modules/Production/Resources/assets/js/view/machine/form_type.vue")
+        .default
 );
 
 Vue.component(
     "tenant-workers-index",
-    require("../../modules/Production/Resources/assets/js/view/workers/index.vue").default
+    require("../../modules/Production/Resources/assets/js/view/workers/index.vue")
+        .default
 );
 
 /** produccion */
 
 Vue.component(
     "tenant-production-index",
-    require("../../modules/Production/Resources/assets/js/view/production/index.vue").default
+    require("../../modules/Production/Resources/assets/js/view/production/index.vue")
+        .default
 );
 Vue.component(
     "tenant-production-form",
-    require("../../modules/Production/Resources/assets/js/view/production/form.vue").default
+    require("../../modules/Production/Resources/assets/js/view/production/form.vue")
+        .default
 );
 
 Vue.component(
     "tenant-packaging-index",
-    require("../../modules/Production/Resources/assets/js/view/packaging/index.vue").default
+    require("../../modules/Production/Resources/assets/js/view/packaging/index.vue")
+        .default
 );
 Vue.component(
     "tenant-packaging-form",
-    require("../../modules/Production/Resources/assets/js/view/packaging/form.vue").default
+    require("../../modules/Production/Resources/assets/js/view/packaging/form.vue")
+        .default
 );
 
 /* Restaurante */
@@ -1325,7 +1514,8 @@ Vue.component(
 // );
 Vue.component(
     "tenant-restaurant-cash-index",
-    require("../../modules/Restaurant/Resources/assets/js/views/cash/index.vue").default
+    require("../../modules/Restaurant/Resources/assets/js/views/cash/index.vue")
+        .default
 );
 // Vue.component(
 //     "tenant-restaurant-cash-filter-pos",
@@ -1363,15 +1553,18 @@ Vue.component(
 // LevelAccess
 Vue.component(
     "tenant-system-activity-logs-generals-index",
-    require("@viewsModuleLevelAccess/system_activity_logs/generals/index.vue").default
+    require("@viewsModuleLevelAccess/system_activity_logs/generals/index.vue")
+        .default
 );
 Vue.component(
     "tenant-system-activity-logs-transactions-index",
-    require("@viewsModuleLevelAccess/system_activity_logs/transactions/index.vue").default
+    require("@viewsModuleLevelAccess/system_activity_logs/transactions/index.vue")
+        .default
 );
 Vue.component(
     "tenant-remember-change-password",
-    require("./views/tenant/users/partials/remember_change_password.vue").default
+    require("./views/tenant/users/partials/remember_change_password.vue")
+        .default
 );
 
 // Reportes en system
@@ -1381,11 +1574,13 @@ Vue.component(
 );
 Vue.component(
     "system-user-not-change-password-index",
-    require("@viewsModuleReport/system/user_not_change_password/index.vue").default
+    require("@viewsModuleReport/system/user_not_change_password/index.vue")
+        .default
 );
 Vue.component(
     "tenant-report-kardex-average-cost-index",
-    require("../../modules/Inventory/Resources/assets/js/kardex_average_cost/index.vue").default
+    require("../../modules/Inventory/Resources/assets/js/kardex_average_cost/index.vue")
+        .default
 );
 
 Vue.component(
@@ -1399,7 +1594,6 @@ Vue.component(
 );
 
 //SIRE
-
 
 Vue.component(
     "tenant-sire-appendix",
@@ -1416,7 +1610,7 @@ Vue.component(
 Vue.component(
     "tenant-package-handler-form",
     require("./views/tenant/package_handler/form.vue").default
-)
+);
 Vue.component(
     "bill-of-exchange-pay-index",
     require("./views/tenant/bill_of_exchange_pay/index.vue").default
@@ -1436,7 +1630,7 @@ Vue.mixin({
         toDecimals(number, decimal = 2) {
             return Number(number).toFixed(decimal);
         },
-        DecimalText: function(number, decimal = 2) {
+        DecimalText: function (number, decimal = 2) {
             return isNaN(parseFloat(number))
                 ? number
                 : Number(number).toFixed(decimal);
@@ -1461,12 +1655,12 @@ Vue.mixin({
                 return String(value).padStart(length, fill);
             }
             return value;
-        }
+        },
     },
     mounted() {
-    //    const mainWrapper = document.getElementById('main-wrapper');
-    //    mainWrapper.classList.add('animate__animated', 'animate__fadeIn');
-    //    mainWrapper.style.animationDuration = '10s';
+        //    const mainWrapper = document.getElementById('main-wrapper');
+        //    mainWrapper.classList.add('animate__animated', 'animate__fadeIn');
+        //    mainWrapper.style.animationDuration = '10s';
     },
     methods: {
         axiosError(error) {
@@ -1478,19 +1672,19 @@ Vue.mixin({
             if (status === 500) {
                 this.$message({
                     type: "info",
-                    message: response.data.message
+                    message: response.data.message,
                 });
             }
         },
         getResponseValidations(success = true, message = null) {
             return {
                 success: success,
-                message: message
+                message: message,
             };
-        }
-    }
+        },
+    },
 });
 const app = new Vue({
     store: store,
-    el: "#main-wrapper"
+    el: "#main-wrapper",
 });

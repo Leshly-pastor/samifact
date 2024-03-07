@@ -2,54 +2,60 @@
     $establishment = $document->establishment;
     $establishment__ = \App\Models\Tenant\Establishment::find($document->establishment_id);
     $logo = $establishment__->logo ?? $company->logo;
-    
+
     if ($logo === null && !file_exists(public_path("$logo}"))) {
         $logo = "{$company->logo}";
     }
-    
+
     if ($logo) {
         $logo = "storage/uploads/logos/{$logo}";
         $logo = str_replace('storage/uploads/logos/storage/uploads/logos/', 'storage/uploads/logos/', $logo);
     }
     $configurations = \App\Models\Tenant\Configuration::first();
-    
+
     $customer = $document->customer;
     $invoice = $document->invoice;
     $document_base = $document->note ? $document->note : null;
-    
+
     //$path_style = app_path('CoreFacturalo'.DIRECTORY_SEPARATOR.'Templates'.DIRECTORY_SEPARATOR.'pdf'.DIRECTORY_SEPARATOR.'style.css');
     $document_number = $document->series . '-' . str_pad($document->number, 8, '0', STR_PAD_LEFT);
     $accounts = \App\Models\Tenant\BankAccount::where('show_in_documents', true)->get();
-    
+
     if ($document_base) {
-        $affected_document_number = $document_base->affected_document ? $document_base->affected_document->series . '-' . str_pad($document_base->affected_document->number, 8, '0', STR_PAD_LEFT) : $document_base->data_affected_document->series . '-' . str_pad($document_base->data_affected_document->number, 8, '0', STR_PAD_LEFT);
+        $affected_document_number = $document_base->affected_document
+            ? $document_base->affected_document->series .
+                '-' .
+                str_pad($document_base->affected_document->number, 8, '0', STR_PAD_LEFT)
+            : $document_base->data_affected_document->series .
+                '-' .
+                str_pad($document_base->data_affected_document->number, 8, '0', STR_PAD_LEFT);
     } else {
         $affected_document_number = null;
     }
-    
+
     $payments = $document->payments;
-    
+
     $document->load('reference_guides');
-    
+
     $total_payment = $document->payments->sum('payment');
     $balance = $document->total - $total_payment - $document->payments->sum('change');
     $bg = "storage/uploads/header_images/{$configurations->background_image}";
     $total_discount_items = 0;
-    
+
     $establishment__ = \App\Models\Tenant\Establishment::find($document->establishment_id);
     $logo = $establishment__->logo ?? $company->logo;
-    
+
     if ($logo === null && !file_exists(public_path("$logo}"))) {
         $logo = "{$company->logo}";
     }
-    
+
     if ($logo) {
         $logo = "storage/uploads/logos/{$logo}";
         $logo = str_replace('storage/uploads/logos/storage/uploads/logos/', 'storage/uploads/logos/', $logo);
     }
-    
+
     $configuration_decimal_quantity = App\CoreFacturalo\Helpers\Template\TemplateHelper::getConfigurationDecimalQuantity();
-    
+
 @endphp
 <html>
 
@@ -357,7 +363,9 @@
             $origin_district_id = (array) $transport->origin_district_id;
             $destinatation_district_id = (array) $transport->destinatation_district_id;
             $origin_district = Modules\Order\Services\AddressFullService::getDescription($origin_district_id[2]);
-            $destinatation_district = Modules\Order\Services\AddressFullService::getDescription($destinatation_district_id[2]);
+            $destinatation_district = Modules\Order\Services\AddressFullService::getDescription(
+                $destinatation_district_id[2],
+            );
         @endphp
 
         <table class="full-width mt-3">
@@ -413,7 +421,9 @@
             $origin_district_id = (array) $transport->origin_district_id;
             $destinatation_district_id = (array) $transport->destinatation_district_id;
             $origin_district = Modules\Order\Services\AddressFullService::getDescription($origin_district_id[2]);
-            $destinatation_district = Modules\Order\Services\AddressFullService::getDescription($destinatation_district_id[2]);
+            $destinatation_district = Modules\Order\Services\AddressFullService::getDescription(
+                $destinatation_district_id[2],
+            );
         @endphp
 
         <table class="full-width mt-3">
@@ -570,7 +580,21 @@
     {{-- <td class="text-left" colspan="3">{{ $document_base->note_description }}</td> --}}
     {{-- </tr> --}}
     {{-- </table> --}}
-
+    @php
+        $width_column = 12;
+        if ($configuration_decimal_quantity->change_decimal_quantity_unit_price_pdf) {
+            if (
+                $configuration_decimal_quantity->decimal_quantity_unit_price_pdf > 6 &&
+                $configuration_decimal_quantity->decimal_quantity_unit_price_pdf <= 8
+            ) {
+                $width_column = 13;
+            } elseif ($configuration_decimal_quantity->decimal_quantity_unit_price_pdf > 8) {
+                $width_column = 15;
+            } else {
+                $width_column = 12;
+            }
+        }
+    @endphp
     <table class="full-width mt-10 mb-10">
         <thead class="">
             <tr class="bg-grey">
@@ -580,7 +604,7 @@
                 <th class="border-top-bottom text-left py-2">Modelo</th>
                 <th class="border-top-bottom text-center py-2" width="8%">Lote</th>
                 <th class="border-top-bottom text-center py-2" width="8%">Serie</th>
-                <th class="border-top-bottom text-right py-2" width="12%">P.Unit</th>
+                <th class="border-top-bottom text-right py-2" width="{{$width_column}}%">P.Unit</th>
                 <th class="border-top-bottom text-right py-2" width="8%">Dto.</th>
                 <th class="border-top-bottom text-right py-2" width="12%">Total</th>
             </tr>
@@ -851,7 +875,7 @@
                             } else {
                                 $total_discount = $total_discount_items;
                             }
-                            
+
                         @endphp
                         {{ number_format($total_discount, 2) }}</td>
                 </tr>

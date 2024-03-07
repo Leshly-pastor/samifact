@@ -18,6 +18,7 @@ class Quotation extends ModelTenant
     protected $with = ['user', 'soap_type', 'state_type', 'currency_type', 'items', 'payments',"project"];
 
     protected $fillable = [
+        'alter_company',
         'id',
         'user_id',
         'external_id',
@@ -95,6 +96,23 @@ class Quotation extends ModelTenant
         // 'date_of_due' => 'date',
         // 'delivery_date' => 'date',
     ];
+    public static function getNextNumber($serie){
+        $document = Quotation::where('prefix', $serie)->orderBy('number', 'DESC')->first();
+        if($document){
+            return $document->number + 1;
+        }else{
+            return 1;
+        }
+    }
+    public function setAlterCompanyAttribute($value)
+    {
+        $this->attributes['alter_company'] = (is_null($value)) ? null : json_encode($value);
+    }
+
+    public function getAlterCompanyAttribute($value)
+    {
+        return (is_null($value)) ? null : (object)json_decode($value);
+    }
     public function project(){
         return $this->hasOne(QuotationProject::class);
     }
@@ -383,6 +401,7 @@ class Quotation extends ModelTenant
         return [
             'id' => $row->id,
             'items' => $items,
+            'alter_company' => $row->alter_company,
             'order_note' => (object)$orderNote,
             'payment_method_type_id' => $row->payment_method_type_id,
             'soap_type_id' => $row->soap_type_id,

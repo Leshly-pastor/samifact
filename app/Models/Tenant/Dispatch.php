@@ -68,10 +68,11 @@ class Dispatch extends ModelTenant
 {
     protected $with = [
         'user', 'soap_type', 'state_type', 'document_type', 'unit_type', 'transport_mode_type',
-        'transfer_reason_type', 'items', 'reference_document'
+        'transfer_reason_type', 'items', 'reference_document', 'dispatches_related'
     ];
 
     protected $fillable = [
+        'alter_company',
         'purchase_order',
         'inventory_reference_id',
         'dispatch_order_id',
@@ -169,7 +170,21 @@ class Dispatch extends ModelTenant
         'sender_address_data' => 'array',
         'receiver_address_data' => 'array'
     ];
-    public function inventory_reference(){
+    public static function getNextNumber($document_type_id, $serie)
+    {
+        $document = Dispatch::where('document_type_id', $document_type_id)->where('series', $serie)->orderBy('number', 'DESC')->first();
+        if ($document) {
+            return $document->number + 1;
+        } else {
+            return 1;
+        }
+    }
+    public function dispatches_related()
+    {
+        return $this->hasMany(DispatchRelated::class, 'dispatch_id');
+    }
+    public function inventory_reference()
+    {
         return $this->belongsTo(InventoryReference::class);
     }
     public function getAdditionalDataAttribute($value)
@@ -232,10 +247,21 @@ class Dispatch extends ModelTenant
         $this->attributes['dispatcher'] = (is_null($value)) ? null : json_encode($value);
     }
 
+    public function getAlterCompanyAttribute($value)
+    {
+        return (is_null($value)) ? null : (object)json_decode($value);
+    }
+
+    public function setAlterCompanyAttribute($value)
+    {
+        $this->attributes['alter_company'] = (is_null($value)) ? null : json_encode($value);
+    }
+
     public function getDriverAttribute($value)
     {
         return (is_null($value)) ? null : (object)json_decode($value);
     }
+
 
     public function setDriverAttribute($value)
     {
@@ -332,15 +358,16 @@ class Dispatch extends ModelTenant
         return $this->belongsTo(Document::class, 'reference_document_id');
     }
 
-    public function reference_check(){
-        if($this->reference_document_id){
-           $document =  Document::find($this->reference_document_id);
-           return $document->number_full;
+    public function reference_check()
+    {
+        if ($this->reference_document_id) {
+            $document =  Document::find($this->reference_document_id);
+            return $document->number_full;
         }
-        if($this->sale_note){
+        if ($this->sale_note) {
             $sale_note = SaleNote::find($this->reference_sale_note_id);
             return $sale_note->number_full;
-        }   
+        }
 
         return "-";
     }
@@ -606,6 +633,7 @@ class Dispatch extends ModelTenant
         }
         $reference = optional($this->inventory_reference)->description;
         return [
+            'alter_company' => $this->alter_company,
             'purchase_order' => $this->purchase_order,
             'is_pse' => $is_pse,
             'btn_is_tesla' => $btn_is_tesla,

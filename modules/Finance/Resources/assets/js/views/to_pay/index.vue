@@ -490,7 +490,7 @@
             :showDialog.sync="showDialogBillOfExchangePayments"
             :documentId="recordId"
             :external="true"
-            :configuration="this.configuration"
+            :configuration="configuration"
         ></bill-of-exchange-payments>
     </div>
 </template>
@@ -503,6 +503,14 @@ import DataTable from "../../components/DataTableWithoutPaging.vue";
 import queryString from "query-string";
 
 export default {
+    props: {
+        configuration: {
+            type: Object,
+            default: () => {
+                return {};
+            },
+        },
+    },
     components: {
         ExpensePayments,
         PurchasePayments,

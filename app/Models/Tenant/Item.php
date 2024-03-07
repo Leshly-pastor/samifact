@@ -724,9 +724,9 @@ class Item extends ModelTenant
                 ->first();
 
             $price = $warehousePrice->price ?? $item->sale_unit_price;
-            return number_format($price, 4, ".", "");
+            return number_format($price,  $configuration->decimal_quantity, ".", "");
         }
-        return number_format($item->sale_unit_price, 4, ".", "");
+        return number_format($item->sale_unit_price,  $configuration->decimal_quantity, ".", "");
     }
 
     /**
@@ -926,6 +926,8 @@ class Item extends ModelTenant
             });
         }
 
+
+            $sale_unit_price = self::getSaleUnitPriceByWarehouse($this, $warehouse->id);
         $data = [
             'meter' => $this->meter,
             'bonus_items' => $itemBonus,
@@ -960,7 +962,7 @@ class Item extends ModelTenant
             'currency_type_symbol'             => $currency->symbol,
             'has_igv'                          => (bool)$this->has_igv,
             //number_format($row->total, $configuration->decimal_quantity, ".", ""),
-            'sale_unit_price'                  => number_format(self::getSaleUnitPriceByWarehouse($this, $warehouse->id), $configuration->decimal_quantity, ".", ""),
+            'sale_unit_price'                  => $sale_unit_price,
             'purchase_has_igv'                 => $this->purchase_has_igv,
             'purchase_unit_value'              => $purchase_unit_value,
             'purchase_unit_price'              => $purchase_unit_price,

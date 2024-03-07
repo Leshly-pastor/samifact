@@ -4,10 +4,12 @@ namespace App\Http\Controllers\Tenant;
 
 use App\CoreFacturalo\Facturalo;
 use App\CoreFacturalo\Helpers\Storage\StorageDocument;
+use App\CoreFacturalo\Requests\Inputs\Common\EstablishmentInput;
 use App\Exports\DispatchExport;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Tenant\DispatchRequest;
 use App\Http\Resources\Tenant\DispatchCollection;
+use App\Models\System\Client;
 use App\Models\Tenant\Catalogs\AffectationIgvType;
 use App\Models\Tenant\Catalogs\DocumentType;
 use App\Models\Tenant\Catalogs\TransferReasonType;
@@ -49,8 +51,11 @@ use App\Models\Tenant\Catalogs\RelatedDocumentType;
 use App\Models\Tenant\DispatchOrder;
 use App\Models\Tenant\InventoryReference;
 use App\Models\Tenant\ProductionOrder;
+use App\Models\Tenant\User;
 use App\Services\PseServiceDispatch;
 use Carbon\Carbon;
+use Hyn\Tenancy\Environment;
+use Hyn\Tenancy\Models\Hostname;
 
 /**
  * Class DispatchController
@@ -302,6 +307,7 @@ class DispatchController extends Controller
             ];
         } else {
             $data = [
+                'alter_company' =>  isset($document->alter_company) ? $document->alter_company : null,
                 'purchase_order' => isset($document->purchase_order) ? $document->purchase_order : null,
                 'establishment_id' => $document->establishment_id,
                 'customer_id' => $document->customer_id,
@@ -466,7 +472,50 @@ class DispatchController extends Controller
             ],
         ];
     }
-
+    public function tablesCompany($id)
+    {
+        $company = Company::where('website_id', $id)->first();
+        $company_active = Company::active();
+        $document_number = $company->document_number;
+        $website_id = $company->website_id;
+        $user = auth()->user()->id;
+        $user_to_save = User::find($user);
+        $user_to_save->company_active_id = $website_id;
+        $user_to_save->save();
+        $payment_destinations = $this->getPaymentDestinations();
+        if ($website_id && $company->id != $company_active->id) {
+            $hostname = Hostname::where('website_id', $website_id)->first();
+            $client = Client::where('hostname_id', $hostname->id)->first();
+            $tenancy = app(Environment::class);
+            $tenancy->tenant($client->hostname->website);
+        }
+        $establishment = Establishment::find(1);
+        $establishment_info = EstablishmentInput::set($establishment->id);
+        // $series = Series::where('establishment_id', $establishment->id)->get();
+        $series = Series::where('establishment_id', $establishment->id)->get()
+            ->transform(function ($row) {
+                return [
+                    'id' => $row->id,
+                    'contingency' => (bool)$row->contingency,
+                    'document_type_id' => $row->document_type_id,
+                    'establishment_id' => $row->establishment_id,
+                    'number' => $row->number,
+                ];
+            });
+        // $series = Series::FilterSeries(1)
+        //     ->get()
+        //     ->transform(function ($row)  use ($document_number) {
+        //         /** @var Series $row */
+        //         return $row->getCollectionData2($document_number);
+        //     })->where('disabled', false);
+        return [
+            'success' => true,
+            'data' => $company,
+            'payment_destinations' => $payment_destinations,
+            'series' => $series,
+            'establishment' => $establishment_info,
+        ];
+    }
     /**
      * Tables
      *
@@ -652,7 +701,13 @@ class DispatchController extends Controller
         $dispatchers = (new DispatcherController())->getOptions();
         $related_document_types = RelatedDocumentType::get();
         $references = InventoryReference::all();
+        $configuration = Configuration::select('multi_companies')->first();
+        $companies = [];
+        if ($configuration->multi_companies) {
+            $companies = Company::all();
+        }
         return compact(
+            'companies',
             'references',
             'establishments',
             'customers',

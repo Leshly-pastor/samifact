@@ -48,6 +48,8 @@
                         </th>
                         <th>Registrado por</th>
                         <th>Vendedor</th>
+                        <th v-if="config.multi_companies">Empresa</th>
+
                         <th>Cliente</th>
                         <th>Estado</th>
                         <th>Cotización</th>
@@ -107,6 +109,23 @@
                         </td>
                         <td>{{ row.user_name }}</td>
                         <td>{{ row.seller_name }}</td>
+                        <td v-if="config.multi_companies">
+                            <template
+                                v-if="
+                                    row.alter_company &&
+                                    row.alter_company.name &&
+                                    row.alter_company.number
+                                "
+                            >
+                                <strong>
+                                    {{ row.alter_company.name.toUpperCase() }}
+                                </strong>
+                                <br />
+                                <small>
+                                    {{ row.alter_company.number }}
+                                </small>
+                            </template>
+                        </td>
                         <td>
                             {{ row.customer_name }}<br /><small
                                 v-text="row.customer_number"
@@ -315,7 +334,10 @@
                                 </button>
                                 <div class="dropdown-menu dropdown-menu-end">
                                     <button
-                                        v-if="row.btn_options && !isIntegrateSystem"
+                                        v-if="
+                                            row.btn_options &&
+                                            !isIntegrateSystem
+                                        "
                                         class="dropdown-item"
                                         @click.prevent="
                                             clickGenerateDocument(row.id)

@@ -25,6 +25,7 @@ use Modules\Pos\Models\CashTransaction;
 use App\Models\Tenant\CashDocumentCredit;
 use Modules\Finance\Models\Income;
 use App\CoreFacturalo\Helpers\Template\ReportHelper;
+use App\Models\Tenant\Configuration;
 use App\Models\Tenant\PackageHandler;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
@@ -41,7 +42,8 @@ class CashController extends Controller
 
     use FinanceTrait;
 
-    public function getCashSeller($user_id){
+    public function getCashSeller($user_id)
+    {
         $payment_destination_id = $this->getPaymentDestinations($user_id);
         return $payment_destination_id;
     }
@@ -77,7 +79,11 @@ class CashController extends Controller
         $user = auth()->user();
         $type = $user->type;
         $users = array();
-
+        $companies = [];
+        $configuration = Configuration::first();
+        if ($configuration->multi_companies) {
+            $companies = Company::all();
+        }
         switch ($type) {
             case 'admin':
                 $users = User::where('type', 'seller')->get();
@@ -88,7 +94,7 @@ class CashController extends Controller
                 break;
         }
 
-        return compact('users', 'user');
+        return compact('users', 'user', 'companies');
     }
 
     public function opening_cash()
@@ -109,7 +115,12 @@ class CashController extends Controller
      */
     public function opening_cash_check($user_id)
     {
+        $configuration = Configuration::first();
         $cash = Cash::where([['user_id', $user_id], ['state', true]])->first();
+        if($configuration->multi_companies){
+            $cash = null;
+            return compact('cash');
+        }
         return compact('cash');
     }
 
@@ -140,14 +151,37 @@ class CashController extends Controller
      */
     public function store(CashRequest $request)
     {
-
+        $configuration = Configuration::first();
         $id = $request->input('id');
-
+        if($id==null && $configuration->multi_companies){
+            $website_id = $request->input('website_id');
+            $cash = Cash::where([['user_id', $request->user_id], ['state', true]])
+            ->whereJsonContains('alter_company', ['website_id' => $website_id])->first();
+            if($cash){
+                return [
+                    'success' => false,
+                    'message' => 'Ya existe una caja aperturada para esta empresa'
+                ];
+            }
+        }
         //DB::connection('tenant')->transaction(function () use ($id, $request) {
         DB::connection('tenant')->transaction(function () use ($id, $request) {
 
             $cash = Cash::firstOrNew(['id' => $id]);
             $cash->fill($request->all());
+            $website_id = $request->input('website_id');
+            $alter_company = [];
+            if ($website_id) {
+                $company_found = Company::where('website_id', $website_id)->first();
+                $alter_company = [
+                    'id' => $company_found->id,
+                    'name' => $company_found->name,
+                    'number' => $company_found->number,
+                    'trade_name' => $company_found->trade_name,
+                    'website_id' => $company_found->website_id,
+                ];
+            }
+            $cash->alter_company = $alter_company;
 
             if (!$id) {
                 $cash->date_opening = date('Y-m-d');
@@ -404,10 +438,7 @@ class CashController extends Controller
                 $payment_credit += 1;
             }
         } else if ($request->quotation_id != null) {
-        }
-        else if ($request->package_handler_id != null) {
-         
-           
+        } else if ($request->package_handler_id != null) {
         }
         if ($payment_credit == 0) {
 

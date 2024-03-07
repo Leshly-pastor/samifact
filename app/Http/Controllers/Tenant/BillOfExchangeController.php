@@ -46,9 +46,10 @@ class BillOfExchangeController  extends Controller
 
         return $pdf->stream($filename . '.pdf');
     }
-    public function delete_payment($id){
+    public function delete_payment($id)
+    {
         $bill_of_exchange_payment = BillOfExchangePayment::find($id);
-        
+
         $bill_of_exchange_payment->delete();
         return [
             'success' => true,
@@ -159,7 +160,7 @@ class BillOfExchangeController  extends Controller
         $clientId = $request->client_id;
         $records = Document::without(['user', 'soap_type', 'state_type', 'currency_type'])
 
-            ->select('series', 'number', 'id', 'date_of_issue', 'total')
+            ->select('series', 'number', 'id', 'date_of_issue', 'total', 'currency_type_id', 'exchange_rate_sale')
             ->selectRaw('(SELECT SUM(payment) FROM document_payments WHERE document_id = documents.id) AS total_payment')
             ->selectRaw('documents.total - IFNULL((SELECT SUM(payment) FROM document_payments WHERE document_id = documents.id), 0) AS total')
 
@@ -200,11 +201,34 @@ class BillOfExchangeController  extends Controller
         $documents = Document::whereIn('id', $documents_id);
         $document_payment = DocumentPayment::whereIn('document_id', $documents_id);
         $total_payments = $document_payment->sum('payment');
-        $total_documents = $documents->sum('total');
+        // $total_documents = $documents->sum('total');
+        $total_documents = 0;
+        $data_documents = $documents->get();
+        $unique_exchange_rates = collect($data_documents)->pluck('exchange_rate_sale')->unique();
+
+        foreach ($data_documents as $document) {
+            if ($unique_exchange_rates->count() > 1) {
+                if ($document->currency_type_id == 'PEN') {
+                    $total_documents += $document->total;
+                } else {
+                    $total_documents += $document->total * $document->exchange_rate_sale;
+                }
+            } else {
+                $total_documents += $document->total;
+            }
+        }
         $total_pending = $total_documents - $total_payments;
         $date_of_due = $request->input('date_of_due');
         $bill_of_exchange = new BillOfExchange;
         $bill_of_exchange->series = "LC01";
+        if($unique_exchange_rates->count() > 1){
+            $bill_of_exchange->exchange_rate_sale = 1;
+            $bill_of_exchange->currency_type_id = 'PEN';
+        }else{
+            $bill_of_exchange->exchange_rate_sale = $unique_exchange_rates->first();
+            $bill_of_exchange->currency_type_id = $data_documents->first()->currency_type_id;
+        }
+        // $bill_of_exchange->currency_type_id = 
         $bill_of_exchange->number = (BillOfExchange::count() == 0) ? 1 : BillOfExchange::orderBy('number', 'desc')->first()->number + 1;
         $bill_of_exchange->date_of_due = $date_of_due;
         $bill_of_exchange->total = $total_pending;
@@ -213,7 +237,6 @@ class BillOfExchangeController  extends Controller
         $bill_of_exchange->user_id = auth()->id();
         $bill_of_exchange->save();
 
-        $data_documents = $documents->get();
         foreach ($data_documents as $document) {
             $total = $document->total;
             $payment = $document->payments->sum('payment');

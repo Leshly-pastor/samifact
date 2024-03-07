@@ -98,7 +98,7 @@
                             @change="changePaymentCondition"
                             popper-class="el-select-document_type"
                             dusk="document_type_id"
-                            style="max-width: 200px;"
+                            style="max-width: 200px"
                         >
                             <el-option value="02" label="Crédito"></el-option>
                             <el-option value="01" label="Contado"></el-option>
@@ -197,7 +197,7 @@
                                 <th>Monto</th>
                                 <th style="width: 30px">
                                     <a
-                                        style="font-size:18px"
+                                        style="font-size: 18px"
                                         href="#"
                                         @click.prevent="clickAddFee"
                                         class="text-center font-weight-bold text-center text-info"
@@ -268,7 +268,7 @@
                                 </th>
                                 <th width="5%">
                                     <a
-                                        style="font-size:18px"
+                                        style="font-size: 18px"
                                         href="#"
                                         @click.prevent="clickAddPayment"
                                         class="text-center font-weight-bold text-center text-info"
@@ -427,7 +427,7 @@ export default {
             configuration: {},
             global_discount_types: [],
             load_list_document_items: false,
-            cash_id: null
+            cash_id: null,
         };
     },
     created() {
@@ -439,11 +439,11 @@ export default {
     methods: {
         hasCashOpen() {
             let has_cash = this.payment_destinations.some(
-                payment_destination => payment_destination.cash_id != null
+                (payment_destination) => payment_destination.cash_id != null
             );
             if (has_cash) {
                 this.cash_id = this.payment_destinations.find(
-                    payment_destination => payment_destination.cash_id != null
+                    (payment_destination) => payment_destination.cash_id != null
                 ).cash_id;
             }
             return has_cash;
@@ -488,7 +488,7 @@ export default {
                 id: null,
                 date: moment().format("YYYY-MM-DD"),
                 currency_type_id: this.document.currency_type_id,
-                amount: 0
+                amount: 0,
             });
             this.calculateFee();
         },
@@ -497,7 +497,7 @@ export default {
             let total = this.document.total;
             let accumulated = 0;
             let amount = _.round(total / fee_count, 2);
-            _.forEach(this.document.fee, row => {
+            _.forEach(this.document.fee, (row) => {
                 accumulated += amount;
                 if (total - accumulated < 0) {
                     amount = _.round(total - accumulated + amount, 2);
@@ -516,7 +516,7 @@ export default {
                 payment_method_type_id: "01",
                 payment_destination_id: null,
                 reference: null,
-                payment: 0
+                payment: 0,
             });
         },
         initForm() {
@@ -529,7 +529,7 @@ export default {
                 number_full: null,
                 date_of_issue: null,
                 seller_id: null,
-                sale_note: null
+                sale_note: null,
             };
             this.generate_dispatch = false;
         },
@@ -572,14 +572,14 @@ export default {
                 guides: [],
                 additional_information: null,
                 actions: {
-                    format_pdf: "a4"
+                    format_pdf: "a4",
                 },
                 quotation_id: null,
                 sale_note_id: null,
                 payments: [],
                 seller_id: null,
                 fee: [],
-                hotel: {}
+                hotel: {},
             };
         },
         resetDocument() {
@@ -598,7 +598,7 @@ export default {
             let error_by_item = 0;
             let message = "";
 
-            this.document.payments.forEach(item => {
+            this.document.payments.forEach((item) => {
                 if (item.payment_destination_id == null) {
                     error_by_item++;
                     message = "El destino del pago es obligatorio";
@@ -607,13 +607,13 @@ export default {
 
             return {
                 error_by_item: error_by_item,
-                message: message
+                message: message,
             };
         },
         validatePaymentDate() {
             let error_by_item = 0;
             let message = "";
-            this.document.fee.forEach(item => {
+            this.document.fee.forEach((item) => {
                 // console.error(item)
                 var date_issue = moment(this.document.date_of_issue).format(
                     "YYYY-MM-DD"
@@ -628,18 +628,26 @@ export default {
 
             return {
                 error_by_item: error_by_item,
-                message: message
+                message: message,
             };
         },
         async submit() {
+            if (this.configuration.multi_companies) {
+                let serie = _.find(this.series, {
+                    id: this.document.series_id,
+                });
+                this.document.series = serie.number;
+            } else {
+                delete this.document.establishment;
+                delete this.document.series;
+            }
             if (!this.hasCashOpen()) {
                 this.$message.error("Debe abrir caja para realizar la venta");
                 return false;
             }
             // validacion restriccion de productos
-            const validate_restrict_sale_items_cpe = this.fnValidateRestrictSaleItemsCpe(
-                this.document
-            );
+            const validate_restrict_sale_items_cpe =
+                this.fnValidateRestrictSaleItemsCpe(this.document);
             if (!validate_restrict_sale_items_cpe.success)
                 return this.$message.error(
                     validate_restrict_sale_items_cpe.message
@@ -656,7 +664,8 @@ export default {
                 }
             }
 
-            let validate_payment_destination = await this.validatePaymentDestination();
+            let validate_payment_destination =
+                await this.validatePaymentDestination();
 
             if (validate_payment_destination.error_by_item > 0) {
                 return this.$message.error(
@@ -679,7 +688,7 @@ export default {
             }
             await this.$http
                 .post(`/${this.resource_documents}`, this.document)
-                .then(response => {
+                .then((response) => {
                     if (response.data.success) {
                         this.documentNewId = response.data.data.id;
                         this.showDialogDocumentOptions = true;
@@ -698,7 +707,7 @@ export default {
                         this.$message.error(response.data.message);
                     }
                 })
-                .catch(error => {
+                .catch((error) => {
                     if (error.response.status === 422) {
                         this.errors = error.response.data;
                     } else {
@@ -707,14 +716,14 @@ export default {
                 })
                 .then(() => {
                     this.loading_submit = false;
-                    $.each($(".v-modal"), function(a, b) {
+                    $.each($(".v-modal"), function (a, b) {
                         /* v-modal se le resta 5 z-index para que no se sobreponga en el modal*/
                         $(b).css("z-index", $(b).css("z-index") - 5);
                     });
                 });
         },
         validatePaymentDates() {
-            var valid = _.filter(this.document.payments, item => {
+            var valid = _.filter(this.document.payments, (item) => {
                 return true;
             });
 
@@ -729,12 +738,12 @@ export default {
             ) {
                 let new_payments = [];
 
-                this.form.payments.forEach(row => {
+                this.form.payments.forEach((row) => {
                     const payment = { ...row };
 
                     if (
                         !_.some(this.payment_destinations, {
-                            id: row.payment_destination_id
+                            id: row.payment_destination_id,
                         })
                     ) {
                         payment.payment_destination_id = null;
@@ -788,7 +797,7 @@ export default {
             this.document.attributes = [];
             this.document.guides = q.guides;
             this.document.actions = {
-                format_pdf: "a4"
+                format_pdf: "a4",
             };
             this.document.sale_note_id = this.form.id;
             // this.document.payments = q.payments;
@@ -809,13 +818,13 @@ export default {
         },
         async assignPlateNumberToItems(sale_note) {
             if (sale_note.plate_number) {
-                await this.document.items.forEach(item => {
+                await this.document.items.forEach((item) => {
                     let empty_attributes = _.isEmpty(item.attributes);
 
                     if (empty_attributes) {
                         item.attributes = [];
                         let attribute = _.find(item.attributes, {
-                            attribute_type_id: "7000"
+                            attribute_type_id: "7000",
                         });
 
                         if (!attribute) {
@@ -826,7 +835,7 @@ export default {
                                 value: sale_note.plate_number,
                                 start_date: null,
                                 end_date: null,
-                                duration: null
+                                duration: null,
                             });
                         }
                     }
@@ -834,28 +843,29 @@ export default {
             }
         },
         async create() {
-            await this.$http
-                .get(`/${this.resource}/option/tables`)
-                .then(response => {
-                    this.all_document_types =
-                        response.data.document_types_invoice;
-                    this.all_series = response.data.series;
-                    this.payment_destinations =
-                        response.data.payment_destinations;
-                    this.payment_method_types =
-                        response.data.payment_method_types;
-                    this.sellers = response.data.sellers;
-                    this.configuration = response.data.configuration;
-                    this.global_discount_types =
-                        response.data.global_discount_types;
+            let url = `/${this.resource}/option/tables`;
+            if (this.recordId) {
+                url = `/${this.resource}/option/tables/${this.recordId}`;
+            }
+            await this.$http.get(url).then((response) => {
+                this.document.company_id = response.data.company_id;
+                this.document.establishment = response.data.establishment_info;
+                this.all_document_types = response.data.document_types_invoice;
+                this.all_series = response.data.series;
+                this.payment_destinations = response.data.payment_destinations;
+                this.payment_method_types = response.data.payment_method_types;
+                this.sellers = response.data.sellers;
+                this.configuration = response.data.configuration;
+                this.global_discount_types =
+                    response.data.global_discount_types;
 
-                    // this.document.document_type_id = (this.document_types.length > 0)?this.document_types[0].id:null;
-                    // this.changeDocumentType();
-                });
+                // this.document.document_type_id = (this.document_types.length > 0)?this.document_types[0].id:null;
+                // this.changeDocumentType();
+            });
 
             await this.$http
                 .get(`/${this.resource}/record/${this.recordId}`)
-                .then(response => {
+                .then((response) => {
                     this.form = response.data.data;
                     this.validateIdentityDocumentType();
 
@@ -867,7 +877,7 @@ export default {
 
             await this.$http
                 .get(`/${this.resource}/dispatches`)
-                .then(response => {
+                .then((response) => {
                     this.dispatches = response.data;
                 });
         },
@@ -883,7 +893,7 @@ export default {
                 )
             ) {
                 this.document_types = _.filter(this.all_document_types, {
-                    id: "03"
+                    id: "03",
                 });
             } else {
                 this.document_types = this.all_document_types;
@@ -898,7 +908,7 @@ export default {
         filterSeries() {
             this.document.series_id = null;
             this.series = _.filter(this.all_series, {
-                document_type_id: this.document.document_type_id
+                document_type_id: this.document.document_type_id,
             });
             this.document.series_id =
                 this.series.length > 0 ? this.series[0].id : null;
@@ -920,7 +930,7 @@ export default {
                 `/downloads/saleNote/sale_note/${this.form.external_id}`,
                 "_blank"
             );
-        }
-    }
+        },
+    },
 };
 </script>

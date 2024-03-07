@@ -31,6 +31,7 @@ class Cash extends ModelTenant
     protected $table = 'cash';
 
     protected $fillable = [
+        'alter_company',
         'user_id',
         'date_opening',
         'time_opening',
@@ -44,7 +45,10 @@ class Cash extends ModelTenant
         'apply_restaurant'
     ];
 
-
+    public function setAlterCompanyAttribute($value)
+    {
+        $this->attributes['alter_company'] = (is_null($value)) ? null : json_encode($value);
+    }
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */

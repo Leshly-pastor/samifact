@@ -1,5 +1,5 @@
 <template>
-    <div class="card mb-0 pt-2 pt-md-0">
+    <div class="card mb-0 pt-2 pt-md-0" v-loading="loading">
         <!-- <div class="card-header">
             <h3 class="my-0">Nuevo Comprobante</h3>
         </div> -->
@@ -7,35 +7,56 @@
             <div class="invoice">
                 <header class="clearfix">
                     <div class="row">
-                        <div class="col-sm-2 text-center mt-3 mb-0">
-                            <logo
-                                url="/"
-                                :path_logo="
-                                    company.logo != null
-                                        ? `/storage/uploads/logos/${company.logo}`
-                                        : ''
-                                "
-                            ></logo>
-                        </div>
-                        <div class="col-sm-6 text-left mt-3 mb-0">
-                            <address class="ib mr-2">
-                                <span class="font-weight-bold d-block"
-                                    >Cotización</span
+                        <template v-if="configuration.multi_companies">
+                            <div
+                                class="col-xl-4 col-md-4 col-12 align-self-center"
+                            >
+                                <label> Cotización </label>
+                                <el-select
+                                    v-model="form.company_id"
+                                    @change="changeCompany"
+                                    placeholder="Seleccione una empresa"
                                 >
-                                <span class="font-weight-bold">{{
-                                    company.name
-                                }}</span>
-                                <br />
-                                <div v-if="establishment.address != '-'">
-                                    {{ establishment.address }},
-                                </div>
-                                {{ establishment.district.description }},
-                                {{ establishment.province.description }},
-                                {{ establishment.department.description }} -
-                                {{ establishment.country.description }}
-                                <br />
-                            </address>
-                        </div>
+                                    <el-option
+                                        v-for="(option, idx) in companies"
+                                        :key="idx"
+                                        :label="option.name"
+                                        :value="option.website_id"
+                                    ></el-option>
+                                </el-select>
+                            </div>
+                        </template>
+                        <template v-else>
+                            <div class="col-sm-2 text-center mt-3 mb-0">
+                                <logo
+                                    url="/"
+                                    :path_logo="
+                                        company.logo != null
+                                            ? `/storage/uploads/logos/${company.logo}`
+                                            : ''
+                                    "
+                                ></logo>
+                            </div>
+                            <div class="col-sm-6 text-left mt-3 mb-0">
+                                <address class="ib mr-2">
+                                    <span class="font-weight-bold d-block"
+                                        >Cotización</span
+                                    >
+                                    <span class="font-weight-bold">{{
+                                        company.name
+                                    }}</span>
+                                    <br />
+                                    <div v-if="establishment.address != '-'">
+                                        {{ establishment.address }},
+                                    </div>
+                                    {{ establishment.district.description }},
+                                    {{ establishment.province.description }},
+                                    {{ establishment.department.description }} -
+                                    {{ establishment.country.description }}
+                                    <br />
+                                </address>
+                            </div>
+                        </template>
                     </div>
                 </header>
                 <form autocomplete="off" @submit.prevent="submit">
@@ -1338,8 +1359,9 @@ export default {
     mixins: [functions, exchangeRate],
     data() {
         return {
+            companies: [],
             business_turns: [],
-
+            loading: false,
             hash: null,
             showResultExcelProducts: false,
             registered: 0,
@@ -1396,6 +1418,7 @@ export default {
         await this.$http.get(`/${this.resource}/tables`).then((response) => {
             const data = response.data;
             this.business_turns = data.business_turns;
+            this.companies = data.companies;
             this.isIntegrateSystem = data.is_integrate_system;
             this.currency_types = data.currency_types;
             this.all_series = data.series;
@@ -1447,9 +1470,7 @@ export default {
         });
         this.$eventHub.$on("initInputPerson", () => {
             this.initInputPerson();
-        }); 
-
-     
+        });
 
         await this.createQuotationFromSO();
     },
@@ -1458,7 +1479,31 @@ export default {
     },
     mounted() {},
     methods: {
-      
+        async changeCompany() {
+            try {
+                this.loading = true;
+                const response = await this.$http.get(
+                    `/sale-notes/tables-company/${this.form.company_id}`
+                );
+                if (response.status == 200) {
+                    let { data } = response;
+                    let { series, establishment, payment_destinations } = data;
+                    // this.all_series = series;
+                    this.form.establishment = establishment;
+                    this.payment_destinations = payment_destinations;
+
+                    this.all_series = series;
+                    // this.$store.commit("setAllSeries", series);
+                    this.filterSeries();
+                    this.form.payments = [];
+                    this.clickAddPayment();
+                    // this.changeDestinationSale();
+                }
+            } catch (e) {
+            } finally {
+                this.loading = false;
+            }
+        },
         async clickAddItemQ(form) {
             if (form.item.lots_enabled) {
                 if (!form.IdLoteSelected)
@@ -1951,12 +1996,15 @@ export default {
                 establishment_id: this.form.establishment_id,
                 document_type_id: "COT",
             });
-            console.log(
-                "🚀 ~ file: form.vue:1555 ~ filterSeries ~ this.series:",
-                this.series
-            );
+
             this.form.series_id =
                 this.series.length > 0 ? this.series[0].id : null;
+            if (this.configuration.multi_companies) {
+                let [serie] = this.series;
+                if (serie && serie.next_number) {
+                    this.form.number = serie.next_number;
+                }
+            }
         },
         resetForm() {
             this.activePanel = 0;
@@ -2209,6 +2257,13 @@ export default {
             };
         },
         async submit() {
+            if (this.configuration.multi_companies) {
+                if (!this.form.company_id) {
+                    return this.$message.error(
+                        "Debe seleccionar una empresa para realizar la venta"
+                    );
+                }
+            }
             if (!this.validProject()) return;
             if (this.serie) {
                 this.form.prefix = this.serie;

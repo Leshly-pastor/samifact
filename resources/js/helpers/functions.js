@@ -3,7 +3,7 @@ function calculateRowItem(row_old, currency_type_id_new, exchange_rate_sale, pig
 
     let currency_type_id_old = row_old.item.currency_type_id
     let unit_price = parseFloat(row_old.item.unit_price)
-    if(row_old.item.meter && row_old.item.meter > 0 && !isEdit){
+    if(row_old.item.meter && row_old.item.meter > 0 && !isEdit ){
         unit_price = parseFloat(row_old.item.unit_price) * parseFloat(row_old.item.meter)
     }
     // } else {

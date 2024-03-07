@@ -22,6 +22,14 @@ class BusinessTurn extends ModelTenant
         }
         return false;
     }
+    public static function isOptometry()
+    {
+        $businessTurn = BusinessTurn::where('value', 'optometry')->first();
+        if ($businessTurn && $businessTurn->active == 1) {
+            return true;
+        }
+        return false;
+    }
     public static function isIntegrateSystem()
     {
         $businessTurn = BusinessTurn::where('value', 'integrate_system')->first();

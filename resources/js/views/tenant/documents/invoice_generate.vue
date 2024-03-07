@@ -33,7 +33,7 @@
                                                 ) in companies"
                                                 :key="idx"
                                                 :label="option.name"
-                                                :value="option.id"
+                                                :value="option.website_id"
                                             ></el-option>
                                         </el-select>
                                     </div>
@@ -4191,11 +4191,16 @@ export default {
                 );
                 if (response.status == 200) {
                     let { data } = response;
-                    let { series, establishment } = data;
+                    let { series, establishment, payment_destinations } = data;
                     // this.all_series = series;
                     this.form.establishment = establishment;
+                    this.payment_destinations = payment_destinations;
+                
                     this.$store.commit("setAllSeries", series);
                     this.filterSeries();
+                    this.form.payments = [];
+                    this.clickAddPayment();
+                    // this.changeDestinationSale();
                 }
             } catch (e) {
             } finally {
@@ -4827,6 +4832,7 @@ export default {
             let exchange_rate_sale_today = parseFloat(
                 this.form.exchange_rate_sale
             );
+
             let exchange_rate_sale_sale = parseFloat(data.exchange_rate_sale);
             if (exchange_rate_sale_sale != exchange_rate_sale_today) {
                 await this.$confirm(
@@ -4851,6 +4857,14 @@ export default {
             if (data.periods && data.periods.length > 0) {
                 this.monthsSelected = this.formatRecords(data.periods);
                 this.setMonths();
+            }
+            if (this.configuration.multi_companies) {
+                let { alter_company } = data;
+                if (alter_company) {
+                    let { website_id } = alter_company;
+                    this.form.company_id = website_id;
+                    this.changeCompany();
+                }
             }
             this.form.establishment_id = data.establishment_id;
             this.form.document_type_id = data.document_type_id;
@@ -6163,6 +6177,7 @@ export default {
                 document_type_id: this.form.document_type_id,
                 contingency: this.is_contingency,
             });
+
             if (
                 this.form.document_type_id === this.config.user.document_id &&
                 this.typeUser == "seller"
@@ -6184,7 +6199,6 @@ export default {
             if (this.configuration.multi_companies) {
                 let [serie] = series;
                 if (serie && serie.next_number) {
-                    console.log("seteando");
                     this.form.number = serie.next_number;
                 }
             }

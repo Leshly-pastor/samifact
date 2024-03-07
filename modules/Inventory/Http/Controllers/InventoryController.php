@@ -50,6 +50,24 @@ class InventoryController extends Controller
         ];
     }
 
+    public function recordsApp(Request $request){
+        $column = $request->input('column');
+        if ($column == 'warehouse') {
+            $records = ItemWarehouse::with(['item', 'warehouse'])
+                ->whereHas('item', function ($query) use ($request) {
+                    $query->where('unit_type_id', '!=', 'ZZ');
+                    $query->whereNotIsSet();
+                })
+                ->whereHas('warehouse', function ($query) use ($request) {
+                    $query->where('description', 'like', '%' . $request->value . '%');
+                })
+                ->orderBy('item_id');
+        } else {
+            $records = $this->getCommonRecords($request);
+        }
+
+        return new InventoryCollection($records->paginate(config('tenant.items_per_page')));
+    }
     public function records(Request $request)
     {
         $column = $request->input('column');

@@ -3393,7 +3393,7 @@
                                                 form.decimal_quantity_unit_price_pdf
                                             "
                                             :min="2"
-                                            :max="6"
+                                            :max="10"
                                             :precision="0"
                                             :step="1"
                                             @change="submit"

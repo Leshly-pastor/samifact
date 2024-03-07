@@ -53,11 +53,7 @@ class MultiCompanyController extends Controller
             $website_id = $website != null ? $website->id : null;
             if ($hostname_id && $website_id) {
                 $website_ids[] = $website_id;
-                $company_exists = DB::connection('tenant')
-                    ->table('companies')
-                    ->where('website_id', $website_id)
-                    ->first();
-                if (!$company_exists) {
+            
                     DB::connection('tenant')
                         ->table('multi_companies')
                         ->insert([
@@ -74,6 +70,7 @@ class MultiCompanyController extends Controller
                     $company_to_insert = $company->toArray();
                     $company_to_insert['updated_at'] = date('Y-m-d H:i:s');
                     $company_to_insert['id'] = null;
+                    $company_to_insert['document_number'] = null;
                     $company_to_insert['not_principal'] = true;
                     $company_to_insert['website_id'] = $website_id;
                     $subDom = $subdominio;
@@ -82,7 +79,6 @@ class MultiCompanyController extends Controller
                     $company = DB::connection('tenant')
                         ->table('companies')
                         ->insert($company_to_insert);
-                }
             } else {
                 $fail = true;
             }
@@ -98,7 +94,22 @@ class MultiCompanyController extends Controller
             $company_to_delete->delete();
         }
         
-
+        $companies_to_delete = DB::connection('tenant')
+            ->table('companies')
+            ->select('website_id')
+            ->groupBy('website_id')
+            ->havingRaw('count(*) > 1')
+            ->get();
+        //borrar las empresas que tengan mas de un registro y solo dejar el primero
+        foreach ($companies_to_delete as $company_to_delete) {
+            $company_to_delete = Company::where('website_id', $company_to_delete->website_id)
+                ->orderBy('id', 'asc')
+                ->get();
+            $company_to_delete = $company_to_delete->slice(1);
+            foreach ($company_to_delete as $company) {
+                $company->delete();
+            }
+        }
 
         if ($fail) {
             return [

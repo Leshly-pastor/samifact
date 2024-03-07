@@ -93,6 +93,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Hyn\Tenancy\Environment;
 use Hyn\Tenancy\Models\Hostname;
 use Hyn\Tenancy\Models\Website;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Modules\BusinessTurn\Models\DocumentHotel;
 use Modules\BusinessTurn\Models\DocumentTransport;
@@ -560,10 +561,17 @@ class DocumentController extends Controller
 
     public function tablesCompany($id)
     {   
-        $company = Company::find($id);
+        $company = Company::where('website_id',$id)->first();
         $company_active = Company::active();
         $document_number = $company->document_number;
         $website_id = $company->website_id;
+        $user = auth()->user()->id;
+        $user_to_save = User::find($user);
+        $user_to_save->company_active_id = $website_id;
+        $user_to_save->save();
+        $key ="cash_".$user;
+        Cache::put($key, $website_id, 60);
+        $payment_destinations = $this->getPaymentDestinations();
         if ($website_id && $company->id != $company_active->id) {
             $hostname = Hostname::where('website_id', $website_id)->first();
             $client = SystemClient::where('hostname_id', $hostname->id)->first();
@@ -572,15 +580,26 @@ class DocumentController extends Controller
         }
         $establishment = Establishment::find(1);
         $establishment_info =EstablishmentInput::set($establishment->id);
-        $series = Series::FilterSeries(1)
-            ->get()
-            ->transform(function ($row)  use ($document_number) {
-                /** @var Series $row */
-                return $row->getCollectionData2($document_number);
-            })->where('disabled', false);
+        $series = Series::where('establishment_id', $establishment->id)->get()
+        ->transform(function ($row) {
+            return [
+                'id' => $row->id,
+                'contingency' => (bool)$row->contingency,
+                'document_type_id' => $row->document_type_id,
+                'establishment_id' => $row->establishment_id,
+                'number' => $row->number,
+            ];
+        });
+        // $series = Series::FilterSeries(1)
+        //     ->get()
+        //     ->transform(function ($row)  use ($document_number) {
+        //         /** @var Series $row */
+        //         return $row->getCollectionData2($document_number);
+        //     })->where('disabled', false);
         return [
             'success' => true,
             'data' => $company,
+            'payment_destinations' => $payment_destinations,
             'series' => $series,
             'establishment' => $establishment_info, 
         ];
@@ -1060,7 +1079,9 @@ class DocumentController extends Controller
         $fact =  DB::connection('tenant')->transaction(function () use ($data, $duplicate, $type, $format) {
             $company_id = $data['company_id'];
             if ($company_id) {
-                $company = Company::find($company_id);
+                $company = Company::where(
+                    'website_id',
+                    $company_id)->first();
                 $facturalo = new Facturalo($company);
             } else {
                 $facturalo = new Facturalo();
@@ -1068,8 +1089,7 @@ class DocumentController extends Controller
             }
             $result = $facturalo->save($data, $duplicate);
             if ($company_id) {
-                //company tiene una propiedad llamada document_number, es un array
-                //necesito actualizar el numero y series del documento
+
                 $document_number = $company->document_number;
                 $document_result = $result->getDocument();
                 $series = $document_result->series;

@@ -74,6 +74,7 @@
                         >
                             Fecha de pago
                         </th>
+                        <th v-if="configuration.multi_companies">Empresa</th>
                         <th>Cliente</th>
                         <th class="text-end" v-if="columns.seller_name.visible">
                             Vendedor
@@ -204,6 +205,23 @@
                             v-if="columns.date_payment.visible"
                         >
                             {{ row.date_of_payment }}
+                        </td>
+                        <td v-if="configuration.multi_companies">
+                            <template
+                                v-if="
+                                    row.alter_company &&
+                                    row.alter_company.name &&
+                                    row.alter_company.number
+                                "
+                            >
+                                <strong>
+                                    {{ row.alter_company.name.toUpperCase() }}
+                                </strong>
+                                <br />
+                                <small>
+                                    {{ row.alter_company.number }}
+                                </small>
+                            </template>
                         </td>
                         <td>
                             {{ row.customer_name }}<br /><small
@@ -518,15 +536,15 @@
                         </td>
 
                         <td class="text-end">
-                            <el-dropdown trigger="click"  @command="manageIndexCommand">
+                            <el-dropdown
+                                trigger="click"
+                                @command="manageIndexCommand"
+                            >
                                 <el-button type="primary">
                                     <i class="fas fa-ellipsis-v"></i>
                                 </el-button>
 
-                                <el-dropdown-menu
-                                    slot="dropdown"
-                                   
-                                >
+                                <el-dropdown-menu slot="dropdown">
                                     <template v-if="isCommercial">
                                         <el-dropdown-item
                                             v-if="row.dispatches.length > 0"
@@ -1324,7 +1342,10 @@ export default {
     },
     methods: {
         manageIndexCommand([command, arg1 = null, arg2 = null]) {
-            console.log("🚀 ~ file: index.vue:1327 ~ manageIndexCommand ~ command:", command)
+            console.log(
+                "🚀 ~ file: index.vue:1327 ~ manageIndexCommand ~ command:",
+                command
+            );
             switch (command) {
                 case "openDispatchFinish":
                     this.openDispatchFinish(arg1);

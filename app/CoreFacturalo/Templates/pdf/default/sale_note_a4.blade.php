@@ -1,5 +1,6 @@
 @php
-    $establishment = \App\Models\Tenant\Establishment::where('id', $document->establishment_id)->first();
+    $establishment__ = \App\Models\Tenant\Establishment::where('id', $document->establishment_id)->first();
+    $establishment = $document->establishment;
     $customer = $document->customer;
     //$path_style = app_path('CoreFacturalo'.DIRECTORY_SEPARATOR.'Templates'.DIRECTORY_SEPARATOR.'pdf'.DIRECTORY_SEPARATOR.'style.css');
     

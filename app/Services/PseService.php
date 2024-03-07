@@ -1087,7 +1087,7 @@ class PseService
         $item = $document_item->item;
         $canped = $document_item->quantity;
         $preuni = $document_item->unit_value - ($document_item->total_discount / $document_item->quantity);
-
+        $prcigv = 0.18;
 
         $totuni = $document_item->unit_value * $document_item->quantity - $document_item->total_discount;
         if ($document_item->total_isc > 0) {
@@ -1095,11 +1095,13 @@ class PseService
             // $totuni = $totuni + $document_item->total_isc;
 
         }
+
         $affectation_igv_type_id = $document_item->affectation_igv_type_id;
         if ($affectation_igv_type_id != '20' && $affectation_igv_type_id != '30' && $affectation_igv_type_id != '40') {
 
             $prelis = $preuni * (1 + $document_item->percentage_isc / 100) * (1 + $document_item->percentage_igv / 100);
         } else {
+            $prcigv = 0.0;
             $prelis = $preuni;
         }
         $valref = 0;
@@ -1140,7 +1142,7 @@ class PseService
         $xml->addChild('nompro', $this->format_characters($item->description, 24));
         $xml->addChild('nomabr', $this->format_characters($item->description, 24));
         $xml->addChild('valbas', $document_item->unit_value);
-
+        // $xml->addChild('prcigv', $prcigv);
         $xml->addChild('mondsc', number_format(($document_item->total_discount), 2));
 
         $xml->addChild('preuni', $preuni);
@@ -1158,9 +1160,9 @@ class PseService
         $xml->addChild('montot', $montot);
         $xml->addChild('desdet', '');
         $xml->addChild('monicb', '');
-        $xml->addChild('frmvta', '');
-        $xml->addChild('cendis', '');
-        $xml->addChild('codalm', '');
+        // $xml->addChild('frmvta', '');
+        // $xml->addChild('cendis', '');
+        // $xml->addChild('codalm', '');
         $xml->addChild('frmvta', '');
         $xml->addChild('cendis', '');
         $xml->addChild('codalm', '');

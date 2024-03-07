@@ -36,6 +36,7 @@ if ($hostname) {
 
         Route::get('production-order/print/{external_id}/{format?}', 'Tenant\ProductionOrderController@toPrint');
         Route::get('dispatch-order/print/{external_id}/{format?}', 'Tenant\DispatchOrderController@toPrint');
+        Route::get('sale-notes/tables-company/{company_id}', 'Tenant\SaleNoteController@tablesCompany');
         Route::get('sale-notes/print/{external_id}/{format?}', 'Tenant\SaleNoteController@toPrint');
         Route::get('sale-notes/ticket/{id}/{format?}', 'Tenant\SaleNoteController@toTicket');
         Route::get('purchases/print/{external_id}/{format?}', 'Tenant\PurchaseController@toPrint');
@@ -708,7 +709,7 @@ if ($hostname) {
             Route::get('quotations/record/{quotation}', 'Tenant\QuotationController@record');
             Route::get('quotations/anular/{id}', 'Tenant\QuotationController@anular');
             Route::get('quotations/item/tables', 'Tenant\QuotationController@item_tables');
-            Route::get('quotations/option/tables', 'Tenant\QuotationController@option_tables');
+            Route::get('quotations/option/tables/{id?}', 'Tenant\QuotationController@option_tables');
             Route::get('quotations/search/customers', 'Tenant\QuotationController@searchCustomers');
             Route::get('quotations/search/customer/{id}', 'Tenant\QuotationController@searchCustomerById');
             Route::get('quotations/download/{external_id}/{format?}', 'Tenant\QuotationController@download');
@@ -822,7 +823,7 @@ if ($hostname) {
             // Route::get('sale-notes/print/{external_id}/{format?}', 'Tenant\SaleNoteController@toPrint');
             Route::get('sale-notes/change-state-payment/{salenote}/{stateEnum}', 'Tenant\SaleNoteController@changeStatePayment');
             Route::get('sale-notes/record2/{salenote}', 'Tenant\SaleNoteController@record2');
-            Route::get('sale-notes/option/tables', 'Tenant\SaleNoteController@option_tables');
+            Route::get('sale-notes/option/tables/{id?}', 'Tenant\SaleNoteController@option_tables');
             Route::get('sale-notes/changed/{salenote}', 'Tenant\SaleNoteController@changed');
             Route::post('sale-notes/email', 'Tenant\SaleNoteController@email');
             Route::post('sale-notes/send_email', 'Tenant\SaleNoteController@sendEmail');

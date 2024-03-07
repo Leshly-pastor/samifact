@@ -221,6 +221,13 @@ $thridLevel = $path[2] ?? null;
                             </a>
                         </li>
                     @endif
+                    @if (is_optometry())
+                        <li class="{{ $firstLevel === 'optometry-services' ? 'active' : '' }}">
+                            <a class="nav-link" href="{{ route('tenant.optometry_services.index') }}">
+                                Servicio de optometría
+                            </a>
+                        </li>
+                    @endif
                     @if (in_array('contracts', $vc_module_levels))
                         <li class="mega">
                             <a href="#contrato" data-bs-toggle="collapse" data-role="button"
@@ -452,15 +459,15 @@ $thridLevel = $path[2] ?? null;
                         </li>
                     @endif
                     @if (in_array('item_lots_group', $vc_module_levels))
-                    <li class="{{ $firstLevel === 'item-lots-group' ? 'active' : '' }}">
-                        <a class="nav-link" href="{{ route('tenant.item-lots-group.index') }}">
-                            <span class="label">Lotes</span>
-                        </a>
-                    </li>
+                        <li class="{{ $firstLevel === 'item-lots-group' ? 'active' : '' }}">
+                            <a class="nav-link" href="{{ route('tenant.item-lots-group.index') }}">
+                                <span class="label">Lotes</span>
+                            </a>
+                        </li>
                     @endif
                     @php
                         $isClothesShoes = \Modules\BusinessTurn\Models\BusinessTurn::isClothesShoes();
-                        
+
                     @endphp
                     @if ($isClothesShoes)
                         <li class="{{ $firstLevel === 'item-sizes' ? 'active' : '' }}">
@@ -894,7 +901,7 @@ $thridLevel = $path[2] ?? null;
                             <a class="{{ $firstLevel === 'account' && $secondLevel == 'tax_return' ? 'active' : '' }}"
                                 href="{{ route('tenant.tax_return.index') }}">
                                 <span class="label">Declaración mensual
-                                    </span>
+                                </span>
                             </a>
                         </li>
                     @endif
@@ -944,7 +951,7 @@ $thridLevel = $path[2] ?? null;
                 </a>
                 <ul class="collapse submenu list-unstyled {{ $firstLevel === 'finances' && in_array($secondLevel, ['global-payments', 'balance', 'payment-method-types', 'unpaid', 'to-pay', 'income', 'movements']) ? 'show' : '' }}"
                     id="finance" data-parent="#accordionExample">
-                    
+
                     @if (in_array('finances_movements', $vc_module_levels))
                         <li class="{{ $firstLevel === 'finances' && $secondLevel == 'movements' ? 'active' : '' }}">
                             <a class="nav-link" href="{{ route('tenant.finances.movements.index') }}">
@@ -984,8 +991,8 @@ $thridLevel = $path[2] ?? null;
                     @if (in_array('finances_payments', $vc_module_levels))
                         <li
                             class="{{ $firstLevel === 'finances' && $secondLevel == 'global-payments' ? 'active' : '' }}">
-                            <a class="nav-link"
-                                href="{{ route('tenant.finances.global_payments.index') }}">Reporte de pagos</a>
+                            <a class="nav-link" href="{{ route('tenant.finances.global_payments.index') }}">Reporte
+                                de pagos</a>
                         </li>
                     @endif
                     @if (in_array('finances_balance', $vc_module_levels))
@@ -1286,7 +1293,9 @@ $thridLevel = $path[2] ?? null;
                                     $name = $vc_suscription_name->grades;
                                 }
                                 if (isset($vc_suscription_name) && isset($vc_suscription_name->sections)) {
-                                    $name = $name ? $name . ' y ' . $vc_suscription_name->sections : $vc_suscription_name->sections;
+                                    $name = $name
+                                        ? $name . ' y ' . $vc_suscription_name->sections
+                                        : $vc_suscription_name->sections;
                                 }
                             @endphp
                             @if ($name)

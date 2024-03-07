@@ -151,6 +151,7 @@ class   SaleNote extends ModelTenant
     ];
 
     protected $fillable = [
+        'alter_company',
         'state_payment_id',
         'no_stock',
         'cash_id',
@@ -291,7 +292,14 @@ class   SaleNote extends ModelTenant
             self::adjustSellerIdField($model);
         });
     }
-
+    public static function getNextNumber($serie){
+        $document = SaleNote::where('series', $serie)->orderBy('number', 'DESC')->first();
+        if($document){
+            return $document->number + 1;
+        }else{
+            return 1;
+        }
+    }
     /**
      * Busca el ultimo numero basado en series y el prefijo.
      *
@@ -317,7 +325,15 @@ class   SaleNote extends ModelTenant
         }
         return $return + 1;
     }
+    public function setAlterCompanyAttribute($value)
+    {
+        $this->attributes['alter_company'] = (is_null($value)) ? null : json_encode($value);
+    }
 
+    public function getAlterCompanyAttribute($value)
+    {
+        return (is_null($value)) ? null : (object)json_decode($value);
+    }
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
@@ -879,6 +895,7 @@ class   SaleNote extends ModelTenant
         
         });
         return [
+            'alter_company' => $this->alter_company,
             'payments_methods' => $payments_methods,
             'quotation_id' => $this->quotation_id,
             'has_agency_dispatch' => $has_agency_dispatch,

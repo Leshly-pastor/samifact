@@ -22,6 +22,18 @@
     @if($document['observations'])
         <cbc:Note><![CDATA[{{ $document['observations'] }}]]></cbc:Note>
     @endif
+    @foreach ($document['dispatches_related'] as $related)
+    <cac:AdditionalDocumentReference>
+        <cbc:ID>{{ $related->serie_number }}</cbc:ID>
+        <cbc:DocumentTypeCode>09</cbc:DocumentTypeCode>
+        <cbc:DocumentType>GUIA DE REMISION ELECTRONICA</cbc:DocumentType>
+        <cac:IssuerParty>
+            <cac:PartyIdentification>
+                <cbc:ID schemeID="6">{{ $related->company_number }}</cbc:ID>
+            </cac:PartyIdentification>
+        </cac:IssuerParty>
+    </cac:AdditionalDocumentReference>
+@endforeach
     <cac:Signature>
         <cbc:ID>{{ config('configuration.signature_uri') }}</cbc:ID>
         <cbc:Note>{{ config('configuration.signature_note') }}</cbc:Note>

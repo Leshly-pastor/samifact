@@ -43,9 +43,11 @@ class BusinessTurnController extends Controller
 
         $record = BusinessTurn::findOrFail($request->id);
         $record->active = ($record->active) ? false:true;
+        if($record->active){
+            BusinessTurn::where('id', '!=', $record->id)->update(['active' => false]);
+        }
         $record->save();
         if(!BusinessTurn::isIntegrateSystem()){
-            //setear a todos los usuarios la propiedad integrate_user_type_id a null
             DB::connection('tenant')->table('users')->update(['integrate_user_type_id' => null]);
             
         }

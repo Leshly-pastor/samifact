@@ -228,6 +228,7 @@ class ItemController extends Controller
             'internal_id' => 'Código interno',
             'unit_type_id' => 'Unidad de medida',
             'barcode' => 'Código de barras',
+            'factory_code' => 'Código de fábrica',
             'model' => 'Modelo',
             'brand' => 'Marca',
             'date_of_due' => 'Fecha vencimiento',

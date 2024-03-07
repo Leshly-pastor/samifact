@@ -1,5 +1,5 @@
 <template>
-    <div class="card mb-0 pt-2 pt-md-0">
+    <div class="card mb-0 pt-2 pt-md-0" v-loading="loading">
         <Keypress key-event="keyup" @success="checkKey" />
         <Keypress
             key-event="keyup"
@@ -11,35 +11,56 @@
             <div class="invoice">
                 <header class="clearfix">
                     <div class="row">
-                        <div class="col-sm-2 text-center mt-3 mb-0">
-                            <logo
-                                url="/"
-                                :path_logo="
-                                    company.logo != null
-                                        ? `/storage/uploads/logos/${company.logo}`
-                                        : ''
-                                "
-                            ></logo>
-                        </div>
-                        <div class="col-sm-10 text-left mt-3 mb-0">
-                            <address class="ib mr-2">
-                                <span class="font-weight-bold d-block"
-                                    >Nota de venta</span
+                        <template v-if="configuration.multi_companies">
+                            <div
+                                class="col-xl-4 col-md-4 col-12 align-self-center"
+                            >
+                                <label> Nota de venta </label>
+                                <el-select
+                                    v-model="form.company_id"
+                                    @change="changeCompany"
+                                    placeholder="Seleccione una empresa"
                                 >
-                                <span class="font-weight-bold">{{
-                                    company.name
-                                }}</span>
-                                <br />
-                                <div v-if="establishment.address != '-'">
-                                    {{ establishment.address }},
-                                </div>
-                                {{ establishment.district.description }},
-                                {{ establishment.province.description }},
-                                {{ establishment.department.description }} -
-                                {{ establishment.country.description }}
-                                <br />
-                            </address>
-                        </div>
+                                    <el-option
+                                        v-for="(option, idx) in companies"
+                                        :key="idx"
+                                        :label="option.name"
+                                        :value="option.website_id"
+                                    ></el-option>
+                                </el-select>
+                            </div>
+                        </template>
+                        <template v-else>
+                            <div class="col-sm-2 text-center mt-3 mb-0">
+                                <logo
+                                    url="/"
+                                    :path_logo="
+                                        company.logo != null
+                                            ? `/storage/uploads/logos/${company.logo}`
+                                            : ''
+                                    "
+                                ></logo>
+                            </div>
+                            <div class="col-sm-10 text-left mt-3 mb-0">
+                                <address class="ib mr-2">
+                                    <span class="font-weight-bold d-block"
+                                        >Nota de venta</span
+                                    >
+                                    <span class="font-weight-bold">{{
+                                        company.name
+                                    }}</span>
+                                    <br />
+                                    <div v-if="establishment.address != '-'">
+                                        {{ establishment.address }},
+                                    </div>
+                                    {{ establishment.district.description }},
+                                    {{ establishment.province.description }},
+                                    {{ establishment.department.description }} -
+                                    {{ establishment.country.description }}
+                                    <br />
+                                </address>
+                            </div>
+                        </template>
                     </div>
                 </header>
                 <form autocomplete="off" @submit.prevent="submit">
@@ -1353,6 +1374,8 @@ export default {
     },
     data() {
         return {
+            loading: false,
+            companies: [],
             person_type_id: null,
             isDriver: false,
             monthCollege: [],
@@ -1452,6 +1475,7 @@ export default {
         await this.initForm();
         await this.$http.get(`/${this.resource}/tables`).then((response) => {
             this.business_turns = response.data.business_turns;
+            this.companies = response.data.companies;
             this.currency_types = response.data.currency_types;
             this.establishments = response.data.establishments;
             this.all_customers = response.data.customers;
@@ -1512,8 +1536,36 @@ export default {
         this.changeCurrencyType();
     },
     methods: {
+        async changeCompany() {
+            try {
+                this.loading = true;
+                const response = await this.$http.get(
+                    `/sale-notes/tables-company/${this.form.company_id}`
+                );
+                if (response.status == 200) {
+                    let { data } = response;
+                    let { series, establishment, payment_destinations } = data;
+                    // this.all_series = series;
+                    this.form.establishment = establishment;
+                    this.payment_destinations = payment_destinations;
+
+                    this.all_series = series;
+                    // this.$store.commit("setAllSeries", series);
+                    this.filterSeries();
+                    this.form.payments = [];
+                    this.clickAddPayment();
+                    // this.changeDestinationSale();
+                }
+            } catch (e) {
+            } finally {
+                this.loading = false;
+            }
+        },
         addDocumentTransport(transport) {
-            console.log("🚀 ~ file: form.vue:1516 ~ addDocumentTransport ~ transport:", transport)
+            console.log(
+                "🚀 ~ file: form.vue:1516 ~ addDocumentTransport ~ transport:",
+                transport
+            );
             this.form.transport = transport;
         },
         addDispatchTransport(dispatch) {
@@ -1793,6 +1845,12 @@ export default {
             });
             this.form.series_id =
                 this.series.length > 0 ? this.series[0].id : null;
+            if (this.configuration.multi_companies) {
+                let [serie] = this.series;
+                if (serie && serie.next_number) {
+                    this.form.number = serie.next_number;
+                }
+            }
         },
         // async clickDeleteSNItem(id, index){
 
@@ -1961,8 +2019,8 @@ export default {
             this.collegeYear = [];
             this.errors = {};
             this.form = {
-                transport:{},
-                transport_dispatch:{},
+                transport: {},
+                transport_dispatch: {},
                 dispatch_ticket_pdf_quantity: 1,
                 dispatch_ticket_pdf: false,
                 id: null,
@@ -2438,6 +2496,13 @@ export default {
             };
         },
         async submit() {
+            if (this.configuration.multi_companies) {
+                if (!this.form.company_id) {
+                    return this.$message.error(
+                        "Debe seleccionar una empresa para realizar la venta"
+                    );
+                }
+            }
             if (this.configuration.enabled_dispatch_ticket_pdf) {
                 this.form.dispatch_ticket_pdf = true;
             }

@@ -203,6 +203,7 @@ class ServiceDispatchController extends Controller
             ];
         }
         return [
+            'dispatches_related' => $record->dispatches_related,
             'company_name' => $company->name,
             'company_number' => $company->number,
             'company_mtc_auth' => $company->mtc_auth,

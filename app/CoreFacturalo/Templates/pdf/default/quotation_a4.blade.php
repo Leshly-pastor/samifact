@@ -1,5 +1,5 @@
 @php
-$establishment = $document->establishment;
+    $establishment = $document->establishment;
     $logo = "storage/uploads/logos/{$company->logo}";
     if ($establishment->logo) {
         $logo = "{$establishment->logo}";
@@ -432,7 +432,7 @@ $establishment = $document->establishment;
     </table>
 
     <table class="full-width">
-
+    
         <tbody>
             <tr>
                 @if ($configuration->yape_qr_quotations && $establishment_data->yape_logo )

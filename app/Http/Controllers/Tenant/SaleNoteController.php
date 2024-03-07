@@ -76,10 +76,14 @@ use Modules\Suscription\Models\Tenant\SuscriptionPayment;
 use App\CoreFacturalo\Requests\Inputs\Common\EstablishmentInput;
 use App\Exports\SaleNoteExport;
 use App\Mail\Tenant\IntegrateSystemEmail;
+use App\Models\System\Client as SystemClient;
 use App\Models\Tenant\DispatchOrder;
 use App\Models\Tenant\MessageIntegrateSystem;
 use App\Models\Tenant\ProductionOrder;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Hyn\Tenancy\Environment;
+use Hyn\Tenancy\Models\Hostname;
+use Illuminate\Support\Facades\Cache;
 use Modules\BusinessTurn\Models\BusinessTurn;
 use Modules\Inventory\Models\InventoryConfiguration;
 
@@ -594,18 +598,15 @@ class SaleNoteController extends Controller
                     ->orWhere('number', 'like', "%{$request->value}%");
             })
                 ->latest();
-        }
-        else if ($request->column == 'customer_id' && $request->value != null) {
+        } else if ($request->column == 'customer_id' && $request->value != null) {
             $records->where('customer_id', $request->value)
                 ->latest();
-        }
-        else if($request->column == 'quotation_number' && $request->value != null){
+        } else if ($request->column == 'quotation_number' && $request->value != null) {
             $records->whereHas('quotation', function ($query) use ($request) {
                 $query->where('number', 'like', "%{$request->value}%");
             })
                 ->latest();
-        }
-        else {
+        } else {
             $records->where($request->column, 'like', "%{$request->value}%")
                 ->latest('id');
         }
@@ -664,6 +665,51 @@ class SaleNoteController extends Controller
         $payment_destinations = $this->getPaymentDestinations($user_id);
         return compact('payment_destinations');
     }
+    public function tablesCompany($id)
+    {
+        $company = Company::where('website_id', $id)->first();
+        $company_active = Company::active();
+        $document_number = $company->document_number;
+        $website_id = $company->website_id;
+        $user = auth()->user()->id;
+        $user_to_save = User::find($user);
+        $user_to_save->company_active_id = $website_id;
+        $user_to_save->save();
+        $key = "cash_" . $user;
+        Cache::put($key, $website_id, 60);
+        $payment_destinations = $this->getPaymentDestinations();
+        if ($website_id && $company->id != $company_active->id) {
+            $hostname = Hostname::where('website_id', $website_id)->first();
+            $client = SystemClient::where('hostname_id', $hostname->id)->first();
+            $tenancy = app(Environment::class);
+            $tenancy->tenant($client->hostname->website);
+        }
+        $establishment = Establishment::find(1);
+        $establishment_info = EstablishmentInput::set($establishment->id);
+        $series = Series::where('establishment_id', $establishment->id)->get()
+            ->transform(function ($row) {
+                return [
+                    'id' => $row->id,
+                    'contingency' => (bool)$row->contingency,
+                    'document_type_id' => $row->document_type_id,
+                    'establishment_id' => $row->establishment_id,
+                    'number' => $row->number,
+                ];
+            });
+        // $series = Series::FilterSeries(1)
+        //     ->get()
+        //     ->transform(function ($row)  use ($document_number) {
+        //         /** @var Series $row */
+        //         return $row->getCollectionData2($document_number);
+        //     })->where('disabled', false);
+        return [
+            'success' => true,
+            'data' => $company,
+            'payment_destinations' => $payment_destinations,
+            'series' => $series,
+            'establishment' => $establishment_info,
+        ];
+    }
     public function tables($user_id = null)
     {
         $user = new User();
@@ -693,13 +739,17 @@ class SaleNoteController extends Controller
             ];
         });
         $payment_destinations = $this->getPaymentDestinations();
-        $configuration = Configuration::select('destination_sale', 'ticket_58')->first();
+        $configuration = Configuration::select('destination_sale', 'ticket_58', 'multi_companies')->first();
         // $sellers = User::GetSellers(false)->get();
         $sellers = User::getSellersToNvCpe($establishment_id, $userId);
         $global_discount_types = ChargeDiscountType::getGlobalDiscounts();
         $is_integrate_system = BusinessTurn::isIntegrateSystem();
-
+        $companies = [];
+        if ($configuration->multi_companies) {
+            $companies = Company::all();
+        }
         return compact(
+            'companies',
             'business_turns',
             'is_integrate_system',
             'customers',
@@ -794,7 +844,40 @@ class SaleNoteController extends Controller
             if (!isset($inputs['id'])) {
                 $inputs['id'] = false;
             }
+            $company_id = Functions::valueKeyInArray($inputs, 'company_id');
+
             $data = $this->mergeData($inputs);
+            if ($company_id) {
+                $company_found = Company::where('website_id', $company_id)->first();
+                $alter_company = [
+                    'id' => $company_found->id,
+                    'name' => $company_found->name,
+                    'number' => $company_found->number,
+                    'trade_name' => $company_found->trade_name,
+                    'website_id' => $company_found->website_id,
+                ];
+                $data['alter_company'] = $alter_company;
+                $alter_establishment = Functions::valueKeyInArray($inputs, 'establishment');
+                if ($alter_establishment) {
+                    $data['establishment'] = $alter_establishment;
+                }
+
+                $alter_number = Functions::valueKeyInArray($inputs, 'number');
+                if ($alter_number) {
+                    $data['number'] = $alter_number;
+                }
+                $document_found = SaleNote::where('series', $data['series'])
+                    ->where('alter_company->website_id', $company_found->website_id)
+                    ->orderBy('number', 'desc')
+                    ->first();
+                if ($document_found) {
+                    $document_number = $document_found->number;
+                    $document_number = $document_number + 1;
+                    if ($document_number > $data['number']) {
+                        $data['number'] = $document_number;
+                    }
+                }
+            }
             $this->sale_note =  SaleNote::query()->updateOrCreate(['id' => $inputs['id']], $data);
 
             $this->deleteAllPayments($this->sale_note->payments);
@@ -1233,7 +1316,14 @@ class SaleNoteController extends Controller
         $this->company = ($this->company != null) ? $this->company : Company::active();
         $this->document = ($sale_note != null) ? $sale_note : $this->sale_note;
 
-        $this->configuration = Configuration::first();
+        $configuration = Configuration::first();
+        $this->configuration = $configuration;
+        if ($configuration->multi_companies &&  $this->document->alter_company) {
+            $company = Company::where('website_id', $this->document->alter_company->website_id)->first();
+            if ($company) {
+                $this->company = $company;
+            }
+        }
         // $configuration = $this->configuration->formats;
         $base_template = Establishment::find($this->document->establishment_id)->template_pdf;
 
@@ -1727,18 +1817,50 @@ class SaleNoteController extends Controller
         return $this->searchClientById($id);
     }
 
-    public function option_tables()
+    public function option_tables($sale_note_id = null)
     {
-        $establishment = Establishment::where('id', auth()->user()->establishment_id)->first();
-        $series = Series::where('establishment_id', $establishment->id)->get();
+        $sellers = User::GetSellers(false)->get();
+        $configuration = Configuration::select(['multi_companies', 'restrict_sale_items_cpe', 'global_discount_type_id'])->first();
+        $global_discount_types = ChargeDiscountType::getGlobalDiscounts();
+        $company_id = null;
+        $establishment_info = null;
+        $sale_note = SaleNote::find($sale_note_id);
+        $alter_company  = $sale_note ? $sale_note->alter_company : null;
+        if ($configuration->multi_companies && $sale_note_id && $alter_company) {
+            $website_id = $alter_company->website_id;
+            $company_alter = Company::where('website_id', $website_id)->first();
+            $document_number = $company_alter->document_number;
+            $key = 'cash_' . auth()->user()->id;
+            $company_active_id = Cache::put($key, $website_id, 60);
+            User::find(auth()->user()->id)->update(['company_active_id' => $website_id]);
+            $company_id = $company_alter->website_id;
+            $hostname = Hostname::where('website_id', $website_id)->first();
+            $client = SystemClient::where('hostname_id', $hostname->id)->first();
+            $tenancy = app(Environment::class);
+            $tenancy->tenant($client->hostname->website);
+            $establishment = Establishment::where('id', auth()->user()->establishment_id)->first();
+            $establishment_info = EstablishmentInput::set($establishment->id);
+            $series = Series::where('establishment_id', $establishment->id)->get();
+        } else {
+            $establishment = Establishment::where('id', auth()->user()->establishment_id)->first();
+            $series = Series::where('establishment_id', $establishment->id)->get();
+        }
+        $payment_destinations = $this->getPaymentDestinations();
         $document_types_invoice = DocumentType::whereIn('id', ['01', '03'])->where('active', true)->get();
         $payment_method_types = PaymentMethodType::all();
-        $payment_destinations = $this->getPaymentDestinations();
-        $sellers = User::GetSellers(false)->get();
-        $configuration = Configuration::select(['restrict_sale_items_cpe', 'global_discount_type_id'])->first();
-        $global_discount_types = ChargeDiscountType::getGlobalDiscounts();
 
-        return compact('series', 'document_types_invoice', 'payment_method_types', 'payment_destinations', 'sellers', 'configuration', 'global_discount_types');
+
+        return compact(
+            'establishment_info',
+            'company_id',
+            'series',
+            'document_types_invoice',
+            'payment_method_types',
+            'payment_destinations',
+            'sellers',
+            'configuration',
+            'global_discount_types'
+        );
     }
 
     public function sendEmail(Request $request)

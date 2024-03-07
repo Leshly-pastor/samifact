@@ -110,7 +110,14 @@
                                 <span>{{ dis.number | pad(0, 3) }}</span>
                             </td>
                             <td>{{ dis.date_of_issue | toDate }}</td>
-                            <td>{{ dis.total }}</td>
+                            <td>
+                                <template v-if="dis.currency_type_id == 'PEN'">
+                                    S/
+                                </template>
+                                <template v-else> $ </template>
+
+                                {{ dis.total }}
+                            </td>
                         </tr>
                         <tr>
                             <td colspan="2"></td>
@@ -120,7 +127,10 @@
                         </tr>
                     </tbody>
                 </table>
-                <div class="row m-1 d-flex justify-content-center" v-if="this.sum_total > 0">
+                <div
+                    class="row m-1 d-flex justify-content-center"
+                    v-if="this.sum_total > 0"
+                >
                     <div class="col-4">
                         <label for="date_of_due"> Fecha de vencimiento </label>
                         <el-date-picker
@@ -224,19 +234,36 @@ export default {
                 this.loading = false;
             }
         },
-    
+
         onFillSelectedNotes() {
             this.form.selecteds = [];
             this.sum_total = 0;
             let total = 0;
+            let has_just_one_currency_type =
+                new Set(this.notes.filter(n=>n.selected).map((n) => n.currency_type_id)).size === 1;
+
             this.notes.map((d) => {
                 if (d.selected) {
-                    total += Number(d.total);
+                    let total_d = 0;
+                    if (has_just_one_currency_type) {
+                        total_d = Number(d.total);
+                    } else {
+                        if (d.currency_type_id === "PEN") {
+                            total_d = Number(d.total);
+                        } else {
+                            total_d =
+                                Number(d.total) * Number(d.exchange_rate_sale);
+                        }
+                    }
+                    total += total_d;
                     this.form.selecteds.push(d.id);
                 }
             });
             this.sum_total += total;
-            console.log("🚀 ~ file: generate.vue:239 ~ onFillSelectedNotes ~ this.sum_total:", this.sum_total)
+            console.log(
+                "🚀 ~ file: generate.vue:239 ~ onFillSelectedNotes ~ this.sum_total:",
+                this.sum_total
+            );
             this.sum_total = Number(this.sum_total.toFixed(2));
         },
         onFindNotes() {

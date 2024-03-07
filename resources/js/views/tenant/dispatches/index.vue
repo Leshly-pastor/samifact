@@ -27,6 +27,8 @@
                     <tr slot="heading">
                         <th>#</th>
                         <th class="text-center">Fecha Emisión</th>
+                        <th v-if="configuration.multi_companies">Empresa</th>
+
                         <th>Cliente</th>
                         <th>Número</th>
                         <th>Estado</th>
@@ -44,6 +46,23 @@
                     >
                         <td>{{ index }}</td>
                         <td class="text-center">{{ row.date_of_issue }}</td>
+                        <td v-if="configuration.multi_companies">
+                            <template
+                                v-if="
+                                    row.alter_company &&
+                                    row.alter_company.name &&
+                                    row.alter_company.number
+                                "
+                            >
+                                <strong>
+                                    {{ row.alter_company.name.toUpperCase() }}
+                                </strong>
+                                <br />
+                                <small>
+                                    {{ row.alter_company.number }}
+                                </small>
+                            </template>
+                        </td>
                         <td>
                             {{ row.customer_name }} <br />
                             <small>{{ row.customer_number }}</small>
@@ -154,6 +173,12 @@
                                 >
                                     Enviar PSE
                                 </button>
+                                <a
+                                    :href="`/dispatches/create_new/dispatch/${row.id}`"
+                                    class="btn waves-effect waves-light btn-sm btn-warning m-1__2"
+                                    v-if="row.state_type_id == '01'"
+                                    >Editar</a
+                                >
                             </template>
                             <template v-else>
                                 <button

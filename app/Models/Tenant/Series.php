@@ -164,9 +164,9 @@ class Series extends ModelTenant
         $document_id = (int)$document_id;
         $series_id = (int)$series_id;
         $disabled = false;
-        if ($document_id == $this->document_type_id  && $userType !== 'admin') {
-            $disabled = !(($series_id == $this->id));
-        }
+        // if ($document_id == $this->document_type_id  && $userType !== 'admin') {
+        //     $disabled = !(($series_id == $this->id));
+        // }
         $next_number = null;
         if ($this->document_type_id === '01' || $this->document_type_id === '03') {
             $next_number = Document::getNextNumber($this->document_type_id, $this->number);
@@ -178,7 +178,36 @@ class Series extends ModelTenant
                 }
             }
         }
-
+        if($this->document_type_id == '80'){
+            $next_number = SaleNote::getNextNumber($this->number);
+            if ($document_number) {
+                $number = $this->number;
+                $number_company = isset($document_number->$number) ? $document_number->$number : null;
+                if ($number_company) {
+                    $next_number = $number_company > $next_number ? $number_company : $next_number;
+                }
+            }
+        }
+        if($this->document_type_id == 'COT'){
+            $next_number = Quotation::getNextNumber($this->number);
+            if ($document_number) {
+                $number = $this->number;
+                $number_company = isset($document_number->$number) ? $document_number->$number : null;
+                if ($number_company) {
+                    $next_number = $number_company > $next_number ? $number_company : $next_number;
+                }
+            }
+        }
+        if ($this->document_type_id === '09' || $this->document_type_id === '31') {
+            $next_number = Dispatch::getNextNumber($this->document_type_id, $this->number);
+            if ($document_number) {
+                $number = $this->number;
+                $number_company = isset($document_number->$number) ? $document_number->$number : null;
+                if ($number_company) {
+                    $next_number = $number_company > $next_number ? $number_company : $next_number;
+                }
+            }
+        }
         return [
             'id' => $this->id,
             'contingency' => (bool)$this->contingency,

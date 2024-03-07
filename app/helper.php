@@ -54,6 +54,12 @@ if (!function_exists('order_note_discounted_stock')) {
         return false;
     }
 }
+if (!function_exists('is_optometry')) {
+    function is_optometry()
+    {
+        return BusinessTurn::isOptometry();
+    }
+}
 if (!function_exists('is_integrate_system')) {
     function is_integrate_system()
     {

@@ -845,10 +845,6 @@ export default {
             this.document.payments = [];
             if (this.document.payment_condition_id === "01") {
                 this.document.payments = this.form.quotation.payments;
-                console.log(
-                    "🚀 ~ file: options.vue:855 ~ changePaymentCondition ~ this.document.payments:",
-                    this.document.payments
-                );
                 if (
                     this.document.payments === undefined ||
                     this.document.payments.length < 1
@@ -1094,6 +1090,15 @@ export default {
             };
         },
         async submit() {
+            if (this.config.multi_companies) {
+                let serie = _.find(this.series, {
+                    id: this.document.series_id,
+                });
+                this.document.series = serie.number;
+            } else {
+                delete this.document.establishment;
+                delete this.document.series;
+            }
             if (!this.hasCashOpen()) {
                 this.$message.error("Debe abrir caja para realizar la venta");
                 return false;
@@ -1231,24 +1236,26 @@ export default {
             });
         },
         async create() {
-            await this.$http
-                .get(`/${this.resource}/option/tables`)
-                .then((response) => {
-                    this.all_document_types =
-                        response.data.document_types_invoice;
-                    this.all_series = response.data.series;
-                    this.payment_destinations =
-                        response.data.payment_destinations;
-
-                    this.$store.commit(
-                        "setPaymentMethodTypes",
-                        response.data.payment_method_types
-                    );
-                    // this.payment_method_types = response.data.payment_method_types ;
-                    this.sellers = response.data.sellers;
-                    // this.document.document_type_id = (this.all_document_types.length > 0)?this.all_document_types[0].id:null
-                    // this.changeDocumentType()
-                });
+            console.log(this.config);
+            let url = `/${this.resource}/option/tables`;
+            if (this.recordId) {
+                url = `/${this.resource}/option/tables/${this.recordId}`;
+            }
+            await this.$http.get(url).then((response) => {
+                this.all_document_types = response.data.document_types_invoice;
+                this.all_series = response.data.series;
+                this.payment_destinations = response.data.payment_destinations;
+                this.document.company_id = response.data.company_id;
+                this.document.establishment = response.data.establishment_info;
+                this.$store.commit(
+                    "setPaymentMethodTypes",
+                    response.data.payment_method_types
+                );
+                // this.payment_method_types = response.data.payment_method_types ;
+                this.sellers = response.data.sellers;
+                // this.document.document_type_id = (this.all_document_types.length > 0)?this.all_document_types[0].id:null
+                // this.changeDocumentType()
+            });
 
             await this.getRecord();
         },
@@ -1264,7 +1271,7 @@ export default {
                     this.document.payments =
                         response.data.data.quotation.payments;
                     this.document.total = this.form.quotation.total;
-                
+
                     this.document.currency_type_id =
                         this.form.quotation.currency_type_id;
                     this.document.payment_condition_id =
