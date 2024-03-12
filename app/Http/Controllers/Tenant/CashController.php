@@ -71,7 +71,8 @@ class CashController extends Controller
 
     public function create()
     {
-        return view('tenant.items.form');
+        // return view('tenant.items.form');
+        return view('tenant.cash.index');
     }
 
     public function tables()

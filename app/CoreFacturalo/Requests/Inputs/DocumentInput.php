@@ -114,9 +114,8 @@ class DocumentInput
             }
         }
         $company_id = Functions::valueKeyInArray($inputs, 'company_id');
-
-
         return [
+            'optometry_service_id' => Functions::valueKeyInArray($inputs, 'optometry_service_id'),
             'alter_company' => $alter_company,
             'company_id' => $company_id,
             'cash_id' => $cash_id,

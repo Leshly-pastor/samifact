@@ -1175,6 +1175,7 @@ export default {
             this.form.total = _.round(total, 2);
         },
         async submit() {
+            this.form.discounted_stock = this.configuration.discount_order_note;
             // await this.changePaymentMethodType(false)
             if (this.configuration.enabled_dispatch_ticket_pdf) {
                 this.form.dispatch_ticket_pdf = true;

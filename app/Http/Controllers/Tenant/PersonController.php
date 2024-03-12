@@ -68,11 +68,13 @@ class PersonController extends Controller
     }
     public function drivers()
     {
+        $is_comercial  = auth()->user()->integrate_user_type_id == 2;
         $type = 'customers';
         $api_service_token = \App\Models\Tenant\Configuration::getApiServiceToken();
         $driver = true;
         $suscriptionames = SuscriptionNames::create_new();
         return view('tenant.persons.index', compact(
+            'is_comercial',
             'type',
             'driver',
             'api_service_token',

@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\Sale\Http\Requests;
+namespace Modules\Optometry\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 

@@ -12,7 +12,7 @@
            :api_whatsapp="{{json_encode($api_whatsapp)}}">
        </system-whatsapp-configuration>
             <system-certificate-index></system-certificate-index>
-            <system-login-settings :configuration='@json($configuration)'></system-login-settings>
+            {{-- <system-login-settings :configuration='@json($configuration)'></system-login-settings> --}}
 
             <system-login-other-configuration></system-login-other-configuration>
            

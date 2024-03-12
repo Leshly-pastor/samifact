@@ -218,6 +218,12 @@
                         ref="ref_search_items"
                     >
                         <el-button
+                            v-if="
+                                !(
+                                    typeUser === 'seller' &&
+                                    !configuration.seller_can_create_product
+                                )
+                            "
                             slot="append"
                             icon="el-icon-plus"
                             @click.prevent="showDialogNewItem = true"
@@ -789,12 +795,14 @@
                                                     v-if="item.isEditingName"
                                                 >
                                                     <el-input
-                                                    placeholder="Nombre del producto"
+                                                        placeholder="Nombre del producto"
                                                         v-model="
                                                             item.name_product_pdf
                                                         "
                                                         @keyup.enter.native="
-                                                            keyupEnterNameProduct(index)
+                                                            keyupEnterNameProduct(
+                                                                index
+                                                            )
                                                         "
                                                         @blur="
                                                             blurNameProduct(
@@ -1443,7 +1451,6 @@ export default {
         // if (document.querySelector(".sidebar-toggle")) {
         //     document.querySelector(".sidebar-toggle").click();
         // }
-
         await this.selectDefaultCustomer();
         await this.enabledSearchItemByBarcode();
         this.enabledCategoriesProductsView();
@@ -1523,31 +1530,36 @@ export default {
     },
     methods: {
         keyupEnterNameProduct(index) {
-            console.log("🚀 ~ file: index.vue:1525 ~ keyupEnterNameProduct ~ index:", index)
+            console.log(
+                "🚀 ~ file: index.vue:1525 ~ keyupEnterNameProduct ~ index:",
+                index
+            );
             let item = this.form.items[index];
             item.isEditingName = false;
-            if(item.name_product_pdf){
+            if (item.name_product_pdf) {
                 item.name_product_pdf = item.name_product_pdf.toUpperCase();
             }
             this.form.items[index] = item;
-       this.$forceUpdate();
+            this.$forceUpdate();
         },
         blurNameProduct(index) {
-            console.log("🚀 ~ file: index.vue:1536 ~ blurNameProduct ~ index:", index)
+            console.log(
+                "🚀 ~ file: index.vue:1536 ~ blurNameProduct ~ index:",
+                index
+            );
             let item = this.form.items[index];
             item.isEditingName = false;
-            if(item.name_product_pdf){
+            if (item.name_product_pdf) {
                 item.name_product_pdf = item.name_product_pdf.toUpperCase();
             }
             this.form.items[index] = item;
-       this.$forceUpdate();
+            this.$forceUpdate();
         },
         clickEditItem(index) {
             let item = this.form.items[index];
             item.isEditingName = true;
             this.form.items[index] = item;
             this.$forceUpdate();
-
         },
         clickAddItemSize(event, size, item, index) {
             event.stopPropagation();
@@ -2577,6 +2589,12 @@ export default {
             this.loading = true;
             await this.sleep(800);
             this.is_payment = true;
+            let {percentage_allowance_charge,active_allowance_charge} = this.configuration;
+            if(active_allowance_charge){
+                setTimeout(() => {
+                    this.$refs.payment.setAllowanceCharge(percentage_allowance_charge);
+                }, 500);
+            }
             this.loading = false;
         },
         sleep(ms) {

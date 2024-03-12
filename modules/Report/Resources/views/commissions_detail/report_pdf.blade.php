@@ -123,7 +123,7 @@ use App\Models\Tenant\ItemUnitType;
                                         $presentation = $row->item->presentation;
                                         $presentation_name = $presentation->description;
                                         $data_items = ItemUnitType::find($row->item->presentation->id);
-                                        $purchase_unit_price = $items->purchase_unit_price*$data_items->quantity_unit;
+                                        $purchase_unit_price = $items->purchase_unit_price*$data_items->quantity_unit*$quantity;
                                 
                                         // $quantity = $presentation->quantity_unit;
                                         $unit_price = number_format($unit_price, 2, '.', '');
@@ -136,7 +136,7 @@ use App\Models\Tenant\ItemUnitType;
                                         $presentation = $row->item->presentation;
                                         $presentation_name = $presentation->description;
                                         $data_items = ItemUnitType::find($row->item->presentation->id);
-                                        $purchase_unit_price = $items->purchase_unit_price*$data_items->quantity_unit;
+                                        $purchase_unit_price = $items->purchase_unit_price*$data_items->quantity_unit*$quantity;
                                 
                                         // $quantity = $presentation->quantity_unit;
                                         $unit_price = number_format($unit_price, 2, '.', '');

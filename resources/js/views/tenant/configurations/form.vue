@@ -3411,7 +3411,47 @@
                                     </div>
                                 </div>
                             </template>
-
+        
+        
+                            <div class="col-md-3 mt-4">
+                                <label class="control-label"
+                                    >Mostrar solo la primera cuota de pago
+                                    <el-tooltip
+                                        class="item"
+                                        content="Disponible para los documentos a crédito"
+                                        effect="dark"
+                                        placement="top-start"
+                                    >
+                                        <i class="fa fa-info-circle"></i>
+                                    </el-tooltip>
+                                </label>
+                                <div
+                                    :class="{
+                                        'has-danger':
+                                            errors.show_the_first_cuota_document,
+                                    }"
+                                    class="form-group"
+                                >
+                                    <el-switch
+                                        v-model="
+                                            form.show_the_first_cuota_document
+                                        "
+                                        active-text="Si"
+                                        inactive-text="No"
+                                        @change="submit"
+                                    ></el-switch>
+                                    <small
+                                        v-if="
+                                            errors.show_the_first_cuota_document
+                                        "
+                                        class="text-danger"
+                                        v-text="
+                                            errors
+                                                .show_the_first_cuota_document[0]
+                                        "
+                                    ></small>
+                                </div>
+                            </div>
                             <div class="col-md-6 mt-4">
                                 <!-- <label class="control-label">Agregar imágenes al pdf 
                                     <el-tooltip

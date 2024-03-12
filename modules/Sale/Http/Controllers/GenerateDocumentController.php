@@ -20,7 +20,9 @@
     use Illuminate\Http\Request;
     use Illuminate\Support\Facades\DB;
     use Modules\Finance\Traits\FinanceTrait;
-    use Modules\Sale\Http\Resources\TechnicalServiceResource;
+use Modules\Optometry\Http\Resources\OptometryServiceResource;
+use Modules\Optometry\Models\OptometryService;
+use Modules\Sale\Http\Resources\TechnicalServiceResource;
     use Modules\Sale\Models\TechnicalService;
 
     class GenerateDocumentController extends Controller
@@ -46,6 +48,10 @@
         {
             if ($table === 'technical-services') {
                 return new TechnicalServiceResource(TechnicalService::query()->findOrFail($id));
+            }
+
+            if ($table === 'optometry-services') {
+                return new OptometryServiceResource(OptometryService::query()->findOrFail($id));
             }
         }
 

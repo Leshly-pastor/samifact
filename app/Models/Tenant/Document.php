@@ -167,6 +167,7 @@ class Document extends ModelTenant
         'quotation'
     ];
     protected $fillable = [
+        'optometry_service_id',
         'sent_it_email',
         'alter_company',
         'bill_of_exchange_id',
@@ -311,11 +312,12 @@ class Document extends ModelTenant
         return (is_null($value)) ? null : (object) json_decode($value);
     }
 
-    public static function getNextNumber($document_type_id, $serie){
+    public static function getNextNumber($document_type_id, $serie)
+    {
         $document = Document::where('document_type_id', $document_type_id)->where('series', $serie)->orderBy('number', 'DESC')->first();
-        if($document){
+        if ($document) {
             return $document->number + 1;
-        }else{
+        } else {
             return 1;
         }
     }
@@ -339,7 +341,8 @@ class Document extends ModelTenant
         }
         return 0;
     }
-    public function periods(){
+    public function periods()
+    {
         return $this->hasMany(SuscriptionPayment::class, 'document_id');
     }
     public function getEstablishmentAttribute($value)
@@ -596,7 +599,8 @@ class Document extends ModelTenant
     /**
      * @return HasOne
      */
-    public function hotelRent(){
+    public function hotelRent()
+    {
         return $this->hasOne(HotelRent::class);
     }
     /**
@@ -805,8 +809,9 @@ class Document extends ModelTenant
     {
         return $this->hasMany(Dispatch::class, 'reference_document_id', 'id');
     }
-    public function no_stock_document(){
-        return $this->hasOne(NoStockDocument::class,'document_id','id');
+    public function no_stock_document()
+    {
+        return $this->hasOne(NoStockDocument::class, 'document_id', 'id');
     }
 
     /**
@@ -1092,29 +1097,29 @@ class Document extends ModelTenant
      * @param $row_user_id
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeWhereFilterCommission($query, $date_start, $date_end, $establishment_id, $user_type, $user_seller_id, $row_user_id,$item_id,$unit_type_id)
+    public function scopeWhereFilterCommission($query, $date_start, $date_end, $establishment_id, $user_type, $user_seller_id, $row_user_id, $item_id, $unit_type_id)
     {
-        if($item_id!=null && $unit_type_id==null){
+        if ($item_id != null && $unit_type_id == null) {
             $query->whereStateTypeAccepted()
-            ->whereBetween('date_of_issue', [$date_start, $date_end])
-            ->whereHas('items',function($q) use($item_id,$unit_type_id){
-                $q->where('item_id',$item_id);                 
-            })
-            ->whereEstablishmentId($establishment_id);
-        }else if($item_id!=null && $unit_type_id!=null){
+                ->whereBetween('date_of_issue', [$date_start, $date_end])
+                ->whereHas('items', function ($q) use ($item_id, $unit_type_id) {
+                    $q->where('item_id', $item_id);
+                })
+                ->whereEstablishmentId($establishment_id);
+        } else if ($item_id != null && $unit_type_id != null) {
             $query->whereStateTypeAccepted()
-            ->whereBetween('date_of_issue', [$date_start, $date_end])
-            ->whereHas('items',function($q) use($item_id,$unit_type_id){
-                $q->where('item_id',$item_id) ->whereRaw("JSON_EXTRACT(item, '$.unit_type_id') = '".$unit_type_id."'");               
-            })
-            ->whereEstablishmentId($establishment_id);
-        }else{
+                ->whereBetween('date_of_issue', [$date_start, $date_end])
+                ->whereHas('items', function ($q) use ($item_id, $unit_type_id) {
+                    $q->where('item_id', $item_id)->whereRaw("JSON_EXTRACT(item, '$.unit_type_id') = '" . $unit_type_id . "'");
+                })
+                ->whereEstablishmentId($establishment_id);
+        } else {
             $query->whereStateTypeAccepted()
-            ->whereBetween('date_of_issue', [$date_start, $date_end])
-            ->whereEstablishmentId($establishment_id);
+                ->whereBetween('date_of_issue', [$date_start, $date_end])
+                ->whereEstablishmentId($establishment_id);
         }
-        
-        
+
+
 
         if ($user_seller_id) {
             $query->where($user_type, $user_seller_id);
@@ -1716,7 +1721,8 @@ class Document extends ModelTenant
         return $calculate_quantity_points;
     }
 
-    public function bill_of_exchange_document(){
+    public function bill_of_exchange_document()
+    {
         return $this->hasOne(BillOfExchangeDocument::class);
     }
     public function getQrAttribute($value)

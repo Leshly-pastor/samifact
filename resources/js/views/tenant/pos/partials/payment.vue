@@ -57,16 +57,14 @@
                         <div class="col-6 px-0">
                             <small
                                 class="font-weight-semibold m-0 m-b-0 text-secondary"
-                                >
-                                <template v-if="item.name_product_pdf"
-                                >
-                                {{ item.name_product_pdf }}
+                            >
+                                <template v-if="item.name_product_pdf">
+                                    {{ item.name_product_pdf }}
                                 </template>
                                 <template v-else>
                                     {{ item.item.description }}
                                 </template>
-                                </small
-                            >
+                            </small>
                             <!-- <p class="m-b-0">Descripción del producto</p> -->
                             <!-- <p class="text-muted m-b-0"><small>Descuento 2%</small></p> -->
                         </div>
@@ -360,7 +358,10 @@
                     </div>
                 </div>
 
-                <div class="col-lg-8" v-if="configuration.show_discount_seller_pos">
+                <div
+                    class="col-lg-8"
+                    v-if="configuration.show_discount_seller_pos"
+                >
                     <div class="card card-default">
                         <div class="card-body text-center">
                             <div class="row col-lg-12">
@@ -419,6 +420,100 @@
                                             <template
                                                 slot="prepend"
                                                 v-if="is_discount_amount"
+                                                >{{
+                                                    currencyTypeActive.symbol
+                                                }}</template
+                                            >
+                                            <template slot="append" v-else
+                                                >%</template
+                                            >
+                                        </el-input>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div
+                                v-if="businessTurns.active"
+                                class="row col-md-12 col-lg-12"
+                            >
+                                <div class="col-md-6 col-lg-6"></div>
+                                <div class="col-md-6 col-lg-6">
+                                    <div class="form-group">
+                                        <label class="control-label"
+                                            >N° Placa</label
+                                        >
+                                        <el-input
+                                            v-model="form.plate_number"
+                                            type="textarea"
+                                        ></el-input>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div
+                    class="col-lg-8"
+                    v-if="configuration.show_discount_seller_pos"
+                >
+                    <div class="card card-default">
+                        <div class="card-body text-center">
+                            <div class="row col-lg-12">
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <h2>
+                                            <el-switch
+                                                v-model="enabled_charge"
+                                                active-text="Aplicar cargos"
+                                                class="control-label font-weight-semibold m-0 text-center m-b-0"
+                                                @change="changeEnabledCharge"
+                                            ></el-switch>
+                                        </h2>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label class="control-label">
+                                            <el-checkbox
+                                                v-model="is_charge_amount"
+                                                class="ml-1 mr-1"
+                                                @change="changeTypeDiscount"
+                                            ></el-checkbox>
+
+                                            <template
+                                                >{{
+                                                    is_charge_amount
+                                                        ? "Monto"
+                                                        : "Porcentaje"
+                                                }}
+                                                cargo</template
+                                            >
+
+                                            <el-tooltip
+                                                class="item"
+                                                v-if="
+                                                    global_discount_type &&
+                                                    global_discount_type.description
+                                                "
+                                                :content="
+                                                    global_discount_type.description
+                                                "
+                                                effect="dark"
+                                                placement="top"
+                                            >
+                                                <i
+                                                    class="fa fa-info-circle"
+                                                ></i>
+                                            </el-tooltip>
+                                        </label>
+                                        <el-input
+                                            v-model="charge_amount"
+                                            :disabled="!enabled_charge"
+                                            @change="inputChargeAmount()"
+                                        >
+                                            <template
+                                                slot="prepend"
+                                                v-if="is_charge_amount"
                                                 >{{
                                                     currencyTypeActive.symbol
                                                 }}</template
@@ -661,16 +756,14 @@
                                 </div>
                                 <div
                                     class="col-md-12 col-lg-12"
-                                    v-if="configuration.enabled_dispatch_ticket_pdf"
+                                    v-if="
+                                        configuration.enabled_dispatch_ticket_pdf
+                                    "
                                 >
                                     <div class="form-group">
                                         <label class="control-label"
-                                            >Número de tickets de
-                                            despacho
-                                            
-                                            
-                                           </label
-                                        >
+                                            >Número de tickets de despacho
+                                        </label>
                                         <el-input
                                             v-model="
                                                 dispatch_ticket_pdf_quantity
@@ -800,6 +893,7 @@ export default {
 
     data() {
         return {
+            charge_amount: 0,
             dispatch_ticket_pdf_quantity: 1,
             enabled_discount: false,
             discount_amount: 0,
@@ -835,6 +929,8 @@ export default {
             global_discount_type: {},
             error_global_discount: false,
             is_discount_amount: false,
+            is_charge_amount: false,
+            enabled_charge: false,
             payment_method_type_id: null,
             showDialogDiscountPermission: false,
             totalDiscountPercentage: 0,
@@ -893,6 +989,84 @@ export default {
         },
     },
     methods: {
+        setAllowanceCharge(percentage){
+            this.enabled_charge = true;
+            this.charge_amount = percentage;
+            this.is_charge_amount = false;
+
+            this.reCalculateTotal();
+            },
+        deleteChargeGlobal() {
+            let charge = _.find(this.form.charges, { charge_type_id: "50" });
+            let index = this.form.charges.indexOf(charge);
+
+            if (index > -1) {
+                this.form.charges.splice(index, 1);
+                this.form.total_charge = 0;
+            }
+        },
+        chargeGlobal() {
+            let base = parseFloat(this.form.total);
+
+            // if (this.config.active_allowance_charge) {
+            //     let percentage_allowance_charge = parseFloat(
+            //         this.config.percentage_allowance_charge
+            //     );
+            //     this.total_global_charge = _.round(
+            //         base * (percentage_allowance_charge / 100),
+            //         2
+            //     );
+            // }
+
+            // if (this.total_global_charge == 0) {
+            //     this.deleteChargeGlobal();
+            //     return;
+            // }
+
+            let amount = this.is_charge_amount
+                ? parseFloat(this.charge_amount)
+                : _.round((parseFloat(this.charge_amount) / 100) * base, 2);
+            let factor = _.round(amount / base, 5);
+
+            // console.log(base,factor, amount)
+
+            let charge = _.find(this.form.charges, { charge_type_id: "50" });
+
+            if (amount > 0 && !charge) {
+                this.form.total_charge = _.round(amount, 2);
+                this.form.total = _.round(
+                    this.form.total + this.form.total_charge,
+                    2
+                );
+
+                this.form.charges.push({
+                    charge_type_id: "50",
+                    description:
+                        "Cargos globales que no afectan la base imponible del IGV/IVAP",
+                    factor: factor,
+                    amount: amount,
+                    base: base,
+                });
+            } else {
+                let pos = this.form.charges.indexOf(charge);
+
+                if (pos > -1) {
+                    this.form.total_charge = _.round(amount, 2);
+                    this.form.total = _.round(
+                        this.form.total + this.form.total_charge,
+                        2
+                    );
+
+                    this.form.charges[pos].base = base;
+                    this.form.charges[pos].amount = amount;
+                    this.form.charges[pos].factor = factor;
+                }
+            }
+            this.difference = _.round(this.enter_amount - this.form.total, 2);
+            if(this.difference < 0){
+                this.button_payment = true
+            }
+        },
         startConnection() {
             console.log("as");
             qz.security.setCertificatePromise((resolve, reject) => {
@@ -1008,6 +1182,13 @@ export default {
                 .select();
             // console.log(this.$refs.enter_amount.$el.getElementsByTagName('input')[0])
         },
+        changeEnabledCharge() {
+            if (!this.enabled_charge) {
+                this.charge_amount = 0;
+                this.deleteChargeGlobal();
+                this.reCalculateTotal();
+            }
+        },
         changeEnabledDiscount() {
             if (!this.enabled_discount) {
                 this.discount_amount = 0;
@@ -1016,7 +1197,32 @@ export default {
             }
         },
         changeTypeDiscount() {
-            this.inputDiscountAmount();
+            this.inputChargeAmount();
+        },
+        inputChargeAmount() {
+            // if (this.enabled_discount) {
+            if (
+                this.charge_amount &&
+                !isNaN(this.charge_amount) &&
+                parseFloat(this.charge_amount) > 0
+            ) {
+                if (this.is_charge_amount) {
+                    // if (this.charge_amount >= this.form.total)
+                    //     return this.$message.error(
+                    //         "El monto de descuento debe ser menor al total de venta"
+                    //     );
+                }
+
+                this.deleteChargeGlobal();
+                this.reCalculateTotal();
+            } else {
+                // this.discount_amount = 0
+                this.deleteChargeGlobal();
+                this.reCalculateTotal();
+            }
+
+            // console.log(this.discount_amount)
+            // }
         },
         inputDiscountAmount() {
             if (this.enabled_discount) {
@@ -1276,7 +1482,7 @@ export default {
             // this.form.subtotal = _.round(total + this.form.total_plastic_bag_taxes, 2)
 
             this.discountGlobal();
-
+            this.chargeGlobal();
             this.setTotalPointsBySale(this.configuration);
         },
         deleteDiscountGlobal() {
@@ -1636,7 +1842,8 @@ export default {
                     "El establecimiento no tiene series disponibles para el comprobante"
                 );
             }
-            this.form.dispatch_ticket_pdf_quantity = this.dispatch_ticket_pdf_quantity;
+            this.form.dispatch_ticket_pdf_quantity =
+                this.dispatch_ticket_pdf_quantity;
             if (this.form.document_type_id === "80") {
                 this.form.prefix = "NV";
                 this.form.paid = 1;

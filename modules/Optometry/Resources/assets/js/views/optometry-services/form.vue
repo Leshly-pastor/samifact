@@ -86,7 +86,7 @@
                 </div>
                 <el-tabs v-model="activeName">
                     <el-tab-pane class="mb-3" name="first">
-                        <span slot="label"><h3>General</h3></span>
+                        <span slot="label"><h3>Examen</h3></span>
                         <general-form :general.sync="general"></general-form>
                         <div class="row m-">
                             <div class="col-md-3 col-lg-3 col-12">
@@ -360,17 +360,11 @@
                             </div>
                         </div>
                     </el-tab-pane>
-                    <el-tab-pane class="mb-3" name="vehicle">
-                        <span slot="label"><h3>Check-List</h3></span>
-                        <vehicle-detail
-                            :vehicle.sync="vehicle"
-                        ></vehicle-detail>
-                    </el-tab-pane>
                 </el-tabs>
             </div>
             <div class="row">
                 <div class="col-12 text-end text-sm">
-                    Total de servicio tecnico {{ total.toLocaleString() }}
+                    Total  {{ total.toLocaleString() }}
                 </div>
             </div>
             <div class="form-actions text-end mt-4">
@@ -1282,9 +1276,11 @@ export default {
         },
         initForm() {
             this.errors = {};
+            this.general = {};
             //this.form.exchange_rate_sale = this.exchange_rate
             this.form = {
                 id: null,
+                general: {},
                 customer_id: null,
                 cellphone: null,
                 date_of_issue: moment().format("YYYY-MM-DD"),
@@ -1364,8 +1360,8 @@ export default {
             this.initForm();
 
             this.titleDialog = this.recordId
-                ? "Editar servicio técnico"
-                : "Nuevo servicio técnico";
+                ? "Editar servicio de optometría"
+                : "Nuevo servicio de opto+metría";
             this.searchExchangeRateByDate(this.form.date_of_issue).then(
                 (response) => {
                     this.$store.commit("setExchangeRate", response);
@@ -1379,8 +1375,8 @@ export default {
                     .then((response) => {
                         let data = response.data;
                         this.form = data.data;
+                        this.general = this.form.general || {};
                         this.form.discounts = this.form.discounts || [];
-                        this.vehicle = this.form.vehicle || {};
                     })
                     .then(() => {
                         this.reloadDataCustomers(this.form.customer_id);
@@ -1395,16 +1391,21 @@ export default {
         },
         validateGeneral(general) {
             for (let prop in general) {
-                if (general[prop] !== undefined || general[prop] !== '') {
+                if (general[prop] !== undefined || general[prop] !== "") {
                     return true;
                 }
             }
             return false;
         },
         submit() {
-            if (this.validateGeneral(this.general)) {
-                this.form.vehicle = this.general;
+            if (!this.validateGeneral(this.general)) {
+                return this.$message.error(
+                    "Debe ingresar al menos un dato general"
+                );
             }
+            this.form.general = this.general;
+            // return;
+
             if (parseFloat(this.form.prepayment) > parseFloat(this.form.cost)) {
                 return this.$message.error(
                     "Pago adelantado no puede ser mayor al costo"

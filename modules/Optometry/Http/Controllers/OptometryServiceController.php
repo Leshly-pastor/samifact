@@ -22,6 +22,7 @@ use App\Models\Tenant\PaymentCondition;
 use App\Models\Tenant\Person;
 use App\Models\Tenant\Series;
 use App\Models\Tenant\User;
+use App\Models\Tenant\Warehouse;
 use App\Traits\OfflineTrait;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Exception;
@@ -32,6 +33,7 @@ use Modules\Finance\Traits\FinanceTrait;
 use Modules\Optometry\Http\Requests\OptometryServiceRequest;
 use Modules\Optometry\Http\Resources\OptometryServiceCollection;
 use Modules\Optometry\Models\OptometryService;
+use Modules\Optometry\Models\OptometryServiceData;
 use Modules\Optometry\Models\OptometryServiceItem;
 use Mpdf\Config\ConfigVariables;
 use Mpdf\Config\FontVariables;
@@ -52,8 +54,8 @@ class OptometryServiceController extends Controller
     use FinanceTrait;
     use OfflineTrait;
 
-    protected $technical_service;
-    protected $technical_service_car;
+    protected $optometry_service;
+    protected $optometry_service_car;
     protected $company;
 
     public function index()
@@ -242,11 +244,11 @@ class OptometryServiceController extends Controller
             $data = $this->mergeData($request);
             $tc_id = ($request->has('id')) ? $request->id : null;
 
-            $technical_service = OptometryService::updateOrCreate(['id' => $request->input('id')], $data);
+            $optometry_service = OptometryService::updateOrCreate(['id' => $request->input('id')], $data);
             $all_item = [];
             /* Elimina items del servicio */
             if ($tc_id != null) {
-                $items = OptometryServiceItem::where('technical_services_id', $tc_id)->wherenotin('id', $all_item)->get();
+                $items = OptometryServiceItem::where('optometry_services_id', $tc_id)->wherenotin('id', $all_item)->get();
                 /** @var OptometryServiceItem $temp */
                 foreach ($items as $temp) {
                     $temp->delete();
@@ -254,18 +256,25 @@ class OptometryServiceController extends Controller
             }
             foreach ($data['items'] as $row) {
                 /** @var OptometryServiceItem $temp_item */
-                $temp_item = $technical_service->items()->create($row);
+                if(!isset($row['warehouse_id'])){
+                    $row['warehouse_id'] = Warehouse::first()->id;
+                }
+                $temp_item = $optometry_service->items()->create($row);
                 $all_item[] = $temp_item->id;
             }
             
-
-            $this->technical_service = $technical_service;
+            $general = Functions::valueKeyInArray($data, 'general');
+            if ($general) {
+                $general['optometry_service_id'] = $optometry_service->id;
+                OptometryServiceData::updateOrCreate(['optometry_service_id' => $optometry_service->id], $general);
+            }
+            $this->optometry_service = $optometry_service;
             $this->setFilename();
-            $this->createPdf($this->technical_service, "a4", $this->technical_service->filename);
+            $this->createPdf($this->optometry_service, "a4", $this->optometry_service->filename);
 
             $cash = Cash::query()->where([['user_id', auth()->id()], ['state', true]])->first();
             $cash->cash_documents()->create([
-                'technical_service_id' => $this->technical_service->id
+                'optometry_service_id' => $this->optometry_service->id
             ]);
         });
 
@@ -294,9 +303,9 @@ class OptometryServiceController extends Controller
     private function setFilename()
     {
 
-        $name = ['TS', $this->technical_service->id, date('Ymd')];
-        $this->technical_service->filename = join('-', $name);
-        $this->technical_service->save();
+        $name = ['TS', $this->optometry_service->id, date('Ymd')];
+        $this->optometry_service->filename = join('-', $name);
+        $this->optometry_service->save();
     }
     function get_value_car($label, $property)
     {
@@ -304,14 +313,14 @@ class OptometryServiceController extends Controller
         $state = "state_" . $property;
         return [
             "label" => $label,
-            "quantity" => $this->technical_service_car->{$quantity},
-            "state" => $this->technical_service_car->{$state}
+            "quantity" => $this->optometry_service_car->{$quantity},
+            "state" => $this->optometry_service_car->{$state}
         ];
     }
     public function format_vehicle($id)
     {
-        $technical_service = OptometryService::find($id);
-        $this->technical_service = $technical_service;
+        $optometry_service = OptometryService::find($id);
+        $this->optometry_service = $optometry_service;
         $list1 = [
             $this->get_value_car("Faros Delanteros", "front_lights"),
             $this->get_value_car("Luces Direccionales Delanteros", "directional_lights_front"),
@@ -400,27 +409,27 @@ class OptometryServiceController extends Controller
             "list2",
             "list3",
             "list4",
-            "technical_service",
-            "technical_service_car"
+            "optometry_service",
+            "optometry_service_car"
         ));
         return $pdf->stream('FORMATO.pdf');
     }
-    public function createPdf($technical_service = null, $format_pdf = null, $filename = null)
+    public function createPdf($optometry_service = null, $format_pdf = null, $filename = null)
     {
 
         ini_set("pcre.backtrack_limit", "5000000");
         $template = new Template();
         $pdf = new Mpdf();
 
-        $document = ($technical_service != null) ? $technical_service : $this->technical_service;
+        $document = ($optometry_service != null) ? $optometry_service : $this->optometry_service;
         $company = ($this->company != null) ? $this->company : Company::active();
-        $filename = ($filename != null) ? $filename : $this->technical_service->filename;
+        $filename = ($filename != null) ? $filename : $this->optometry_service->filename;
 
         $configuration = Configuration::first();
 
         $base_template = $configuration->formats; //config('tenant.pdf_template');
 
-        $html = $template->pdf($base_template, "technical_service", $company, $document, $format_pdf);
+        $html = $template->pdf($base_template, "optometry_service", $company, $document, $format_pdf);
 
         $pdf_font_regular = config('tenant.pdf_name_regular');
         $pdf_font_bold = config('tenant.pdf_name_bold');
@@ -487,7 +496,7 @@ class OptometryServiceController extends Controller
         $pdf->WriteHTML($html, HTMLParserMode::HTML_BODY);
 
 
-        $this->uploadFile($filename, $pdf->output('', 'S'), 'technical_service');
+        $this->uploadFile($filename, $pdf->output('', 'S'), 'optometry_service');
     }
 
     public function uploadFile($filename, $file_content, $file_type)
@@ -503,28 +512,28 @@ class OptometryServiceController extends Controller
     public function toPrint($id, $format)
     {
 
-        $technical_service = OptometryService::find($id);
+        $optometry_service = OptometryService::find($id);
 
-        if (!$technical_service) throw new Exception("El código es inválido, no se encontró el servicio técnico relacionado");
+        if (!$optometry_service) throw new Exception("El código es inválido, no se encontró el servicio técnico relacionado");
 
-        $this->reloadPDF($technical_service, $format, $technical_service->filename);
-        $temp = tempnam(sys_get_temp_dir(), 'technical_service');
+        $this->reloadPDF($optometry_service, $format, $optometry_service->filename);
+        $temp = tempnam(sys_get_temp_dir(), 'optometry_service');
 
-        file_put_contents($temp, $this->getStorage($technical_service->filename, 'technical_service'));
+        file_put_contents($temp, $this->getStorage($optometry_service->filename, 'optometry_service'));
 
         /*
             $headers = [
                 'Content-Type' => 'application/pdf',
-                'Content-Disposition' => 'inline; filename="'.$technical_service->filename.'"'
+                'Content-Disposition' => 'inline; filename="'.$optometry_service->filename.'"'
             ];
             */
 
-        return response()->file($temp, $this->generalPdfResponseFileHeaders($technical_service->filename));
+        return response()->file($temp, $this->generalPdfResponseFileHeaders($optometry_service->filename));
     }
 
-    private function reloadPDF($technical_service, $format, $filename)
+    private function reloadPDF($optometry_service, $format, $filename)
     {
-        $this->createPdf($technical_service, $format, $filename);
+        $this->createPdf($optometry_service, $format, $filename);
     }
 
     public function destroy($id)

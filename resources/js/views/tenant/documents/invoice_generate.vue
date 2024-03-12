@@ -544,7 +544,7 @@
                                             :remote-method="searchRemoteItems"
                                             filterable
                                             @change="clickAddFavoriteItem"
-                                            placeholder="Buscar"
+                                            placeholder="Buscar productos favoritos"
                                             remote
                                         >
                                             <el-option
@@ -2530,7 +2530,18 @@
                                                                         "
                                                                     >
                                                                         Otros
-                                                                        cargos:
+                                                                        cargos
+
+                                                                        <el-checkbox
+                                                                            v-model="
+                                                                                is_amount_charge
+                                                                            "
+                                                                            class="ml-1 mr-1"
+                                                                            @change="
+                                                                                changeTypeDiscount
+                                                                            "
+                                                                        ></el-checkbox>
+                                                                        :
                                                                     </td>
                                                                     <td
                                                                         class="text-end"
@@ -2538,9 +2549,19 @@
                                                                             height: 40px !important;
                                                                         "
                                                                     >
-                                                                        {{
-                                                                            currency_type.symbol
-                                                                        }}
+                                                                        <template
+                                                                            v-if="
+                                                                                is_amount_charge
+                                                                            "
+                                                                        >
+                                                                            currency_type.symbol</template
+                                                                        >
+                                                                        <template
+                                                                            v-else
+                                                                        >
+                                                                            %</template
+                                                                        >
+
                                                                         <el-input-number
                                                                             v-model="
                                                                                 total_global_charge
@@ -2835,6 +2856,87 @@
                                                                             "
                                                                             class="table-responsive"
                                                                         >
+                                                                            <div
+                                                                                class="row"
+                                                                            >
+                                                                                <div
+                                                                                    class="col-md-4"
+                                                                                >
+                                                                                    <label
+                                                                                        for="cuota"
+                                                                                        class="w-100"
+                                                                                        >#
+                                                                                        Cuotas</label
+                                                                                    >
+                                                                                    <el-input-number
+                                                                                        class="w-100"
+                                                                                        v-model="
+                                                                                            cuotaNumber
+                                                                                        "
+                                                                                        :min="
+                                                                                            1
+                                                                                        "
+                                                                                        :max="
+                                                                                            36
+                                                                                        "
+                                                                                        controls-position="right"
+                                                                                    ></el-input-number>
+                                                                                </div>
+                                                                                <div
+                                                                                    class="col-md-4"
+                                                                                >
+                                                                                    <label
+                                                                                        for="cuota"
+                                                                                        class="w-100"
+                                                                                        >Días</label
+                                                                                    >
+
+                                                                                    <el-input-number
+                                                                                        class="w-100"
+                                                                                        v-model="
+                                                                                            cuotaDays
+                                                                                        "
+                                                                                        :min="
+                                                                                            1
+                                                                                        "
+                                                                                        :max="
+                                                                                            60
+                                                                                        "
+                                                                                        controls-position="right"
+                                                                                    ></el-input-number>
+                                                                                </div>
+                                                                                <div
+                                                                                    class="col-md-4 d-flex align-items-end"
+                                                                                >
+                                                                                    <el-button
+                                                                                        size="mini"
+                                                                                        type="success"
+                                                                                        @click="
+                                                                                            addFeeds
+                                                                                        "
+                                                                                    >
+                                                                                        <i
+                                                                                            class="fas fa-check"
+                                                                                        ></i>
+                                                                                    </el-button>
+
+                                                                                    <el-tooltip
+                                                                                        content="Eliminar las cuotas"
+                                                                                    >
+                                                                                        <el-button
+                                                                                            size="mini"
+                                                                                            type="danger"
+                                                                                            @click="
+                                                                                                removeFeeds
+                                                                                            "
+                                                                                        >
+                                                                                            <i
+                                                                                                class="fas fa-trash"
+                                                                                            ></i>
+                                                                                        </el-button>
+                                                                                    </el-tooltip>
+                                                                                </div>
+                                                                            </div>
                                                                             <table
                                                                                 class="text-left table"
                                                                                 width="100%"
@@ -3648,6 +3750,31 @@ export default {
     ],
     data() {
         return {
+            is_amount_charge: true,
+            cuotaNumber: 1,
+            cuotaDays: 30,
+            cuotaPeriods: [
+                {
+                    id: 1,
+                    label: "15 días",
+                    days: 15,
+                },
+                {
+                    id: 2,
+                    label: "30 días",
+                    days: 30,
+                },
+                {
+                    id: 3,
+                    label: "45 días",
+                    days: 45,
+                },
+                {
+                    id: 4,
+                    label: "60 días",
+                    days: 60,
+                },
+            ],
             showDialogFormDispatch: false,
             warehousesDetail: [],
             item_unit_types: [],
@@ -4038,6 +4165,46 @@ export default {
         this.formatTooltip(20);
     },
     methods: {
+        calculatePeriodDays(cuotas, days) {
+            if (!cuotas || !days) return;
+            this.form.fee = [];
+            let { date_of_issue } = this.form;
+            //dada la fecha de emision, usando moment calcula las fechas de vencimiento segun el numero de cuotas y los dias de cada cuota
+            let dates = [];
+            for (let i = 0; i < cuotas; i++) {
+                let date = moment(date_of_issue)
+                    .utcOffset(-300)
+                    .add((i + 1) * days, "days")
+                    .format("YYYY-MM-DD");
+                dates.push(date);
+            }
+            this.form.fee = dates.map((d) => ({
+                id: null,
+                date: d,
+                currency_type_id: this.form.currency_type_id,
+                amount: 0,
+            }));
+            this.calculateFee();
+
+            this.setLastDateDue();
+        },
+        setLastDateDue() {
+            if (this.form.fee && this.form.fee.length > 0) {
+                let fee = this.form.fee[this.form.fee.length - 1];
+                this.form.date_of_due = fee.date;
+            }
+        },
+        removeFeeds() {
+            if (this.form.fee.length <= 1) return;
+            this.form.fee = [this.form.fee[0]];
+            this.calculateFee();
+            this.setLastDateDue();
+        },
+        addFeeds() {
+            console.log("🚀 ~ addFeeds ~ this.cuotaNumber:", this.cuotaNumber);
+
+            this.calculatePeriodDays(this.cuotaNumber, this.cuotaDays);
+        },
         clickAddFavoriteItem() {
             let item = this.favoriteItems.find(
                 (item) => item.id == this.favorite_item_id
@@ -4195,7 +4362,7 @@ export default {
                     // this.all_series = series;
                     this.form.establishment = establishment;
                     this.payment_destinations = payment_destinations;
-                
+
                     this.$store.commit("setAllSeries", series);
                     this.filterSeries();
                     this.form.payments = [];
@@ -6676,6 +6843,7 @@ export default {
                 if (this.is_amount) {
                     amount = input_global_discount;
                     factor = _.round(amount / base, 5);
+                    console.log("🚀 ~ discountGlobal ~ factor:", factor);
                 } else {
                     factor = _.round(input_global_discount / 100, 5);
                     amount = factor * base;

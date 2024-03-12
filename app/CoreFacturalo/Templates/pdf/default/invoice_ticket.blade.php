@@ -5,12 +5,12 @@
     if ($logo === null && !file_exists(public_path("$logo}"))) {
         $logo = "{$company->logo}";
     }
-    
+
     if ($logo) {
         $logo = "storage/uploads/logos/{$logo}";
         $logo = str_replace('storage/uploads/logos/storage/uploads/logos/', 'storage/uploads/logos/', $logo);
     }
-    
+
     $customer = $document->customer;
     $total_discount_items = 0;
     $invoice = $document->invoice;
@@ -19,29 +19,36 @@
     $accounts = \App\Models\Tenant\BankAccount::where('show_in_documents', true)->get();
     $document_base = $document->note ? $document->note : null;
     $payments = $document->payments;
-    
+
     if ($document_base) {
-        $affected_document_number = $document_base->affected_document ? $document_base->affected_document->series . '-' . str_pad($document_base->affected_document->number, 8, '0', STR_PAD_LEFT) : $document_base->data_affected_document->series . '-' . str_pad($document_base->data_affected_document->number, 8, '0', STR_PAD_LEFT);
+        $affected_document_number = $document_base->affected_document
+            ? $document_base->affected_document->series .
+                '-' .
+                str_pad($document_base->affected_document->number, 8, '0', STR_PAD_LEFT)
+            : $document_base->data_affected_document->series .
+                '-' .
+                str_pad($document_base->data_affected_document->number, 8, '0', STR_PAD_LEFT);
     } else {
         $affected_document_number = null;
     }
     $document->load('reference_guides');
-    
+
     $total_payment = $document->payments->sum('payment');
     $balance = $document->total - $total_payment - $document->payments->sum('change');
-    
+
     $establishment__ = \App\Models\Tenant\Establishment::find($document->establishment_id);
     $logo = $establishment__->logo ?? $company->logo;
-    
+
     if ($logo === null && !file_exists(public_path("$logo}"))) {
         $logo = "{$company->logo}";
     }
-    
+
     if ($logo) {
         $logo = "storage/uploads/logos/{$logo}";
         $logo = str_replace('storage/uploads/logos/storage/uploads/logos/', 'storage/uploads/logos/', $logo);
     }
-    
+    $configuration = \App\Models\Tenant\Configuration::first();
+
 @endphp
 <html>
 
@@ -445,7 +452,6 @@
 
 
     @if ($document->transport)
-
         <p class="desc"><strong>Transporte de pasajeros</strong></p>
 
         @php
@@ -453,7 +459,9 @@
             $origin_district_id = (array) $transport->origin_district_id;
             $destinatation_district_id = (array) $transport->destinatation_district_id;
             $origin_district = Modules\Order\Services\AddressFullService::getDescription($origin_district_id[2]);
-            $destinatation_district = Modules\Order\Services\AddressFullService::getDescription($destinatation_district_id[2]);
+            $destinatation_district = Modules\Order\Services\AddressFullService::getDescription(
+                $destinatation_district_id[2],
+            );
         @endphp
 
 
@@ -547,21 +555,18 @@
 
         </table>
     @endif
-    
-    @if($document->transport_dispatch)
+
+    @if ($document->transport_dispatch)
         @php
-             $transport_dispatch = $document->transport_dispatch;
+            $transport_dispatch = $document->transport_dispatch;
             $sender_identity_document_type = $transport_dispatch->sender_identity_document_type->description;
             $recipient_identity_document_type = $transport_dispatch->recipient_identity_document_type->description;
         @endphp
-         <p class="desc"><strong>Información de encomienda</strong></p>
-          <table class="full-width mt-3">
+        <p class="desc"><strong>Información de encomienda</strong></p>
+        <table class="full-width mt-3">
             <tr>
-                <td
-                class="desc"
-                colspan="2"
-                >
-                <strong>REMITENTE</strong>
+                <td class="desc" colspan="2">
+                    <strong>REMITENTE</strong>
                 </td>
             </tr>
             <tr>
@@ -589,11 +594,8 @@
                 </td>
             </tr>
             <tr>
-                <td
-                class="desc"
-                colspan="2"
-                >
-                <strong>DESTINATARIO</strong>
+                <td class="desc" colspan="2">
+                    <strong>DESTINATARIO</strong>
                 </td>
             </tr>
             <tr>
@@ -688,7 +690,7 @@
                             <br />ISC : {{ $row->total_isc }} ({{ $row->percentage_isc }}%)
                         @endif
 
-   
+
 
                         @foreach ($row->additional_information as $information)
                             @if ($information)
@@ -708,7 +710,7 @@
                                     if ($dtos->is_split) {
                                         $amount = $amount * 1.18;
                                     }
-                                    
+
                                     $total_discount_items += $amount;
                                 @endphp
                                 @if ($dtos->is_amount == false)
@@ -723,7 +725,7 @@
                                     <small> Característica {{ $size->size }} | {{ $size->qty }} und.</small> <br>
                                 @endforeach
                             @endif
-                         @endisset
+                        @endisset
 
                         @if ($row->charges)
                             @foreach ($row->charges as $charge)
@@ -868,7 +870,7 @@
                             } else {
                                 $total_discount = $total_discount_items;
                             }
-                            
+
                         @endphp
 
                         {{ number_format($total_discount, 2) }}
@@ -973,7 +975,9 @@
                 <p class="desc"><strong>Código hash:</strong> {{ $document->hash }}</p>
 
                 @php
-                    $paymentCondition = \App\CoreFacturalo\Helpers\Template\TemplateHelper::getDocumentPaymentCondition($document);
+                    $paymentCondition = \App\CoreFacturalo\Helpers\Template\TemplateHelper::getDocumentPaymentCondition(
+                        $document,
+                    );
                 @endphp
                 {{-- Condicion de pago  Crédito / Contado --}}
                 <p class="desc pt-5">
@@ -1002,12 +1006,23 @@
                     @endif
                 @else
                     @foreach ($document->fee as $key => $quote)
-                        <p class="desc pt-5">
-                            <span class="desc">&#8226;
-                                {{ empty($quote->getStringPaymentMethodType()) ? 'Cuota #' . ($key + 1) : $quote->getStringPaymentMethodType() }}
-                                / Fecha: {{ $quote->date->format('d-m-Y') }} / Monto:
-                                {{ $quote->currency_type->symbol }}{{ $quote->amount }}</span>
-                        </p>
+                        @if (!$configuration->show_the_first_cuota_document)
+                            <p class="desc pt-5">
+                                <span class="desc">&#8226;
+                                    {{ empty($quote->getStringPaymentMethodType()) ? 'Cuota #' . ($key + 1) : $quote->getStringPaymentMethodType() }}
+                                    / Fecha: {{ $quote->date->format('d-m-Y') }} / Monto:
+                                    {{ $quote->currency_type->symbol }}{{ $quote->amount }}</span>
+                            </p>
+                        @else
+                            @if ($key == 0)
+                                <p class="desc pt-5">
+                                    <span class="desc">&#8226;
+                                        {{ empty($quote->getStringPaymentMethodType()) ? 'Cuota #' . ($key + 1) : $quote->getStringPaymentMethodType() }}
+                                        / Fecha: {{ $quote->date->format('d-m-Y') }} / Monto:
+                                        {{ $quote->currency_type->symbol }}{{ $quote->amount }}</span>
+                                </p>
+                            @endif
+                        @endif
                     @endforeach
                 @endif
 
@@ -1019,7 +1034,6 @@
     </table>
     <table class="full-width">
         @php
-            $configuration = \App\Models\Tenant\Configuration::first();
             $establishment_data = \App\Models\Tenant\Establishment::find($document->establishment_id);
         @endphp
         <tbody>

@@ -5,10 +5,10 @@ use App\Http\Controllers\Controller;
 use App\Models\Tenant\PaymentMethodType;
 use Modules\Finance\Traits\FinanceTrait;
 use Illuminate\Support\Facades\DB;
+use Modules\Optometry\Http\Requests\OptometryServicePaymentRequest;
 use Modules\Optometry\Http\Resources\OptometryServicePaymentCollection;
 use Modules\Optometry\Models\OptometryService;
-use Modules\Sale\Http\Requests\OptometryServicePaymentRequest;
-use Modules\Sale\Models\OptometryServicePayment;
+use Modules\Optometry\Models\OptometryServicePayment;
 
 class OptometryServicePaymentController extends Controller
 {
@@ -17,7 +17,7 @@ class OptometryServicePaymentController extends Controller
 
     public function records($technical_service_id)
     {
-        $records = OptometryServicePayment::where('technical_service_id', $technical_service_id)->get();
+        $records = OptometryServicePayment::where('optometry_service_id', $technical_service_id)->get();
 
         return new OptometryServicePaymentCollection($records);
     }

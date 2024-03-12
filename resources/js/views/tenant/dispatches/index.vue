@@ -177,7 +177,7 @@
                                     :href="`/dispatches/create_new/dispatch/${row.id}`"
                                     class="btn waves-effect waves-light btn-sm btn-warning m-1__2"
                                     v-if="row.state_type_id == '01'"
-                                    >Editar</a
+                                    >Editar.</a
                                 >
                             </template>
                             <template v-else>

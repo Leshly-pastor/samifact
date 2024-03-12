@@ -498,6 +498,15 @@ $thridLevel = $path[2] ?? null;
                             </a>
                         </li>
                     @endif
+
+                    @if ($configuration->enabled_sales_agents)
+                        <li>
+                            <a class="{{ $firstLevel === 'agents' ? 'active' : '' }}"
+                                href="{{ route('tenant.agents.index') }}">
+                                <span class="label"> Agentes de venta </span>
+                            </a>
+                        </li>
+                    @endif
                     @if ($configuration->package_handlers)
                         <li>
                             <a class="{{ $firstLevel === 'persons' && $secondLevel === 'customers' ? 'active' : '' }}"

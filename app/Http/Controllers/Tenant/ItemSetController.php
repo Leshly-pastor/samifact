@@ -58,7 +58,9 @@ class ItemSetController extends Controller
 
     public function create()
     {
-        return view('tenant.items.form');
+        // return view('tenant.items.form');
+        return view('tenant.item_sets.index');
+
     }
 
     public function tables()

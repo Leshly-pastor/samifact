@@ -8,6 +8,7 @@ use App\Models\System\Client;
 use App\Models\System\User;
 use App\Models\Tenant\Company;
 use App\Models\Tenant\Configuration;
+use App\Models\Tenant\User as TenantUser;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Hyn\Tenancy\Contracts\Repositories\HostnameRepository;
@@ -53,32 +54,32 @@ class MultiCompanyController extends Controller
             $website_id = $website != null ? $website->id : null;
             if ($hostname_id && $website_id) {
                 $website_ids[] = $website_id;
-            
-                    DB::connection('tenant')
-                        ->table('multi_companies')
-                        ->insert([
-                            'client_id' => $company_id,
-                            'hostname_id' => $hostname_id,
-                            'website_id' => $website_id,
-                        ]);
 
-                    $tenancy = app(Environment::class);
-                    $tenancy->tenant($found_company->hostname->website);
+                DB::connection('tenant')
+                    ->table('multi_companies')
+                    ->insert([
+                        'client_id' => $company_id,
+                        'hostname_id' => $hostname_id,
+                        'website_id' => $website_id,
+                    ]);
 
-                    $company = Company::without(['identity_document_type'])
-                        ->first();
-                    $company_to_insert = $company->toArray();
-                    $company_to_insert['updated_at'] = date('Y-m-d H:i:s');
-                    $company_to_insert['id'] = null;
-                    $company_to_insert['document_number'] = null;
-                    $company_to_insert['not_principal'] = true;
-                    $company_to_insert['website_id'] = $website_id;
-                    $subDom = $subdominio;
-                    $uuid = config('tenant.prefix_database') . '_' . $subDom;
-                    $this->restoreTenant($uuid);
-                    $company = DB::connection('tenant')
-                        ->table('companies')
-                        ->insert($company_to_insert);
+                $tenancy = app(Environment::class);
+                $tenancy->tenant($found_company->hostname->website);
+
+                $company = Company::without(['identity_document_type'])
+                    ->first();
+                $company_to_insert = $company->toArray();
+                $company_to_insert['updated_at'] = date('Y-m-d H:i:s');
+                $company_to_insert['id'] = null;
+                $company_to_insert['document_number'] = null;
+                $company_to_insert['not_principal'] = true;
+                $company_to_insert['website_id'] = $website_id;
+                $subDom = $subdominio;
+                $uuid = config('tenant.prefix_database') . '_' . $subDom;
+                $this->restoreTenant($uuid);
+                $company = DB::connection('tenant')
+                    ->table('companies')
+                    ->insert($company_to_insert);
             } else {
                 $fail = true;
             }
@@ -93,7 +94,7 @@ class MultiCompanyController extends Controller
             $company_to_delete = Company::find($company_to_delete->id);
             $company_to_delete->delete();
         }
-        
+
         $companies_to_delete = DB::connection('tenant')
             ->table('companies')
             ->select('website_id')
@@ -140,6 +141,9 @@ class MultiCompanyController extends Controller
         $configuration = Configuration::first();
         $configuration->multi_companies = $multi_companies;
         $configuration->save();
+        if ($configuration->multi_companies == false) {
+            TenantUser::query()->update(['company_active_id' => null]);
+        }
         return [
             'success' => true,
             'message' => 'Datos guardados correctamente'

@@ -182,8 +182,13 @@ class InventoryKardex extends ModelTenant
                     }
                     $cpe_doc_asoc = ($cpe_doc_asoc == '-') ? $inventory_kardexable->dispatch->number_full : $cpe_doc_asoc . ' | ' . $inventory_kardexable->dispatch->number_full;
                 }
+                $discounted_order_note = false;
+                if (isset($inventory_kardexable->order_note_id) && $inventory_kardexable->order_note_id) {
+                    $order_note = OrderNote::find($inventory_kardexable->order_note_id);
+                    $discounted_order_note = (bool) $order_note->discounted_stock;
+                }
 
-                $doc_balance = (isset($inventory_kardexable->sale_note_id) || isset($inventory_kardexable->order_note_id) || $cpe_discounted_stock || isset($inventory_kardexable->sale_notes_relateds)) ? $balance += 0 : $balance += $qty;
+                $doc_balance = (isset($inventory_kardexable->sale_note_id) || $discounted_order_note || $cpe_discounted_stock || isset($inventory_kardexable->sale_notes_relateds)) ? $balance += 0 : $balance += $qty;
 
                 $data['input'] = $cpe_input;
                 $data['output'] = $cpe_output;
@@ -214,8 +219,12 @@ class InventoryKardex extends ModelTenant
                 $data['date_of_issue'] = isset($inventory_kardexable->date_of_issue) ? $inventory_kardexable->date_of_issue->format('Y-m-d') : '';
                 break;
             case $models[2]: // Nota de venta
-
-                if (isset($inventory_kardexable->order_note_id)) {
+                $discounted_order_note = false;
+                if (isset($inventory_kardexable->order_note_id) && $inventory_kardexable->order_note_id) {
+                    $order_note = OrderNote::find($inventory_kardexable->order_note_id);
+                    $discounted_order_note = (bool) $order_note->discounted_stock;
+                }
+                if ($discounted_order_note) {
                     $nv_balance = $balance += 0;
                     $data['output'] = '-';
                     $data['order_note_asoc'] = optional($inventory_kardexable)->order_note->number_full;

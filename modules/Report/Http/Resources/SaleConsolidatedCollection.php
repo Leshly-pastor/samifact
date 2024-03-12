@@ -53,10 +53,14 @@ class SaleConsolidatedCollection extends ResourceCollection
                 // category_id
                 if (property_exists($row->item,'unit_price')) {
                     $unit_price = $row->item->unit_price;
+                    if(!is_numeric(($unit_price))){
+                        //check if has commas, if has one replace by dot, if has more than one remove all commas but not the last one and replace the last one by dot
+                        $unit_price = str_replace(',', '.', $unit_price);
+                        $unit_price = (float) $unit_price;
+                    }
                 }
 
             }
-            Log::info('unit_price: '.$row->relation_item->internal_id);
             return [
                 'id' => $row->id,
                 'item_internal_id' => $row->relation_item->internal_id,

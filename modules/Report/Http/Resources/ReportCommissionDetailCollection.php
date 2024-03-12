@@ -24,6 +24,7 @@ class ReportCommissionDetailCollection extends ResourceCollection
             $type_document = '';
             $quantity = $row->quantity;
             $purchase_unit_price = $items->purchase_unit_price * $quantity;
+            dump($purchase_unit_price);
             $unit_price = $row->unit_price * $quantity;
             $presentation_name = null;
             $relation = $row->document_id ? $row->document : $row->sale_note;
@@ -37,7 +38,7 @@ class ReportCommissionDetailCollection extends ResourceCollection
                     // $quantity = $presentation->quantity_unit;
                     $unit_price = number_format(floatval($unit_price) , 2, ".", "");
                     // $unit_price = 
-                    $purchase_unit_price = $items->purchase_unit_price*$presentation->quantity_unit ;
+                    $purchase_unit_price = $items->purchase_unit_price*$presentation->quantity_unit * $quantity;
                 }else{
                     $unit_price = number_format(floatval($unit_price) , 2, ".", "");
                 }
@@ -50,7 +51,7 @@ class ReportCommissionDetailCollection extends ResourceCollection
                     $presentation = $row->item->presentation;
                     $presentation_name = $presentation->description;
                     // $quantity = $presentation->quantity_unit;
-                    $purchase_unit_price = $items->purchase_unit_price*$presentation->quantity_unit ;
+                    $purchase_unit_price = $items->purchase_unit_price*$presentation->quantity_unit  * $quantity;
                 }else{
                     $unit_price = number_format(floatval($unit_price) , 2, ".", "");
                     // $unit_price = 
@@ -76,7 +77,7 @@ class ReportCommissionDetailCollection extends ResourceCollection
                 'name' => $row->relation_item->description,
                 'quantity' => $quantity,
                 'presentation_name' => $presentation_name,
-                'purchase_unit_price' => number_format($purchase_unit_price,2),
+                'purchase_unit_price' => number_format($purchase_unit_price ,2),
                 'unit_price' => $unit_price ,
                 'unit_gain' => number_format(($unit_price - $purchase_unit_price)/$quantity,2),
                 'overall_profit' => (( $unit_price) - ($purchase_unit_price)),

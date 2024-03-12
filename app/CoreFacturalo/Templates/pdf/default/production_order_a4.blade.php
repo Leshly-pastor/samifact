@@ -434,23 +434,7 @@
 
         </table>
     @endif
-    <table class="full-width">
-        <tr>
-            <td width="65%" style="text-align: top; vertical-align: top;">
-                <br>
-                @foreach ($accounts as $account)
-                    <p>
-                        <span class="font-bold">{{ $account->bank->description }}</span>
-                        {{ $account->currency_type->description }}
-                        <span class="font-bold">N°:</span> {{ $account->number }}
-                        @if ($account->cci)
-                            - <span class="font-bold">CCI:</span> {{ $account->cci }}
-                        @endif
-                    </p>
-                @endforeach
-            </td>
-        </tr>
-    </table>
+    
     <br>
 
     <table class="full-width">

@@ -304,6 +304,10 @@ class DocumentUpdateInput
                     $discount_type_id = $row['discount_type_id'];
                     $description = $row['description'];
                     $factor = $row['factor'];
+                    //check if factor is  in this formart 3.0E-5 and convert to 0.00003
+                    if (strpos($factor, 'E') !== false) {
+                        $factor = sprintf('%.5f', $factor);
+                    }
                     $amount = $row['amount'];
                     $base = $row['base'];
                     $is_amount = $row['is_amount'] ?? null; //registra si el descuento fue por monto o porcentaje

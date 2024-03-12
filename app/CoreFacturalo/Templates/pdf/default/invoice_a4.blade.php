@@ -604,7 +604,7 @@
                 <th class="border-top-bottom text-left py-2">Modelo</th>
                 <th class="border-top-bottom text-center py-2" width="8%">Lote</th>
                 <th class="border-top-bottom text-center py-2" width="8%">Serie</th>
-                <th class="border-top-bottom text-right py-2" width="{{$width_column}}%">P.Unit</th>
+                <th class="border-top-bottom text-right py-2" width="{{ $width_column }}%">P.Unit</th>
                 <th class="border-top-bottom text-right py-2" width="8%">Dto.</th>
                 <th class="border-top-bottom text-right py-2" width="12%">Total</th>
             </tr>
@@ -868,7 +868,7 @@
                             if ($discounts) {
                                 $discounts = get_object_vars($document->discounts);
                                 $discount = $discounts[0];
-                                $is_split = $discount->is_split;
+                                $is_split = isset($discount->is_split) ? $discount->is_split : false;
                                 if ($is_split) {
                                     $total_discount = $total_discount * 1.18;
                                 }
@@ -1078,10 +1078,21 @@
             @foreach ($document->fee as $key => $quote)
                 <tr>
                     <td>
-                        &#8226;
-                        {{ empty($quote->getStringPaymentMethodType()) ? 'Cuota #' . ($key + 1) : $quote->getStringPaymentMethodType() }}
-                        / Fecha: {{ $quote->date->format('d-m-Y') }} /
-                        Monto: {{ $quote->currency_type->symbol }}{{ $quote->amount }}</td>
+                        @if (!$configurations->show_the_first_cuota_document)
+                            &#8226;
+                            {{ empty($quote->getStringPaymentMethodType()) ? 'Cuota #' . ($key + 1) : $quote->getStringPaymentMethodType() }}
+                            / Fecha: {{ $quote->date->format('d-m-Y') }} /
+                            Monto: {{ $quote->currency_type->symbol }}{{ $quote->amount }}
+                        @else
+                            @if ($key == 0)
+                                &#8226;
+                                {{ empty($quote->getStringPaymentMethodType()) ? 'Cuota #' . ($key + 1) : $quote->getStringPaymentMethodType() }}
+                                / Fecha: {{ $quote->date->format('d-m-Y') }} /
+                                Monto: {{ $quote->currency_type->symbol }}{{ $quote->amount }}
+                            @endif
+                        @endif
+
+                    </td>
                 </tr>
             @endforeach
             </tr>

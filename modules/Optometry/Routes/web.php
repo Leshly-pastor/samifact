@@ -19,7 +19,7 @@ Route::middleware(['auth', 'locked.tenant'])->group(function () {
         Route::delete('/{id}', 'OptometryServiceController@destroy');
     });
 
-    Route::prefix('technical-service-payments')->group(function () {
+    Route::prefix('optometry-service-payments')->group(function () {
 
         Route::get('/records/{record}', 'OptometryServicePaymentController@records');
         Route::get('/document/{record}', 'OptometryServicePaymentController@document');

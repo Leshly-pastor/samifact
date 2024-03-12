@@ -151,6 +151,7 @@ class   SaleNote extends ModelTenant
     ];
 
     protected $fillable = [
+        'optometry_service_id',
         'alter_company',
         'state_payment_id',
         'no_stock',

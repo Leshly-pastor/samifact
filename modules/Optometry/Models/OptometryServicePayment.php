@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\Sale\Models;
+namespace Modules\Optometry\Models;
 
 use Modules\Finance\Models\GlobalPayment;
 use App\Models\Tenant\PaymentMethodType;

@@ -856,6 +856,7 @@ export default {
         this.loadConfiguration();
         this.loadEstablishment();
         this.loadCompany();
+        console.log("🚀 ~ created ~ this.configuration:", this.configuration)
     },
     async mounted() {
         this.initForm();
@@ -1262,6 +1263,7 @@ export default {
         },
 
         async submit() {
+            this.form.discounted_stock = this.configuration.discount_order_note;
             if (this.serie) {
                 this.form.prefix = this.serie;
             }

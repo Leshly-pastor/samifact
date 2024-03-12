@@ -80,6 +80,7 @@ trait FinanceTrait
             }
             return null;
         } else {
+
             $company_active_id = Cache::get("cash_".$user->id);
             if($company_active_id == null){
                 $company_active_id = $user->company_active_id;

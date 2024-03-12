@@ -189,7 +189,7 @@ export default {
     data() {
         return {
             title: null,
-            resource: 'technical-service-payments',
+            resource: 'optometry-service-payments',
             records: [],
             payment_destinations: [],
             payment_method_types: [],
@@ -283,7 +283,7 @@ export default {
 
             let form = {
                 id: this.records[index].id,
-                technical_service_id: this.recordId,
+                optometry_service_id: this.recordId,
                 date_of_payment: this.records[index].date_of_payment,
                 payment_method_type_id: this.records[index].payment_method_type_id,
                 payment_destination_id: this.records[index].payment_destination_id,

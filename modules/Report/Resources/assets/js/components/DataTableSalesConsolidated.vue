@@ -390,7 +390,7 @@ export default {
                 // if(!this.form.person_id &&  !this.form.seller_id){
                 //     return this.$message.error('Debe seleccionar un cliente o vendedor')
                 // }
-
+                // this.form.page = 1;
                 this.records= []
                 this.loading_submit = await true
                 await this.getRecords()
@@ -403,7 +403,9 @@ export default {
                 this.totals_sale = _.sumBy(this.records, (it) => parseFloat(it.total_sale));
             },
             getRecords() {
-
+                if(this.form.user_type == 'VENDEDOR' && this.form.document_type_id == '80'){
+                    this.form.user_type = "CREADOR";
+                }
                 return this.$http
                     .get(`/${this.resource}/records?${this.getQueryParameters()}`)
                     .then((response) => {
@@ -439,6 +441,7 @@ export default {
                 this.form.person_id = null
                 this.form.user_id = [];
                 this.$eventHub.$emit('changeFilterColumn', 'seller')
+                this.$forceUpdate()
             },
 
         }

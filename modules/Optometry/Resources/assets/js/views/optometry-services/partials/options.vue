@@ -346,7 +346,7 @@ export default {
             customer_email: "",
             titleDialog: null,
             loading: false,
-            resource: "technical-services",
+            resource: "optometry-services",
             resource_documents: "documents",
             errors: {},
             form: {},
@@ -433,7 +433,7 @@ export default {
 
             await this.$http
                 .get(
-                    `/generate-document/record/technical-services/${
+                    `/generate-document/record/optometry-services/${
                         this.recordId
                     }`
                 )
@@ -462,15 +462,15 @@ export default {
                     let total_igv = _.round(total - total_taxed, 2);
                     let item_description = `Descripción: ${
                         this.record.description
-                    }, Estado: ${this.record.state}, Razón: ${this.record
-                        .reason + "\n"}`;
+                    }`;
                     if (this.record.items !== undefined) {
                         this.form.items = this.record.items;
                     }
 
-                    this.form.technical_service_id = this.recordId;
+                    this.form.optometry_service_id = this.recordId;
 
-                    this.form.items.push({
+                    if(total != 0){
+                        this.form.items.push({
                         id: null,
                         item_id: null,
                         internal_id: moment().format("YYYYMMDDHHmmss"),
@@ -481,7 +481,7 @@ export default {
                         affectation_igv_type_id:
                             affectation_igv_type_id || "10",
                         description: item_description,
-                        percentage_igv: this.percentage_igv,
+                        percentage_igv: 18,
                         currency_type_id: "PEN",
                         unit_value: unit_value,
                         unit_price: total,
@@ -494,6 +494,7 @@ export default {
                         discounts: [],
                         charges: []
                     });
+                    }
 
                     total = 0;
                     total_taxed = 0;
@@ -522,7 +523,7 @@ export default {
                     this.form.payments = this.record.payments;
                     this.form.has_document_sale_note = this.record.has_document_sale_note;
 
-                    this.titleDialog = `Servicio de soporte técnico`;
+                    this.titleDialog = `Servicio de optometría`;
                 });
 
             this.loading = false;
@@ -662,7 +663,7 @@ export default {
                     format_pdf: "a4"
                 },
                 quotation_id: null,
-                technical_service_id: null,
+                optometry_service_id: null,
                 is_receivable: false,
                 payments: [],
                 hotel: {}
