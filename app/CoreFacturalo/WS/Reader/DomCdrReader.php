@@ -10,6 +10,31 @@ use Illuminate\Support\Facades\Log;
  */
 class DomCdrReader
 {
+
+    public function checkSignature($xmlString)
+    {
+      
+        $pass = true;
+        $xml = new \SimpleXMLElement($xmlString);
+        $xml->registerXPathNamespace('ar', 'urn:oasis:names:specification:ubl:schema:xsd:ApplicationResponse-2');
+        $xml->registerXPathNamespace('ext', 'urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2');
+        $xml->registerXPathNamespace('ds', 'http://www.w3.org/2000/09/xmldsig#');
+        $xml->registerXPathNamespace('cbc', 'urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2');
+        $xml->registerXPathNamespace('cac', 'urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2');
+
+        $signatureValue = $xml->xpath('//ds:Signature/ds:SignatureValue');
+
+        if (!empty($signatureValue)) {
+            $signatureValue = (string)$signatureValue[0];
+            Log::info($signatureValue);
+            if (strpos($signatureValue, 'BetaPublicCert') !== false) {
+                $pass = false;
+            }
+        } 
+
+
+        return $pass;
+    }
     /**
      * Get Cdr using DomDocument.
      *
@@ -22,8 +47,9 @@ class DomCdrReader
     public function getCdrResponse($xml)
     {
         $xpt = $this->getXpath($xml);
-
+        // $this->checkSignature($xml);
         $cdr = $this->getResponseByXpath($xpt);
+        $cdr->setIsBeta(!$this->checkSignature($xml));
         if (!$cdr) {
 //            Log::error('Not found cdr response in xml');
             throw new \Exception('Not found cdr response in xml', 'ERROR_CDR');

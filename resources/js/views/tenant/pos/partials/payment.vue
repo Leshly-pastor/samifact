@@ -893,6 +893,7 @@ export default {
 
     data() {
         return {
+            user_default_document: [],
             charge_amount: 0,
             dispatch_ticket_pdf_quantity: 1,
             enabled_discount: false,
@@ -989,13 +990,13 @@ export default {
         },
     },
     methods: {
-        setAllowanceCharge(percentage){
+        setAllowanceCharge(percentage) {
             this.enabled_charge = true;
             this.charge_amount = percentage;
             this.is_charge_amount = false;
 
             this.reCalculateTotal();
-            },
+        },
         deleteChargeGlobal() {
             let charge = _.find(this.form.charges, { charge_type_id: "50" });
             let index = this.form.charges.indexOf(charge);
@@ -1063,8 +1064,8 @@ export default {
                 }
             }
             this.difference = _.round(this.enter_amount - this.form.total, 2);
-            if(this.difference < 0){
-                this.button_payment = true
+            if (this.difference < 0) {
+                this.button_payment = true;
             }
         },
         startConnection() {
@@ -1687,9 +1688,35 @@ export default {
             this.series = _.filter(this.all_series, {
                 document_type_id: this.form.document_type_id,
             });
-            this.form.series_id =
-                this.series.length > 0 ? this.series[0].id : null;
-
+            // let { series_id } = this.user_default_document;
+            // if (series_id) {
+            //     let series = this.series.find((s) => s.id === series_id);
+            //     if (series) {
+            //         this.form.series_id = series_id;
+            //     }
+            // }
+            // if (this.form.series_id == null) {
+            //     this.form.series_id =
+            //         this.series.length > 0 ? this.series[0].id : null;
+            // }
+            // let { series_id } = this.user_default_document;
+            let serieDefault = this.user_default_document.find(
+                (s) => s.document_id === this.form.document_type_id
+            );
+            if(serieDefault){
+                let series = this.series.find((s) => s.id === serieDefault.series_id);
+                console.log("🚀 ~ filterSeries ~ series:", series)
+                if (series) {
+                    this.form.series_id = series.id;
+                }
+            }
+            if (this.form.series_id == null) {
+                this.form.series_id =
+                    this.series.length > 0 ? this.series[0].id : null;
+            }
+            // this.form.series_id = series
+            //     ? series_id
+            //     : this.series[0]?.id || null;
             if (!this.form.series_id) {
                 return this.$message.warning(
                     "El establecimiento no tiene series disponibles para el comprobante"
@@ -1942,7 +1969,6 @@ export default {
             if (this.resource_documents !== "documents") {
                 route = `/sale-notes/ticket/${this.documentNewId}/ticket`;
             }
-            //     console.log("🚀 ~ file: payment.vue:1708 ~ gethtml ~ route:", route)
             // this.form.datahtml = route;
             // this.printticket(route);
             // return;
@@ -1965,10 +1991,6 @@ export default {
             await this.sleep(400);
             var configg = getUpdatedConfig();
             var opts = getUpdatedConfig();
-            console.log(
-                "🚀 ~ file: payment.vue:1735 ~ printticket ~ this.form.datahtml:",
-                link
-            );
             var printData = [
                 {
                     type: "pdf",
@@ -2030,11 +2052,24 @@ export default {
                 .get(`/${this.resource}/payment_tables`)
                 .then((response) => {
                     this.all_series = response.data.series;
+                    this.user_default_document =
+                        response.data.user_default_document;
                     this.payment_method_types =
                         response.data.payment_method_types;
                     this.cards_brand = response.data.cards_brand;
                     this.global_discount_types =
                         response.data.global_discount_types;
+                    if (this.user_default_document.length == 1) {
+                        let user_default_document = this.user_default_document[0];
+                        let { document_id, series_id } =
+                            user_default_document;
+                        if (document_id) {
+                            this.form.document_type_id = document_id;
+                        }
+                        if (series_id) {
+                            this.form.series_id = series_id;
+                        }
+                    }
                     this.filterSeries();
                     this.setConfigGlobalDiscountType();
                 });

@@ -252,7 +252,18 @@
                         @else
                             {!! $row->item->description !!}
                         @endif
-   
+                        @if ($configuration->name_pdf)
+                        @php
+                            $item_name = \App\Models\Tenant\Item::select('name')
+                                ->where('id', $row->item_id)
+                                ->first();
+                        @endphp
+                        @if ($item_name->name)
+                        <div>
+                            <span style="font-size: 9px">{{ $item_name->name }}</span>
+                            </div>    
+                        @endif
+                    @endif
                         @if ($row->attributes)
                             @foreach ($row->attributes as $attr)
                                 <br /><span style="font-size: 9px">{!! $attr->description !!} : {{ $attr->value }}</span>

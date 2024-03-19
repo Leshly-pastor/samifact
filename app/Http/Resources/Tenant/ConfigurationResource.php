@@ -23,6 +23,7 @@ class ConfigurationResource extends JsonResource
         return $this->getCollectionData();
         /** Se ha movido al modelo */
         return [
+            'name_pdf' => (bool) $this->name_pdf,
             'enabled_dispatch_ticket_pdf' => (bool) $this->enabled_dispatch_ticket_pdf,
             'search_by_factory_code' => (bool)$this->search_by_factory_code,
             'purchase_affectation_igv_type_id' => $this->purchase_affectation_igv_type_id,

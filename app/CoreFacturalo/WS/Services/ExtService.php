@@ -4,6 +4,7 @@ namespace App\CoreFacturalo\WS\Services;
 
 use App\CoreFacturalo\WS\Response\Error;
 use App\CoreFacturalo\WS\Response\StatusResult;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class ExtService.
@@ -82,7 +83,7 @@ class ExtService extends BaseSunat
     {
         return '98' == $code;
     }
-    
+
     //custom
     public function setCustomStatusCode($code)
     {
@@ -93,5 +94,4 @@ class ExtService extends BaseSunat
     {
         return (int) $this->customStatusCode;
     }
-
 }

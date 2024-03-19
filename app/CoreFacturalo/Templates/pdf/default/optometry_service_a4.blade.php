@@ -291,15 +291,20 @@
             </tr>
             <tr>
                 <td colspan="4" class="text-right font-bold mb-3">COSTO DEL SERVICIO: </td>
-                <td class="text-right font-bold">{{ number_format($document->cost, 2) }}</td>
+                <td class="text-right font-bold">{{ number_format($document->cost+$document->total, 2) }}</td>
             </tr>
             <tr>
-                <td colspan="4" class="text-right font-bold">PAGO ADELANTADO: </td>
-                <td class="text-right font-bold">{{ number_format($document->prepayment, 2) }}</td>
+                <td colspan="4" class="text-right font-bold">PAGOS: </td>
+                @php
+                    $prepayment = $document->prepayment;
+                    $payments = $document->payments->sum('payment');
+                    $total_payment = $prepayment + $payments;
+                @endphp
+                <td class="text-right font-bold">{{ number_format($total_payment, 2) }}</td>
             </tr>
             <tr>
                 <td colspan="4" class="text-right font-bold">SALDO A PAGAR: </td>
-                <td class="text-right font-bold">{{ number_format($document->cost - $document->prepayment, 2) }}</td>
+                <td class="text-right font-bold">{{ number_format($document->total+$document->cost - $total_payment, 2) }}</td>
             </tr>
         </tbody>
     </table>

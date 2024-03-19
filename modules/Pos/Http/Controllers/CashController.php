@@ -177,6 +177,7 @@ class CashController extends Controller
             return (object)[
                 'id'   => $row->id,
                 'name' => $row->description,
+                'description' => $row->description,
                 'is_credit' => $row->is_credit,
                 'is_cash' => $row->is_cash,
                 'is_digital' => $row->is_digital,
@@ -240,12 +241,15 @@ class CashController extends Controller
             $temp = [];
             $notes = [];
             $usado = '';
+            $references = null;
+            $payment_method_description = null;
 
             /** Documentos de Tipo Nota de venta */
             if ($cash_document->payment_type == 'App\Models\Tenant\SaleNotePayment') {
                 $sale_note_payment = SaleNotePayment::find($cash_document->payment_id);
                 if ($sale_note_payment) {
                     $sale_note = $sale_note_payment->sale_note;
+                    $reference = $sale_note_payment->reference;
                     $pays = [];
                     if (in_array($sale_note->state_type_id, $status_type_id)) {
                         $record_total = 0;
@@ -260,6 +264,7 @@ class CashController extends Controller
 
                         foreach ($methods_payment as $record) {
                             if ($sale_note_payment->payment_method_type_id == $record->id) {
+                                $payment_method_description= $record->description;
                                 $record->sum = ($record->sum + $sale_note_payment->payment);
                                 if ($record->id === '01') $data['total_payment_cash_01_sale_note'] += $sale_note_payment->payment;
                                 if ($record->id === '01') $cash_income_x += $sale_note_payment->payment;
@@ -278,6 +283,7 @@ class CashController extends Controller
                         }
                     }
                     $temp = [
+                        'payment_method_description' => $payment_method_description,
                         'type_transaction'          => 'Venta',
                         'document_type_description' => 'NOTA DE VENTA',
                         'number'                    => $sale_note->number_full,
@@ -313,6 +319,7 @@ class CashController extends Controller
                 $package_handler_payment = PackageHandlerPayment::find($cash_document->payment_id);
                 if ($package_handler_payment) {
                     $package_handler = $package_handler_payment->package_handler;
+                    $reference = $package_handler_payment->reference;
                     $pays = [];
                     // if (in_array($package_handler->state_type_id, $status_type_id)) {
                     $record_total = 0;
@@ -327,6 +334,7 @@ class CashController extends Controller
 
                     foreach ($methods_payment as $record) {
                         if ($package_handler_payment->payment_method_type_id == $record->id) {
+                            $payment_method_description= $record->description;
                             $record->sum = ($record->sum + $package_handler_payment->payment);
                             if ($record->id === '01') $data['total_payment_cash_01_sale_note'] += $package_handler_payment->payment;
                             if ($record->id === '01') $cash_income_x += $package_handler_payment->payment;
@@ -380,6 +388,7 @@ class CashController extends Controller
                 // $document = $cash_document->document;
                 $document_payment = DocumentPayment::find($cash_document->payment_id);
                 if ($document_payment) {
+                    $reference = $document_payment->reference;
                     $document = $document_payment->document;
                     $payment_condition_id = $document->payment_condition_id;
                     $pays = $document->payments;
@@ -399,7 +408,7 @@ class CashController extends Controller
                                 $usado .= '<br>Se usan los pagos<br>';
                                 foreach ($methods_payment as $record) {
                                     if ($document_payment->payment_method_type_id == $record->id) {
-
+                                        $payment_method_description= $record->description;
                                         $record->sum = ($record->sum + $document_payment->payment);
 
                                         if (!empty($record_total)) {
@@ -415,7 +424,11 @@ class CashController extends Controller
 
                             foreach ($methods_payment as $record) {
 
-                                if ($record->id === '01') $data['total_payment_cash_01_document'] += $document_payment->payment;
+                                if ($record->id === '01') 
+                                {
+                                    $payment_method_description= $record->description;
+                                    $data['total_payment_cash_01_document'] += $document_payment->payment;
+                                }
                                 // }
                             }
                             $usado .= '<br> state_type_id: ' . $document->state_type_id . '<br>';
@@ -519,6 +532,7 @@ class CashController extends Controller
                 $usado = '<br>Se usan para cash<br>';
                 // $technical_service = $cash_document->technical_service;
                 $technical_service_payment = TechnicalServicePayment::find($cash_document->payment_id);
+                $reference = $technical_service_payment->reference;
                 if ($technical_service_payment) {
                     $technical_service  = $technical_service_payment->technical_service;
 
@@ -532,6 +546,7 @@ class CashController extends Controller
                             foreach ($methods_payment as $record) {
                                 if ($record->id === '01') $cash_income_x += $technical_service_payment->payment;
                                 if ($technical_service_payment->payment_method_type_id == $record->id) {
+                                    $payment_method_description= $record->description;
                                     $record->sum = ($record->sum + $technical_service_payment->payment);
                                     if (!empty($record_total)) {
                                         $usado .= self::getStringPaymentMethod($record->id) . '<br>Se usan los pagos Tipo ' . $record->id . '<br>';
@@ -567,6 +582,7 @@ class CashController extends Controller
             elseif ($cash_document->payment_type == 'Modules\Expense\Models\ExpensePayment') {
                 // $expense_payment = $cash_document->expense_payment;
                 $expense_payment = ExpensePayment::find($cash_document->payment_id);
+                $reference = $expense_payment->reference;
                 $total_expense_payment = 0;
 
                 if ($expense_payment->expense->state_type_id == '05') {
@@ -582,6 +598,7 @@ class CashController extends Controller
                     // $final_balance -= $total;
                     foreach ($methods_payment as $record) {
                         if ($expense_payment->expense_method_type_id == "1" && $record->id == "01") {
+                            $payment_method_description= $record->description;
                             $record->sum = ($record->sum - $expense_payment->payment);
                         }
                     }
@@ -614,6 +631,7 @@ class CashController extends Controller
             /** Documentos de Tipo ingresos */
             elseif ($cash_document->payment_type == 'Modules\Finance\Models\IncomePayment') {
                 $income_payment = IncomePayment::find($cash_document->payment_id);
+                $reference = $income_payment->reference;
                 // $income_payment = $cash_document->income_payment;
                 $total_income_payment = 0;
 
@@ -628,6 +646,7 @@ class CashController extends Controller
                     foreach ($methods_payment as $record) {
                         if ($record->id === '01') $cash_income_x += $income_payment->payment;
                         if ($income_payment->payment_method_type_id == $record->id) {
+                            $payment_method_description= $record->description;
                             $record->sum = ($record->sum + $income_payment->payment);
                         }
                     }
@@ -671,7 +690,7 @@ class CashController extends Controller
                 // $purchase = $cash_document->purchase;
                 $purchase_payment = PurchasePayment::find($cash_document->payment_id);
                 $purchase = $purchase_payment->purchase;
-
+                $reference = $purchase_payment->reference;
                 if (in_array($purchase->state_type_id, $status_type_id)) {
 
                     $payments = $purchase->purchase_payments;
@@ -714,6 +733,7 @@ class CashController extends Controller
             /** Cotizaciones */
             else if ($cash_document->payment_type == 'Modules\Sale\Models\QuotationPayment') {
                 $quotation_payment = QuotationPayment::find($cash_document->payment_id);
+                $reference = $quotation_payment->reference;
                 $quotation = $quotation_payment->quotation;
 
                 // validar si cumple condiciones para usar registro en reporte
@@ -735,7 +755,7 @@ class CashController extends Controller
                         foreach ($methods_payment as $record) {
                             if ($record->id === '01') $cash_income_x += $quotation_payment->payment;
                             if ($quotation_payment->payment_method_type_id == $record->id) {
-
+                                $payment_method_description= $record->description;
                                 $record->sum = ($record->sum + $quotation_payment->payment);
                             }
                         }
@@ -892,6 +912,8 @@ class CashController extends Controller
             // }
 
             if (!empty($temp)) {
+                $temp['reference'] = $reference;
+                $temp['payment_method_description'] = $payment_method_description;
                 $temp['usado'] = isset($temp['usado']) ? $temp['usado'] : '--';
                 $temp['total_string'] = self::FormatNumber($temp['total']);
 
@@ -1304,6 +1326,17 @@ class CashController extends Controller
      * @throws \Mpdf\MpdfException
      * @throws \Throwable
      */
+    public function reportA4Detail($cash){
+        $temp = tempnam(sys_get_temp_dir(), 'cash_pdf_a4_detail');
+        file_put_contents($temp, $this->getPdf($cash, 'a4_detail'));
+
+        $headers = [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="Reporte"'
+        ];
+
+        return response()->file($temp, $headers);
+    }
     public function reportA4($cash)
     {
 

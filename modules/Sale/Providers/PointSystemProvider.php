@@ -31,11 +31,11 @@ class PointSystemProvider extends ServiceProvider
      */
     public function boot()
     {
-        $this->setPointsToDocument(); 
-        $this->setPointsToSaleNote(); 
+        $this->setPointsToDocument();
+        $this->setPointsToSaleNote();
     }
-    
-    
+
+
     /**
      * 
      * Validar si la nota de venta se usara para sistema por puntos y actualizar puntos del cliente
@@ -47,11 +47,11 @@ class PointSystemProvider extends ServiceProvider
         // para registro
         SaleNote::created(function ($sale_note) {
 
-            if($sale_note->isCreatedFromPos() && $sale_note->isPointSystem())
-            {
+            if ($sale_note->isCreatedFromPos() && $sale_note->isPointSystem()) {
                 $customer = $sale_note->person;
 
                 // para items que son intercambiados por puntos
+
                 $this->exchangePointsFromItems($customer, -1);
 
                 // para incrementar puntos por venta
@@ -62,11 +62,10 @@ class PointSystemProvider extends ServiceProvider
 
         // para anulaciones
         SaleNote::updated(function ($sale_note) {
-            
-            if($sale_note->isCreatedFromPos() && $sale_note->isVoidedOrRejected() && $sale_note->isPointSystem())
-            {
+
+            if ($sale_note->isCreatedFromPos() && $sale_note->isVoidedOrRejected() && $sale_note->isPointSystem()) {
                 $customer = $sale_note->person;
-                
+
                 // para items que son intercambiados por puntos
                 $this->exchangePointsFromItems($customer, 1, $sale_note);
 
@@ -74,7 +73,6 @@ class PointSystemProvider extends ServiceProvider
                 $this->setPointsToCustomer($sale_note, -1, $customer);
             }
         });
-        
     }
 
 
@@ -86,31 +84,31 @@ class PointSystemProvider extends ServiceProvider
      */
     private function setPointsToDocument()
     {
-        
+
         // para registro del cpe
         Document::created(function ($document) {
-
-            if($document->isDocumentTypeInvoice() && $document->isPointSystem() && !$document->sale_note_id)
-            {
+            if ($document->isDocumentTypeInvoice() && $document->isPointSystem() && !$document->sale_note_id) {
                 $customer = $document->person;
-
+                $inputs = request()->all();
+                if (empty($inputs)) {
+                    $this->exchangePointsFromItems($customer, -1, $document);
+                } else {
+                    $this->exchangePointsFromItems($customer, -1);
+                }
                 // para items que son intercambiados por puntos
-                $this->exchangePointsFromItems($customer, -1);
 
                 // para incrementar puntos por venta
                 $this->setPointsToCustomer($document, 1, $customer);
             }
-
         });
 
 
         // para anulaciones o rechazo del cpe
         Document::updated(function ($document) {
-            
-            if($document->isDocumentTypeInvoice() && $document->isVoidedOrRejected() && $document->isPointSystem() && !$document->sale_note_id)
-            {
+
+            if ($document->isDocumentTypeInvoice() && $document->isVoidedOrRejected() && $document->isPointSystem() && !$document->sale_note_id) {
                 $customer = $document->person;
-                
+
                 // para items que son intercambiados por puntos
                 $this->exchangePointsFromItems($customer, 1, $document);
 
@@ -118,10 +116,9 @@ class PointSystemProvider extends ServiceProvider
                 $this->setPointsToCustomer($document, -1, $customer);
             }
         });
-        
     }
-    
-    
+
+
     /**
      * 
      * Items que son intercambiados por puntos
@@ -133,27 +130,23 @@ class PointSystemProvider extends ServiceProvider
      */
     private function exchangePointsFromItems($customer, $factor, $document = null)
     {
-        if($document)
-        {
-            $total_used_points_for_exchange = $document->items->sum(function($row){
+        if ($document) {
+            $total_used_points_for_exchange = $document->items->sum(function ($row) {
                 return $row->item->used_points_for_exchange ?? 0;
             });
-        } 
-        else
-        {
+        } else {
             $inputs = request()->all();
-            $total_used_points_for_exchange = collect($inputs['items'])->sum(function($row){
+            $total_used_points_for_exchange = collect($inputs['items'])->sum(function ($row) {
                 return $row['item']['used_points_for_exchange'] ?? 0;
             });
         }
 
-        if($total_used_points_for_exchange > 0)
-        {
+        if ($total_used_points_for_exchange > 0) {
             $this->calculateAccumulatedPoints($customer, $total_used_points_for_exchange, $factor);
         }
     }
 
-    
+
     /**
      * 
      * Asignar puntos al cliente
@@ -175,7 +168,7 @@ class PointSystemProvider extends ServiceProvider
         $this->calculateAccumulatedPoints($customer, $calculate_quantity_points, $factor);
     }
 
-    
+
     /**
      * 
      * Calcular y asignar puntos
@@ -191,7 +184,7 @@ class PointSystemProvider extends ServiceProvider
         $customer->save();
     }
 
- 
+
     /**
      * 
      * Configuracion del sistema de puntos
@@ -202,6 +195,6 @@ class PointSystemProvider extends ServiceProvider
     // {
     //     return Configuration::getDataPointSystem();
     // }
-    
- 
+
+
 }

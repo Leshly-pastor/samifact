@@ -547,7 +547,7 @@ class OptometryServiceController extends Controller
                 'message' => 'El servicio técnico tiene pagos asociados, debe eliminarlos previamente'
             ];
         }
-
+        $record->items()->delete();
         $record->delete();
 
         return [

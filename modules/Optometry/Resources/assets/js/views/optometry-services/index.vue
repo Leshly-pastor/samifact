@@ -32,9 +32,9 @@
                         <th>Número</th>
                         <th>F. Emisión</th>
                         <th>N° Serie</th>
-                        <th>Costo S.</th>
-                        <th>Costo P.</th>
-                        <th>Total</th>
+                        <!-- <th>Costo S.</th> -->
+                        <!-- <th>Costo P.</th> -->
+                        <th>Costo</th>
                         <th class="text-center">Documento</th>
                         <!-- <th>Pago adelantado</th> -->
                         <th></th>
@@ -55,8 +55,8 @@
                         <td class="text-center">{{ row.id }}</td>
                         <td class="text-center">{{ row.date_of_issue }}</td>
                         <td class="text-center">{{ row.serial_number }}</td>
-                        <td class="text-center">{{ row.cost }}</td>
-                        <td class="text-center">{{ row.total }}</td>
+                        <!-- <td class="text-center">{{ row.cost }}</td> -->
+                        <!-- <td class="text-center">{{ row.total }}</td> -->
                         <td class="text-center">{{ row.sum_total }}</td>
                         <td class="text-center">
                             {{ row.number_document_sale_note }}

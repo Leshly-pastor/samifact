@@ -56,4 +56,6 @@ class BillResult extends BaseResult
 
         return $this;
     }
+
+    
 }

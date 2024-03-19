@@ -14,7 +14,7 @@ class TenantAddGlobalDiscountTypeIdToConfigurations extends Migration
     public function up()
     {
         Schema::table('configurations', function (Blueprint $table) {
-            $table->string('global_discount_type_id')->default('03')->after('affectation_igv_type_id');
+            $table->string('global_discount_type_id')->default('02')->after('affectation_igv_type_id');
         });
     }
 

@@ -56,6 +56,12 @@
                             </li>
                             <li>
 
+                                <a href="{{ url('list-agencies') }}">
+                                    <i data-cs-icon="file-text" class="icon" data-cs-size="18"></i>
+                                    Lista de agencias</a>
+                            </li>
+                            <li>
+
                                 <a href="{{ url('list-platforms') }}">
                                     <i data-cs-icon="web" class="icon" data-cs-size="18"></i>
                                     Plataformas</a>
@@ -223,6 +229,13 @@
                                 <i data-cs-icon="file-data" class="icon" data-cs-size="18"></i>
                                 PDF - QR - Yape/Plin</a>
                         </li>
+                        @if($configuration->document_columns)
+                        <li>
+                            <a href="{{ route('tenant.document_columns.index') }}">
+                                <i data-cs-icon="file-data" class="icon" data-cs-size="18"></i>
+                                PDF - Columnas personalizadas</a>
+                        </li>
+                        @endif
                     </ul>
                 </div>
             </div>

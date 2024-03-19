@@ -600,7 +600,8 @@
                                 class="form-group"
                             >
                                 <label class="control-label">
-                                    Código de fábrica
+                                    {{showPharmaElement? 'Principio activo':'Código de fábrica'}}
+                                    
                                     <el-tooltip
                                         class="item"
                                         content="Para habilitar la búsqueda debe realizarlo en configuración/avanzado"

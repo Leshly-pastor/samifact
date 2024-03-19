@@ -17,7 +17,7 @@ use App\Models\Tenant\Catalogs\{
 use Illuminate\Support\Facades\DB;
 use Modules\BusinessTurn\Models\DocumentTransport;
 use Modules\BusinessTurn\Http\Requests\DocumentHotelGuestRequest;
-
+use Modules\BusinessTurn\Models\AgencyTransport;
 
 class BusinessTurnController extends Controller
 {
@@ -32,6 +32,7 @@ class BusinessTurnController extends Controller
         return BusinessTurn::get()->transform(function($row, $key) {
             return [
                 'id' => $row->id,
+                'value' => $row->value,
                 'active' => (bool)$row->active,
                 'name' => $row->name,
             ];
@@ -114,7 +115,7 @@ class BusinessTurnController extends Controller
     {
 
         $identity_document_types = IdentityDocumentType::whereIn('id',['1','4','7'])->get();
-
+        $agencies = AgencyTransport::all();
         $locations = [];
         $departments = Department::whereActive()->get();
         foreach ($departments as $department)
@@ -143,6 +144,6 @@ class BusinessTurnController extends Controller
             ];
         }
 
-        return compact('identity_document_types','locations');
+        return compact('identity_document_types','locations','agencies');
     }
 }

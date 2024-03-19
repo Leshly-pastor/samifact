@@ -111,6 +111,14 @@
                                         class="dropdown-item text-1"
                                         href="#"
                                         @click.prevent="
+                                            clickDownloadReport(row.id, 'a4-detail')
+                                        "
+                                        >PDF A4 V2</a
+                                    >
+                                    <a
+                                        class="dropdown-item text-1"
+                                        href="#"
+                                        @click.prevent="
                                             clickDownloadReport(
                                                 row.id,
                                                 'ticket'

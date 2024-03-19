@@ -178,6 +178,13 @@ p {
     font-size: 12px !important;
 }
 
+.desc-xl {
+    font-size: 14px !important;
+}
+.desc-l{
+    font-size: 12px !important;
+
+}
 .desc {
   font-size: 10px !important;
 }

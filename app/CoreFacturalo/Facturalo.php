@@ -1111,10 +1111,21 @@ class Facturalo
     public function onlySenderXmlSignedBill()
     {
         $res = $this->senderXmlSigned();
+        
         //Log::info($res);
         if ($res->isSuccess()) {
 
             $cdrResponse = $res->getCdrResponse();
+            $beta = $cdrResponse->getIsBeta();
+            if($beta && !$this->isDemo) {
+                $this->response = [
+                    'sent' => true,
+                    'code' => "0000",
+                    'description' => "El comprobante ha sido enviado a la SUNAT en modo de pruebas (BETA).",
+                    'notes' => ""
+                ];
+                return;
+            }
             $this->uploadFile($res->getCdrZip(), 'cdr');
 
             //enviar cdr a pse
@@ -1123,7 +1134,7 @@ class Facturalo
 
             $code = $cdrResponse->getCode();
             $description = $cdrResponse->getDescription();
-
+            Log::info($code." ".$description);
             $this->response = [
                 'sent' => true,
                 'code' => $cdrResponse->getCode(),
@@ -1249,19 +1260,45 @@ class Facturalo
             'ticket' => $ticket
         ]);
     }
+    public function checkSignature($xmlString)
+    {
 
+        $pass = true;
+        $xml = new \SimpleXMLElement($xmlString);
+        $xml->registerXPathNamespace('ar', 'urn:oasis:names:specification:ubl:schema:xsd:ApplicationResponse-2');
+        $xml->registerXPathNamespace('ext', 'urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2');
+        $xml->registerXPathNamespace('ds', 'http://www.w3.org/2000/09/xmldsig#');
+        $xml->registerXPathNamespace('cbc', 'urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2');
+        $xml->registerXPathNamespace('cac', 'urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2');
+
+        $signatureValue = $xml->xpath('//ds:Signature/ds:SignatureValue');
+
+        if (!empty($signatureValue)) {
+            $signatureValue = (string)$signatureValue[0];
+            Log::info($signatureValue);
+            if (strpos($signatureValue, 'BetaPublicCert') !== false) {
+                $pass = false;
+            }
+        }
+
+
+        return $pass;
+    }
     public function statusSummary($ticket)
     {
         $extService = new ExtService();
         $extService->setClient($this->wsClient);
         $extService->setCodeProvider(new XmlErrorCodeProvider());
         $res = $extService->getStatus($ticket);
+        $beta = $res->getCdrResponse()->getIsBeta();
+        if ($beta && !$this->isDemo) {
+            throw new Exception("El CDR es de prueba, no se puede procesar.", 511); //custom exception code
+        }
         if (!$res->isSuccess()) {
             throw new Exception("Code: {$res->getError()->getCode()}; Description: {$res->getError()->getMessage()}", 511); //custom exception code
         } else {
             $cdrResponse = $res->getCdrResponse();
             $this->uploadFile($res->getCdrZip(), 'cdr');
-
             $this->response = [
                 'sent' => true,
                 'code' => $cdrResponse->getCode(),

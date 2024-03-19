@@ -58,7 +58,7 @@
                             :class="`${row.is_locked}? 'text-danger' : 'text-muted'`"
                         >
                             {{ row.type }}
-                            <template v-if="is_locked"> (Bloqueado) </template>
+                            <template v-if="row.is_locked"> (Bloqueado) </template>
                         </div>
                         <div class="row g-0 align-items-center mb-2">
                             <div class="col-auto">

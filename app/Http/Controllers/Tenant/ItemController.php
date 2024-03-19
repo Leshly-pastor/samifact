@@ -223,12 +223,14 @@ class ItemController extends Controller
     }
     public function columns()
     {
+        $configuration = Configuration::select('is_pharmacy')->firstOrFail();
+        $factory_code = $configuration->is_pharmacy ? 'Principio activo' : 'Código de fábrica';
         return [
             'description' => 'Nombre',
             'internal_id' => 'Código interno',
             'unit_type_id' => 'Unidad de medida',
             'barcode' => 'Código de barras',
-            'factory_code' => 'Código de fábrica',
+            'factory_code' => $factory_code,
             'model' => 'Modelo',
             'brand' => 'Marca',
             'date_of_due' => 'Fecha vencimiento',

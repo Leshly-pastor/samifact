@@ -572,7 +572,7 @@ class ClientController extends Controller
                     'soap_type_id' => $request->soap_type_id,
                     'soap_send_id' => $request->soap_send_id == '03' ? '02' : $request->soap_send_id,
                     'soap_username' => $request->soap_username,
-                    'soap_password' =>  $request->soap_send_id == '03' ? $this->soap_password : $request->soap_password,
+                    'soap_password' =>   $request->soap_password,
                     'soap_url' => $request->soap_send_id == '03' ? $this->soap_url : $request->soap_url,
                     'certificate' => $name_certificate,
                     'is_rus' => $is_rus,

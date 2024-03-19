@@ -3605,13 +3605,13 @@
 
         <document-transport-form
             :showDialog.sync="showDialogFormTransport"
-            :transport="form.transport"
+            :transportSaved="form.transport"
             @addDocumentTransport="addDocumentTransport"
         ></document-transport-form>
 
         <document-dispatch-form
             :showDialog.sync="showDialogFormDispatch"
-            :dispatch="form.transport_dispatch"
+            :dispatchSaved="form.transport_dispatch"
             @addDispatchTransport="addDispatchTransport"
         ></document-dispatch-form>
 
@@ -4054,6 +4054,9 @@ export default {
             await this.$http
                 .get(`/documents/${this.documentId}/show`)
                 .then((response) => {
+                    if (!this.isUpdate) {
+                        response.data.data.number = "#";
+                    }
                     this.onSetFormData(response.data.data);
                 })
                 .finally(() => (this.loading_submit = false));

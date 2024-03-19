@@ -2,7 +2,7 @@
     <div class="card mb-0 pt-2 pt-md-0">
         <div class="card-header">
             <h3 class="my-0">Consulta de Documentos</h3>
-            <div class="data-table-visible-columns" style="top: 10px;">
+            <div class="data-table-visible-columns" style="top: 10px">
                 <el-dropdown :hide-on-click="false">
                     <el-button type="primary">
                         Mostrar/Ocultar columnas<i
@@ -31,15 +31,14 @@
                     :resource="resource"
                     :visibleColumns="columns"
                     :colspanFootSales="numberColums"
+                    :isTransport.sync="isTransport"
                 >
                     <tr slot="heading">
                         <th class="">#</th>
                         <th v-if="columns.user_seller.visible" class="">
                             Usuario
                         </th>
-                     <th v-if="columns.seller.visible" class="">
-                            Vendedor
-                        </th>
+                        <th v-if="columns.seller.visible" class="">Vendedor</th>
                         <th class="">Tipo Documento</th>
                         <th class="">Serie</th>
                         <th class="">Numero</th>
@@ -137,7 +136,7 @@
                         <td v-if="columns.user_seller.visible">
                             {{ row.user_name }}
                         </td>
-                             <td v-if="columns.seller.visible">
+                        <td v-if="columns.seller.visible">
                             {{ row.seller_name }}
                         </td>
                         <td>{{ row.document_type_description }}</td>
@@ -399,130 +398,156 @@ export default {
             columns: {
                 guides: {
                     title: "Guias",
-                    visible: false
+                    visible: false,
                 },
                 options: {
                     title: "Opciones",
-                    visible: false
+                    visible: false,
                 },
                 web_platforms: {
                     title: "Plataformas web",
-                    visible: false
+                    visible: false,
                 },
                 total_isc: {
                     title: "Total ISC",
-                    visible: false
+                    visible: false,
                 },
                 total_charge: {
                     title: "Total Cargos",
-                    visible: false
+                    visible: false,
                 },
                 district: {
                     title: "Distrito",
-                    visible: false
+                    visible: false,
                 },
                 department: {
                     title: "Departamento",
-                    visible: false
+                    visible: false,
                 },
                 province: {
                     title: "Provincia",
-                    visible: false
+                    visible: false,
                 },
                 client_direction: {
                     title: "Direccion del cliente",
-                    visible: false
+                    visible: false,
                 },
                 ruc: {
                     title: "Ruc",
-                    visible: false
+                    visible: false,
                 },
                 note_sale: {
                     title: "Nota de venta",
-                    visible: false
+                    visible: false,
                 },
                 date_note: {
                     title: "Fecha de N.Venta",
-                    visible: false
+                    visible: false,
                 },
                 payment_form: {
                     title: "Forma de pago",
-                    visible: false
+                    visible: false,
                 },
                 payment_method: {
                     title: "Metodo de pago",
-                    visible: false
+                    visible: false,
                 },
                 purchase_order: {
                     title: "Orden de compra",
-                    visible: true
+                    visible: true,
                 },
                 total_exonerated: {
                     title: "Total Exonerado",
-                    visible: true
+                    visible: true,
                 },
                 total_unaffected: {
                     title: "Total Inafecto",
-                    visible: true
+                    visible: true,
                 },
                 total_free: {
                     title: "Total Gratuito",
-                    visible: true
+                    visible: true,
                 },
                 total_taxed: {
                     title: "Total Gravado",
-                    visible: true
+                    visible: true,
                 },
                 total_igv: {
                     title: "Total IGV",
-                    visible: true
+                    visible: true,
                 },
                 total_isc: {
                     title: "Total ISC",
-                    visible: true
+                    visible: true,
                 },
                 total: {
                     title: "Total",
-                    visible: true
+                    visible: true,
                 },
                 user_seller: {
                     title: "Usuario",
-                    visible: true
+                    visible: true,
                 },
-                   seller: {
+                seller: {
                     title: "Vendedor",
-                    visible: true
+                    visible: true,
                 },
                 doc_affect: {
                     title: "Doc. Afectado",
-                    visible: true
+                    visible: true,
                 },
                 quote: {
                     title: "Cotizacion",
-                    visible: true
+                    visible: true,
                 },
                 case: {
                     title: "Caso",
-                    visible: true
+                    visible: true,
                 },
                 items: {
                     title: "Productos",
-                    visible: true
+                    visible: true,
                 },
                 currency_type_id: {
                     title: "Moneda",
-                    visible: true
-                }
+                    visible: true,
+                },
             },
             showDialogProducts: false,
             recordsItems: [],
-            numberColums: 7
+            numberColums: 7,
+            businessTurns: [],
+            isTransport: false,
         };
     },
     created() {
         this.getColumnsToShow();
+        this.getBusinessTurns();
     },
+    mounted() {},
     methods: {
+        activeBusinessTurns(value) {
+            let businessTurn = this.businessTurns.find(
+                (item) => item.value === value
+            );
+            console.log(
+                "🚀 ~ activeBusinessTurns ~ businessTurn:",
+                businessTurn
+            );
+            if (businessTurn) {
+                return businessTurn.active;
+            }
+            return false;
+        },
+        async getBusinessTurns() {
+            const response = await this.$http.get("/bussiness_turns/records");
+            this.businessTurns = response.data;
+            this.isTransport = this.activeBusinessTurns("transport");
+            console.log(
+                "🚀 ~ getBusinessTurns ~ this.isTransport:",
+                this.isTransport
+            );
+        },
         clickOptions(recordId = null) {
             this.recordId = recordId;
             this.showDialogOptions = true;
@@ -536,9 +561,9 @@ export default {
                 .post("/validate_columns", {
                     columns: this.columns,
                     report: "documents_report_index", // Nombre del reporte.
-                    updated: updated !== undefined
+                    updated: updated !== undefined,
                 })
-                .then(response => {
+                .then((response) => {
                     if (updated === undefined) {
                         let currentCols = response.data.columns;
                         if (currentCols !== undefined) {
@@ -547,7 +572,7 @@ export default {
                         }
                     }
                 })
-                .catch(error => {
+                .catch((error) => {
                     console.error(error);
                 });
         },
@@ -555,7 +580,7 @@ export default {
             let numColumns = 0;
             let arrayColumns = Object.values(this.columns);
             //console.log(Array.isArray(this.columns))
-            arrayColumns.filter(function(num) {
+            arrayColumns.filter((num) => {
                 switch (num.title) {
                     case "Total":
                     case "Total IGV":
@@ -575,7 +600,7 @@ export default {
                         break;
                 }
             });
-        }
-    }
+        },
+    },
 };
 </script>

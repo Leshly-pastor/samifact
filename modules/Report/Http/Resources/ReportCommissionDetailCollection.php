@@ -24,7 +24,6 @@ class ReportCommissionDetailCollection extends ResourceCollection
             $type_document = '';
             $quantity = $row->quantity;
             $purchase_unit_price = $items->purchase_unit_price * $quantity;
-            dump($purchase_unit_price);
             $unit_price = $row->unit_price * $quantity;
             $presentation_name = null;
             $relation = $row->document_id ? $row->document : $row->sale_note;

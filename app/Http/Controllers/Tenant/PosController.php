@@ -27,6 +27,7 @@ use App\Http\Resources\Tenant\PosCollection;
 use App\Models\Tenant\Catalogs\{
     ChargeDiscountType
 };
+use App\Models\Tenant\UserDefaultDocumentType;
 use PSpell\Config;
 
 class PosController extends Controller
@@ -46,7 +47,7 @@ class PosController extends Controller
         $soap_company  = $company->soap_type_id;
         $business_turns = BusinessTurn::select('active')->where('id', 4)->first();
 
-        return view('tenant.pos.index', compact('configuration', 'soap_company', 'business_turns','is_food_dealer'));
+        return view('tenant.pos.index', compact('configuration', 'soap_company', 'business_turns', 'is_food_dealer'));
     }
 
     public function index_full()
@@ -172,7 +173,7 @@ class PosController extends Controller
             $full_description = ($row->internal_id) ? $row->internal_id . ' - ' . $row->description : $row->description;
             $configuration = Configuration::first();
             $sale_unit_price = $this->getSaleUnitPrice($row, $configuration);
-            
+
             return [
                 'id' => $row->id,
                 'start' => $row->food_dealer->start_time,
@@ -280,9 +281,25 @@ class PosController extends Controller
         $cards_brand = CardBrand::all();
         $payment_destinations = $this->getPaymentDestinations();
         $global_discount_types = ChargeDiscountType::whereIn('id', ['02', '03'])->whereActive()->get();
+        $user = User::findOrFail(auth()->user()->id);
+        if ($user->multiple_default_document_types) {
+            $user_default_document = UserDefaultDocumentType::where('user_id', auth()->user()->id)
+                ->get()
+                ->map(function ($item) {
+                    return ['document_id' => $item->document_type_id, 'series_id' => $item->series_id];
+                })
+                ->toArray();
+        } else {
+            $user_default_document = User::select(['document_id', 'series_id'])
+                ->where('id', auth()->user()->id)
+                ->get()
+                ->map(function ($item) {
+                    return ['document_id' => $item->document_id, 'series_id' => $item->series_id];
+                })
+                ->toArray();
+        }
 
-
-        return compact('series', 'payment_method_types', 'cards_brand', 'payment_destinations', 'global_discount_types');
+        return compact('series', 'payment_method_types', 'cards_brand', 'payment_destinations', 'global_discount_types', 'user_default_document');
     }
 
     public function table($table)

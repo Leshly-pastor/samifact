@@ -219,7 +219,7 @@
                                 </div>
                             </div>
 
-                            <div class="col-md-6">
+                            <!-- <div class="col-md-6">
                                 <div
                                     :class="{ 'has-danger': errors.cost }"
                                     class="form-group"
@@ -239,7 +239,7 @@
                                         v-text="errors.cost[0]"
                                     ></small>
                                 </div>
-                            </div>
+                            </div> -->
 
                             <div v-if="recordId" class="col-md-12">
                                 <div
@@ -332,7 +332,7 @@
                     </el-tab-pane>
 
                     <el-tab-pane class="mb-3" name="third">
-                        <span slot="label"><h3>Productos</h3></span>
+                        <span slot="label"><h3>Productos/Servicio</h3></span>
                         <div class="row">
                             <div class="col-12 row">
                                 <!--
@@ -537,7 +537,7 @@
                                                             clickAddItemInvoice
                                                         "
                                                     >
-                                                        + Agregar Producto
+                                                        + Agregar Producto/Servicio
                                                     </button>
                                                 </td>
                                             </tr>
@@ -1103,7 +1103,8 @@ export default {
             if (isNaN(total)) {
                 this.form.total = 0;
             }
-            this.total = this.form.cost + this.form.total;
+            // this.total = this.form.cost + this.form.total;
+            this.total = this.form.total;
         },
         getFormatUnitPriceRow(unit_price) {
             return _.round(unit_price, 6);
@@ -1597,7 +1598,14 @@ export default {
                     "Pago adelantado no puede ser mayor al costo"
                 );
             }
-
+            if (this.form.items.length === 0) {
+                return this.$message.error("Ingrese al menos un producto/servicio");
+            }
+            // let total = this.form.items.reduce(
+            //     (acc, item) => acc + parseFloat(item.total),
+            //     0
+            // );
+            // this.form.cost = total;
             this.loading_submit = true;
             this.$http
                 .post(`/${this.resource}`, this.form)

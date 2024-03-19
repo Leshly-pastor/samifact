@@ -13,11 +13,12 @@ class AddOptometryServiceIdDocuments extends Migration
      */
     public function up()
     {
-        Schema::table('documents', function (Blueprint $table) {
-            $table->unsignedInteger('optometry_service_id')->nullable();
-            $table->foreign('optometry_service_id')->references('id')->on('optometry_services')->onDelete('cascade');
-        });
-
+        if (!Schema::hasColumn('documents', 'optometry_service_id')) {
+            Schema::table('documents', function (Blueprint $table) {
+                $table->unsignedInteger('optometry_service_id')->nullable();
+                $table->foreign('optometry_service_id')->references('id')->on('optometry_services');
+            });
+        }
     }
 
 
@@ -30,11 +31,16 @@ class AddOptometryServiceIdDocuments extends Migration
     public function down()
     {
         //
-        Schema::table('documents', function (Blueprint $table) {
-            $table->dropForeign(['optometry_service_id']);
-            $table->dropColumn('optometry_service_id');
-        });
+        // Schema::table('documents', function (Blueprint $table) {
+        //     $table->dropForeign(['optometry_service_id']);
+        //     $table->dropColumn('optometry_service_id');
+        // });
+        if(Schema::hasColumn('documents', 'optometry_service_id')) {
+            Schema::table('documents', function (Blueprint $table) {
+                $table->dropForeign(['optometry_service_id']);
+                $table->dropColumn('optometry_service_id');
+            });
+        }
 
-        
     }
 }

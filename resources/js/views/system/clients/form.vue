@@ -465,7 +465,6 @@
                                         </label>
                                         <el-input
                                             v-model="form.soap_username"
-                                            :disabled="isSmart"
                                         >
                                         </el-input>
                                         <div class="sub-title text-muted">
@@ -482,7 +481,7 @@
                                         </small>
                                     </div>
                                 </div>
-                                <div class="col-md-6" v-show="!isSmart">
+                                <div class="col-md-6">
                                     <div
                                         :class="{
                                             'has-danger': errors.soap_password,
@@ -1180,7 +1179,7 @@ export default {
                         this.form = response.data.data;
                         if (this.form.cert_smart) {
                             this.isSmart = true;
-                            this.form.soap_password = null;
+                            // this.form.soap_password = null;
                             this.form.soap_url = null;
                             // this.form.soap_send_id = "03";
                         }

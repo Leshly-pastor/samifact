@@ -125,6 +125,9 @@ class SettingController extends Controller
         return view('tenant.settings.list_payment_methods');
     }
 
+    public function listAgenciesTransport(){
+        return view('tenant.settings.list_agencies_transport');
+    }
     /**
      * @return Factory|Application|View
      */

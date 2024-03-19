@@ -184,7 +184,7 @@
             'date_of_issue',
             // 'time_of_issue'
         ];
-
+        // protected $with = ['items'];
         public static function boot()
         {
             parent::boot();
@@ -400,6 +400,7 @@
                 /** @var TechnicalServiceItem $row */
                 return $row->getCollectionData();
             });
+            // $total = $this->cost + $this->total;
             $total = $this->cost + $this->total;
 
             //docs asociados

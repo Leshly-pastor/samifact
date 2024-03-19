@@ -61,11 +61,15 @@ trait ReportTrait
         $web_platform = FunctionController::InArray($request, 'web_platform_id', 0);
         $has_payment = FunctionController::InArray($request, 'has_payment', false);
         $session_user_id = FunctionController::InArray($request, 'session_user_id', false);
-
+        $transport = FunctionController::InArray($request, 'transport', "false") == "true" ? true : false;
+        $transport_dispatch = FunctionController::InArray($request, 'transport_dispatch', "false") == "true" ? true : false;
+        $date_start_transport = FunctionController::InArray($request, 'date_start_transport');
+        $time_start_transport = FunctionController::InArray($request, 'time_start_transport');
+        $agency_origin_id = FunctionController::InArray($request, 'agency_origin_id');
+        $agency_destination_id = FunctionController::InArray($request, 'agency_destination_id');
         $has_payment = ($has_payment == 'true') ? true : false;
         $d_start = null;
         $d_end = null;
-
         /** @todo: Eliminar periodo, fechas y cambiar por
 
         $date_start = $request['date_start'];
@@ -107,9 +111,35 @@ trait ReportTrait
             $session_user_id,
             $has_payment,
             $license_id,
-            $responsible_id
+            $responsible_id,
         );
-
+        if ($transport) {
+            if ($date_start_transport) {
+                $records->whereHas('transport', function ($query) use ($date_start_transport, $time_start_transport) {
+                    $query->where('start_date', $date_start_transport);
+                    if ($time_start_transport) {
+                        $query->where('start_time', $time_start_transport);
+                    }
+                });
+            } else {
+                $records->whereHas('transport');
+            }
+        }
+        if ($transport_dispatch) {
+            $records->whereHas('transport_dispatch');
+        }
+        if ($transport || $transport_dispatch) {
+            if ($agency_origin_id) {
+                $records->whereHas('transport', function ($query) use ($agency_origin_id) {
+                    $query->where('agency_origin_id', $agency_origin_id);
+                });
+            }
+            if ($agency_destination_id) {
+                $records->whereHas('transport', function ($query) use ($agency_destination_id) {
+                    $query->where('agency_destination_id', $agency_destination_id);
+                });
+            }
+        }
         return $records;
     }
 
@@ -147,7 +177,6 @@ trait ReportTrait
         $has_payment = false,
         $license_id = null,
         $responsible_id = null
-        
     ) {
         $configuration = Configuration::first();
         $web_platform = (int)$web_platform;
@@ -171,11 +200,11 @@ trait ReportTrait
         } else {
             $data = PurchaseItem::whereNotNull('id');
         }
-        if($model == Purchase::class){
-            if($license_id){
+        if ($model == Purchase::class) {
+            if ($license_id) {
                 $data->where('license_id', $license_id);
             }
-            if($responsible_id){
+            if ($responsible_id) {
                 $data->where('responsible_id', $responsible_id);
             }
         }
@@ -205,7 +234,7 @@ trait ReportTrait
             $data->where('establishment_id', $establishment_id);
         }
 
-        if($model == Quotation::class && $has_payment){
+        if ($model == Quotation::class && $has_payment) {
             $data->has('payments');
         }
         if ($person_id && $type_person) {
@@ -240,26 +269,26 @@ trait ReportTrait
                 $usersId = json_decode($userId);
                 if (count($usersId) > 0) {
 
-                    if ($column == 'seller_id' && $configuration->multi_sellers &&( $model == Document::class || $model == SaleNote::class)) {
+                    if ($column == 'seller_id' && $configuration->multi_sellers && ($model == Document::class || $model == SaleNote::class)) {
                         $data->whereHas('items', function ($a) use ($usersId) {
                             $a->whereHas('sellers', function ($q) use ($usersId) {
                                 $q->whereIn('seller_id', $usersId);
                             });
                         });
                     } else {
-                     
+
                         $data->whereIn($column, $usersId);
                     }
                 }
             } else {
-                if ($column == 'seller_id' && $configuration->multi_sellers &&( $model == Document::class || $model == SaleNote::class)) {
+                if ($column == 'seller_id' && $configuration->multi_sellers && ($model == Document::class || $model == SaleNote::class)) {
                     $data->whereHas('items', function ($a) use ($userId) {
                         $a->whereHas('sellers', function ($q) use ($userId) {
                             $q->where('seller_id', $userId);
                         });
                     });
                 } else {
-                   
+
                     $data->where($column, $userId);
                 }
             }
@@ -366,7 +395,8 @@ trait ReportTrait
      */
 
 
-    public function getInventoryReferences(){
+    public function getInventoryReferences()
+    {
         return InventoryReference::all();
     }
     public function getPersons($type)
@@ -452,7 +482,7 @@ trait ReportTrait
                 return [
                     'id' => $row->id,
                     'description' => ($row->internal_id) ? "{$row->internal_id} - {$row->description}" : $row->description,
-                    'unit_type' => ItemUnitType::where('item_id',$row->id)->get()->transform(function ($row) {
+                    'unit_type' => ItemUnitType::where('item_id', $row->id)->get()->transform(function ($row) {
                         return [
                             'id' => $row->unit_type->id,
                             'item_id' => $row->item_id,

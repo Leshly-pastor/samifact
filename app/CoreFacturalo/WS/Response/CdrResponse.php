@@ -26,7 +26,10 @@ class CdrResponse
      * @var string[]
      */
     protected $notes;
-
+    /**
+     * @var bool
+     */
+    protected $isBeta;
     /**
      * @return bool
      */
@@ -115,5 +118,25 @@ class CdrResponse
         $this->notes = $notes;
 
         return $this;
+    }
+
+    /**
+     * @param bool $isNotBeta
+     *
+     * @return CdrResponse
+     */
+    public function setIsBeta($isBeta)
+    {
+        $this->isBeta = $isBeta;
+
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getIsBeta()
+    {
+        return $this->isBeta;
     }
 }

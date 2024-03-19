@@ -5,6 +5,7 @@ namespace Modules\BusinessTurn\Models;
 use App\Models\Tenant\ModelTenant;
 use App\Models\Tenant\Document;
 use App\Models\Tenant\Catalogs\IdentityDocumentType;
+use App\Models\Tenant\SaleNote;
 
 class SaleNoteTransportDispatch extends ModelTenant
 {
@@ -20,9 +21,41 @@ class SaleNoteTransportDispatch extends ModelTenant
         'recipient_number_identity_document',
         'recipient_passenger_fullname',
         'recipient_telephone',
+        'origin_district_id',
+        'origin_address',
+        'destinatation_district_id',
+        'destinatation_address',
+        'agency_origin_id',
+        'agency_destination_id',
     ];
-  
- 
+    
+    public function agency_origin()
+    {
+        return $this->belongsTo(AgencyTransport::class, 'agency_origin_id');
+    }
+    public function agency_destination()
+    {
+        return $this->belongsTo(AgencyTransport::class, 'agency_destination_id');
+    }
+    public function getOriginDistrictIdAttribute($value)
+    {
+        return (is_null($value)) ? null : (object) json_decode($value);
+    }
+
+    public function setOriginDistrictIdAttribute($value)
+    {
+        $this->attributes['origin_district_id'] = (is_null($value)) ? null : json_encode($value);
+    }
+
+    public function getDestinatationDistrictIdAttribute($value)
+    {
+        return (is_null($value)) ? null : (object) json_decode($value);
+    }
+
+    public function setDestinatationDistrictIdAttribute($value)
+    {
+        $this->attributes['destinatation_district_id'] = (is_null($value)) ? null : json_encode($value);
+    }
 
     public function sale_note()
     {

@@ -456,6 +456,14 @@
 
         @php
             $transport = $document->transport;
+            $agency_origin = '-';
+            $agency_destination = '-';
+            if ($transport->agency_origin_id) {
+                $agency_origin = $transport->agency_origin->description;
+            }
+            if ($transport->agency_destination_id) {
+                $agency_destination = $transport->agency_destination->description;
+            }
             $origin_district_id = (array) $transport->origin_district_id;
             $destinatation_district_id = (array) $transport->destinatation_district_id;
             $origin_district = Modules\Order\Services\AddressFullService::getDescription($origin_district_id[2]);
@@ -471,15 +479,23 @@
                     <p class="desc">{{ $transport->identity_document_type->description }}:</p>
                 </td>
                 <td>
-                    <p class="desc">{{ $transport->number_identity_document }}</p>
+                    <p class="desc-xl">
+                        <strong>
+                            {{ $transport->number_identity_document }}
+                    </p>
+                    </strong>
                 </td>
             </tr>
             <tr>
                 <td>
-                    <p class="desc">Nombre:</p>
+                    <p class="desc">NOMBRE:</p>
                 </td>
                 <td>
-                    <p class="desc">{{ $transport->passenger_fullname }}</p>
+                    <p class="desc-xl">
+                        <strong>
+                            {{ $transport->passenger_fullname }}
+                        </strong>
+                    </p>
                 </td>
             </tr>
 
@@ -490,6 +506,14 @@
                 </td>
                 <td>
                     <p class="desc">{{ $transport->seat_number }}</p>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <p class="desc">N° Bus:</p>
+                </td>
+                <td>
+                    <p class="desc">{{ $transport->bus_number }}</p>
                 </td>
             </tr>
             <tr>
@@ -517,14 +541,29 @@
                     <p class="desc">{{ $transport->start_time }}</p>
                 </td>
             </tr>
-
+            <tr>
+                <td>
+                    <p class="desc">Agencia Origen:</p>
+                </td>
+                <td>
+                    <p class="desc-l">
+                        <strong>
+                            {{ $agency_origin }}
+                        </strong>
+                    </p>
+                </td>
+            </tr>
 
             <tr>
                 <td>
                     <p class="desc">U. Origen:</p>
                 </td>
                 <td>
-                    <p class="desc">{{ $origin_district }}</p>
+                    <p class="desc-l">
+                        <strong>
+                            {{ $origin_district }}
+                        </strong>
+                    </p>
                 </td>
             </tr>
             <tr>
@@ -532,16 +571,35 @@
                     <p class="desc">D. Origen:</p>
                 </td>
                 <td>
-                    <p class="desc">{{ $transport->origin_address }}</p>
+                    <p class="desc-l">
+                        <strong>
+                            {{ $transport->origin_address }}
+                        </strong>
+                    </p>
                 </td>
             </tr>
-
+            <tr>
+                <td>
+                    <p class="desc">Agencia Destino:</p>
+                </td>
+                <td>
+                    <p class="desc-l">
+                        <strong>
+                            {{ $agency_destination }}
+                        </strong>
+                    </p>
+                </td>
+            </tr>
             <tr>
                 <td>
                     <p class="desc">U. Destino:</p>
                 </td>
                 <td>
-                    <p class="desc">{{ $destinatation_district }}</p>
+                    <p class="desc-l">
+                        <strong>
+                            {{ $destinatation_district }}
+                        </strong>
+                    </p>
                 </td>
             </tr>
             <tr>
@@ -549,7 +607,11 @@
                     <p class="desc">D. Destino:</p>
                 </td>
                 <td>
-                    <p class="desc">{{ $transport->destinatation_address }}</p>
+                    <p class="desc-l">
+                        <strong>
+                            {{ $transport->destinatation_address }}
+                        </strong>
+                    </p>
                 </td>
             </tr>
 
@@ -561,6 +623,26 @@
             $transport_dispatch = $document->transport_dispatch;
             $sender_identity_document_type = $transport_dispatch->sender_identity_document_type->description;
             $recipient_identity_document_type = $transport_dispatch->recipient_identity_document_type->description;
+            $agency_origin_dispatch = '-';
+            $agency_destination_dispatch = '-';
+            if ($transport_dispatch->agency_origin_id) {
+                $agency_origin_dispatch = $transport_dispatch->agency_origin->description;
+            }
+            if ($transport_dispatch->agency_destination_id) {
+                $agency_destination_dispatch = $transport_dispatch->agency_destination->description;
+            }
+            $origin_district_dispatch = null;
+            $destinatation_district_dispatch = null;
+            if ($transport_dispatch->origin_district_id && $transport_dispatch->destinatation_district_id) {
+                $origin_district_id = (array) $transport_dispatch->origin_district_id;
+                $destinatation_district_id = (array) $transport_dispatch->destinatation_district_id;
+                $origin_district_dispatch = Modules\Order\Services\AddressFullService::getDescription(
+                    $origin_district_id[2],
+                );
+                $destinatation_district_dispatch = Modules\Order\Services\AddressFullService::getDescription(
+                    $destinatation_district_id[2],
+                );
+            }
         @endphp
         <p class="desc"><strong>Información de encomienda</strong></p>
         <table class="full-width mt-3">
@@ -571,10 +653,16 @@
             </tr>
             <tr>
                 <td>
-                    <p class="desc">{{ $sender_identity_document_type }}:</p>
+                    <p class="desc">
+                        {{ $sender_identity_document_type }}:
+                    </p>
                 </td>
                 <td>
-                    <p class="desc">{{ $transport_dispatch->sender_number_identity_document }}</p>
+                    <p class="desc">
+                        <strong>
+                            {{ $transport_dispatch->sender_number_identity_document }}
+                        </strong>
+                    </p>
                 </td>
             </tr>
             <tr>
@@ -582,15 +670,62 @@
                     <p class="desc">Nombre:</p>
                 </td>
                 <td>
-                    <p class="desc">{{ $transport_dispatch->sender_passenger_fullname }}</p>
+                    <p class="desc">
+                        <strong>
+                            {{ $transport_dispatch->sender_passenger_fullname }}
+                        </strong>
+                    </p>
+                </td>
+            </tr>
+            @if ($transport_dispatch->sender_telephone)
+                <tr>
+                    <td>
+                        <p class="desc">Teléfono:</p>
+                    </td>
+                    <td>
+                        <p class="desc">
+                            <strong>
+                                {{ $transport_dispatch->sender_telephone }}
+                            </strong>
+                        </p>
+                    </td>
+                </tr>
+            @endif
+            <tr>
+                <td>
+                    <p class="desc">Agencia Origen:</p>
+                </td>
+                <td>
+                    <p class="desc-l">
+                        <strong>
+                            {{ $agency_origin_dispatch }}
+                        </strong>
+                    </p>
+                </td>
+            </tr>
+
+            <tr>
+                <td>
+                    <p class="desc">U. Origen:</p>
+                </td>
+                <td>
+                    <p class="desc-l">
+                        <strong>
+                            {{ $origin_district_dispatch }}
+                        </strong>
+                    </p>
                 </td>
             </tr>
             <tr>
                 <td>
-                    <p class="desc">Teléfono:</p>
+                    <p class="desc">D. Origen:</p>
                 </td>
                 <td>
-                    <p class="desc">{{ $transport_dispatch->sender_telephone }}</p>
+                    <p class="desc-l">
+                        <strong>
+                            {{ $transport_dispatch->origin_address }}
+                        </strong>
+                    </p>
                 </td>
             </tr>
             <tr>
@@ -603,7 +738,11 @@
                     <p class="desc">{{ $recipient_identity_document_type }}:</p>
                 </td>
                 <td>
-                    <p class="desc">{{ $transport_dispatch->recipient_number_identity_document }}</p>
+                    <p class="desc">
+                        <strong>
+                            {{ $transport_dispatch->recipient_number_identity_document }}
+                        </strong>
+                    </p>
                 </td>
             </tr>
             <tr>
@@ -611,17 +750,66 @@
                     <p class="desc">Nombre:</p>
                 </td>
                 <td>
-                    <p class="desc">{{ $transport_dispatch->recipient_passenger_fullname }}</p>
+                    <p class="desc">
+
+                        <strong>
+                            {{ $transport_dispatch->recipient_passenger_fullname }}
+                        </strong>
+                    </p>
+                </td>
+            </tr>
+            @if ($transport_dispatch->recipient_telephone)
+                <tr>
+                    <td>
+                        <p class="desc">Teléfono:</p>
+                    </td>
+                    <td>
+                        <p class="desc">
+                            <strong>
+                                {{ $transport_dispatch->recipient_telephone }}
+                            </strong>
+
+                        </p>
+                    </td>
+                </tr>
+            @endif
+            <tr>
+                <td>
+                    <p class="desc">Agencia Destino:</p>
+                </td>
+                <td>
+                    <p class="desc-l">
+                        <strong>
+                            {{ $agency_destination_dispatch }}
+                        </strong>
+                    </p>
                 </td>
             </tr>
             <tr>
                 <td>
-                    <p class="desc">Teléfono:</p>
+                    <p class="desc">U. Destino:</p>
                 </td>
                 <td>
-                    <p class="desc">{{ $transport_dispatch->recipient_telephone }}</p>
+                    <p class="desc-l">
+                        <strong>
+                            {{ $destinatation_district_dispatch }}
+                        </strong>
+                    </p>
                 </td>
             </tr>
+            <tr>
+                <td>
+                    <p class="desc">D. Destino:</p>
+                </td>
+                <td>
+                    <p class="desc-l">
+                        <strong>
+                            {{ $transport_dispatch->destinatation_address }}
+                        </strong>
+                    </p>
+                </td>
+            </tr>
+
         </table>
     @endif
 

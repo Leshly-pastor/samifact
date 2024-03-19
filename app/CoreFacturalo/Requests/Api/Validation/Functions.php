@@ -32,7 +32,10 @@ class Functions
         if(in_array($inputs['identity_document_type_id'],['6'])){
             $ubigeo = Functions::validateUbigeo($district_id);
         }
-
+        //validar si identity_document_type_id es 6 number debe tener 11 dígitos
+        if($inputs['identity_document_type_id'] === '6' && strlen($inputs['number']) !== 11) {
+            throw new Exception("El número de RUC debe contener 11 dígitos.");
+        }
         $province_id = ($district_id)?substr($district_id, 0 ,4):null;
         $department_id = ($district_id)?substr($district_id, 0 ,2):null;
 

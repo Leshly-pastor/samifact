@@ -78,6 +78,10 @@ Vue.component(
 
 //
 Vue.component(
+    "tenant-document-columns",
+    require("./views/tenant/document_columns/index.vue").default
+);
+Vue.component(
     "tenant-document-names",
     require("./views/tenant/setting/document_name.vue").default
 );
@@ -1037,6 +1041,10 @@ Vue.component(
     require("@viewsModuleSale/agents/index.vue").default
 );
 
+Vue.component(
+    "tenant-agencies-transport",
+    require("@viewsModuleSale/agencies-transport/index.vue").default
+);
 //Item
 Vue.component(
     "tenant-web-platforms-index",

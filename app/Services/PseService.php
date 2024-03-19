@@ -970,7 +970,7 @@ class PseService
         $xml->facelecab->addChild('monoca', $this->monoca);
         $xml->facelecab->addChild('mongra', $this->mongra);
         //dscto que afectan  la  base imponible, se va a "total_discount" del document, no hace falta sumar lo de los items
-        $xml->facelecab->addChild('mondsc', number_format($this->dsct_item, 2));
+        $xml->facelecab->addChild('mondsc', number_format($this->dsct_item, 2, '.', ''));
         $xml->facelecab->addChild('mondoc', $mondoc);
         $xml->facelecab->addChild('prcper', 0.0);
         $xml->facelecab->addChild('corepe', '');
@@ -1142,7 +1142,7 @@ class PseService
         $xml->addChild('nomabr', $this->format_characters($item->description, 24));
         $xml->addChild('valbas', $document_item->unit_value);
         $xml->addChild('prcigv', $prcigv);
-        $xml->addChild('mondsc', number_format(($document_item->total_discount), 2));
+        $xml->addChild('mondsc', number_format(($document_item->total_discount), 2,'.',''));
 
         $xml->addChild('preuni', $preuni);
         $xml->addChild('monigv', $monigv);

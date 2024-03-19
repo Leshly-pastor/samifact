@@ -534,7 +534,6 @@ class QuotationController extends Controller
                 ];
                 $data['alter_company'] = $alter_company;
                 // $alter_establishment = Functions::valueKeyInArray($request, 'establishment');
-                // dump($alter_establishment);
                 if ($alter_establishment) {
                     $data['establishment'] = $alter_establishment;
                 }

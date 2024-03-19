@@ -88,7 +88,7 @@
                     <el-tab-pane class="mb-3" name="first">
                         <span slot="label"><h3>Examen</h3></span>
                         <general-form :general.sync="general"></general-form>
-                        <div class="row m-">
+                        <!-- <div class="row m-">
                             <div class="col-md-3 col-lg-3 col-12">
                                 <label>Costo</label>
                                 <el-input-number
@@ -96,7 +96,7 @@
                                     @change="updateCost"
                                 ></el-input-number>
                             </div>
-                        </div>
+                        </div> -->
                     </el-tab-pane>
                     <el-tab-pane class="mb-3" name="second">
                         <span slot="label"><h3>Notas</h3></span>
@@ -145,7 +145,7 @@
                     </el-tab-pane>
 
                     <el-tab-pane class="mb-3" name="third">
-                        <span slot="label"><h3>Productos</h3></span>
+                        <span slot="label"><h3>Productos/Servicio</h3></span>
                         <div class="row">
                             <div class="col-12 row">
                                 <!--
@@ -350,7 +350,7 @@
                                                             clickAddItemInvoice
                                                         "
                                                     >
-                                                        + Agregar Producto
+                                                        + Agregar Producto/Servicio
                                                     </button>
                                                 </td>
                                             </tr>
@@ -912,7 +912,8 @@ export default {
             if (isNaN(total)) {
                 this.form.total = 0;
             }
-            this.total = this.form.cost + this.form.total;
+            // this.total = this.form.cost + this.form.total;
+            this.total = this.form.total;
         },
         getFormatUnitPriceRow(unit_price) {
             return _.round(unit_price, 6);
@@ -1411,7 +1412,9 @@ export default {
                     "Pago adelantado no puede ser mayor al costo"
                 );
             }
-
+    if (this.form.items.length === 0) {
+                return this.$message.error("Ingrese al menos un producto/servicio");
+            }
             this.loading_submit = true;
             this.$http
                 .post(`/${this.resource}`, this.form)

@@ -3,7 +3,7 @@
     $establishment = $document->establishment;
     $customer = $document->customer;
     //$path_style = app_path('CoreFacturalo'.DIRECTORY_SEPARATOR.'Templates'.DIRECTORY_SEPARATOR.'pdf'.DIRECTORY_SEPARATOR.'style.css');
-    
+
     $left = $document->series ? $document->series : $document->prefix;
     $tittle = $left . '-' . str_pad($document->number, 8, '0', STR_PAD_LEFT);
     $payments = $document->payments;
@@ -19,7 +19,8 @@
             ->where('id', $document->quotation_id)
             ->first();
     }
-    
+    $configuration = \App\Models\Tenant\Configuration::first();
+
 @endphp
 <html>
 
@@ -193,125 +194,127 @@
         </table>
     @endif
     @if ($document->transport)
-    <br>
-    <strong>Transporte de pasajeros</strong>
-    @php
-        $transport = $document->transport;
-        $origin_district_id = (array) $transport->origin_district_id;
-        $destinatation_district_id = (array) $transport->destinatation_district_id;
-        $origin_district = Modules\Order\Services\AddressFullService::getDescription($origin_district_id[2]);
-        $destinatation_district = Modules\Order\Services\AddressFullService::getDescription($destinatation_district_id[2]);
-    @endphp
+        <br>
+        <strong>Transporte de pasajeros</strong>
+        @php
+            $transport = $document->transport;
+            $origin_district_id = (array) $transport->origin_district_id;
+            $destinatation_district_id = (array) $transport->destinatation_district_id;
+            $origin_district = Modules\Order\Services\AddressFullService::getDescription($origin_district_id[2]);
+            $destinatation_district = Modules\Order\Services\AddressFullService::getDescription(
+                $destinatation_district_id[2],
+            );
+        @endphp
 
-    <table class="full-width mt-3">
-        <tr>
-            <td width="120px">{{ $transport->identity_document_type->description }}</td>
-            <td width="8px">:</td>
-            <td>{{ $transport->number_identity_document }}</td>
-            <td width="120px">NOMBRE</td>
-            <td width="8px">:</td>
-            <td>{{ $transport->passenger_fullname }}</td>
-        </tr>
-        <tr>
-            <td width="120px">N° ASIENTO</td>
-            <td width="8px">:</td>
-            <td>{{ $transport->seat_number }}</td>
-            <td width="120px">M. PASAJERO</td>
-            <td width="8px">:</td>
-            <td>{{ $transport->passenger_manifest }}</td>
-        </tr>
-        <tr>
-            <td width="120px">F. INICIO</td>
-            <td width="8px">:</td>
-            <td>{{ $transport->start_date }}</td>
-            <td width="120px">H. INICIO</td>
-            <td width="8px">:</td>
-            <td>{{ $transport->start_time }}</td>
-        </tr>
-        <tr>
-            <td width="120px">U. ORIGEN</td>
-            <td width="8px">:</td>
-            <td>{{ $origin_district }}</td>
-            <td width="120px">D. ORIGEN</td>
-            <td width="8px">:</td>
-            <td>{{ $transport->origin_address }}</td>
-        </tr>
-        <tr>
-            <td width="120px">U. DESTINO</td>
-            <td width="8px">:</td>
-            <td>{{ $destinatation_district }}</td>
-            <td width="120px">D. DESTINO</td>
-            <td width="8px">:</td>
-            <td>{{ $transport->destinatation_address }}</td>
-        </tr>
-    </table>
-@endif
-@if ($document->transport_dispatch)
-<br>
-<strong>Información de encomienda</strong>
-@php
-    $transport_dispatch = $document->transport_dispatch;
-    $sender_identity_document_type = $transport_dispatch->sender_identity_document_type->description;
-    $recipient_identity_document_type = $transport_dispatch->recipient_identity_document_type->description;
-    $origin_district_id = (array) $transport->origin_district_id;
-    $destinatation_district_id = (array) $transport->destinatation_district_id;
-    $origin_district = Modules\Order\Services\AddressFullService::getDescription($origin_district_id[2]);
-    $destinatation_district = Modules\Order\Services\AddressFullService::getDescription($destinatation_district_id[2]);
-@endphp
+        <table class="full-width mt-3">
+            <tr>
+                <td width="120px">{{ $transport->identity_document_type->description }}</td>
+                <td width="8px">:</td>
+                <td>{{ $transport->number_identity_document }}</td>
+                <td width="120px">NOMBRE</td>
+                <td width="8px">:</td>
+                <td>{{ $transport->passenger_fullname }}</td>
+            </tr>
+            <tr>
+                <td width="120px">N° ASIENTO</td>
+                <td width="8px">:</td>
+                <td>{{ $transport->seat_number }}</td>
+                <td width="120px">M. PASAJERO</td>
+                <td width="8px">:</td>
+                <td>{{ $transport->passenger_manifest }}</td>
+            </tr>
+            <tr>
+                <td width="120px">F. INICIO</td>
+                <td width="8px">:</td>
+                <td>{{ $transport->start_date }}</td>
+                <td width="120px">H. INICIO</td>
+                <td width="8px">:</td>
+                <td>{{ $transport->start_time }}</td>
+            </tr>
+            <tr>
+                <td width="120px">U. ORIGEN</td>
+                <td width="8px">:</td>
+                <td>{{ $origin_district }}</td>
+                <td width="120px">D. ORIGEN</td>
+                <td width="8px">:</td>
+                <td>{{ $transport->origin_address }}</td>
+            </tr>
+            <tr>
+                <td width="120px">U. DESTINO</td>
+                <td width="8px">:</td>
+                <td>{{ $destinatation_district }}</td>
+                <td width="120px">D. DESTINO</td>
+                <td width="8px">:</td>
+                <td>{{ $transport->destinatation_address }}</td>
+            </tr>
+        </table>
+    @endif
+    @if ($document->transport_dispatch)
+        <br>
+        <strong>Información de encomienda</strong>
+        @php
+            $transport_dispatch = $document->transport_dispatch;
+            $sender_identity_document_type = $transport_dispatch->sender_identity_document_type->description;
+            $recipient_identity_document_type = $transport_dispatch->recipient_identity_document_type->description;
+            // $origin_district_id = (array) $transport_dispatch->origin_district_id;
+            // $destinatation_district_id = (array) $transport_dispatch->destinatation_district_id;
+            // $origin_district = Modules\Order\Services\AddressFullService::getDescription($origin_district_id[2]);
+            // $destinatation_district = Modules\Order\Services\AddressFullService::getDescription($destinatation_district_id[2]);
+        @endphp
 
-<table class="full-width mt-3">
-    <thead>
-        <tr>
-            <th colspan="6" class="text-left">
-                <strong>REMITENTE</strong>
-            </th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td width="120px">{{ $sender_identity_document_type }}</td>
-            <td width="8px">:</td>
-            <td>{{ $transport_dispatch->sender_number_identity_document }}</td>
-            <td width="120px">NOMBRE</td>
-            <td width="8px">:</td>
-            <td>{{ $transport_dispatch->sender_passenger_fullname }}</td>
-        </tr>
-        <tr>
+        <table class="full-width mt-3">
+            <thead>
+                <tr>
+                    <th colspan="6" class="text-left">
+                        <strong>REMITENTE</strong>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td width="120px">{{ $sender_identity_document_type }}</td>
+                    <td width="8px">:</td>
+                    <td>{{ $transport_dispatch->sender_number_identity_document }}</td>
+                    <td width="120px">NOMBRE</td>
+                    <td width="8px">:</td>
+                    <td>{{ $transport_dispatch->sender_passenger_fullname }}</td>
+                </tr>
+                <tr>
 
-        </tr>
-        <tr>
-            <td width="120px">TELÉFONO</td>
-            <td width="8px">:</td>
-            <td>{{ $transport_dispatch->sender_telephone }}</td>
-            <td colspan="3"></td>
-        </tr>
-    </tbody>
-    <thead>
-        <tr>
-            <th colspan="6" class="text-left">
-                <strong>DESTINATARIO</strong>
-            </th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td width="120px">{{ $recipient_identity_document_type }}</td>
-            <td width="8px">:</td>
-            <td>{{ $transport_dispatch->recipient_number_identity_document }}</td>
-            <td width="120px">NOMBRE</td>
-            <td width="8px">:</td>
-            <td>{{ $transport_dispatch->recipient_passenger_fullname }}</td>
-        </tr>
+                </tr>
+                <tr>
+                    <td width="120px">TELÉFONO</td>
+                    <td width="8px">:</td>
+                    <td>{{ $transport_dispatch->sender_telephone }}</td>
+                    <td colspan="3"></td>
+                </tr>
+            </tbody>
+            <thead>
+                <tr>
+                    <th colspan="6" class="text-left">
+                        <strong>DESTINATARIO</strong>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td width="120px">{{ $recipient_identity_document_type }}</td>
+                    <td width="8px">:</td>
+                    <td>{{ $transport_dispatch->recipient_number_identity_document }}</td>
+                    <td width="120px">NOMBRE</td>
+                    <td width="8px">:</td>
+                    <td>{{ $transport_dispatch->recipient_passenger_fullname }}</td>
+                </tr>
 
-        <tr>
-            <td width="120px">TELÉFONO</td>
-            <td width="8px">:</td>
-            <td>{{ $transport_dispatch->recipient_telephone }}</td>
-            <td colspan="3"></td>
-        </tr>
-    </tbody>
-</table>
-@endif
+                <tr>
+                    <td width="120px">TELÉFONO</td>
+                    <td width="8px">:</td>
+                    <td>{{ $transport_dispatch->recipient_telephone }}</td>
+                    <td colspan="3"></td>
+                </tr>
+            </tbody>
+        </table>
+    @endif
     <table class="full-width mt-10 mb-10">
         <thead class="">
             <tr class="bg-grey">
@@ -335,7 +338,7 @@
                             {{ number_format($row->quantity, 0) }}
                         @endif
                     </td>
-                    <td class="text-center align-top">{{  symbol_or_code($row->item->unit_type_id) }}</td>
+                    <td class="text-center align-top">{{ symbol_or_code($row->item->unit_type_id) }}</td>
                     <td class="text-left">
                         @if ($row->name_product_pdf)
                             {!! $row->name_product_pdf !!}
@@ -343,9 +346,22 @@
                             {!! $row->item->description !!}
                         @endif
                         {{-- 
-
+                            
    
                          --}}
+
+                        @if ($configuration->name_pdf)
+                            @php
+                                $item_name = \App\Models\Tenant\Item::select('name')
+                                    ->where('id', $row->item_id)
+                                    ->first();
+                            @endphp
+                            @if ($item_name->name)
+                                <div>
+                                    <span style="font-size: 9px">{{ $item_name->name }}</span>
+                                </div>
+                            @endif
+                        @endif
 
                         @isset($row->item->sizes_selected)
                             @if (count($row->item->sizes_selected) > 0)
@@ -356,7 +372,8 @@
                         @endisset
                         @if ($row->attributes)
                             @foreach ($row->attributes as $attr)
-                                <br /><span style="font-size: 9px">{!! $attr->description !!} : {{ $attr->value }}</span>
+                                <br /><span style="font-size: 9px">{!! $attr->description !!} :
+                                    {{ $attr->value }}</span>
                             @endforeach
                         @endif
                         @if ($row->discounts)
@@ -385,7 +402,7 @@
 
                         @inject('itemLotGroup', 'App\Services\ItemLotsGroupService')
                         @php
-                            
+
                             // utilizar propiedad si la nv esta regularizada con dicho campo
                             if (isset($row->item->IdLoteSelected)) {
                                 $lot_code = $row->item->IdLoteSelected;
@@ -393,11 +410,15 @@
                                 // para nv con error de propiedad
                                 $lot_code = [];
                                 if (isset($row->item->lots_group)) {
-                                    $lot_codes_compromise = collect($row->item->lots_group)->where('compromise_quantity', '>', 0);
+                                    $lot_codes_compromise = collect($row->item->lots_group)->where(
+                                        'compromise_quantity',
+                                        '>',
+                                        0,
+                                    );
                                     $lot_code = $lot_codes_compromise->all();
                                 }
                             }
-                            
+
                         @endphp
 
                         {{ $itemLotGroup->getLote($lot_code) }}
@@ -502,7 +523,7 @@
             @php
                 $change_payment = $document->getChangePayment();
             @endphp
-nsport
+            nsport
             @if ($change_payment < 0)
                 <tr>
                     <td colspan="7" class="text-right font-bold">Vuelto: {{ $document->currency_type->symbol }}
@@ -600,8 +621,10 @@ nsport
             @endphp
             @foreach ($payments as $row)
                 <tr>
-                    <td>- {{ $row->date_of_payment->format('d/m/Y') }} - {{ $row->payment_method_type->description }}
-                        - {{ $row->reference ? $row->reference . ' - ' : '' }} {{ $document->currency_type->symbol }}
+                    <td>- {{ $row->date_of_payment->format('d/m/Y') }} -
+                        {{ $row->payment_method_type->description }}
+                        - {{ $row->reference ? $row->reference . ' - ' : '' }}
+                        {{ $document->currency_type->symbol }}
                         {{ $row->payment + $row->change }}</td>
                 </tr>
                 @php
@@ -617,7 +640,6 @@ nsport
     @endif
     <table class="full-width">
         @php
-            $configuration = \App\Models\Tenant\Configuration::first();
             $establishment_data = \App\Models\Tenant\Establishment::find($document->establishment_id);
         @endphp
         <tbody>

@@ -8,7 +8,14 @@ $current_hostname = app(Hyn\Tenancy\Contracts\CurrentHostname::class);
 if ($current_hostname) {
     Route::domain($current_hostname->fqdn)->group(function () {
         Route::middleware(['auth', 'locked.tenant'])->group(function () {
-
+            Route::prefix('agencies-transport')->group(function () {
+                Route::get('records', 'AgencyTransportController@records');
+                Route::get('columns', 'AgencyTransportController@columns');
+                Route::get('locations', 'AgencyTransportController@locations');
+                Route::post('', 'AgencyTransportController@store');
+                Route::get('record/{id}', 'AgencyTransportController@record');
+                Route::delete('', 'AgencyTransportController@destroy');
+            });
             /**
              sale-opportunities
              sale-opportunities/columns

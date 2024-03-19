@@ -470,30 +470,30 @@ export default {
 
                     this.form.technical_service_id = this.recordId;
 
-                    this.form.items.push({
-                        id: null,
-                        item_id: null,
-                        internal_id: moment().format("YYYYMMDDHHmmss"),
-                        item_type_id: "02",
-                        has_igv: true,
-                        price_type_id: "01",
-                        unit_type_id: "ZZ",
-                        affectation_igv_type_id:
-                            affectation_igv_type_id || "10",
-                        description: item_description,
-                        percentage_igv: this.percentage_igv,
-                        currency_type_id: "PEN",
-                        unit_value: unit_value,
-                        unit_price: total,
-                        total_base_igv: total_taxed,
-                        total_igv: total_igv,
-                        total_value: total_taxed,
-                        total_taxes: total_igv,
-                        total: total,
-                        quantity: 1,
-                        discounts: [],
-                        charges: []
-                    });
+                    // this.form.items.push({
+                    //     id: null,
+                    //     item_id: null,
+                    //     internal_id: moment().format("YYYYMMDDHHmmss"),
+                    //     item_type_id: "02",
+                    //     has_igv: true,
+                    //     price_type_id: "01",
+                    //     unit_type_id: "ZZ",
+                    //     affectation_igv_type_id:
+                    //         affectation_igv_type_id || "10",
+                    //     description: item_description,
+                    //     percentage_igv: this.percentage_igv,
+                    //     currency_type_id: "PEN",
+                    //     unit_value: unit_value,
+                    //     unit_price: total,
+                    //     total_base_igv: total_taxed,
+                    //     total_igv: total_igv,
+                    //     total_value: total_taxed,
+                    //     total_taxes: total_igv,
+                    //     total: total,
+                    //     quantity: 1,
+                    //     discounts: [],
+                    //     charges: []
+                    // });
 
                     total = 0;
                     total_taxed = 0;

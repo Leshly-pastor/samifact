@@ -66,6 +66,12 @@ if ($hostname) {
                 Route::post('/login', [MultiCompanyController::class, 'login']);
 
             });
+            Route::prefix('document-columns')->group(function () {
+                Route::get('/', 'Tenant\DocumentColumnController@index')->name('tenant.document_columns.index');
+                Route::get('/records', 'Tenant\DocumentColumnController@records');
+                Route::get('/record/{id}', 'Tenant\DocumentColumnController@record');
+                Route::post('/', 'Tenant\DocumentColumnController@store');
+            });
             Route::prefix('bill-of-exchange-pay')->group(function () {
                 Route::get('/', [BillOfExchangePayController::class, 'index'])->name('tenant.bill_of_exchange_pay.index');
                 Route::post('/', [BillOfExchangePayController::class, 'store']);
@@ -130,6 +136,7 @@ if ($hostname) {
             Route::get('list-currencies', 'Tenant\SettingController@listCurrencies');
             Route::get('list-cards', 'Tenant\SettingController@listCards');
             Route::get('list-platforms', 'Tenant\SettingController@listPlatforms');
+            Route::get('list-agencies', 'Tenant\SettingController@listAgenciesTransport');
 
             Route::get('document-names', 'Tenant\SettingController@documentNames')->name('tenant.document_names.index');
             Route::get('yape-plin-qr', 'Tenant\SettingController@YaplePlinQr')->name('tenant.yape_plin_qr.index');
@@ -1122,7 +1129,7 @@ if ($hostname) {
             Route::get('configurations/apiruc', 'System\ConfigurationController@apiruc');
             Route::get('configurations/apkurl', 'System\ConfigurationController@apkurl');
 
-            Route::get('config urations/update-tenant-discount-type-base', 'System\ConfigurationController@updateTenantDiscountTypeBase');
+            Route::get('configurations/update-tenant-discount-type-base', 'System\ConfigurationController@updateTenantDiscountTypeBase');
 
 
             // backup

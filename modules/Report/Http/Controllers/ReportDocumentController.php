@@ -28,6 +28,7 @@ use Maatwebsite\Excel\Excel as BaseExcel;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Traits\JobReportTrait;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Modules\BusinessTurn\Models\AgencyTransport;
 use Modules\Report\Exports\DocumentExportStandard;
 
 
@@ -50,7 +51,7 @@ class ReportDocumentController extends Controller
 
         $persons = $this->getPersons('customers');
         $sellers = $this->getSellers();
-
+        $agencies_transport =  AgencyTransport::all();
         $establishments = Establishment::all()->transform(function ($row) {
             return [
                 'id' => $row->id,
@@ -59,7 +60,14 @@ class ReportDocumentController extends Controller
         });
         $users = $this->getUsers();
 
-        return compact('document_types', 'establishments', 'persons', 'sellers', 'users');
+        return compact(
+            'agencies_transport',
+            'document_types',
+            'establishments',
+            'persons',
+            'sellers',
+            'users'
+        );
     }
 
 

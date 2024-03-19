@@ -1319,6 +1319,7 @@
                             <div class="col-md-6 mt-4">
                                 <label class="control-label">
                                     Buscar productos por código de fábrica
+
                                     <el-tooltip
                                         class="item"
                                         content="Disponible en Nuevo CPE y Nota de venta"
@@ -1529,7 +1530,7 @@
                                     ></small>
                                 </div>
                             </div>
-                            
+
                             <div class="col-md-6 mt-4">
                                 <label class="control-label">
                                     Facturas/Boletas no afectan stock
@@ -1562,7 +1563,7 @@
                                     ></small>
                                 </div>
                             </div>
-                                <div class="col-md-6 mt-4">
+                            <div class="col-md-6 mt-4">
                                 <label class="control-label">
                                     Pedidos afectan stock
                                     <el-tooltip
@@ -1577,7 +1578,8 @@
 
                                 <div
                                     :class="{
-                                        'has-danger': errors.discount_order_note,
+                                        'has-danger':
+                                            errors.discount_order_note,
                                     }"
                                     class="form-group"
                                 >
@@ -1999,7 +2001,7 @@
                                     ></small>
                                 </div>
                             </div>
-                              <div class="col-md-6 mt-4">
+                            <div class="col-md-6 mt-4">
                                 <label class="control-label">
                                     Producto favoritos - acceso rápido
                                     <el-tooltip
@@ -2028,7 +2030,9 @@
                                     <small
                                         v-if="errors.show_favorites_documents"
                                         class="text-danger"
-                                        v-text="errors.show_favorites_documents[0]"
+                                        v-text="
+                                            errors.show_favorites_documents[0]
+                                        "
                                     ></small>
                                 </div>
                             </div>
@@ -3014,6 +3018,40 @@
                                 </div>
                             </div>
                             <div class="col-md-6 mt-4">
+                                <label class="control-label"
+                                    >Descripción en pdf
+                                    <el-tooltip
+                                        class="item"
+                                        effect="dark"
+                                        placement="top-start"
+                                    >
+                                        <div slot="content">
+                                            Muestra la propiedad nombre en el
+                                            pdf
+                                        </div>
+                                        <i class="fa fa-info-circle"></i>
+                                    </el-tooltip>
+                                </label>
+                                <div
+                                    :class="{
+                                        'has-danger': errors.name_pdf,
+                                    }"
+                                    class="form-group"
+                                >
+                                    <el-switch
+                                        v-model="form.name_pdf"
+                                        active-text="Si"
+                                        inactive-text="No"
+                                        @change="submit"
+                                    ></el-switch>
+                                    <small
+                                        v-if="errors.name_pdf"
+                                        class="text-danger"
+                                        v-text="errors.name_pdf[0]"
+                                    ></small>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mt-4">
                                 <div class="form-group">
                                     <label class="control-label"
                                         >Imágen para encabezado - pdf
@@ -3411,8 +3449,7 @@
                                     </div>
                                 </div>
                             </template>
-        
-        
+
                             <div class="col-md-3 mt-4">
                                 <label class="control-label"
                                     >Mostrar solo la primera cuota de pago
@@ -3482,6 +3519,32 @@
                                             ></i>
                                         </el-tooltip>
                                     </a>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mt-4">
+                                <label class="control-label"
+                                    >Activar columnas personalizadas
+                                    <el-tooltip
+                                        class="item"
+                                        content="4 columnas personalizadas en el pdf - Solo disponible en facturas y boletas"
+                                        effect="dark"
+                                        placement="top-start"
+                                    >
+                                        <i class="fa fa-info-circle"></i>
+                                    </el-tooltip>
+                                </label>
+                                <div
+                                    :class="{
+                                        'has-danger': errors.document_columns,
+                                    }"
+                                    class="form-group"
+                                >
+                                    <el-switch
+                                        v-model="form.document_columns"
+                                        active-text="Si"
+                                        inactive-text="No"
+                                        @change="submit"
+                                    ></el-switch>
                                 </div>
                             </div>
                         </div>

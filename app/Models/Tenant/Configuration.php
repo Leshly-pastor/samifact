@@ -141,6 +141,8 @@ use App\Models\Tenant\Skin;
 class Configuration extends ModelTenant
 {
     protected $fillable = [
+        'document_columns',
+        'name_pdf',
         'show_the_first_cuota_document',
         'discount_order_note',
         'show_discount_seller_pos',
@@ -342,6 +344,8 @@ class Configuration extends ModelTenant
     ];
 
     protected $casts = [
+        'document_columns' => 'boolean',
+        'name_pdf' => 'boolean',
         'show_the_first_cuota_document' => 'boolean',
         'discount_order_note' => 'boolean',
         'show_discount_seller_pos' => 'boolean',
@@ -600,6 +604,8 @@ class Configuration extends ModelTenant
         $currency = CurrencyType::all();
         $skins = Skin::all();
         return [
+            'document_columns' => (bool) $this->document_columns,
+            'name_pdf' => (bool)$this->name_pdf,
             'show_the_first_cuota_document' => (bool)$this->show_the_first_cuota_document,
             'discount_order_note' => (bool)$this->discount_order_note,
             'show_discount_seller_pos' => (bool)$this->show_discount_seller_pos,

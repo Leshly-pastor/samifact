@@ -21,8 +21,18 @@ class SaleNoteTransport extends ModelTenant
         'destinatation_address',
         'start_date',
         'start_time', 
+        'agency_origin_id',
+        'agency_destination_id',
     ];
-  
+    
+    public function agency_origin()
+    {
+        return $this->belongsTo(AgencyTransport::class, 'agency_origin_id');
+    }
+    public function agency_destination()
+    {
+        return $this->belongsTo(AgencyTransport::class, 'agency_destination_id');
+    }
     public function getOriginDistrictIdAttribute($value)
     {
         return (is_null($value))?null:(object) json_decode($value);

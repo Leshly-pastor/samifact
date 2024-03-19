@@ -1,7 +1,7 @@
 <?php
 
 namespace Modules\BusinessTurn\Models;
- 
+
 use App\Models\Tenant\ModelTenant;
 use App\Models\Tenant\Document;
 use App\Models\Tenant\Catalogs\IdentityDocumentType;
@@ -9,6 +9,8 @@ use App\Models\Tenant\Catalogs\IdentityDocumentType;
 class DocumentTransport extends ModelTenant
 {
     protected $fillable = [
+        'bus_number',
+        'passenger_age',
         'document_id',
         'seat_number',
         'passenger_manifest',
@@ -20,27 +22,36 @@ class DocumentTransport extends ModelTenant
         'destinatation_district_id',
         'destinatation_address',
         'start_date',
-        'start_time', 
+        'start_time',
+        'agency_origin_id',
+        'agency_destination_id',
     ];
-  
+    public function agency_origin()
+    {
+        return $this->belongsTo(AgencyTransport::class, 'agency_origin_id');
+    }
+    public function agency_destination()
+    {
+        return $this->belongsTo(AgencyTransport::class, 'agency_destination_id');
+    }
     public function getOriginDistrictIdAttribute($value)
     {
-        return (is_null($value))?null:(object) json_decode($value);
+        return (is_null($value)) ? null : (object) json_decode($value);
     }
 
     public function setOriginDistrictIdAttribute($value)
     {
-        $this->attributes['origin_district_id'] = (is_null($value))?null:json_encode($value);
+        $this->attributes['origin_district_id'] = (is_null($value)) ? null : json_encode($value);
     }
 
     public function getDestinatationDistrictIdAttribute($value)
     {
-        return (is_null($value))?null:(object) json_decode($value);
+        return (is_null($value)) ? null : (object) json_decode($value);
     }
 
     public function setDestinatationDistrictIdAttribute($value)
     {
-        $this->attributes['destinatation_district_id'] = (is_null($value))?null:json_encode($value);
+        $this->attributes['destinatation_district_id'] = (is_null($value)) ? null : json_encode($value);
     }
 
 
@@ -53,5 +64,4 @@ class DocumentTransport extends ModelTenant
     {
         return $this->belongsTo(IdentityDocumentType::class, 'identity_document_type_id');
     }
-
 }

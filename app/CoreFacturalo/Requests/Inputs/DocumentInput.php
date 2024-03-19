@@ -286,8 +286,10 @@ class DocumentInput
                         }
                     }
                 } else {
-                    if (key_exists('quantity_unit', $presentation)) {
+                    if (is_array($presentation) && key_exists('quantity_unit', $presentation)) {
                         $quantity_factor = $presentation['quantity_unit'];
+                    } elseif (is_object($presentation) && property_exists($presentation, 'quantity_unit')) {
+                        $quantity_factor = $presentation->quantity_unit;
                     }
                 }
 
