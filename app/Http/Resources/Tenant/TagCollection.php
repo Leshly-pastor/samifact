@@ -17,6 +17,7 @@ class TagCollection extends ResourceCollection
         return $this->collection->transform(function($row, $key) {
             return [
                 'id' => $row->id,
+                'favicon' => $row->favicon,
                 'description' => $row->description,
                 'name' => $row->name,
                 'status' => $row->status

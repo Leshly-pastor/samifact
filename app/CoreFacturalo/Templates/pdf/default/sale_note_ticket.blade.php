@@ -294,7 +294,18 @@
                                                     <p class="desc">{{ $transport->passenger_fullname }}</p>
                                                 </td>
                                             </tr>
-                                
+                                            @if ($transport->passenger_age)
+                                                <tr>
+                                                    <td>
+                                                        <p class="desc">Edad
+                                                        </p>
+                                                    </td>
+                                                    <td>
+                                                        <p class="desc">{{ $transport->passenger_age }}</p>
+                                                    </td>
+                                                </tr>
+                                            @endif
+                                            
                                 
                                             <tr>
                                                 <td>

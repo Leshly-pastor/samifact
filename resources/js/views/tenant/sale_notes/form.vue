@@ -544,7 +544,10 @@
                                 </div>
                             </div>
                             <!-- Pagos -->
-                            <div class="col-12 pt-3">
+                            <div
+                                class="col-12 pt-3"
+                                v-if="form.payment_condition_id === '01'"
+                            >
                                 <table>
                                     <thead>
                                         <tr width="100%">
@@ -1223,6 +1226,206 @@
                                     >{{ currency_type.symbol }}
                                     {{ form.total.toFixed(decimalQuantity) }}
                                 </h3>
+                                <div class="row" v-if="form.total > 0">
+                                    <div class="col-md-6 col-lg-6 col-12"></div>
+                                    <div class="col-md-6 col-lg-6 col-12">
+                                        <div class="row">
+                                            <div class="col-12 text-end">
+                                                Condiciones de pago:
+                                                <el-select
+                                                    v-model="
+                                                        form.payment_condition_id
+                                                    "
+                                                    dusk="document_type_id"
+                                                    popper-class="el-select-document_type"
+                                                    style="max-width: 200px"
+                                                    @change="
+                                                        changePaymentCondition
+                                                    "
+                                                >
+                                                    <el-option
+                                                        label="Crédito con cuotas"
+                                                        value="03"
+                                                    ></el-option>
+                                                    <!-- <el-option
+                                                                                label="Crédito"
+                                                                                value="02"
+                                                                            ></el-option> -->
+                                                    <el-option
+                                                        label="Contado"
+                                                        value="01"
+                                                    ></el-option>
+                                                </el-select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 col-lg-6 col-12"></div>
+                                    <div
+                                        class="col-md-6 col-lg-6 col-12 text-end table-responsive"
+                                        v-if="
+                                            form.payment_condition_id === '03'
+                                        "
+                                    >
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <label for="cuota" class="w-100"
+                                                    ># Cuotas</label
+                                                >
+                                                <el-input-number
+                                                    class="w-100"
+                                                    v-model="cuotaNumber"
+                                                    :min="1"
+                                                    :max="1000"
+                                                    controls-position="right"
+                                                ></el-input-number>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label for="cuota" class="w-100"
+                                                    >Días</label
+                                                >
+
+                                                <el-input-number
+                                                    class="w-100"
+                                                    v-model="cuotaDays"
+                                                    :min="1"
+                                                    :max="60"
+                                                    controls-position="right"
+                                                ></el-input-number>
+                                            </div>
+                                            <div
+                                                class="col-md-4 d-flex align-items-end"
+                                            >
+                                                <el-button
+                                                    size="mini"
+                                                    type="success"
+                                                    @click="addFeeds"
+                                                >
+                                                    <i class="fas fa-check"></i>
+                                                </el-button>
+
+                                                <el-tooltip
+                                                    content="Eliminar las cuotas"
+                                                >
+                                                    <el-button
+                                                        size="mini"
+                                                        type="danger"
+                                                        @click="removeFeeds"
+                                                    >
+                                                        <i
+                                                            class="fas fa-trash"
+                                                        ></i>
+                                                    </el-button>
+                                                </el-tooltip>
+                                            </div>
+                                        </div>
+                                        <el-collapse
+                                            @change="changeCollapse"
+                                            v-model="activeNames"
+                                        >
+                                            <el-collapse-item
+                                                :title="`Cuotas ${form.fee.length}`"
+                                                name="1"
+                                            >
+                                                <table
+                                                    class="text-left table"
+                                                    width="100%"
+                                                >
+                                                    <thead>
+                                                        <tr
+                                                            v-if="
+                                                                form.fee
+                                                                    .length > 0
+                                                            "
+                                                        >
+                                                            <th
+                                                                class="text-left"
+                                                                style="
+                                                                    width: 100px;
+                                                                "
+                                                            >
+                                                                Fecha
+                                                            </th>
+                                                            <th
+                                                                class="text-left"
+                                                                style="
+                                                                    width: 100px;
+                                                                "
+                                                            >
+                                                                Monto
+                                                            </th>
+                                                            <th
+                                                                style="
+                                                                    width: 30px;
+                                                                "
+                                                            ></th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr v-if="!showAll">
+                                                            <td colspan="3" class="text-start">
+                                                                Se muestran las
+                                                                primeras y
+                                                                últimas 5 cuotas
+                                                            </td>
+                                                        </tr>
+
+                                                        <tr
+                                                            v-for="(
+                                                                row, index
+                                                            ) in getDisplayedRows"
+                                                            :key="index"
+                                                        >
+                                                            <td>
+                                                                <el-date-picker
+                                                                    v-model="
+                                                                        row.date
+                                                                    "
+                                                                    :clearable="
+                                                                        false
+                                                                    "
+                                                                    format="dd/MM/yyyy"
+                                                                    type="date"
+                                                                    value-format="yyyy-MM-dd"
+                                                                    :picker-options="
+                                                                        pickerOptions
+                                                                    "
+                                                                ></el-date-picker>
+                                                            </td>
+                                                            <td>
+                                                                <el-input
+                                                                    v-model="
+                                                                        row.amount
+                                                                    "
+                                                                ></el-input>
+                                                            </td>
+                                                            <td
+                                                                class="text-center"
+                                                            >
+                                                                <button
+                                                                    v-if="
+                                                                        index >
+                                                                        0
+                                                                    "
+                                                                    class="btn waves-effect waves-light btn-sm btn-danger"
+                                                                    type="button"
+                                                                    @click.prevent="
+                                                                        clickRemoveFee(
+                                                                            index
+                                                                        )
+                                                                    "
+                                                                >
+                                                                    <i
+                                                                        class="fa fa-trash"
+                                                                    ></i>
+                                                                </button>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </el-collapse-item>
+                                        </el-collapse>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1342,6 +1545,11 @@ export default {
     },
     mixins: [functions, exchangeRate, cash],
     computed: {
+        getDisplayedRows() {
+            return this.showAll
+                ? this.form.fee
+                : this.form.fee.slice(0, 5).concat(this.form.fee.slice(-5));
+        },
         ...mapState(["config"]),
         sms_periodo: function () {
             let text = "";
@@ -1374,6 +1582,10 @@ export default {
     },
     data() {
         return {
+            cuotaNumber: 1,
+            cuotaDays: 30,
+            showAll: true,
+            activeNames: ["1"],
             loading: false,
             companies: [],
             person_type_id: null,
@@ -1536,6 +1748,116 @@ export default {
         this.changeCurrencyType();
     },
     methods: {
+        changeCollapse(){},
+        calculatePeriodDays(cuotas, days) {
+            let date_of_issue = this.form.date_of_issue;
+            if (!cuotas || !days) return;
+            if (this.form.fee.length > 0) {
+                let [fee] = this.form.fee;
+                let { date } = fee;
+                date_of_issue = date;
+            }
+            this.form.fee = [];
+            //dada la fecha de emision, usando moment calcula las fechas de vencimiento segun el numero de cuotas y los dias de cada cuota
+            let dates = [];
+            for (let i = 0; i < cuotas; i++) {
+                let date = moment(date_of_issue)
+                    .utcOffset(-300)
+                    .add((i + 1) * (i == 0 ? 0 : days), "days")
+                    .format("YYYY-MM-DD");
+                dates.push(date);
+            }
+            this.form.fee = dates.map((d) => ({
+                id: null,
+                date: d,
+                currency_type_id: this.form.currency_type_id,
+                amount: 0,
+            }));
+            this.calculateFee();
+
+            this.setLastDateDue();
+        },
+        setLastDateDue() {
+            if (this.form.fee && this.form.fee.length > 0) {
+                let fee = this.form.fee[this.form.fee.length - 1];
+                this.form.date_of_due = fee.date;
+            }
+        },
+        removeFeeds() {
+            if (this.form.fee.length <= 1) return;
+            this.form.fee = [this.form.fee[0]];
+            this.calculateFee();
+            this.setLastDateDue();
+        },
+        addFeeds() {
+            console.log("🚀 ~ addFeeds ~ this.cuotaNumber:", this.cuotaNumber);
+
+            this.calculatePeriodDays(this.cuotaNumber, this.cuotaDays);
+        },
+        clickAddFee() {
+            this.form.date_of_due = moment().format("YYYY-MM-DD");
+            this.form.fee.push({
+                id: null,
+                date: moment().add(1, "days").format("YYYY-MM-DD"),
+                currency_type_id: this.form.currency_type_id,
+                amount: 0,
+            });
+            this.calculateFee();
+        },
+        calculateFee() {
+            this.showAll = this.form.fee.length < 15;
+            let fee_count = this.form.fee.length;
+            // let total = this.form.total;
+            let total = this.getTotal();
+
+            let accumulated = 0;
+            let amount = _.round(total / fee_count, 2);
+            _.forEach(this.form.fee, (row) => {
+                accumulated += amount;
+                if (total - accumulated < 0) {
+                    amount = _.round(total - accumulated + amount, 2);
+                }
+                row.amount = amount;
+            });
+        },
+        getTotal() {
+            let total_pay = this.form.total;
+            if (this.form.has_retention) {
+                total_pay -= this.form.retention.amount;
+            }
+            // console.log(this.form.retention)
+            // console.log(this.form.total_pending_payment)
+            // console.log(this.form.total)
+
+            if (
+                !_.isEmpty(this.form.detraction) &&
+                this.form.total_pending_payment > 0
+            ) {
+                return this.form.total_pending_payment;
+            }
+
+            if (
+                !_.isEmpty(this.form.retention) &&
+                this.form.total_pending_payment > 0
+            ) {
+                // console.log('1');
+                return this.form.total_pending_payment;
+            }
+
+            // console.log('2');
+            return total_pay;
+        },
+        changePaymentCondition() {
+            this.form.fee = [];
+            this.form.payments = [];
+            // if (this.form.payment_condition_id === "02") {
+            //     this.clickAddFeeNew();
+            //     this.readonly_date_of_due = true;
+            // }
+            if (this.form.payment_condition_id === "03") {
+                this.clickAddFee();
+            }
+        },
         async changeCompany() {
             try {
                 this.loading = true;
@@ -2019,6 +2341,8 @@ export default {
             this.collegeYear = [];
             this.errors = {};
             this.form = {
+                fee: [],
+                payment_condition_id: "01",
                 transport: {},
                 transport_dispatch: {},
                 dispatch_ticket_pdf_quantity: 1,

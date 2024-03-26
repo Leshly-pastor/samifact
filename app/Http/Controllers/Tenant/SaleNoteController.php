@@ -80,6 +80,7 @@ use App\Models\System\Client as SystemClient;
 use App\Models\Tenant\DispatchOrder;
 use App\Models\Tenant\MessageIntegrateSystem;
 use App\Models\Tenant\ProductionOrder;
+use App\Models\Tenant\SaleNoteFee;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Hyn\Tenancy\Environment;
 use Hyn\Tenancy\Models\Hostname;
@@ -879,12 +880,17 @@ class SaleNoteController extends Controller
                 }
             }
             $this->sale_note =  SaleNote::query()->updateOrCreate(['id' => $inputs['id']], $data);
-
+            
+            // $this->deleteAlFees($this->sale_note->fee);
+            SaleNoteFee::where('sale_note_id', $this->sale_note->id)->delete();
             $this->deleteAllPayments($this->sale_note->payments);
-
+            
             //se elimina los items para activar el evento deleted del modelo y controlar el inventario
             $this->deleteAllItems($this->sale_note->items);
 
+            $fee = Functions::valueKeyInArray($inputs, 'fee',[]);
+            $this->saveFees($this->sale_note, $fee);
+            // $this->sale_note->fee()->
             $configuration = Configuration::first();
             foreach ($data['items'] as $row) {
 
@@ -2041,6 +2047,11 @@ class SaleNoteController extends Controller
     }
 
 
+    public function saveFees($sale_note, $fees){
+        foreach ($fees as $row) {
+            $sale_note->fee()->create($row);
+        }
+    }
     public function savePayments($sale_note, $payments, $cash_id = null)
     {
 

@@ -149,7 +149,7 @@
                     <div class="col-md-5">
                         <div
                             :class="{
-                                'has-danger': errors.affectation_igv_type_id
+                                'has-danger': errors.affectation_igv_type_id,
                             }"
                             class="form-group"
                         >
@@ -198,17 +198,23 @@
                                     slot="prepend"
                                     :disabled="
                                         form.quantity < 0.01 ||
-                                            form.item.calculate_quantity
+                                        form.item.calculate_quantity
                                     "
                                     icon="el-icon-minus"
-                                    style="padding-right: 5px ;padding-left: 12px"
+                                    style="
+                                        padding-right: 5px;
+                                        padding-left: 12px;
+                                    "
                                     @click="clickDecrease"
                                 ></el-button>
                                 <el-button
                                     slot="append"
                                     :disabled="form.item.calculate_quantity"
                                     icon="el-icon-plus"
-                                    style="padding-right: 5px ;padding-left: 12px"
+                                    style="
+                                        padding-right: 5px;
+                                        padding-left: 12px;
+                                    "
                                     @click="clickIncrease"
                                 ></el-button>
                             </el-input-number>
@@ -254,7 +260,7 @@
                     <div
                         v-if="showLots"
                         class="col-md-3 col-sm-3"
-                        style="padding-top: 1%;"
+                        style="padding-top: 1%"
                     >
                         <a
                             class="text-center font-weight-bold text-info"
@@ -267,7 +273,7 @@
                     <div
                         v-if="showSeries"
                         class="col-md-3 col-sm-3"
-                        style="padding-top: 1%;"
+                        style="padding-top: 1%"
                     >
                         <!-- <el-button type="primary" native-type="submit" icon="el-icon-check">Elegir serie</el-button> -->
                         <a
@@ -323,12 +329,36 @@
                             ></vue-ckeditor>
                         </div>
                     </div>
+                    <template
+                        v-if="form.item_id && configuration.discounts_acc"
+                    >
+                        <span class="text-primary">Descuento</span>
+                        <a href="#" @click.prevent="addDiscount">[+ Agregar]</a>
+                        <div
+                            v-for="(discount, index) in discounts"
+                            :key="index"
+                        >
+                            <div class="col-md-3 col-lg-3 col-12">
+                                <el-input
+                                    v-model="discount.percentage"
+                                    type="number"
+                                    @input="calculateDiscount"
+                                >
+                                    <el-button
+                                        slot="append"
+                                        icon="el-icon-delete"
+                                        @click.prevent="removeDiscount(index)"
+                                    ></el-button>
+                                </el-input>
+                            </div>
+                        </div>
+                    </template>
                     <template v-if="!is_client">
                         <div
                             v-if="item_unit_types.length > 0"
                             class="col-md-12"
                         >
-                            <div class="table-responsive" style="margin:3px">
+                            <div class="table-responsive" style="margin: 3px">
                                 <h5 class="separator-title">
                                     Lista de Precios
                                     <el-tooltip
@@ -365,8 +395,9 @@
                                     </thead>
                                     <tbody>
                                         <tr
-                                            v-for="(row,
-                                            index) in item_unit_types"
+                                            v-for="(
+                                                row, index
+                                            ) in item_unit_types"
                                             :key="index"
                                         >
                                             <td class="text-center">
@@ -457,8 +488,9 @@
                                             </thead>
                                             <tbody>
                                                 <tr
-                                                    v-for="(row,
-                                                    index) in form.discounts"
+                                                    v-for="(
+                                                        row, index
+                                                    ) in form.discounts"
                                                     :key="index"
                                                 >
                                                     <td>
@@ -542,8 +574,9 @@
                                             </thead>
                                             <tbody>
                                                 <tr
-                                                    v-for="(row,
-                                                    index) in form.charges"
+                                                    v-for="(
+                                                        row, index
+                                                    ) in form.charges"
                                                     :key="index"
                                                 >
                                                     <td>
@@ -621,8 +654,9 @@
                                             </thead>
                                             <tbody>
                                                 <tr
-                                                    v-for="(row,
-                                                    index) in form.attributes"
+                                                    v-for="(
+                                                        row, index
+                                                    ) in form.attributes"
                                                     :key="index"
                                                 >
                                                     <td>
@@ -709,7 +743,7 @@
             <!-- @todo: Mejorar evitando duplicar codigo -->
             <!-- Ocultar en cel -->
 
-            <div class="form-actions text-end pt-2  hidden-sm-down">
+            <div class="form-actions text-end pt-2 hidden-sm-down">
                 <el-button @click.prevent="close()">Cerrar</el-button>
                 <el-button
                     v-if="form.item_id"
@@ -769,7 +803,7 @@ import VueCkeditor from "vue-ckeditor5";
 import { mapActions, mapState } from "vuex/dist/vuex.mjs";
 import {
     ItemOptionDescription,
-    ItemSlotTooltip
+    ItemSlotTooltip,
 } from "../../../../../../../../resources/js/helpers/modal_item";
 
 export default {
@@ -780,14 +814,14 @@ export default {
         "exchangeRateSale",
         "typeUser",
         "configuration",
-        "percentageIgv"
+        "percentageIgv",
     ],
     components: {
         ItemForm,
         WarehousesDetail,
         LotsGroup,
         SelectLotsForm,
-        "vue-ckeditor": VueCkeditor.component
+        "vue-ckeditor": VueCkeditor.component,
     },
 
     data() {
@@ -828,10 +862,11 @@ export default {
             showDialogSelectLots: false,
             lots: [],
             editors: {
-                classic: ClassicEditor
+                classic: ClassicEditor,
             },
             loading_dialog: false,
-            readonly_total: 0
+            readonly_total: 0,
+            discounts: [],
         };
     },
 
@@ -843,11 +878,11 @@ export default {
     mounted() {
         this.getTables();
 
-        this.$eventHub.$on("reloadDataItems", item_id => {
+        this.$eventHub.$on("reloadDataItems", (item_id) => {
             this.reloadDataItems(item_id);
         });
 
-        this.$eventHub.$on("selectWarehouseId", warehouse_id => {
+        this.$eventHub.$on("selectWarehouseId", (warehouse_id) => {
             this.form.warehouse_id = warehouse_id;
         });
         this.canCreateProduct();
@@ -868,7 +903,7 @@ export default {
             }
             return false;
         },
-        canEditPrice: function() {
+        canEditPrice: function () {
             if (
                 this.typeUser === "admin" ||
                 (this.config !== undefined &&
@@ -899,9 +934,74 @@ export default {
                 return this.config.allow_edit_unit_price_to_seller;
             }
             return false;
-        }
+        },
     },
     methods: {
+        setDiscounts() {
+            let { unit_price_value, quantity } = this.form;
+            let total = parseFloat(unit_price_value) * parseFloat(quantity);
+            let result = this.discounts.reduce((a, b) => {
+                return a + parseFloat(b.result);
+            }, 0);
+
+            let discount_type = this.discount_types.find((d) => d.id == "00");
+            // let total = this.form.total / 1.18;
+            let percentage = (result / total) * 100;
+            let factor = result / total;
+            this.form.discounts.push({
+                discount_type_id: discount_type.id,
+                discount_type,
+                description: "Descuentoss",
+                percentage,
+                factor,
+                amount: result,
+                base: result / total,
+                is_amount: true,
+                use_input_amount: true,
+                is_split: false,
+            });
+            console.log(
+                "🚀 ~ file: item.vue:1476 ~ setDiscounts ~ this.form.discounts:",
+                this.form.discounts
+            );
+        },
+        calculateDiscount() {
+            if (this.discounts == null || this.discounts.length == 0) {
+                return;
+            }
+            let total = this.form.unit_price_value * this.form.quantity;
+            let { affectation_igv_type_id, has_igv } = this.form;
+
+            for (let i = 0; i < this.discounts.length; i++) {
+                let { percentage } = this.discounts[i];
+                if (percentage != 0 || percentage != null) {
+                    let discount = total * (percentage / 100);
+
+                    if (has_igv && affectation_igv_type_id == "10") {
+                        discount = discount / 1.18;
+                    }
+                    //redondear a dos decimales
+
+                    // discount = Math.round(discount * 100) / 100;
+
+                    this.discounts[i].result = discount;
+
+                    total = total - discount;
+                    this.discounts[i].base = total;
+                    this.discounts[i].original_price =
+                        this.form.unit_price_value;
+                }
+            }
+        },
+        removeDiscount(idx) {
+            this.discounts.splice(idx, 1);
+        },
+        addDiscount() {
+            this.discounts.push({
+                percentage: 0,
+                result: 0,
+            });
+        },
         ...mapActions(["loadConfiguration"]),
         hasAttributes() {
             if (
@@ -922,7 +1022,7 @@ export default {
             return ItemOptionDescription(item);
         },
         getTables() {
-            this.$http.get(`/${this.resource}/item/tables`).then(response => {
+            this.$http.get(`/${this.resource}/item/tables`).then((response) => {
                 this.items = response.data.items;
                 this.affectation_igv_types =
                     response.data.affectation_igv_types;
@@ -941,7 +1041,8 @@ export default {
                     this.config !== undefined &&
                     this.config.seller_can_create_product !== undefined
                 ) {
-                    this.can_add_new_product = this.config.seller_can_create_product;
+                    this.can_add_new_product =
+                        this.config.seller_can_create_product;
                 }
             }
             return this.can_add_new_product;
@@ -994,11 +1095,11 @@ export default {
                 this.loading_search = true;
                 const params = {
                     input: input,
-                    search_by_barcode: this.search_item_by_barcode ? 1 : 0
+                    search_by_barcode: this.search_item_by_barcode ? 1 : 0,
                 };
                 await this.$http
                     .get(`/${this.resource}/search-items/`, { params })
-                    .then(response => {
+                    .then((response) => {
                         this.items = response.data.items;
                         this.loading_search = false;
                         this.enabledSearchItemsBarcode();
@@ -1031,14 +1132,14 @@ export default {
                     title: "Serie ubicada",
                     message: "Producto añadido!",
                     type: "success",
-                    duration: 1200
+                    duration: 1200,
                 });
                 this.form.item_id = this.items[0].id;
                 this.$refs.selectSearchNormal.$data.selectedLabel = "";
 
                 await this.changeItem();
 
-                this.lots = await this.form.item.lots.map(lot => {
+                this.lots = await this.form.item.lots.map((lot) => {
                     lot.has_sale = true;
                 });
 
@@ -1052,7 +1153,7 @@ export default {
                     title: "Serie no ubicada",
                     message: "",
                     type: "warning",
-                    duration: 1200
+                    duration: 1200,
                 });
             }
         },
@@ -1112,7 +1213,7 @@ export default {
                 IdLoteSelected: null,
                 document_item_id: null,
                 name_product_pdf: "",
-                calculate_quantity: false
+                calculate_quantity: false,
             };
 
             this.activePanel = 0;
@@ -1190,16 +1291,14 @@ export default {
             if (this.form.document_item_id && this.form.item.lots.length > 0) {
                 await this.$http
                     .get(
-                        `/${this.resource}/regularize-lots/${
-                            this.form.document_item_id
-                        }`
+                        `/${this.resource}/regularize-lots/${this.form.document_item_id}`
                     )
-                    .then(response => {
+                    .then((response) => {
                         let all_lots = this.form.item.lots;
                         let available_lots = response.data;
 
                         all_lots.forEach((lot, index) => {
-                            let exist_lot = _.find(available_lots, it => {
+                            let exist_lot = _.find(available_lots, (it) => {
                                 return it.id == lot.id;
                             });
 
@@ -1208,7 +1307,7 @@ export default {
                             }
                         });
                     })
-                    .catch(error => {})
+                    .catch((error) => {})
                     .then(() => {});
             }
         },
@@ -1221,7 +1320,7 @@ export default {
                 factor: 0,
                 amount: 0,
                 base: 0,
-                is_amount: false
+                is_amount: false,
             });
         },
         clickRemoveDiscount(index) {
@@ -1242,7 +1341,7 @@ export default {
                 percentage: 0,
                 factor: 0,
                 amount: 0,
-                base: 0
+                base: 0,
             });
         },
         clickRemoveCharge(index) {
@@ -1251,7 +1350,7 @@ export default {
         changeChargeType(index) {
             let charge_type_id = this.form.charges[index].charge_type_id;
             this.form.charges[index].charge_type = _.find(this.charge_types, {
-                id: charge_type_id
+                id: charge_type_id,
             });
         },
         clickAddAttribute() {
@@ -1261,17 +1360,17 @@ export default {
                 value: null,
                 start_date: null,
                 end_date: null,
-                duration: null
+                duration: null,
             });
         },
         clickRemoveAttribute(index) {
             this.form.attributes.splice(index, 1);
         },
         changeAttributeType(index) {
-            let attribute_type_id = this.form.attributes[index]
-                .attribute_type_id;
+            let attribute_type_id =
+                this.form.attributes[index].attribute_type_id;
             let attribute_type = _.find(this.attribute_types, {
-                id: attribute_type_id
+                id: attribute_type_id,
             });
             this.form.attributes[index].description =
                 attribute_type.description;
@@ -1288,7 +1387,8 @@ export default {
             this.form.unit_price_value = this.form.item.sale_unit_price;
             this.lots = this.form.item.lots;
             this.form.has_igv = this.form.item.has_igv;
-            this.form.affectation_igv_type_id = this.form.item.sale_affectation_igv_type_id;
+            this.form.affectation_igv_type_id =
+                this.form.item.sale_affectation_igv_type_id;
             this.form.quantity = 1;
             this.item_unit_types = this.form.item.item_unit_types;
             this.item_unit_types.length > 0
@@ -1304,14 +1404,14 @@ export default {
             this.form.attributes = [];
 
             if (this.hasAttributes()) {
-                this.form.item.item_attributes.forEach(row => {
+                this.form.item.item_attributes.forEach((row) => {
                     this.form.attributes.push({
                         attribute_type_id: row.attribute_type_id,
                         description: row.description,
                         duration: row.duration,
                         end_date: row.end_date,
                         start_date: row.start_date,
-                        value: row.value
+                        value: row.value,
                     });
                 });
             }
@@ -1333,7 +1433,7 @@ export default {
             }
         },
         reloadDataItems(item_id) {
-            this.$http.get(`/${this.resource}/table/items`).then(response => {
+            this.$http.get(`/${this.resource}/table/items`).then((response) => {
                 this.items = response.data;
                 this.form.item_id = item_id;
                 if (item_id) {
@@ -1348,6 +1448,7 @@ export default {
                 this.form.quantity * this.form.unit_price_value,
                 4
             );
+            this.calculateDiscount();
             console.log(this.readonly_total);
         },
         calculateQuantity() {
@@ -1364,14 +1465,16 @@ export default {
         },
         async clickAddItem() {
             this.validateQuantity();
-
+if (this.discounts.length != 0) {
+                this.setDiscounts();
+            }
             if (this.form.item.lots_enabled) {
                 if (!this.form.IdLoteSelected)
                     return this.$message.error("Debe seleccionar un lote.");
             }
 
             let select_lots = await _.filter(this.form.item.lots, {
-                has_sale: true
+                has_sale: true,
             });
 
             if (this.form.item.series_enabled) {
@@ -1406,9 +1509,12 @@ export default {
             );
             this.row.IdLoteSelected = IdLoteSelected;
             this.initForm();
-
+            if (this.discounts.length > 0) {
+                this.row.discounts_acc = this.discounts;
+            }
             // this.initializeFields()
             this.$emit("add", this.row);
+                    this.discounts = [];
             this.setFocusSelectItem();
         },
         cleanItems() {
@@ -1424,7 +1530,7 @@ export default {
             if (this.form.item.calculate_quantity) {
                 if (this.total_item < 0.01)
                     this.$set(this.errors, "total_item", [
-                        "total venta producto debe ser mayor a 0"
+                        "total venta producto debe ser mayor a 0",
                     ]);
             }
 
@@ -1434,7 +1540,7 @@ export default {
             let price = 0;
 
             this.item_unit_type = _.find(this.form.item.item_unit_types, {
-                id: this.form.item_unit_type_id
+                id: this.form.item_unit_type_id,
             });
 
             switch (this.item_unit_type.price_default) {
@@ -1458,7 +1564,8 @@ export default {
                 this.item_unit_type = {};
                 this.form.unit_price = this.form.item.sale_unit_price;
                 this.form.unit_price_value = this.form.item.sale_unit_price;
-                this.form.item.unit_type_id = this.form.item.original_unit_type_id;
+                this.form.item.unit_type_id =
+                    this.form.item.original_unit_type_id;
             } else {
                 let valor = 0;
                 switch (row.price_default) {
@@ -1486,7 +1593,7 @@ export default {
 
             await this.$http
                 .get(`/${this.resource}/item/tables`)
-                .then(response => {
+                .then((response) => {
                     this.items = response.data.items;
                 })
                 .then(() => {
@@ -1549,7 +1656,7 @@ export default {
                 return this.item_unit_type.id === item_unit_type.id;
             }
             return false;
-        }
-    }
+        },
+    },
 };
 </script>

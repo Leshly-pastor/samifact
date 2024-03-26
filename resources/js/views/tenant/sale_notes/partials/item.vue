@@ -1694,6 +1694,7 @@ export default {
                 let exist = item_unit_types.find((i) => i.factor_default);
                 if (exist) {
                     this.form.item_unit_type_id = exist.id;
+                    this.changePrice(this.form.item_unit_type_id);
                 }
             }
             this.form.unit_price_value = this.form.item.sale_unit_price;

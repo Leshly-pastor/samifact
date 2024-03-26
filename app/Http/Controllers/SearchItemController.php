@@ -796,12 +796,14 @@ class SearchItemController extends Controller
                 'lots_enabled' => (bool)$row->lots_enabled,
                 'series_enabled' => (bool)$row->series_enabled,
                 'is_set' => (bool)$row->is_set,
-                'warehouses' => collect($row->warehouses)->transform(function ($row) use ($warehouse) {
+                'warehouses' => collect($row->warehouses)->transform(function ($wh) use ($warehouse, $row) {
+                    $price = self::getSaleUnitPriceByWarehouse($row, $warehouse->id);
                     return [
-                        'warehouse_id' => $row->warehouse->id,
-                        'warehouse_description' => $row->warehouse->description,
-                        'stock' => $row->stock,
-                        'checked' => ($row->warehouse_id == $warehouse->id) ? true : false,
+                        'price' => $price,
+                        'warehouse_id' => $wh->warehouse->id,
+                        'warehouse_description' => $wh->warehouse->description,
+                        'stock' => $wh->stock,
+                        'checked' => ($wh->warehouse_id == $warehouse->id) ? true : false,
                     ];
                 }),
                 'item_unit_types' => $row->item_unit_types,
@@ -854,7 +856,20 @@ class SearchItemController extends Controller
             'stock' => $stock,
         ];
     }
+    public static function getSaleUnitPriceByWarehouse(Item $item, int $warehouseId): string
+    {
+        $configuration = Configuration::first();
+        if ($configuration->active_warehouse_prices) {
 
+            $warehousePrice = $item->warehousePrices->where('item_id', $item->id)
+                ->where('warehouse_id', $warehouseId)
+                ->first();
+
+            $price = $warehousePrice->price ?? $item->sale_unit_price;
+            return number_format($price,  $configuration->decimal_quantity, ".", "");
+        }
+        return number_format($item->sale_unit_price,  $configuration->decimal_quantity, ".", "");
+    }
     /**
      * @param Request|null $request
      * @param int          $id

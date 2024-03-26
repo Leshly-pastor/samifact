@@ -27,7 +27,7 @@
 
 @media (max-width: 768px) {
     .header-dropdown {
-        min-width: 100px !important;
+        min-width: 250px !important;
     }
 }
 
@@ -54,9 +54,16 @@
 
 .search_input {
     margin-bottom: 0.1rem;
-    border-radius: 20px !important;
+    /* border-radius: 20px !important; */
 }
-
+.minWSize{
+    min-width: 800px;
+}
+@media (min-width: 760px) and (max-width: 1260px) {
+    .minWSize{
+        min-width: 500px;
+    }
+}
 .search_title{
 
 }
@@ -83,23 +90,36 @@
 
  <header class="header">
 
-     <div class="header-middle">
+     <div class="header-middle"
+     style="padding-bottom: 1rem;padding-top: 1rem;"
+     >
+        <div class="container">
+            <span style="color:black;">
+                {{$information->information_contact_address}}
+            </span>
+        </div>
          <div   class="container">
              <div class="header-left">
                  <a href="{{ route("tenant.ecommerce.index") }}" class="logo" style="max-width: 180px">
                     @if($information->logo)
-                        <img src="{{ asset('storage/uploads/logos/'.$information->logo) }}" alt="Logo" />
+                        <img 
+                        style="max-width: 180px;"
+                        src="{{ asset('storage/uploads/logos/'.$information->logo) }}" alt="Logo" />
                     @else
                         <img src="{{asset('logo/tulogo.png')}}" alt="Logo" />
                     @endif
                  </a>
              </div><!-- End .header-left -->
 
-             <div id="header_bar" class="header-center header-dropdowns">
+             <div id="header_bar" class="header-center header-dropdowns"
+             
+             >
 
-                 <div class="header-dropdown" style="min-width:400px;">
+                 <div class="header-dropdown minWSize">
 
-                    <input placeholder="Buscar..." type="text" class="search_input form-control form-control-lg" v-model="value" v-on:keyup="autoComplete" />
+                    <input placeholder="Buscar..." type="text" class="search_input form-control form-control-lg" v-model="value" v-on:keyup="autoComplete"
+                    style="max-width:none;!important; "
+                    />
                      <div class="header-menu">
                          <ul v-if="results.length > 0">
                             <li v-for="result in results">
@@ -122,10 +142,11 @@
                  <button class="mobile-menu-toggler" type="button">
                      <i class="icon-menu"></i>
                  </button>
-                 <div class="header-contact">
+                 {{-- <div class="header-contact">
                      <span> Atención al</span>
                      <i class="fab fa-whatsapp"></i> <a href="#"><strong>{{$information->information_contact_phone}}</strong></a>
-                 </div><!-- End .header-contact -->
+                 </div> --}}
+                 <!-- End .header-contact -->
 
                 @include('ecommerce::layouts.partials_ecommerce.cart_dropdown')
 

@@ -860,6 +860,11 @@ Vue.component(
         .default
 );
 Vue.component(
+    "tenant-ecommerce-configuration-favicon",
+    require("../../modules/Ecommerce/Resources/assets/js/views/configuration_favicon/index.vue")
+        .default
+);
+Vue.component(
     "tenant-ecommerce-configuration-social",
     require("../../modules/Ecommerce/Resources/assets/js/views/configuration_social/index.vue")
         .default

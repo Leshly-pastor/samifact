@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\Tenant;
 
 use App\Imports\ItemsImport;
@@ -23,6 +24,20 @@ class TagController extends Controller
     }
 
 
+    public function updateFavicon(Request $request, $id)
+    {
+        $file = $request->file('file');
+        $tag = Tag::findOrFail($id);
+        $file_name = Str::slug($tag->description) . '.' . $file->getClientOriginalExtension();
+        $path = 'public' . DIRECTORY_SEPARATOR . 'tags' . DIRECTORY_SEPARATOR . $file_name;
+        Storage::put($path, file_get_contents($file));
+        $tag->favicon = $file_name;
+        $tag->save();
+        return [
+            'success' => true,
+            'message' => 'Favicon actualizado'
+        ];
+    }
     public function columns()
     {
         return [
@@ -34,7 +49,7 @@ class TagController extends Controller
     public function records(Request $request)
     {
         $records = Tag::where($request->column, 'like', "%{$request->value}%")->orderBy('description');
-        
+
         return new TagCollection($records->paginate(config('tenant.items_per_page')));
     }
 
@@ -51,7 +66,8 @@ class TagController extends Controller
         return $record;
     }
 
-    public function store(TagRequest $request) {
+    public function store(TagRequest $request)
+    {
         $id = $request->input('id');
         $person = Tag::firstOrNew(['id' => $id]);
         $person->fill($request->all());
@@ -59,34 +75,24 @@ class TagController extends Controller
 
         return [
             'success' => true,
-            'message' => ($id)?'Tag editado con éxito':'Tag registrado con éxito',
+            'message' => ($id) ? 'Tag editado con éxito' : 'Tag registrado con éxito',
             'id' => $person->id
         ];
     }
-    
+
     public function destroy($id)
     {
         //return 'sd';
         $item = Tag::findOrFail($id);
-       // $this->deleteRecordInitialKardex($item);
+        // $this->deleteRecordInitialKardex($item);
         $item->status = 0;
         $item->save();
 
-       // $item->delete();
+        // $item->delete();
 
         return [
             'success' => true,
             'message' => 'Tag eliminado con éxito'
         ];
     }
-
-
-
-  
-
-
- 
-
-
-
 }

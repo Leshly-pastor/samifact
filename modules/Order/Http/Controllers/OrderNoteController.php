@@ -139,10 +139,15 @@ class OrderNoteController extends Controller
 
     public function documents(Request $request)
     {
-
-        $records = OrderNote::doesntHave('documents')
-            ->doesntHave('sale_notes')
-            ->where('state_type_id', '01')
+        $configuration = Configuration::first();
+        $order_note_not_blocked = $configuration->order_note_not_blocked;
+        $records = OrderNote::query();
+        if (!$order_note_not_blocked) {
+            // $records = $records->where('state_type_id', '01');
+            $records =    $records->doesntHave('sale_notes')
+                ->doesntHave('documents');
+        }
+        $records = $records->where('state_type_id', '01')
             ->whereTypeUser()
             ->latest();
 
@@ -171,7 +176,10 @@ class OrderNoteController extends Controller
 
                     app(SaleNoteController::class)->store(new SaleNoteRequest($row));
                 } else {
-
+                    if (isset($row['series']) && is_array($row['series'])) {
+                        $series = Series::find($row['series_id']);
+                        $row['series'] = $series->number;
+                    }
                     $data_val = DocumentValidation::validation($row);
 
                     app(DocumentController::class)->store(new DocumentRequest(DocumentInput::set($data_val)));
@@ -480,13 +488,25 @@ class OrderNoteController extends Controller
                     $data["discount_order_note"] = true;
                 }
                 $this->order_note = OrderNote::create($data);
-
+                if (isset($data['fee'])) {
+                    foreach ($data['fee'] as $row) {
+                        $this->order_note->fee()->create($row);
+                    }
+                }
+                foreach ($data['items'] as $row) {
+                }
                 foreach ($data['items'] as $row) {
                     $warehouse_id = Functions::valueKeyInArray($row, "warehouse_id", null);
+                    $discounts_acc = Functions::valueKeyInArray($row, 'discounts_acc', null);
                     if ($warehouse_id &&  $warehouse_id == 0) {
                         $warehouse = Warehouse::where('establishment_id', auth()->user()->establishment_id)->first();
                         $row['warehouse_id'] = $warehouse->id;
                     }
+                    if ($discounts_acc) {
+                        $row['discounts_acc'] = $discounts_acc;
+                        // $row['item']['discounts_acc'] = $discounts_acc;
+                    }
+
                     $this->generalSetIdLoteSelectedToItem($row);
                     $this->order_note->items()->create($row);
                     if ($is_food_dealer) {
@@ -780,6 +800,7 @@ class OrderNoteController extends Controller
             // $data = $this->mergeData($request, $this->order_note);
             $data = $this->mergeArray($request, $this->order_note);
 
+            $this->order_note->fee()->delete();
 
             $this->order_note->fill($data);
             //$this->order_note->items()->delete();

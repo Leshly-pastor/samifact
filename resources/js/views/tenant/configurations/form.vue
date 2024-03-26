@@ -2036,6 +2036,41 @@
                                     ></small>
                                 </div>
                             </div>
+                            <div class="col-md-6 mt-4">
+                                <label class="control-label">
+                                    Generar varios documentos de un pedido
+                                    <el-tooltip
+                                        class="item"
+                                        content="Permite generar varios documentos a partir de un pedido aunque ya se haya generado un documento"
+                                        effect="dark"
+                                        placement="top-start"
+                                    >
+                                        <i class="fa fa-info-circle"></i>
+                                    </el-tooltip>
+                                </label>
+
+                                <div
+                                    :class="{
+                                        'has-danger':
+                                            errors.order_note_not_blocked,
+                                    }"
+                                    class="form-group"
+                                >
+                                    <el-switch
+                                        v-model="form.order_note_not_blocked"
+                                        active-text="Si"
+                                        inactive-text="No"
+                                        @change="submit"
+                                    ></el-switch>
+                                    <small
+                                        v-if="errors.order_note_not_blocked"
+                                        class="text-danger"
+                                        v-text="
+                                            errors.order_note_not_blocked[0]
+                                        "
+                                    ></small>
+                                </div>
+                            </div>
                         </div>
                     </el-tab-pane>
 
@@ -3048,6 +3083,40 @@
                                         v-if="errors.name_pdf"
                                         class="text-danger"
                                         v-text="errors.name_pdf[0]"
+                                    ></small>
+                                </div>
+                            </div>
+                                    <div class="col-md-6 mt-4">
+                                <label class="control-label"
+                                    >Presentación en pdf
+                                    <el-tooltip
+                                        class="item"
+                                        effect="dark"
+                                        placement="top-start"
+                                    >
+                                        <div slot="content">
+                                            Muestra la presentación en el
+                                            pdf
+                                        </div>
+                                        <i class="fa fa-info-circle"></i>
+                                    </el-tooltip>
+                                </label>
+                                <div
+                                    :class="{
+                                        'has-danger': errors.presentation_pdf,
+                                    }"
+                                    class="form-group"
+                                >
+                                    <el-switch
+                                        v-model="form.presentation_pdf"
+                                        active-text="Si"
+                                        inactive-text="No"
+                                        @change="submit"
+                                    ></el-switch>
+                                    <small
+                                        v-if="errors.presentation_pdf"
+                                        class="text-danger"
+                                        v-text="errors.presentation_pdf[0]"
                                     ></small>
                                 </div>
                             </div>

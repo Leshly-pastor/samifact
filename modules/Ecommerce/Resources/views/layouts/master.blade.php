@@ -8,14 +8,19 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-    <title>eCommerce</title>
+    <title>{{$trade_name}}</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="keywords" content="ecommerce" />
     <meta name="description" content="eCommerce">
     <meta name="author" content="SW-THEMES">
 
-    <!-- Favicon -->
+    @if ($favicon)
+        <link rel="shortcut icon" type="image/png" href="{{ asset('storage/uploads/favicons/'.$favicon) }}" />
+    @else
     <link rel="icon" type="image/x-icon" href="{{ asset('porto-ecommerce/assets/images/icons/favicon.ico') }}">
+
+    @endif
+    <!-- Favicon -->
 
     <!-- Plugins CSS File -->
     <link rel="stylesheet" href="{{ asset('porto-ecommerce/assets/css/bootstrap.min.css') }}">
@@ -97,7 +102,7 @@
                             @include('ecommerce::layouts.partials_ecommerce.list_products')
                         </div>
 
-                        <div class="row float-right">
+                        <div class="row text-center">
                           <div class="col-md-12 col-lg-12">
                             {{ $dataPaginate->links() }}
                           </div>

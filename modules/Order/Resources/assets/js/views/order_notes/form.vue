@@ -706,6 +706,13 @@
                                     OP.GRAVADA: {{ currency_type.symbol }}
                                     {{ form.total_taxed }}
                                 </p>
+                                <p
+                                    class="text-end"
+                                    v-if="form.total_discount > 0"
+                                >
+                                    DESCUENTO TOTAL: {{ currency_type.symbol }}
+                                    {{ form.total_discount }}
+                                </p>
                                 <p class="text-end" v-if="form.total_igv > 0">
                                     IGV: {{ currency_type.symbol }}
                                     {{ form.total_igv }}
@@ -714,6 +721,85 @@
                                     <b>TOTAL A PAGAR: </b
                                     >{{ currency_type.symbol }} {{ form.total }}
                                 </h3>
+                                <p
+                                    class="text-end"
+                                    v-if="form.items.length > 0"
+                                >
+                                    Condiciones de pago:
+                                    <el-select
+                                        v-model="form.payment_condition_id"
+                                        dusk="document_type_id"
+                                        popper-class="el-select-document_type"
+                                        style="max-width: 200px"
+                                        @change="changePaymentCondition"
+                                    >
+                                        <el-option
+                                            label="Crédito con cuotas"
+                                            value="03"
+                                        ></el-option>
+                                        <!-- <el-option
+                                                                                label="Crédito"
+                                                                                value="02"
+                                                                            ></el-option> -->
+                                        <el-option
+                                            label="Contado"
+                                            value="01"
+                                        ></el-option>
+                                    </el-select>
+                                </p>
+
+                                <table class="w-100">
+                                    <tr
+                                        v-for="(row, index) in form.fee"
+                                        :key="index"
+                                    >
+                                        <td>
+                                            <el-date-picker
+                                                v-model="row.date"
+                                                :clearable="false"
+                                                format="dd/MM/yyyy"
+                                                type="date"
+                                                value-format="yyyy-MM-dd"
+                                                :picker-options="pickerOptions"
+                                            ></el-date-picker>
+                                        </td>
+                                        <td>
+                                            <el-input
+                                                v-model="row.amount"
+                                            ></el-input>
+                                        </td>
+                                        <td width="15%">
+                                            <button
+                                                v-if="index > 0"
+                                                class="btn waves-effect waves-light btn-sm btn-danger"
+                                                type="button"
+                                                @click.prevent="
+                                                    clickRemoveFee(index)
+                                                "
+                                            >
+                                                <i class="fa fa-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </table>
+                                <p
+                                    class="text-end"
+                                    v-if="form.payment_condition_id === '03'"
+                                >
+                                    <label class="control-label">
+                                        <a
+                                            class=""
+                                            href="#"
+                                            @click.prevent="clickAddFee"
+                                            ><i
+                                                class="fa fa-plus font-weight-bold text-info"
+                                            ></i>
+                                            <span style="color: #777777"
+                                                >Agregar cuota</span
+                                            ></a
+                                        >
+                                    </label>
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -792,6 +878,11 @@ export default {
     mixins: [functions, exchangeRate],
     data() {
         return {
+            pickerOptions: {
+                disabledDate(time) {
+                    return time.getTime() < Date.now();
+                },
+            },
             sellers: [],
             resource: "order-notes",
             showDialogAddItem: false,
@@ -856,7 +947,7 @@ export default {
         this.loadConfiguration();
         this.loadEstablishment();
         this.loadCompany();
-        console.log("🚀 ~ created ~ this.configuration:", this.configuration)
+        console.log("🚀 ~ created ~ this.configuration:", this.configuration);
     },
     async mounted() {
         this.initForm();
@@ -941,6 +1032,46 @@ export default {
         this.loading_form = true;
     },
     methods: {
+        clickRemoveFee(index) {
+            this.form.fee.splice(index, 1);
+            this.calculateFee();
+        },
+        changePaymentCondition() {
+            this.form.fee = [];
+            this.form.payments = [];
+            // if (this.form.payment_condition_id === "02") {
+            //     this.clickAddFeeNew();
+            //     this.readonly_date_of_due = true;
+            // }
+            if (this.form.payment_condition_id === "03") {
+                this.clickAddFee();
+            }
+        },
+        calculateFee() {
+            let fee_count = this.form.fee.length;
+            // let total = this.form.total;
+            let total = this.form.total;
+
+            let accumulated = 0;
+            let amount = _.round(total / fee_count, 2);
+            _.forEach(this.form.fee, (row) => {
+                accumulated += amount;
+                if (total - accumulated < 0) {
+                    amount = _.round(total - accumulated + amount, 2);
+                }
+                row.amount = amount;
+            });
+        },
+        clickAddFee() {
+            this.form.date_of_due = moment().format("YYYY-MM-DD");
+            this.form.fee.push({
+                id: null,
+                date: moment().add(1, "days").format("YYYY-MM-DD"),
+                currency_type_id: this.form.currency_type_id,
+                amount: 0,
+            });
+            this.calculateFee();
+        },
         clickAddAdditionalData() {
             this.form.additional_data.push({
                 title: null,
@@ -1048,6 +1179,9 @@ export default {
         initForm() {
             this.errors = {};
             this.form = {
+                payments: [],
+                fee: [],
+                payment_condition_id: "01",
                 reference_data: null,
                 dispatch_ticket_pdf_quantity: 1,
                 dispatch_ticket_pdf: false,
@@ -1233,6 +1367,7 @@ export default {
             this.form.total_igv_free = _.round(total_igv_free, 2);
             this.form.total_exportation = _.round(total_exportation, 2);
             this.form.total_taxed = _.round(total_taxed, 2);
+            this.form.total_discount = _.round(total_discount, 2);
             this.form.total_exonerated = _.round(total_exonerated, 2);
             this.form.total_unaffected = _.round(total_unaffected, 2);
             this.form.total_free = _.round(total_free, 2);
@@ -1287,7 +1422,9 @@ export default {
             }
 
             this.loading_submit = true;
-
+            if (this.form.fee.length > 0) {
+                this.form.payment_condition_id = "02";
+            }
             // await this.changePaymentMethodType(false)
             await this.$http
                 .post(`/${this.resource}`, this.form)

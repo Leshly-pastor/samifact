@@ -1,7 +1,7 @@
 <?php
 
 namespace Modules\BusinessTurn\Models;
- 
+
 use App\Models\Tenant\ModelTenant;
 use App\Models\Tenant\SaleNote;
 use App\Models\Tenant\Catalogs\IdentityDocumentType;
@@ -9,6 +9,8 @@ use App\Models\Tenant\Catalogs\IdentityDocumentType;
 class SaleNoteTransport extends ModelTenant
 {
     protected $fillable = [
+        'bus_number',
+        'passenger_age',
         'sale_note_id',
         'seat_number',
         'passenger_manifest',
@@ -20,11 +22,11 @@ class SaleNoteTransport extends ModelTenant
         'destinatation_district_id',
         'destinatation_address',
         'start_date',
-        'start_time', 
+        'start_time',
         'agency_origin_id',
         'agency_destination_id',
     ];
-    
+
     public function agency_origin()
     {
         return $this->belongsTo(AgencyTransport::class, 'agency_origin_id');
@@ -35,22 +37,22 @@ class SaleNoteTransport extends ModelTenant
     }
     public function getOriginDistrictIdAttribute($value)
     {
-        return (is_null($value))?null:(object) json_decode($value);
+        return (is_null($value)) ? null : (object) json_decode($value);
     }
 
     public function setOriginDistrictIdAttribute($value)
     {
-        $this->attributes['origin_district_id'] = (is_null($value))?null:json_encode($value);
+        $this->attributes['origin_district_id'] = (is_null($value)) ? null : json_encode($value);
     }
 
     public function getDestinatationDistrictIdAttribute($value)
     {
-        return (is_null($value))?null:(object) json_decode($value);
+        return (is_null($value)) ? null : (object) json_decode($value);
     }
 
     public function setDestinatationDistrictIdAttribute($value)
     {
-        $this->attributes['destinatation_district_id'] = (is_null($value))?null:json_encode($value);
+        $this->attributes['destinatation_district_id'] = (is_null($value)) ? null : json_encode($value);
     }
 
 
@@ -63,5 +65,4 @@ class SaleNoteTransport extends ModelTenant
     {
         return $this->belongsTo(IdentityDocumentType::class, 'identity_document_type_id');
     }
-
 }

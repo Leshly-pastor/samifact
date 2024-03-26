@@ -25,6 +25,7 @@ class ConfigurationEcommerceResource extends JsonResource
             'token_public_culqui' => $this->token_public_culqui,
             'columns_virtual_store' => $this->columns_virtual_store,
             'logo' => $this->logo,
+            'favicon' => $this->favicon,
             'link_youtube' => $this->link_youtube,
             'link_twitter' => $this->link_twitter,
             'link_facebook' => $this->link_facebook,

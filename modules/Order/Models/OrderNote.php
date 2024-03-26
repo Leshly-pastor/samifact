@@ -118,9 +118,11 @@ class OrderNote extends ModelTenant
         'state_type',
         'currency_type',
         'items',
+        'fee',
     ];
 
     protected $fillable = [
+        'payment_condition_id',
         'discounted_stock',
         'id',
         'number',
@@ -205,6 +207,12 @@ class OrderNote extends ModelTenant
         'total_value' => 'float',
         'total' => 'float',
     ];
+
+
+    public function fee()
+    {
+        return $this->hasMany(OrderNoteFee::class);
+    }
 
     public function getEstablishmentAttribute($value)
     {

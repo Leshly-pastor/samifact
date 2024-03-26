@@ -155,9 +155,28 @@ class CashController extends Controller
                     ];
                 }
             );
-
+        
         $document_credit = $document_credit->concat($sale_note_credit);
         $document_credit_total = $document_credit->sum('total');
+        $sale_note_unpaid = SaleNote::where('cash_id', $cash_id)
+            ->where('total_canceled',0)
+            ->where('paid',0)
+            ->withSum('payments', 'payment')
+            ->get()
+            ->sum(function ($saleNote) {
+                return $saleNote->total - $saleNote->getRelation('payments')->sum('payment');
+            });
+        // $documents_unpaid =  Document::where('cash_id', $cash_id)
+        // ->where('payment_condition_id', '01')
+        // ->where('total_canceled',0)
+        // ->withSum('payments', 'payment')
+        // ->get()
+        // ->sum(function ($document) {
+        //     return $document->total - $document->getRelation('payments')->sum('payment');
+        // });
+        // dump($sale_note_unpaid." sale_note_unpaid");
+        $document_credit_total += $sale_note_unpaid;
+        // $document_credit_total += $documents_unpaid;
         $establishment = $cash->user->establishment;
         $status_type_id = self::getStateTypeId();
         $final_balance = 0;
@@ -287,7 +306,8 @@ class CashController extends Controller
                         'type_transaction'          => 'Venta',
                         'document_type_description' => 'NOTA DE VENTA',
                         'number'                    => $sale_note->number_full,
-                        'date_of_issue'             => $date_payment,
+                        // 'date_of_issue'             => $date_payment,
+                        'date_of_issue'             => $sale_note->date_of_issue->format('Y-m-d'),
                         'date_sort'                 => $sale_note->date_of_issue,
                         'customer_name'             => $sale_note->customer->name,
                         'customer_number'           => $sale_note->customer->number,
@@ -300,7 +320,9 @@ class CashController extends Controller
                         'type_transaction_prefix'   => 'income',
                         'order_number_key'          => $order_number . '_' . $sale_note->created_at->format('YmdHis'),
                     ];
-
+                    if($temp['document_type_description'] === 'NOTA DE VENTA'){
+                        // dump($temp);
+                    }
                     // items
                     // dd($document->items);
                     foreach ($sale_note->items as $item) {

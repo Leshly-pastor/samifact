@@ -8,6 +8,7 @@
 
     <tenant-ecommerce-configuration-logo></tenant-ecommerce-configuration-logo>
     <tenant-ecommerce-configuration-social></tenant-ecommerce-configuration-social>
+    <tenant-ecommerce-configuration-favicon></tenant-ecommerce-configuration-favicon>
     <tenant-ecommerce-configuration-tag></tenant-ecommerce-configuration-tag>
     <tenant-ecommerce-configuration-columns></tenant-ecommerce-configuration-columns>
 

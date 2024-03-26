@@ -72,9 +72,7 @@
                 </div>
                 <div class="col-md-12 mt-2">
                     <el-input v-model="form.customer_telephone">
-                        <template slot="prepend"
-                            >+51</template
-                        >
+                        <template slot="prepend">+51</template>
                         <el-button
                             slot="append"
                             @click="clickSendWhatsapp"
@@ -94,9 +92,7 @@
                         v-model="form.customer_telephone"
                         placeholder="Enviar link por WhatsApp"
                     >
-                        <template slot="prepend"
-                            >+51</template
-                        >
+                        <template slot="prepend">+51</template>
                         <el-button slot="append" @click="clickSendWhatsapp2"
                             >Enviar URL
                             <el-tooltip
@@ -272,7 +268,10 @@
                     </div>
                 </div>
                 <br />
-                <div class="col-lg-12" v-show="is_document_type_invoice">
+                <div
+                    class="col-lg-12"
+                    v-if="is_document_type_invoice && document.fee && document.fee.length == 0"
+                >
                     <table>
                         <thead>
                             <tr width="100%">
@@ -363,6 +362,25 @@
                         </tbody>
                     </table>
                 </div>
+                <div class="col-lg-12" v-else>
+                    <table class="table table-sm table-bordered">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Fecha de pago</th>
+                                <th>Monto</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            <tr v-for="(row, index) in document.fee" :key="index">
+                                <td>{{ index + 1 }}</td>
+                                <td>{{ row.date }}</td>
+                                <td>{{ row.amount }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
 
                 <template v-if="fnApplyRestrictSaleItemsCpe">
                     <list-restrict-items
@@ -383,12 +401,22 @@
                         >
                     </div>
                 </div>
-                <div class="col-lg-6" v-if="form.order_note && !form.order_note.discounted_stock">
+                <div
+                    class="col-lg-6"
+                    v-if="form.order_note && !form.order_note.discounted_stock"
+                >
                     <label for="quantity">Número de comprobantes</label>
                     <el-input-number v-model="quantity" :min="1">
                     </el-input-number>
                 </div>
-                <div class="col-12"  v-if="isSending && form.order_note && !form.order_note.discounted_stock">
+                <div
+                    class="col-12"
+                    v-if="
+                        isSending &&
+                        form.order_note &&
+                        !form.order_note.discounted_stock
+                    "
+                >
                     <el-progress :percentage="progress"></el-progress>
                 </div>
                 <!-- propinas -->
@@ -458,6 +486,7 @@ import SaleNoteOptions from "@views/sale_notes/partials/options.vue";
 import SetTip from "@components/SetTip.vue";
 import ListRestrictItems from "@components/secondary/ListRestrictItems.vue";
 import { fnRestrictSaleItemsCpe } from "@mixins/functions";
+import Table from '../../../../../../../Finance/Resources/assets/js/views/balance/partial/Table.vue';
 
 export default {
     components: {
@@ -698,12 +727,16 @@ export default {
             if (this.document.items.length === 0)
                 return this.$message.error("No tiene productos agregados.");
 
-            let validate_payment_destination = await this.validatePaymentDestination();
+            if(this.document.payment_condition_id == '01'){
+                let validate_payment_destination = await this.validatePaymentDestination();
 
             if (validate_payment_destination.error_by_item > 0) {
                 return this.$message.error(
                     "El destino del pago es obligatorio"
                 );
+            }
+            }else{
+                this.document.payments = [];
             }
 
             // validacion restriccion de productos
@@ -863,6 +896,8 @@ export default {
             // console.log(q)
 
             this.document.establishment_id = q.establishment_id;
+            this.document.fee = q.fee;
+            this.document.payment_condition_id = q.payment_condition_id ? q.payment_condition_id : '01';
             // this.document.date_of_issue = q.date_of_issue
             this.document.time_of_issue = moment().format("HH:mm:ss");
             // this.document.customer_id = q.customer_id

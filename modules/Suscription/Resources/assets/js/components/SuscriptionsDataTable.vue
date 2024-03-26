@@ -134,7 +134,7 @@
                     @change="getRecords"
                 >
                     <el-option
-                        v-for="year in [2023, 2024]"
+                        v-for="year in [2023, 2024,2025]"
                         :key="year"
                         :label="year"
                         :value="year"

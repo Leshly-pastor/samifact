@@ -274,7 +274,7 @@
                                             effect="dark"
                                             placement="top-start"
                                         >
-                                            <!-- un icono como boton pequeño para eliminar la imagen -->
+                                
                                             <el-tag
                                                 type="danger"
                                                 role="button"
@@ -317,7 +317,24 @@
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label class="control-label"
-                                        >Logo APP</label
+                                        >Logo APP
+                                           <el-tooltip
+                                            class="item"
+                                            content="Eliminar el logo de la app"
+                                            effect="dark"
+                                            placement="top-start"
+                                        >
+                                
+                                            <el-tag
+                                                type="danger"
+                                                role="button"
+                                                @click="removeAppLogo"
+                                            >
+                                                <i class="fa fa-trash"></i>
+                                            </el-tag>
+                                        </el-tooltip>
+                                        
+                                        </label
                                     >
                                     <el-input
                                         v-model="form.app_logo"
@@ -349,7 +366,26 @@
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label class="control-label"
-                                        >Logo pie de página</label
+                                        >Logo pie de página
+                                           <el-tooltip
+                                            class="item"
+                                            content="Eliminar logo pie de pagina"
+                                            effect="dark"
+                                            placement="top-start"
+                                        >
+                                
+                                            <el-tag
+                                                type="danger"
+                                                role="button"
+                                                @click="removeFooterLogo"
+                                            >
+                                                <i class="fa fa-trash"></i>
+                                            </el-tag>
+                                        </el-tooltip>
+                                        
+                                        
+                                        
+                                        </label
                                     >
                                     <el-input
                                         v-model="form.footer_logo"
@@ -907,6 +943,10 @@ export default {
         this.events();
     },
     methods: {
+        async removeFooterLogo() {
+            this.form.footer_logo = null;
+            await this.submit();
+        },
         async removebgdefault() {
             this.form.bg_default = null;
             await this.submit();
@@ -917,6 +957,10 @@ export default {
         },
          async removeFavicon() {
             this.form.favicon = null;
+            await this.submit();
+        },
+         async removeAppLogo() {
+            this.form.app_logo = null;
             await this.submit();
         },
         setConfiguration() {

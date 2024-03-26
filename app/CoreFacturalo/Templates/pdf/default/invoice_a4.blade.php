@@ -717,6 +717,11 @@
                                 </div>
                             @endif
                         @endif
+                        @if ($configurations->presentation_pdf && isset($row->item->presentation) && isset($row->item->presentation->description))
+                            <div>
+                                <span style="font-size: 9px">{{ $row->item->presentation->description }}</span>
+                            </div>
+                        @endif
                         @if ($row->total_isc > 0)
                             <br /><span style="font-size: 9px">ISC : {{ $row->total_isc }}
                                 ({{ $row->percentage_isc }}%)</span>
@@ -849,7 +854,7 @@
                         @foreach ($documment_columns as $column)
                             <td class="text-right align-top">
                                 @php
-                                    $value = $column->getValudDocumentItem($row,$column->value);
+                                    $value = $column->getValudDocumentItem($row, $column->value);
                                 @endphp
                                 {{ $value }}
                             </td>
@@ -886,35 +891,35 @@
                         <td class="text-right align-top">-{{ number_format($p->total, 2) }}</td>
                     </tr>
                     <tr>
-                        <td colspan="{{$colspan}}" class="border-bottom"></td>
+                        <td colspan="{{ $colspan }}" class="border-bottom"></td>
                     </tr>
                 @endforeach
             @endif
 
             @if ($document->total_exportation > 0)
                 <tr>
-                    <td colspan="{{$colspan-1}}" class="text-right font-bold">Op. Exportación:
+                    <td colspan="{{ $colspan - 1 }}" class="text-right font-bold">Op. Exportación:
                         {{ $document->currency_type->symbol }}</td>
                     <td class="text-right font-bold">{{ number_format($document->total_exportation, 2) }}</td>
                 </tr>
             @endif
             @if ($document->total_free > 0)
                 <tr>
-                    <td colspan="{{$colspan-1}}" class="text-right font-bold">Op. Gratuitas:
+                    <td colspan="{{ $colspan - 1 }}" class="text-right font-bold">Op. Gratuitas:
                         {{ $document->currency_type->symbol }}</td>
                     <td class="text-right font-bold">{{ number_format($document->total_free, 2) }}</td>
                 </tr>
             @endif
             @if ($document->total_unaffected > 0)
                 <tr>
-                    <td colspan="{{$colspan-1}}" class="text-right font-bold">Op. Inafectas:
+                    <td colspan="{{ $colspan - 1 }}" class="text-right font-bold">Op. Inafectas:
                         {{ $document->currency_type->symbol }}</td>
                     <td class="text-right font-bold">{{ number_format($document->total_unaffected, 2) }}</td>
                 </tr>
             @endif
             @if ($document->total_exonerated > 0)
                 <tr>
-                    <td colspan="{{$colspan-1}}" class="text-right font-bold">Op. Exoneradas:
+                    <td colspan="{{ $colspan - 1 }}" class="text-right font-bold">Op. Exoneradas:
                         {{ $document->currency_type->symbol }}</td>
                     <td class="text-right font-bold">{{ number_format($document->total_exonerated, 2) }}</td>
                 </tr>
@@ -953,7 +958,8 @@
 
             @if ($document->total_isc > 0)
                 <tr>
-                    <td colspan="{{$colspan-1}}" class="text-right font-bold">ISC: {{ $document->currency_type->symbol }}</td>
+                    <td colspan="{{ $colspan - 1 }}" class="text-right font-bold">ISC:
+                        {{ $document->currency_type->symbol }}</td>
                     <td class="text-right font-bold">{{ number_format($document->total_isc, 2) }}</td>
                 </tr>
             @endif
@@ -1017,36 +1023,38 @@
 
             @if ($document->perception)
                 <tr>
-                    <td colspan="{{$colspan-1}}" class="text-right font-bold">Importe total:
+                    <td colspan="{{ $colspan - 1 }}" class="text-right font-bold">Importe total:
                         {{ $document->currency_type->symbol }}</td>
                     <td class="text-right font-bold">{{ number_format($document->total, 2) }}</td>
                 </tr>
                 <tr>
-                    <td colspan="{{$colspan-1}}" class="text-right font-bold">Percepción:
+                    <td colspan="{{ $colspan - 1 }}" class="text-right font-bold">Percepción:
                         {{ $document->currency_type->symbol }}</td>
                     <td class="text-right font-bold">{{ number_format($document->perception->amount, 2) }}</td>
                 </tr>
                 <tr>
-                    <td colspan="{{$colspan-1}}" class="text-right font-bold">Total a pagar:
+                    <td colspan="{{ $colspan - 1 }}" class="text-right font-bold">Total a pagar:
                         {{ $document->currency_type->symbol }}</td>
                     <td class="text-right font-bold">
                         {{ number_format($document->total + $document->perception->amount, 2) }}</td>
                 </tr>
             @elseif($document->retention)
                 <tr>
-                    <td colspan="{{$colspan-1}}" class="text-right font-bold" style="font-size: 16px;">Importe total:
+                    <td colspan="{{ $colspan - 1 }}" class="text-right font-bold" style="font-size: 16px;">Importe
+                        total:
                         {{ $document->currency_type->symbol }}</td>
                     <td class="text-right font-bold" style="font-size: 16px;">
                         {{ number_format($document->total, 2) }}</td>
                 </tr>
                 <tr>
-                    <td colspan="{{$colspan-1}}" class="text-right">TOTAL RETENCIÓN
+                    <td colspan="{{ $colspan - 1 }}" class="text-right">TOTAL RETENCIÓN
                         ({{ $document->retention->percentage * 100 }}
                         %): {{ $document->currency_type->symbol }}</td>
                     <td class="text-right">{{ number_format($document->retention->amount, 2) }}</td>
                 </tr>
                 <tr>
-                    <td colspan="{{$colspan-1}}" class="text-right">IMPORTE NETO: {{ $document->currency_type->symbol }}</td>
+                    <td colspan="{{ $colspan - 1 }}" class="text-right">IMPORTE NETO:
+                        {{ $document->currency_type->symbol }}</td>
                     <td class="text-right">{{ number_format($document->total - $document->retention->amount, 2) }}
                     </td>
                 </tr>
@@ -1060,7 +1068,7 @@
 
             @if (($document->retention || $document->detraction) && $document->total_pending_payment > 0)
                 <tr>
-                    <td colspan="{{$colspan-1}}" class="text-right font-bold">M. Pendiente:
+                    <td colspan="{{ $colspan - 1 }}" class="text-right font-bold">M. Pendiente:
                         {{ $document->currency_type->symbol }}</td>
                     <td class="text-right font-bold">{{ number_format($document->total_pending_payment, 2) }}</td>
                 </tr>

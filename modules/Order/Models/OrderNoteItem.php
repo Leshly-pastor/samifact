@@ -80,7 +80,7 @@
             'item',
             'quantity',
             'unit_value',
-
+            'discounts_acc',
             'affectation_igv_type_id',
             'total_base_igv',
             'percentage_igv',
@@ -135,7 +135,15 @@
             'total' => 'float',
             'warehouse_id' => 'int'
         ];
-
+        public function getDiscountsAccAttribute($value)
+        {
+            return (is_null($value)) ? null : (object)json_decode($value);
+        }
+    
+        public function setDiscountsAccAttribute($value)
+        {
+            $this->attributes['discounts_acc'] = (is_null($value)) ? null : json_encode($value);
+        }
         /**
          * @return int
          */

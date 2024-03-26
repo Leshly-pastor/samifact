@@ -363,6 +363,12 @@
                             @endif
                         @endif
 
+                        @if ($configuration->presentation_pdf && isset($row->item->presentation) && isset($row->item->presentation->description))
+                        <div>
+                            <span style="font-size: 9px">{{ $row->item->presentation->description }}</span>
+                        </div>
+                    @endif
+
                         @isset($row->item->sizes_selected)
                             @if (count($row->item->sizes_selected) > 0)
                                 @foreach ($row->item->sizes_selected as $size)
@@ -637,6 +643,31 @@
             </tr>
 
         </table>
+    @endif
+    @if($document->fee->count())
+    <table class="full-width">
+        @foreach ($document->fee as $key => $quote)
+            <tr>
+                <td>
+                    @if (!$configuration->show_the_first_cuota_document)
+                        &#8226;
+                        {{ 'Cuota #' . ($key + 1) }}
+                        / Fecha: {{ $quote->date }} /
+                        Monto: {{ $quote->currency_type->symbol }}{{ $quote->amount }}
+                    @else
+                        @if ($key == 0)
+                            &#8226;
+                            {{ 'Cuota #' . ($key + 1)  }}
+                            / Fecha: {{ $quote->date }} /
+                            Monto: {{ $quote->currency_type->symbol }}{{ $quote->amount }}
+                        @endif
+                    @endif
+
+                </td>
+            </tr>
+        @endforeach
+        </tr>
+    </table>
     @endif
     <table class="full-width">
         @php

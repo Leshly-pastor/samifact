@@ -22,7 +22,8 @@ class ConfigurationController extends Controller
         return view('ecommerce::configuration.index');
     }
 
-    public function record() {
+    public function record()
+    {
         $configuration = ConfigurationEcommerce::first();
         $record = new ConfigurationEcommerceResource($configuration);
         return $record;
@@ -117,15 +118,20 @@ class ConfigurationController extends Controller
 
             $file = $request->file('file');
             $ext = $file->getClientOriginalExtension();
-            $name = $type.'_'.$company->number.'.'.$ext;
+            $name = $type . '_' . $company->number . '.' . $ext;
 
             request()->validate(['file' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048']);
-            
+
             UploadFileHelper::checkIfValidFile($name, $file->getPathName(), true);
+            if ($type === 'logo_store') {
+                $file->storeAs('public/uploads/logos', $name);
+                $config->logo = $name;
+            }
+            if ($type === 'favicon_store') {
+                $file->storeAs('public/uploads/favicons', $name);
+                $config->favicon = $name;
+            }
 
-            $file->storeAs('public/uploads/logos', $name);
-
-            $config->logo = $name;
 
             $config->save();
 
@@ -141,7 +147,4 @@ class ConfigurationController extends Controller
             'message' =>  __('app.actions.upload.error'),
         ];
     }
-
-
-
 }

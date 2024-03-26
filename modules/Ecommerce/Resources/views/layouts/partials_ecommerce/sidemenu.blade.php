@@ -1,6 +1,6 @@
 @php
     $tagid = Request::segment(3);
-    
+
 @endphp
 <nav class="side-nav">
     <ul class="menu menu-vertical sf-arrows">
@@ -135,16 +135,62 @@
               </ul>
           </li> --}}
 
-        @foreach ($items as $item)
+        @php
+            $displayItems = $items->take(11);
+            $hasMoreItems = $items->count() > 11;
+            $hiddenItems = $items->slice(11);
+        @endphp
+
+        @foreach ($displayItems as $item)
             <li class="{{ $tagid == $item->id ? 'active' : '' }}">
                 <a href="{{ route('tenant.ecommerce.category', ['category' => $item->id]) }}">
-                    <i class="icon-cat-gift"></i>
+                    @if ($item->favicon)
+                        <img src="{{ asset('storage/tags/' . $item->favicon) }}" alt="Logo" width="20" height="20"
+                            style="display: inline-block; margin-right: 5px;" />
+                    @else
+                        <i class="icon-cat-gift"></i>
+                    @endif
                     @php
                         echo wordwrap($item->name, 27, "<br />\n");
                     @endphp
                 </a>
             </li>
         @endforeach
+        @foreach ($hiddenItems as $item)
+            <li class="{{ $tagid == $item->id ? 'active extra-item' : 'extra-item' }}" style="display: none;">
+                <a href="{{ route('tenant.ecommerce.category', ['category' => $item->id]) }}">
+                    @if ($item->favicon)
+                    <img src="{{ asset('storage/tags/' . $item->favicon) }}" alt="Logo" width="20" height="20"
+                        style="display: inline-block; margin-right: 5px;" />
+                @else
+                    <i class="icon-cat-gift"></i>
+                @endif
+                        @php
+                            echo wordwrap($item->name, 27, "<br />\n");
+                        @endphp
+                </a>
+            </li>
+        @endforeach
+        @if ($hasMoreItems)
+            <li class="show-more-categories">
+                <a href="#" id="show-more-categories">
+                    MOSTRAR MÁS
+                </a>
+            </li>
+        @endif
 
     </ul>
 </nav>
+@if ($hasMoreItems)
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#show-more-categories').click(function(event) {
+                event.preventDefault();
+                $('.extra-item').removeAttr('style');
+                $(this).hide();
+            });
+        });
+    </script>
+@endif
+</script>

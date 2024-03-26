@@ -142,6 +142,7 @@ class   SaleNote extends ModelTenant
     use SellerIdTrait;
 
     protected $with = [
+        'fee',
         'user',
         'soap_type',
         'state_type',
@@ -325,6 +326,10 @@ class   SaleNote extends ModelTenant
             $return += $sn->number;
         }
         return $return + 1;
+    }
+    public function fee()
+    {
+        return $this->hasMany(SaleNoteFee::class);
     }
     public function setAlterCompanyAttribute($value)
     {

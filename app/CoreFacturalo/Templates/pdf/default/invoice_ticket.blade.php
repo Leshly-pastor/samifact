@@ -498,7 +498,21 @@
                     </p>
                 </td>
             </tr>
-
+            @if($transport->passenger_age)
+                <tr>
+                    <td>
+                        <p class="desc">EDAD
+                        </p>
+                    </td>
+                    <td>
+                        <p class="desc-xl">
+                            <strong>
+                                {{ $transport->passenger_age }}
+                            </strong>
+                        </p>
+                    </td>
+                </tr>
+            @endif
 
             <tr>
                 <td>
@@ -560,9 +574,7 @@
                 </td>
                 <td>
                     <p class="desc-l">
-                        <strong>
                             {{ $origin_district }}
-                        </strong>
                     </p>
                 </td>
             </tr>
@@ -596,9 +608,7 @@
                 </td>
                 <td>
                     <p class="desc-l">
-                        <strong>
                             {{ $destinatation_district }}
-                        </strong>
                     </p>
                 </td>
             </tr>

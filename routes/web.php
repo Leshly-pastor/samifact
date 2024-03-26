@@ -918,6 +918,7 @@ if ($hostname) {
             Route::get('tags', 'Tenant\TagController@index')->name('tenant.tags.index');
             Route::get('tags/columns', 'Tenant\TagController@columns');
             Route::get('tags/records', 'Tenant\TagController@records');
+            Route::post('tags/{id}/upload', 'Tenant\TagController@updateFavicon');
             Route::get('tags/record/{tag}', 'Tenant\TagController@record');
             Route::post('tags', 'Tenant\TagController@store');
             Route::delete('tags/{tag}', 'Tenant\TagController@destroy');

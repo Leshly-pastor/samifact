@@ -2554,7 +2554,9 @@
                                                                                 is_amount_charge
                                                                             "
                                                                         >
-                                                                            currency_type.symbol</template
+                                                                            {{
+                                                                                currency_type.symbol
+                                                                            }}</template
                                                                         >
                                                                         <template
                                                                             v-else
@@ -2877,7 +2879,7 @@
                                                                                             1
                                                                                         "
                                                                                         :max="
-                                                                                            36
+                                                                                            1000
                                                                                         "
                                                                                         controls-position="right"
                                                                                     ></el-input-number>
@@ -2937,126 +2939,186 @@
                                                                                     </el-tooltip>
                                                                                 </div>
                                                                             </div>
-                                                                            <table
-                                                                                class="text-left table"
-                                                                                width="100%"
+                                                                            <el-collapse
+                                                                                @change="
+                                                                                    changeCollapse
+                                                                                "
+                                                                                v-model="
+                                                                                    activeNames
+                                                                                "
                                                                             >
-                                                                                <thead>
-                                                                                    <tr
-                                                                                        v-if="
-                                                                                            form
-                                                                                                .fee
-                                                                                                .length >
-                                                                                            0
-                                                                                        "
+                                                                                <el-collapse-item
+                                                                                    :title="`Cuotas ${form.fee.length}`"
+                                                                                    name="1"
+                                                                                >
+                                                                                    <table
+                                                                                        class="text-left table"
+                                                                                        width="100%"
                                                                                     >
-                                                                                        <th
-                                                                                            class="text-left"
-                                                                                            style="
-                                                                                                width: 100px;
-                                                                                            "
-                                                                                        >
-                                                                                            Fecha
-                                                                                        </th>
-                                                                                        <th
-                                                                                            class="text-left"
-                                                                                            style="
-                                                                                                width: 100px;
-                                                                                            "
-                                                                                        >
-                                                                                            Monto
-                                                                                        </th>
-                                                                                        <th
-                                                                                            style="
-                                                                                                width: 30px;
-                                                                                            "
-                                                                                        ></th>
-                                                                                    </tr>
-                                                                                </thead>
-                                                                                <tbody>
-                                                                                    <tr
-                                                                                        v-for="(
-                                                                                            row,
-                                                                                            index
-                                                                                        ) in form.fee"
-                                                                                        :key="
-                                                                                            index
-                                                                                        "
-                                                                                    >
-                                                                                        <td>
-                                                                                            <el-date-picker
-                                                                                                v-model="
-                                                                                                    row.date
-                                                                                                "
-                                                                                                :clearable="
-                                                                                                    false
-                                                                                                "
-                                                                                                format="dd/MM/yyyy"
-                                                                                                type="date"
-                                                                                                value-format="yyyy-MM-dd"
-                                                                                                :picker-options="
-                                                                                                    pickerOptions
-                                                                                                "
-                                                                                            ></el-date-picker>
-                                                                                        </td>
-                                                                                        <td>
-                                                                                            <el-input
-                                                                                                v-model="
-                                                                                                    row.amount
-                                                                                                "
-                                                                                            ></el-input>
-                                                                                        </td>
-                                                                                        <td
-                                                                                            class="text-center"
-                                                                                        >
-                                                                                            <button
+                                                                                        <thead>
+                                                                                            <tr
                                                                                                 v-if="
-                                                                                                    index >
+                                                                                                    form
+                                                                                                        .fee
+                                                                                                        .length >
                                                                                                     0
                                                                                                 "
-                                                                                                class="btn waves-effect waves-light btn-sm btn-danger"
-                                                                                                type="button"
-                                                                                                @click.prevent="
-                                                                                                    clickRemoveFee(
-                                                                                                        index
-                                                                                                    )
+                                                                                            >
+                                                                                                <th
+                                                                                                    class="text-left"
+                                                                                                    style="
+                                                                                                        width: 100px;
+                                                                                                    "
+                                                                                                >
+                                                                                                    Fecha
+                                                                                                </th>
+                                                                                                <th
+                                                                                                    class="text-left"
+                                                                                                    style="
+                                                                                                        width: 100px;
+                                                                                                    "
+                                                                                                >
+                                                                                                    Monto
+                                                                                                </th>
+                                                                                                <th
+                                                                                                    style="
+                                                                                                        width: 30px;
+                                                                                                    "
+                                                                                                ></th>
+                                                                                            </tr>
+                                                                                        </thead>
+                                                                                        <tbody>
+                                                                                            <!-- <tr
+                                                                                                v-for="(
+                                                                                                    row,
+                                                                                                    index
+                                                                                                ) in form.fee"
+                                                                                                :key="
+                                                                                                    index
                                                                                                 "
                                                                                             >
-                                                                                                <i
-                                                                                                    class="fa fa-trash"
-                                                                                                ></i>
-                                                                                            </button>
-                                                                                        </td>
-                                                                                    </tr>
-                                                                                    <tr>
-                                                                                        <td
-                                                                                            colspan="5"
-                                                                                        >
-                                                                                            <label
-                                                                                                class="control-label"
-                                                                                            >
-                                                                                                <a
-                                                                                                    class=""
-                                                                                                    href="#"
-                                                                                                    @click.prevent="
-                                                                                                        clickAddFee
-                                                                                                    "
-                                                                                                    ><i
-                                                                                                        class="fa fa-plus font-weight-bold text-info"
-                                                                                                    ></i>
-                                                                                                    <span
-                                                                                                        style="
-                                                                                                            color: #777777;
+                                                                                                <td>
+                                                                                                    <el-date-picker
+                                                                                                        v-model="
+                                                                                                            row.date
                                                                                                         "
-                                                                                                        >Agregar
-                                                                                                        cuota</span
-                                                                                                    ></a
+                                                                                                        :clearable="
+                                                                                                            false
+                                                                                                        "
+                                                                                                        format="dd/MM/yyyy"
+                                                                                                        type="date"
+                                                                                                        value-format="yyyy-MM-dd"
+                                                                                                        :picker-options="
+                                                                                                            pickerOptions
+                                                                                                        "
+                                                                                                    ></el-date-picker>
+                                                                                                </td>
+                                                                                                <td>
+                                                                                                    <el-input
+                                                                                                        v-model="
+                                                                                                            row.amount
+                                                                                                        "
+                                                                                                    ></el-input>
+                                                                                                </td>
+                                                                                                <td
+                                                                                                    class="text-center"
                                                                                                 >
-                                                                                            </label>
-                                                                                        </td>
-                                                                                    </tr>
-                                                                                </tbody>
-                                                                            </table>
+                                                                                                    <button
+                                                                                                        v-if="
+                                                                                                            index >
+                                                                                                            0
+                                                                                                        "
+                                                                                                        class="btn waves-effect waves-light btn-sm btn-danger"
+                                                                                                        type="button"
+                                                                                                        @click.prevent="
+                                                                                                            clickRemoveFee(
+                                                                                                                index
+                                                                                                            )
+                                                                                                        "
+                                                                                                    >
+                                                                                                        <i
+                                                                                                            class="fa fa-trash"
+                                                                                                        ></i>
+                                                                                                    </button>
+                                                                                                </td>
+                                                                                            </tr> -->
+                                                                                            <tr
+                                                                                                v-if="
+                                                                                                    !showAll
+                                                                                                "
+                                                                                            >
+                                                                                                <td
+                                                                                                    colspan="3"
+                                                                                                >
+                                                                                                    Se
+                                                                                                    muestran
+                                                                                                    las
+                                                                                                    primeras
+                                                                                                    y
+                                                                                                    últimas
+                                                                                                    5
+                                                                                                    cuotas
+                                                                                                </td>
+                                                                                            </tr>
+
+                                                                                            <tr
+                                                                                                v-for="(
+                                                                                                    row,
+                                                                                                    index
+                                                                                                ) in getDisplayedRows"
+                                                                                                :key="
+                                                                                                    index
+                                                                                                "
+                                                                                            >
+                                                                                                <td>
+                                                                                                    <el-date-picker
+                                                                                                        v-model="
+                                                                                                            row.date
+                                                                                                        "
+                                                                                                        :clearable="
+                                                                                                            false
+                                                                                                        "
+                                                                                                        format="dd/MM/yyyy"
+                                                                                                        type="date"
+                                                                                                        value-format="yyyy-MM-dd"
+                                                                                                        :picker-options="
+                                                                                                            pickerOptions
+                                                                                                        "
+                                                                                                    ></el-date-picker>
+                                                                                                </td>
+                                                                                                <td>
+                                                                                                    <el-input
+                                                                                                        v-model="
+                                                                                                            row.amount
+                                                                                                        "
+                                                                                                    ></el-input>
+                                                                                                </td>
+                                                                                                <td
+                                                                                                    class="text-center"
+                                                                                                >
+                                                                                                    <button
+                                                                                                        v-if="
+                                                                                                            index >
+                                                                                                            0
+                                                                                                        "
+                                                                                                        class="btn waves-effect waves-light btn-sm btn-danger"
+                                                                                                        type="button"
+                                                                                                        @click.prevent="
+                                                                                                            clickRemoveFee(
+                                                                                                                index
+                                                                                                            )
+                                                                                                        "
+                                                                                                    >
+                                                                                                        <i
+                                                                                                            class="fa fa-trash"
+                                                                                                        ></i>
+                                                                                                    </button>
+                                                                                                </td>
+                                                                                            </tr>
+                                                                                        </tbody>
+                                                                                    </table>
+                                                                                </el-collapse-item>
+                                                                            </el-collapse>
                                                                         </div>
                                                                     </td>
                                                                 </tr>
@@ -3750,6 +3812,8 @@ export default {
     ],
     data() {
         return {
+            showAll: true,
+            activeNames: ["1"],
             is_amount_charge: true,
             cuotaNumber: 1,
             cuotaDays: 30,
@@ -3909,6 +3973,11 @@ export default {
         };
     },
     computed: {
+        getDisplayedRows() {
+            return this.showAll
+                ? this.form.fee
+                : this.form.fee.slice(0, 5).concat(this.form.fee.slice(-5));
+        },
         isGeneratedFromExternal() {
             return (
                 this.table != undefined &&
@@ -4168,16 +4237,22 @@ export default {
         this.formatTooltip(20);
     },
     methods: {
+        changeCollapse() {},
         calculatePeriodDays(cuotas, days) {
+            let date_of_issue = this.form.date_of_issue;
             if (!cuotas || !days) return;
+            if (this.form.fee.length > 0) {
+                let [fee] = this.form.fee;
+                let { date } = fee;
+                date_of_issue = date;
+            }
             this.form.fee = [];
-            let { date_of_issue } = this.form;
             //dada la fecha de emision, usando moment calcula las fechas de vencimiento segun el numero de cuotas y los dias de cada cuota
             let dates = [];
             for (let i = 0; i < cuotas; i++) {
                 let date = moment(date_of_issue)
                     .utcOffset(-300)
-                    .add((i + 1) * days, "days")
+                    .add((i + 1) * (i == 0 ? 0 : days), "days")
                     .format("YYYY-MM-DD");
                 dates.push(date);
             }
@@ -7378,6 +7453,7 @@ export default {
             });
         },
         calculateFee() {
+            this.showAll = this.form.fee.length < 15;
             let fee_count = this.form.fee.length;
             // let total = this.form.total;
             let total = this.getTotal();
