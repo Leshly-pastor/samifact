@@ -4,7 +4,7 @@ namespace App\CoreFacturalo\Requests\Api\Validation;
 
 use App\Models\Tenant\Item;
 use Exception;
-
+ 
 class DispatchValidation
 {
     public static function validation($inputs)
@@ -13,8 +13,7 @@ class DispatchValidation
         unset($inputs['establishment']);
 
         Functions::validateSeries($inputs);
-
-        $inputs['customer_id'] = Functions::person($inputs['customer'], 'customers');
+        $inputs['customer_id'] = $inputs['customer'] ? Functions::person($inputs['customer'], 'customers') : null;
         unset($inputs['customer']);
 
         $inputs['items'] = self::items($inputs['items']);

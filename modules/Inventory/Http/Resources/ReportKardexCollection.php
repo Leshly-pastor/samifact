@@ -53,8 +53,9 @@ class ReportKardexCollection extends ResourceCollection
 
             case $models[0]: //venta
 
-                $cpe_input = ($row->quantity > 0) ?  (isset($row->inventory_kardexable->sale_note_id) || isset($row->inventory_kardexable->order_note_id) ? "-" : number_format($row->quantity,0)) : "-";
-                $cpe_output = ($row->quantity < 0) ?  (isset($row->inventory_kardexable->sale_note_id) || isset($row->inventory_kardexable->order_note_id) ? "-" : number_format($row->quantity,0)) : "-";
+                $cpe_input = ($row->quantity > 0) ?  (isset($row->inventory_kardexable->sale_note_id) || isset($row->inventory_kardexable->order_note_id) ? "-" : number_format($row->quantity,2)) : "-";
+                $cpe_output = ($row->quantity < 0) ?  (isset($row->inventory_kardexable->sale_note_id) || isset($row->inventory_kardexable->order_note_id) ? "-" : number_format($row->quantity,2)) : "-";
+                
                 $cpe_discounted_stock = false;
                 $cpe_doc_asoc = isset($row->inventory_kardexable->note) ? $row->inventory_kardexable->note->affected_document->getNumberFullAttribute() : '-';
 
@@ -78,7 +79,7 @@ class ReportKardexCollection extends ResourceCollection
                     'date_of_issue' => isset($row->inventory_kardexable->date_of_issue) ? $row->inventory_kardexable->date_of_issue->format('Y-m-d') : '',
                     'type_transaction' => ($row->quantity < 0) ? "Venta" : "Anulación Venta",
                     'number' => optional($row->inventory_kardexable)->series . '-' . optional($row->inventory_kardexable)->number,
-                    'input' => intVal($cpe_input),
+                    'input' => floatVal($cpe_input),
                     'output' => $cpe_output,
                     'balance' => $doc_balance,
                     'sale_note_asoc' => isset($row->inventory_kardexable->sale_note_id)  ? optional($row->inventory_kardexable)->sale_note->number_full : "-",
@@ -95,7 +96,7 @@ class ReportKardexCollection extends ResourceCollection
                     'date_of_issue' => isset($row->inventory_kardexable->date_of_issue) ? $row->inventory_kardexable->date_of_issue->format('Y-m-d') : '',
                     'type_transaction' => ($row->quantity < 0) ? "Anulación Compra" : "Compra",
                     'number' => optional($row->inventory_kardexable)->series . '-' . optional($row->inventory_kardexable)->number,
-                    'input' => ($row->quantity > 0) ?  intVal($row->quantity) : "-",
+                    'input' => ($row->quantity > 0) ?  floatVal($row->quantity) : "-",
                     'output' => ($row->quantity < 0) ?  $row->quantity : "-",
                     'balance' => self::$balance += $row->quantity,
                     'sale_note_asoc' => '-',
@@ -112,7 +113,7 @@ class ReportKardexCollection extends ResourceCollection
                     'date_of_issue' => isset($row->inventory_kardexable->date_of_issue) ? $row->inventory_kardexable->date_of_issue->format('Y-m-d') : '',
                     'number' => optional($row->inventory_kardexable)->number_full,
                     // 'number' => optional($row->inventory_kardexable)->prefix.'-'.optional($row->inventory_kardexable)->id,
-                    'input' => ($row->quantity > 0) ?  intVal($row->quantity) : "-",
+                    'input' => ($row->quantity > 0) ?  floatVal($row->quantity) : "-",
                     'output' => ($row->quantity < 0) ?  $row->quantity : "-",
                     'balance' => self::$balance += $row->quantity,
                     'sale_note_asoc' => '-',
@@ -175,7 +176,7 @@ class ReportKardexCollection extends ResourceCollection
                     'date_of_issue' => isset($row->inventory_kardexable->date_of_issue) ? $row->inventory_kardexable->date_of_issue->format('Y-m-d') : '',
                     'type_transaction' => ($row->quantity < 0) ? "Pedido" : "Anulación Pedido",
                     'number' => optional($row->inventory_kardexable)->prefix . '-' . optional($row->inventory_kardexable)->id,
-                    'input' => ($row->quantity > 0) ?  intVal($row->quantity) : "-",
+                    'input' => ($row->quantity > 0) ?  floatVal($row->quantity) : "-",
                     'output' => ($row->quantity < 0) ?  $row->quantity : "-",
                     'balance' => self::$balance += $row->quantity,
                     'sale_note_asoc' => '-',

@@ -1392,6 +1392,9 @@ export default {
                 case "openSendEmailModal":
                     this.openSendEmailModal(arg1);
                     break;
+                case "duplicate":
+                    this.duplicate(arg1);
+                    break;
                 default:
                     break;
             }

@@ -159,7 +159,7 @@ class InventoryKardex extends ModelTenant
             'warehouse' => $warehouseName,
         ];
         $inventory_kardexable = $this->inventory_kardexable;
-        $qty = number_format($this->quantity, 0, '.', '');
+        $qty = number_format($this->quantity, 2, '.', '');
         $input_set = ($qty > 0) ? $qty : "-";
         $output_set = ($qty < 0) ? $qty : "-";
         $data['input'] = $input_set;

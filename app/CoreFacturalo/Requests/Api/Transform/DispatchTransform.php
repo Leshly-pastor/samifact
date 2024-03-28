@@ -6,6 +6,8 @@ use App\CoreFacturalo\Requests\Api\Transform\Common\EstablishmentTransform;
 use App\CoreFacturalo\Requests\Api\Transform\Common\PersonTransform;
 use App\CoreFacturalo\Requests\Api\Transform\Common\LegendTransform;
 use App\CoreFacturalo\Requests\Api\Transform\Common\ActionTransform;
+use App\Models\Tenant\Catalogs\IdentityDocumentType;
+use Modules\Dispatch\Models\Transport;
 
 class DispatchTransform
 {
@@ -19,7 +21,7 @@ class DispatchTransform
             'time_of_issue' => Functions::valueKeyInArray($inputs, 'hora_de_emision'),
             'document_type_id' => Functions::valueKeyInArray($inputs, 'codigo_tipo_documento'),
             'establishment' => EstablishmentTransform::transform($inputs['datos_del_emisor']),
-            'customer' => PersonTransform::transform($inputs['datos_del_cliente_o_receptor']),
+            'customer' => PersonTransform::transform($inputs, 'datos_del_cliente_o_receptor'),
             'observations' => Functions::valueKeyInArray($inputs, 'observaciones'),
             'transport_mode_type_id' => Functions::valueKeyInArray($inputs, 'codigo_modo_transporte'),
             'transfer_reason_type_id' => Functions::valueKeyInArray($inputs, 'codigo_motivo_traslado'),
@@ -44,9 +46,15 @@ class DispatchTransform
             'transport_data' => self::transport($inputs),
             'transport_id' => Functions::valueKeyInArray($inputs, 'transport_id'),
             'items' => self::items($inputs),
+            'sender_data' => self::senderData($inputs),
+            'receiver_data' => self::receiverData($inputs),
+            'sender_address_data' => self::senderAddressData($inputs),
+            'sender_address' => self::senderAddressData($inputs),
+            'receiver_address_data' => self::receiverAddressData($inputs),
             'legends' => LegendTransform::transform($inputs),
             'actions' => ActionTransform::transform($inputs),
             'additional_data' => Functions::valueKeyInArray($inputs, 'dato_adicional'),
+            'transports' => self::transports($inputs),
         ];
         self::AffectedDocument($data, $inputs);
         return $data;
@@ -75,7 +83,7 @@ class DispatchTransform
             return [
                 'location_id' => $origin['ubigeo'],
                 'address' => $origin['direccion'],
-                'code' => $origin['codigo_del_domicilio_fiscal'],
+                'code' => '0000',
             ];
         }
         return null;
@@ -89,7 +97,7 @@ class DispatchTransform
             return [
                 'location_id' => $delivery['ubigeo'],
                 'address' => $delivery['direccion'],
-                'code' => $delivery['codigo_del_domicilio_fiscal'],
+                'code' => '0000',
             ];
         }
         return null;
@@ -138,15 +146,119 @@ class DispatchTransform
         return null;
     }
 
+    private static function transports($inputs)
+    {
+        if (key_exists('vehiculo', $inputs)) {
+            $transport = $inputs['vehiculo'];
+
+            $tr = Transport::query()->firstOrCreate([
+                'plate_number' => $transport['numero_de_placa'],
+            ], [
+                'model' => Functions::valueKeyInArray($transport, 'modelo'),
+                'brand' => Functions::valueKeyInArray($transport, 'marca'),
+            ]);
+
+//            $tr = Transport::query()
+//                ->select('id', 'plate_number', 'model', 'brand', 'tuce_number', 'authorization_entity_id', 'authorization_entity_number')
+//                ->first($record->id);
+
+            return [
+                [
+                    'transport_id' => $tr->id,
+                    'transport_data' => [
+                        'id' => $tr->id,
+                        'plate_number' => $tr->plate_number,
+                        'model' => $tr->model,
+                        'brand' => $tr->brand,
+                        'tuce_number' => $tr->tuce_number,
+                        'authorization_entity_id' => $tr->authorization_entity_id,
+                        'authorization_entity_number' => $tr->authorization_entity_number
+                    ]// $tr->toArray()
+                ]
+            ];
+        }
+        return [];
+    }
+
+    private static function senderData($inputs)
+    {
+        if (key_exists('remitente', $inputs)) {
+            $data = $inputs['remitente'];
+            $identity_document_type_id = $data['codigo_tipo_documento_identidad'];
+            $idt = IdentityDocumentType::query()->find($identity_document_type_id);
+
+            return [
+                'identity_document_type_id' => $data['codigo_tipo_documento_identidad'],
+                'identity_document_type_description' => $idt->description,
+                'number' => $data['numero_documento'],
+                'name' => $data['apellidos_y_nombres_o_razon_social'],
+            ];
+        }
+
+        return null;
+    }
+
+    private static function receiverData($inputs)
+    {
+        if (key_exists('destinatario', $inputs)) {
+            $data = $inputs['destinatario'];
+            $identity_document_type_id = $data['codigo_tipo_documento_identidad'];
+            $idt = IdentityDocumentType::query()->find($identity_document_type_id);
+
+            return [
+                'identity_document_type_id' => $identity_document_type_id,
+                'identity_document_type_description' => $idt->description,
+                'number' => $data['numero_documento'],
+                'name' => $data['apellidos_y_nombres_o_razon_social'],
+            ];
+        }
+
+        return null;
+    }
+
+    private static function senderAddressData($inputs)
+    {
+        // dd($inputs["direccion_partida_remitente"]);
+        if (key_exists('direccion_partida_remitente', $inputs)) {
+            $data = $inputs['direccion_partida_remitente'];
+            $location_id = $data['ubigeo'];
+
+            return [
+                'location_id' => [
+                    substr($location_id, 0, 2),
+                    substr($location_id, 0, 4),
+                    substr($location_id, 0, 6)
+                ],
+                'address' => $data['direccion'],
+            ];
+        }
+        return null;
+    }
+
+    private static function receiverAddressData($inputs)
+    {
+        if (key_exists('direccion_llegada_destinatario', $inputs)) {
+            $data = $inputs['direccion_llegada_destinatario'];
+            $location_id = $data['ubigeo'];
+
+            return [
+                'location_id' => [
+                    substr($location_id, 0, 2),
+                    substr($location_id, 0, 4),
+                    substr($location_id, 0, 6)
+                ],
+                'address' => $data['direccion'],
+            ];
+        }
+        return null;
+    }
+
     private static function items($inputs)
     {
         if (key_exists('items', $inputs)) {
             $items = [];
             foreach ($inputs['items'] as $row) {
                 $items[] = [
-                    //'internal_id' => $row['codigo_interno'],
-                    //'quantity' => Functions::valueKeyInArray($row, 'cantidad'),
-
                     'internal_id' => isset($row['codigo_interno']) ? $row['codigo_interno'] : '',
                     'description' => Functions::valueKeyInArray($row, 'descripcion'),
                     'name' => Functions::valueKeyInArray($row, 'nombre'),

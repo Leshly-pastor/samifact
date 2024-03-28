@@ -13,7 +13,6 @@ use Exception;
 use App\Models\Tenant\Configuration;
 use Carbon\Carbon;
 
-
 class Functions
 {
     public static function establishment($inputs) {
@@ -76,6 +75,9 @@ class Functions
             ->first();
 
         if (!$item) {
+            if(is_null($inputs['description'])) {
+                throw new Exception("El item {$inputs['internal_id']} no puede ser registrado.");
+            }
 
             $item = new Item();
             $item->internal_id = $inputs['internal_id'];
@@ -106,6 +108,31 @@ class Functions
             }
             
         }
+
+        if(key_exists('update_data', $inputs) && $inputs['update_data']) {
+            $data = $inputs['update_data'];
+            if(key_exists('codigo_tipo_afectacion_igv_venta', $data)) {
+                $item->update([
+                    'sale_affectation_igv_type_id' => $data['codigo_tipo_afectacion_igv_venta']
+                ]);
+            }
+            if(key_exists('codigo_tipo_afectacion_igv_compra', $data)) {
+                $item->update([
+                    'purchase_affectation_igv_type_id' => $data['codigo_tipo_afectacion_igv_compra']
+                ]);
+            }
+            if(key_exists('precio_unitario_venta_incluye_igv', $data)) {
+                $item->update([
+                    'has_igv' => func_str_to_lower_utf8($data['precio_unitario_venta_incluye_igv']) === 'si'
+                ]);
+            }
+            if(key_exists('precio_unitario_compra_incluye_igv', $data)) {
+                $item->update([
+                    'purchase_has_igv' => func_str_to_lower_utf8($data['precio_unitario_compra_incluye_igv']) === 'si'
+                ]);
+            }
+        }
+
 
         return $item->id;
     }

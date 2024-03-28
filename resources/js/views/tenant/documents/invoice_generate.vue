@@ -4031,10 +4031,7 @@ export default {
     async created() {
         this.loadConfiguration();
         this.$store.commit("setConfiguration", this.configuration);
-        console.log(
-            "🚀 ~ file: invoice_generate.vue:3700 ~ created ~ this.configuration:",
-            this.configuration
-        );
+
         this.isEditingItems = this.configuration.edit_info_documents;
         let { decimal_quantity } = this.configuration;
         if (decimal_quantity) {
@@ -4279,8 +4276,6 @@ export default {
             this.setLastDateDue();
         },
         addFeeds() {
-            console.log("🚀 ~ addFeeds ~ this.cuotaNumber:", this.cuotaNumber);
-
             this.calculatePeriodDays(this.cuotaNumber, this.cuotaDays);
         },
         clickAddFavoriteItem() {
@@ -4992,10 +4987,7 @@ export default {
                 let tempItem = itemsParsed.find(
                     (ip) => ip.item_id == item.id || ip.id == item.id
                 );
-                console.log(
-                    "🚀 ~ file: invoice_generate.vue:4716 ~ setItemFromResponse ~ tempItem:",
-                    tempItem
-                );
+
                 if (tempItem !== undefined) {
                     item.quantity = tempItem.quantity;
                 }
@@ -5172,6 +5164,7 @@ export default {
                     this.onSetSeries(data.document_type_id, data.series)
                 );
             }
+
             //
             // this.series = this.onSetSeries(data.document_type_id, data.series);
             this.form.state_type_id = data.state_type_id;
@@ -5249,6 +5242,13 @@ export default {
                     data.additional_information
                 );
 
+            if (
+                (this.table == "quotations" &&
+                    this.form.additional_information == "") ||
+                this.form.additional_information == null
+            ) {
+                this.form.additional_information = data.description;
+            }
             // this.form.additional_information = data.additional_information;
             // this.form.fee = [];
             this.prepareDataDetraction();
@@ -5469,7 +5469,6 @@ export default {
             return null;
         },
         onSetSeries(documentType, serie) {
-            // console.log('onSetSeries')
             const find = this.all_series.find(
                 (s) => s.document_type_id == documentType && s.number == serie
             );
@@ -6322,7 +6321,6 @@ export default {
                 let alt = _.find(this.customers, {
                     id: this.establishment.customer_id,
                 });
-                // console.log(alt)
 
                 if (alt !== undefined) {
                     this.form.customer_id = this.establishment.customer_id;
@@ -6395,10 +6393,6 @@ export default {
                     this.form.date_of_issue
                 ).then((response) => {
                     this.form.exchange_rate_sale = response;
-                    console.log(
-                        "🚀 ~ file: invoice_generate.vue:6109 ~ ).then ~ response:",
-                        response
-                    );
                 });
             } catch (e) {
                 this.form.exchange_rate_sale = 1;
@@ -6415,7 +6409,6 @@ export default {
             });
         },
         filterSeries() {
-            // console.log('filterSeries');
             this.form.series_id = null;
             let series = _.filter(this.all_series, {
                 establishment_id: this.form.establishment_id,
@@ -6435,8 +6428,6 @@ export default {
                     id: this.config.user.serie,
                 });
             }
-
-            //console.log(series);
 
             this.$store.commit("setSeries", series);
             this.form.series_id =
@@ -6549,18 +6540,27 @@ export default {
             });
             let items = [];
             this.form.items.forEach((row) => {
-                items.push(
-                    calculateRowItem(
-                        row,
-                        this.form.currency_type_id,
-                        this.form.exchange_rate_sale,
-                        this.percentage_igv,
-                        this.documentId !== null
-                    )
+                let calculate_row = calculateRowItem(
+                    row,
+                    this.form.currency_type_id,
+                    this.form.exchange_rate_sale,
+                    this.percentage_igv,
+                    this.documentId !== null
                 );
+                console.log(calculate_row);
+                items.push(calculate_row);
             });
             this.form.items = items;
             this.calculateTotal();
+
+            if (this.isEditingItems) {
+                for (let i = 0; i < this.form.items.length; i++) {
+                    this.form.items[i].unit_value_edit =
+                        this.form.items[i].unit_value;
+                    this.form.items[i].unit_price_edit =
+                        this.form.items[i].unit_price;
+                }
+            }
         },
         calculateTotal() {
             let total_discount = 0;
@@ -6583,8 +6583,6 @@ export default {
             // let total_free_igv = 0
 
             this.form.items.forEach((row) => {
-                // console.log(row)
-
                 total_discount += parseFloat(row.total_discount);
                 total_charge += parseFloat(row.total_charge);
 
@@ -6680,8 +6678,6 @@ export default {
                         total += parseFloat(row.total);
                     }
                 }
-
-                // console.log(row.total_value)
 
                 if (!["21", "37"].includes(row.affectation_igv_type_id)) {
                     // total_value += parseFloat(row.total_value)
@@ -6826,8 +6822,6 @@ export default {
             // let base = this.form.total_taxed + amount
             let factor = _.round(amount / base, 5);
 
-            // console.log(base,factor, amount)
-
             let charge = _.find(this.form.charges, { charge_type_id: "50" });
 
             if (amount > 0 && !charge) {
@@ -6921,7 +6915,6 @@ export default {
                 if (this.is_amount) {
                     amount = input_global_discount;
                     factor = _.round(amount / base, 5);
-                    console.log("🚀 ~ discountGlobal ~ factor:", factor);
                 } else {
                     factor = _.round(input_global_discount / 100, 5);
                     amount = factor * base;
@@ -7167,7 +7160,6 @@ export default {
                                 this.changeCompany();
                             }
                             this.documentNewId = response.data.data.id;
-                            console.log(response);
                             this.showOptionsDialog(response);
 
                             this.form_cash_document.document_id =
@@ -7442,14 +7434,12 @@ export default {
 
             let payment = 0;
             let amount = _.round(total / payment_count, 2);
-            // console.log(amount);
             _.forEach(this.form.payments, (row) => {
                 payment += amount;
                 if (total - payment < 0) {
                     amount = _.round(total - payment + amount, 2);
                 }
                 row.payment = amount;
-                // console.error(row.payment)
             });
         },
         calculateFee() {
@@ -7473,9 +7463,6 @@ export default {
             if (this.form.has_retention) {
                 total_pay -= this.form.retention.amount;
             }
-            // console.log(this.form.retention)
-            // console.log(this.form.total_pending_payment)
-            // console.log(this.form.total)
 
             if (
                 !_.isEmpty(this.form.detraction) &&
@@ -7488,11 +7475,9 @@ export default {
                 !_.isEmpty(this.form.retention) &&
                 this.form.total_pending_payment > 0
             ) {
-                // console.log('1');
                 return this.form.total_pending_payment;
             }
 
-            // console.log('2');
             return total_pay;
         },
         setDescriptionOfItem(item) {

@@ -315,9 +315,9 @@ class Facturalo
                         ]);
                     }
                     $this->updatePrepaymentDocuments($inputs);
-                    if ($inputs->hotel) $this->document->hotel()->create($inputs->hotel);
-                    if ($inputs->transport) $this->document->transport()->create($inputs->transport);
-                    if ($inputs->transport_dispatch) $this->document->transport_dispatch()->create($inputs->transport_dispatch);
+                    if (isset($inputs->hotel)  && $inputs->hotel) $this->documents->hotel()->create($inputs->hotel);
+                    if (isset($inputs->transport) && $inputs->transport) $this->documents->transport()->create($inputs->transport);
+                    if (isset($inputs->transport_dispatch)  && $inputs->transport_dispatch) $this->documents->transport_dispatch()->create($inputs->transport_dispatch);
                     Invoice::create(
                         [
                             'document_id' => $this->documents->id,

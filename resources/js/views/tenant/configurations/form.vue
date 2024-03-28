@@ -1970,7 +1970,7 @@
                             </div>
                             <div class="col-md-6 mt-4">
                                 <label class="control-label">
-                                    Editar rápida - productos
+                                    Edición rápida - productos
                                     <el-tooltip
                                         class="item"
                                         content="Edición rápida de los valores (precio, cantidad, valor, total) de los productos en el detalle del documento"

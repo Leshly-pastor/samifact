@@ -18,10 +18,10 @@ class DispatchController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
-            'delivery.address' => 'required|max:100',
-            'origin.address' => 'required|max:100',
-        ]);
+        // $request->validate([
+        //     'delivery.address' => 'required|max:100',
+        //     'origin.address' => 'required|max:100',
+        // ]);
 
         $fact =  DB::connection('tenant')->transaction(function () use ($request) {
             $facturalo = new Facturalo();
@@ -91,6 +91,23 @@ class DispatchController extends Controller
             ];
         }
         $res = ((new ServiceDispatchController())->statusTicket($external_id));
+        (new Facturalo())->createPdf($record, 'dispatch', 'a4');
+        return $res;
+
+    }
+
+    public function statusTicketCarrier($id)
+    {
+        $record = Dispatch::query()
+            ->where('id', $id)
+            ->first();
+        if (!$record) {
+            return [
+                'success' => false,
+                'message' => 'El external id es incorrecto'
+            ];
+        }
+        $res = ((new ServiceDispatchController())->statusTicket($record->external_id));
         (new Facturalo())->createPdf($record, 'dispatch', 'a4');
         return $res;
 

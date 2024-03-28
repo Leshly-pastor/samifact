@@ -55,7 +55,6 @@ class SystemActivityLogTransactionController extends Controller
     public function records(Request $request)
     {
         $records = $this->getRecords($request);
-        
         return new SystemActivityTransactionCollection($records->paginate(config('tenant.items_per_page')));
     }
 

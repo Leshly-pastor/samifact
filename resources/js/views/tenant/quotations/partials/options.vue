@@ -1271,7 +1271,8 @@ export default {
                     this.document.payments =
                         response.data.data.quotation.payments;
                     this.document.total = this.form.quotation.total;
-
+                    this.document.additional_information =
+                        this.form.quotation.description;
                     this.document.currency_type_id =
                         this.form.quotation.currency_type_id;
                     this.document.payment_condition_id =

@@ -252,10 +252,13 @@ class ClientController extends Controller
             $row->count_item = DB::connection('tenant')
                 ->table('items')
                 ->count();
+            // $row->count_sales_notes = DB::connection('tenant')
+            //     ->table('configurations')
+            //     ->first()
+            //     ->quantity_sales_notes;
             $row->count_sales_notes = DB::connection('tenant')
-                ->table('configurations')
-                ->first()
-                ->quantity_sales_notes;
+                ->table('sale_notes')
+                ->count();
             $quantity_pending_documents = $this->getQuantityPendingDocuments();
             $row->document_regularize_shipping = $quantity_pending_documents['document_regularize_shipping'];
             $row->document_not_sent = $quantity_pending_documents['document_not_sent'];
@@ -287,9 +290,12 @@ class ClientController extends Controller
                     }
                 }
                 $row->count_sales_notes = DB::connection('tenant')
-                    ->table('configurations')
-                    ->first()
-                    ->quantity_sales_notes;
+                    ->table('sale_notes')
+                    ->count();
+                // $row->count_sales_notes = DB::connection('tenant')
+                //     ->table('configurations')
+                //     ->first()
+                //     ->quantity_sales_notes;
                 //dd($row->count_sales_notes);
 
                 $client_helper = new ClientHelper();

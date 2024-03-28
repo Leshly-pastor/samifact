@@ -466,9 +466,11 @@
             }
             $origin_district_id = (array) $transport->origin_district_id;
             $destinatation_district_id = (array) $transport->destinatation_district_id;
-            $origin_district = Modules\Order\Services\AddressFullService::getDescription($origin_district_id[2]);
+            $origin_district = Modules\Order\Services\AddressFullService::getDescription(
+                isset($origin_district_id[2]) ? $origin_district_id[2] : null,
+            );
             $destinatation_district = Modules\Order\Services\AddressFullService::getDescription(
-                $destinatation_district_id[2],
+                isset($destinatation_district_id[2]) ? $destinatation_district_id[2] : null,
             );
         @endphp
 
@@ -498,7 +500,7 @@
                     </p>
                 </td>
             </tr>
-            @if($transport->passenger_age)
+            @if ($transport->passenger_age)
                 <tr>
                     <td>
                         <p class="desc">EDAD
@@ -530,14 +532,16 @@
                     <p class="desc">{{ $transport->bus_number }}</p>
                 </td>
             </tr>
-            <tr>
-                <td>
-                    <p class="desc">M. Pasajero:</p>
-                </td>
-                <td>
-                    <p class="desc">{{ $transport->passenger_manifest }}</p>
-                </td>
-            </tr>
+            @if ($transport->passenger_manifest)
+                <tr>
+                    <td>
+                        <p class="desc">M. Pasajero:</p>
+                    </td>
+                    <td>
+                        <p class="desc">{{ $transport->passenger_manifest }}</p>
+                    </td>
+                </tr>
+            @endif
 
             <tr>
                 <td>
@@ -555,75 +559,83 @@
                     <p class="desc">{{ $transport->start_time }}</p>
                 </td>
             </tr>
-            <tr>
-                <td>
-                    <p class="desc">Agencia Origen:</p>
-                </td>
-                <td>
-                    <p class="desc-l">
-                        <strong>
-                            {{ $agency_origin }}
-                        </strong>
-                    </p>
-                </td>
-            </tr>
+            @if ($agency_origin && $agency_origin !== '-')
+                <tr>
+                    <td>
+                        <p class="desc">Agencia Origen:</p>
+                    </td>
+                    <td>
+                        <p class="desc-l">
+                            <strong>
+                                {{ $agency_origin }}
+                            </strong>
+                        </p>
+                    </td>
+                </tr>
+            @endif
 
-            <tr>
-                <td>
-                    <p class="desc">U. Origen:</p>
-                </td>
-                <td>
-                    <p class="desc-l">
+            @if ($origin_district)
+                <tr>
+                    <td>
+                        <p class="desc">U. Origen:</p>
+                    </td>
+                    <td>
+                        <p class="desc-l">
                             {{ $origin_district }}
-                    </p>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <p class="desc">D. Origen:</p>
-                </td>
-                <td>
-                    <p class="desc-l">
-                        <strong>
+                        </p>
+                    </td>
+                </tr>
+            @endif
+            @if ($transport->origin_address)
+                <tr>
+                    <td>
+                        <p class="desc">D. Origen:</p>
+                    </td>
+                    <td>
+                        <p class="desc-l">
                             {{ $transport->origin_address }}
-                        </strong>
-                    </p>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <p class="desc">Agencia Destino:</p>
-                </td>
-                <td>
-                    <p class="desc-l">
-                        <strong>
-                            {{ $agency_destination }}
-                        </strong>
-                    </p>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <p class="desc">U. Destino:</p>
-                </td>
-                <td>
-                    <p class="desc-l">
+                        </p>
+                    </td>
+                </tr>
+            @endif
+            @if ($agency_destination && $agency_destination != '-')
+                <tr>
+                    <td>
+                        <p class="desc">Agencia Destino:</p>
+                    </td>
+                    <td>
+                        <p class="desc-l">
+                            <strong>
+                                {{ $agency_destination }}
+                            </strong>
+                        </p>
+                    </td>
+                </tr>
+            @endif
+            @if ($destinatation_district)
+                <tr>
+                    <td>
+                        <p class="desc">U. Destino:</p>
+                    </td>
+                    <td>
+                        <p class="desc-l">
                             {{ $destinatation_district }}
-                    </p>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <p class="desc">D. Destino:</p>
-                </td>
-                <td>
-                    <p class="desc-l">
-                        <strong>
+                        </p>
+                    </td>
+                </tr>
+            @endif
+            @if ($transport->destinatation_address)
+                <tr>
+                    <td>
+                        <p class="desc">D. Destino:</p>
+                    </td>
+                    <td>
+                        <p class="desc-l">
                             {{ $transport->destinatation_address }}
-                        </strong>
-                    </p>
-                </td>
-            </tr>
+                        </p>
+                    </td>
+                </tr>
+            @endif
 
         </table>
     @endif
@@ -701,43 +713,45 @@
                     </td>
                 </tr>
             @endif
-            <tr>
-                <td>
-                    <p class="desc">Agencia Origen:</p>
-                </td>
-                <td>
-                    <p class="desc-l">
-                        <strong>
-                            {{ $agency_origin_dispatch }}
-                        </strong>
-                    </p>
-                </td>
-            </tr>
+            @if ($agency_origin_dispatch && $agency_origin_dispatch !== '-')
+                <tr>
+                    <td>
+                        <p class="desc">Agencia Origen:</p>
+                    </td>
+                    <td>
+                        <p class="desc-l">
+                            <strong>
+                                {{ $agency_origin_dispatch }}
+                            </strong>
+                        </p>
+                    </td>
+                </tr>
+            @endif
 
-            <tr>
-                <td>
-                    <p class="desc">U. Origen:</p>
-                </td>
-                <td>
-                    <p class="desc-l">
-                        <strong>
-                            {{ $origin_district_dispatch }}
-                        </strong>
-                    </p>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <p class="desc">D. Origen:</p>
-                </td>
-                <td>
-                    <p class="desc-l">
-                        <strong>
-                            {{ $transport_dispatch->origin_address }}
-                        </strong>
-                    </p>
-                </td>
-            </tr>
+            @if ($origin_district_dispatch && $origin_district_dispatch !== '-')
+                <tr>
+                    <td>
+                        <p class="desc">U. Origen:</p>
+                    </td>
+                    <td>
+                        <p class="desc-l">
+                                {{ $origin_district_dispatch }}
+                        </p>
+                    </td>
+                </tr>
+            @endif
+            @if ($transport_dispatch->origin_address)
+                <tr>
+                    <td>
+                        <p class="desc">D. Origen:</p>
+                    </td>
+                    <td>
+                        <p class="desc-l">
+                                {{ $transport_dispatch->origin_address }}
+                        </p>
+                    </td>
+                </tr>
+            @endif
             <tr>
                 <td class="desc" colspan="2">
                     <strong>DESTINATARIO</strong>
@@ -783,42 +797,44 @@
                     </td>
                 </tr>
             @endif
-            <tr>
-                <td>
-                    <p class="desc">Agencia Destino:</p>
-                </td>
-                <td>
-                    <p class="desc-l">
-                        <strong>
-                            {{ $agency_destination_dispatch }}
-                        </strong>
-                    </p>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <p class="desc">U. Destino:</p>
-                </td>
-                <td>
-                    <p class="desc-l">
-                        <strong>
-                            {{ $destinatation_district_dispatch }}
-                        </strong>
-                    </p>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <p class="desc">D. Destino:</p>
-                </td>
-                <td>
-                    <p class="desc-l">
-                        <strong>
-                            {{ $transport_dispatch->destinatation_address }}
-                        </strong>
-                    </p>
-                </td>
-            </tr>
+            @if ($agency_destination_dispatch && $agency_destination_dispatch !== '-')
+                <tr>
+                    <td>
+                        <p class="desc">Agencia Destino:</p>
+                    </td>
+                    <td>
+                        <p class="desc-l">
+                            <strong>
+                                {{ $agency_destination_dispatch }}
+                            </strong>
+                        </p>
+                    </td>
+                </tr>
+            @endif
+            @if ($destinatation_district_dispatch && $destinatation_district_dispatch !== '-')
+                <tr>
+                    <td>
+                        <p class="desc">U. Destino:</p>
+                    </td>
+                    <td>
+                        <p class="desc-l">
+                                {{ $destinatation_district_dispatch }}
+                        </p>
+                    </td>
+                </tr>
+            @endif
+            @if (!is_null($transport_dispatch->destinatation_address))
+                <tr>
+                    <td>
+                        <p class="desc">D. Destino:</p>
+                    </td>
+                    <td>
+                        <p class="desc-l">
+                                {{ $transport_dispatch->destinatation_address }}
+                        </p>
+                    </td>
+                </tr>
+            @endif
 
         </table>
     @endif

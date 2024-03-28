@@ -244,7 +244,7 @@
                         <label class="control-label">Filtrar por marca</label>
                         <el-select
                             v-model="search.filter_brand"
-                            @change="searchRemoteItems"
+                            @change="searchRemoteItemsBC"
                             clearable
                             filterable
                         >
@@ -261,7 +261,7 @@
                             >Filtrar por categoría</label
                         >
                         <el-select
-                            @change="searchRemoteItems"
+                            @change="searchRemoteItemsBC"
                             v-model="search.filter_categorie"
                             clearable
                             filterable
@@ -1682,6 +1682,32 @@ export default {
         clickIncrease() {
             this.form.quantity = parseInt(this.form.quantity) + 1;
             this.calculateTotal();
+        },
+        async searchRemoteItemsBC() {
+            console.log("xdd");
+                this.loading_search = true;
+                const params = {
+                    ...this.search,
+                    search_by_barcode: this.search_item_by_barcode ? 1 : 0,
+                    search_item_by_barcode_presentation: this
+                        .search_item_by_barcode_presentation
+                        ? 1
+                        : 0,
+                    search_factory_code_items:
+                        this.enabledSearchFactoryCodeItems,
+                };
+                await this.$http
+                    .get(`/${this.resource}/search-items/`, { params })
+                    .then((response) => {
+                        this.items = response.data.items;
+                        this.loading_search = false;
+                        // this.enabledSearchItemsBarcode(input);
+                        // this.enabledSearchItemBySeries();
+                        if (this.items.length == 0) {
+                            this.filterItems();
+                        }
+                    });
+            
         },
         async searchRemoteItems(input) {
             if (input.length > 2) {

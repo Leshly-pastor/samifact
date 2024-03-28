@@ -562,7 +562,6 @@ class ReportKardexController extends Controller
         if ($item_id) {
             $data->where('item_id', $item_id);
         }
-
         $data
             ->orderBy('item_id')
             ->orderBy('id')

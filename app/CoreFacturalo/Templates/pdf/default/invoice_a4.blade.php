@@ -371,9 +371,11 @@
             }
             $origin_district_id = (array) $transport->origin_district_id;
             $destinatation_district_id = (array) $transport->destinatation_district_id;
-            $origin_district = Modules\Order\Services\AddressFullService::getDescription($origin_district_id[2]);
+            $origin_district = Modules\Order\Services\AddressFullService::getDescription(
+                isset($origin_district_id[2]) ? $origin_district_id[2] : null,
+            );
             $destinatation_district = Modules\Order\Services\AddressFullService::getDescription(
-                $destinatation_district_id[2],
+                isset($destinatation_district_id[2]) ? $destinatation_district_id[2] : null,
             );
         @endphp
 
@@ -717,7 +719,10 @@
                                 </div>
                             @endif
                         @endif
-                        @if ($configurations->presentation_pdf && isset($row->item->presentation) && isset($row->item->presentation->description))
+                        @if (
+                            $configurations->presentation_pdf &&
+                                isset($row->item->presentation) &&
+                                isset($row->item->presentation->description))
                             <div>
                                 <span style="font-size: 9px">{{ $row->item->presentation->description }}</span>
                             </div>
