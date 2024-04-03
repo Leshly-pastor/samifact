@@ -134,6 +134,7 @@ class ServiceDispatchController extends Controller
                     ->where('id', $dispatch->id)
                     ->update([
                         'state_type_id' => $state_type_id,
+                        'message_ticket' => $message,
                         'qr_url' => $qr_url
                     ]);
 

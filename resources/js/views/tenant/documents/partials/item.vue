@@ -1469,10 +1469,6 @@ export default {
                 use_input_amount: true,
                 is_split: false,
             });
-            console.log(
-                "🚀 ~ file: item.vue:1476 ~ setDiscounts ~ this.form.discounts:",
-                this.form.discounts
-            );
         },
         calculateDiscount() {
             if (this.discounts == null || this.discounts.length == 0) {
@@ -1684,7 +1680,6 @@ export default {
             this.calculateTotal();
         },
         async searchRemoteItemsBC() {
-            console.log("xdd");
                 this.loading_search = true;
                 const params = {
                     ...this.search,
@@ -1938,6 +1933,7 @@ export default {
                     this.form.discounts = this.recordItem.discounts;
                     this.form.charges = this.recordItem.charges;
                 }
+                console.log("🚀 ~ create ~ this.recordItem.discounts_acc:", this.recordItem.discounts_acc)
                 this.discounts = this.recordItem.discounts_acc || [];
                 if (this.discounts.length > 0) {
                     this.form.discounts = [];
@@ -2119,8 +2115,6 @@ export default {
             this.clearExtraInfoItem();
 
             this.form.item = _.find(this.items, { id: this.form.item_id });
-            console.log("🚀 ~ changeItem ~ this.form.item:", JSON.stringify(this.form.item))
-
             if (this.person_type_id) {
                 let { item_customer_prices } = this.form.item;
                 let exist = item_customer_prices.find(
@@ -2201,6 +2195,11 @@ export default {
             ) {
                 this.form.name_product_pdf = this.form.item.name_product_pdf;
             }
+            if(this.configuration.discounts_acc){
+                this.discounts = [];
+                this.addDiscount();
+            }
+            this.sizes = this.form.item.sizes || [];
         },
         focusTotalItem(change) {
             if (!change && this.form.item.calculate_quantity) {
@@ -2320,6 +2319,7 @@ export default {
             //     return this.$message.error(`La cantidad no puede ser inferior a ${this.getMinQuantity()}`);
             // }
             this.validateQuantity();
+            this.discounts = this.discounts.filter((d) => d.percentage > 0);
             if (this.discounts.length != 0) {
                 this.setDiscounts();
             }
@@ -2440,6 +2440,7 @@ export default {
             this.row.document_item_id = document_item_id;
 
             this.showMessageDetraction();
+
             if (this.discounts.length > 0) {
                 this.row.discounts_acc = this.discounts;
             }

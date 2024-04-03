@@ -2457,6 +2457,7 @@ export default {
             this.customers = this.all_customers;
         },
         addRow(row) {
+            console.log("🚀 ~ addRow ~ row:", row)
             // this.form.items.push(row)
             if (this.form.seller_id) {
                 row.seller_id = this.form.seller_id;

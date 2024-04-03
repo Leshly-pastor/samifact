@@ -1556,9 +1556,23 @@
                                                     Cantidad
                                                 </th>
                                                 <th
+                                                    v-if="
+                                                        configuration.show_item_stock
+                                                    "
+                                                >
+                                                    Stock
+                                                </th>
+                                                <th
                                                     class="text-end font-weight-bold"
                                                 >
                                                     Valor U.
+                                                </th>
+                                                <th
+                                                    v-if="
+                                                        configuration.show_purchase_unit_price
+                                                    "
+                                                >
+                                                    Precio de compra
                                                 </th>
                                                 <th
                                                     class="text-end font-weight-bold"
@@ -1569,6 +1583,13 @@
                                                     class="text-end font-weight-bold"
                                                 >
                                                     Subtotal
+                                                </th>
+                                                <th
+                                                    v-if="
+                                                        configuration.show_item_discounts
+                                                    "
+                                                >
+                                                    Descuento
                                                 </th>
                                                 <!--<th class="text-end font-weight-bold">Cargo</th>-->
                                                 <th
@@ -1753,7 +1774,13 @@
                                                         {{ row.quantity }}
                                                     </template>
                                                 </td>
-
+                                                <td
+                                                    v-if="
+                                                        configuration.show_item_stock
+                                                    "
+                                                >
+                                                {{ row.item.stock}}
+                                                </td>
                                                 <td
                                                     class="text-end"
                                                     style="
@@ -1807,6 +1834,14 @@
                                                             }}
                                                         </template>
                                                     </template>
+                                                </td>
+                                                <td
+                                                    v-if="
+                                                        configuration.show_purchase_unit_price
+                                                    "
+                                                    class="text-end"
+                                                >
+                                                        {{ Number(row.item.purchase_unit_price).toFixed(2) }}
                                                 </td>
                                                 <td
                                                     class="text-end"
@@ -1898,6 +1933,14 @@
                                                                 : ""
                                                         }}
                                                     </template>
+                                                </td>
+                                                <td
+                                                class="text-end"
+                                                    v-if="
+                                                        configuration.show_item_discounts
+                                                    "
+                                                >
+                                                    {{Number(row.total_discount).toFixed(2)}}
                                                 </td>
                                                 <td
                                                     class="text-end"
@@ -2022,7 +2065,7 @@
                                             </tr>
 
                                             <tr>
-                                                <td colspan="9">
+                                                <td :colspan="colspan">
                                                     <div
                                                         class="row table-responsive justify-content-end"
                                                     >
@@ -3115,6 +3158,33 @@
                                                                                                     </button>
                                                                                                 </td>
                                                                                             </tr>
+                                                                                            <tr>
+                                                                                                <td
+                                                                                                    colspan="3"
+                                                                                                >
+                                                                                                    <label
+                                                                                                        class="control-label"
+                                                                                                    >
+                                                                                                        <a
+                                                                                                            class=""
+                                                                                                            href="#"
+                                                                                                            @click.prevent="
+                                                                                                                clickAddFee
+                                                                                                            "
+                                                                                                            ><i
+                                                                                                                class="fa fa-plus font-weight-bold text-info"
+                                                                                                            ></i>
+                                                                                                            <span
+                                                                                                                style="
+                                                                                                                    color: #777777;
+                                                                                                                "
+                                                                                                                >Agregar
+                                                                                                                cuota</span
+                                                                                                            ></a
+                                                                                                        >
+                                                                                                    </label>
+                                                                                                </td>
+                                                                                            </tr>
                                                                                         </tbody>
                                                                                     </table>
                                                                                 </el-collapse-item>
@@ -3812,6 +3882,7 @@ export default {
     ],
     data() {
         return {
+            colspan:9,
             showAll: true,
             activeNames: ["1"],
             is_amount_charge: true,
@@ -4029,6 +4100,15 @@ export default {
         },
     },
     async created() {
+        if(this.configuration.show_item_stock){
+                this.colspan += 1 ;
+        }
+        if(this.configuration.show_item_discounts){
+            this.colspan += 1 ;
+        }
+        if(this.configuration.show_purchase_unit_price){
+            this.colspan += 1 ;
+        }
         this.loadConfiguration();
         this.$store.commit("setConfiguration", this.configuration);
 
@@ -5156,7 +5236,6 @@ export default {
 
             this.form.seller_id = data.seller_id;
             this.form.items = this.onPrepareItems(data.items);
-
             // this.form.series = data.series; //form.series no llena el selector
             if (this.table !== "quotations" && !this.company.is_rus) {
                 this.$store.commit(
@@ -5279,6 +5358,7 @@ export default {
             this.prepareDataCustomer();
 
             this.calculateTotal();
+            console.log(this.form.items);
             this.changeCurrencyType();
             // this.currency_type = _.find(this.currency_types, {'id': this.form.currency_type_id})
         },
@@ -5420,6 +5500,13 @@ export default {
                 }
 
                 i.discounts = i.discounts ? Object.values(i.discounts) : [];
+                let total_discount = 0;
+                if(i.discounts.length > 0){
+                    total_discount = i.discounts.reduce((acc, discount) => {
+                        return acc + Number(discount.amount);
+                    }, 0);
+                }
+                i.total_discount = total_discount;
                 // i.discounts = i.discounts || [];
                 i.charges = i.charges || [];
                 i.attributes = i.attributes || [];
@@ -5427,6 +5514,9 @@ export default {
                 i.additional_information = this.onPrepareAdditionalInformation(
                     i.additional_information
                 );
+                i.discounts_acc = i.discounts_acc
+                    ? Object.values(i.discounts_acc)
+                    : [];
                 i.item = this.onPrepareIndividualItem(i);
                 return i;
             });
@@ -5436,24 +5526,40 @@ export default {
             let currency_type = _.find(this.currency_types, {
                 id: this.form.currency_type_id,
             });
-
+            new_item.stock = data.stock;
             new_item.sale_affectation_igv_type_id =
                 data.affectation_igv_type_id;
-
+            let { discounts } = data;
+            // let amount = 0;
+            let { percentage_igv } = data;
+            let amount = discounts.reduce((acc, discount) => {
+                if (discount.discount_type_id == "00") {
+                    return (
+                        acc +
+                        Number(discount.amount) * (percentage_igv / 100 + 1)
+                    );
+                } else {
+                    return acc + Number(discount.amount);
+                }
+            }, 0);
             if (this.table) {
                 let { exchange_rate_sale } = this.form;
                 if (new_item.currency_type_id != this.form.currency_type_id) {
                     new_item.sale_unit_price =
-                        new_item.unit_price * exchange_rate_sale;
+                        (Number(new_item.unit_price) + amount) *
+                        exchange_rate_sale;
                     new_item.unit_price =
-                        new_item.unit_price * exchange_rate_sale;
+                        (Number(new_item.unit_price) + amount) *
+                        exchange_rate_sale;
                 } else {
-                    new_item.sale_unit_price = new_item.unit_price;
-                    new_item.unit_price = new_item.unit_price;
+                    new_item.sale_unit_price = Number(
+                        new_item.unit_price) + amount
+                    ;
+                    new_item.unit_price = Number(new_item.unit_price) + amount;
                 }
             } else {
-                new_item.sale_unit_price = data.unit_price;
-                new_item.unit_price = data.unit_price;
+                new_item.sale_unit_price = Number(data.unit_price) + amount;
+                new_item.unit_price = Number(data.unit_price) + amount;
             }
             new_item.currency_type_id = currency_type.id;
             new_item.currency_type_symbol = currency_type.symbol;
@@ -5979,7 +6085,6 @@ export default {
         async ediItem(row, index) {
             row.indexi = index;
             this.recordItem = row;
-
             if (row.item.meter && row.item.meter > 0) {
                 this.recordItem.unit_price /= row.item.meter;
                 this.recordItem.input_unit_price_value /= row.item.meter;
@@ -6507,6 +6612,13 @@ export default {
             if (this.form.seller_id) {
                 row.seller_id = this.form.seller_id;
             }
+            let total_discount = 0;
+            if(row.discounts.length!=0){
+                row.discounts.forEach((discount) => {
+                    total_discount += discount.amount;
+                });
+            }
+            row.total_discount = total_discount;
             if (this.recordItem) {
                 //this.form.items.$set(this.recordItem.indexi, row)
                 this.form.items[this.recordItem.indexi] = row;
@@ -6547,7 +6659,8 @@ export default {
                     this.percentage_igv,
                     this.documentId !== null
                 );
-                console.log(calculate_row);
+                calculate_row.discounts_acc = row.discounts_acc || [];
+                // console.log(calculate_row);
                 items.push(calculate_row);
             });
             this.form.items = items;

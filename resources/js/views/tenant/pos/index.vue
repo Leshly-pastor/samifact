@@ -2409,6 +2409,7 @@ export default {
                 this.is_payment = false;
                 this.initForm();
                 this.changeExchangeRate();
+                this.getRecords();
                 this.cancelFormPosLocalStorage();
                 this.selectDefaultCustomer();
                 this.$nextTick(() => {

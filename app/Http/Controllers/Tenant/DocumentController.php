@@ -1470,6 +1470,7 @@ class DocumentController extends Controller
                 }
             }
             $item->discounts = $discounts;
+            $item->stock = Item::find($item->item_id)->getStockByWarehouse($document->establishment_id);
         }
 
         return response()->json([

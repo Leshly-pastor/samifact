@@ -443,6 +443,7 @@ export default {
             await this.$eventHub.$emit("cancelSale");
             await this.$eventHub.$emit("cancelSaleGarage");
             this.$emit("update:showDialog", false);
+            // location.reload();
         },
         initForm() {
             this.errors = {};

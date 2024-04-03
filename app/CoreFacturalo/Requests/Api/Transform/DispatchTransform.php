@@ -138,9 +138,14 @@ class DispatchTransform
         if (key_exists('vehiculo', $inputs)) {
             $transport = $inputs['vehiculo'];
             return [
-                'plate_number' => $transport['numero_de_placa'],
-                'model' => Functions::valueKeyInArray($transport, 'modelo'),
-                'brand' => Functions::valueKeyInArray($transport, 'marca'),
+                'plate_number'           => $transport['numero_de_placa'],
+                'model'                  => Functions::valueKeyInArray($transport, 'modelo'),
+                'brand'                  => Functions::valueKeyInArray($transport, 'marca'),
+                'tuc'                    => Functions::valueKeyInArray($transport, 'tuc_principal'),
+                'auth_plate_primary'     => Functions::valueKeyInArray($transport, 'autorizacion_placa_principal'),
+                'secondary_plate_number' => Functions::valueKeyInArray($transport, 'placa_secundaria'),
+                'auth_plate_secondary'   => Functions::valueKeyInArray($transport, 'autorizacion_placa_secundaria'),
+                'tuc_secondary'          => Functions::valueKeyInArray($transport, 'tuc_secundaria'),
             ];
         }
         return null;

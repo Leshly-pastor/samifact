@@ -1399,6 +1399,11 @@ export default {
             this.setDefaultAttributes();
             this.cleanTotalItem();
             this.calculateTotal();
+
+                if(this.configuration.discounts_acc){
+                this.discounts = [];
+                this.addDiscount();
+            }
         },
         setDefaultAttributes() {
             this.form.attributes = [];

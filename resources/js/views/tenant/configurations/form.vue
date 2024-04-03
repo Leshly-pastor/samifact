@@ -2071,6 +2071,113 @@
                                     ></small>
                                 </div>
                             </div>
+                                <div class="col-md-6 mt-4">
+                                <label class="control-label">
+                                    Precio de comprar - documentos
+                                    <el-tooltip
+                                        class="item"
+                                        content="Mostrar una columna con el precio de compra del producto en el detalle del documento"
+                                        effect="dark"
+                                        placement="top-start"
+                                    >
+                                        <i class="fa fa-info-circle"></i>
+                                    </el-tooltip>
+                                </label>
+
+                                <div
+                                    :class="{
+                                        'has-danger':
+                                            errors.show_purchase_unit_price,
+                                    }"
+                                    class="form-group"
+                                >
+                                    <el-switch
+                                        v-model="form.show_purchase_unit_price"
+                                        active-text="Si"
+                                        inactive-text="No"
+                                        @change="submit"
+                                    ></el-switch>
+                                    <small
+                                        v-if="errors.show_purchase_unit_price"
+                                        class="text-danger"
+                                        v-text="
+                                            errors.show_purchase_unit_price[0]
+                                        "
+                                    ></small>
+                                </div>
+                            </div>
+
+                                <div class="col-md-6 mt-4">
+                                <label class="control-label">
+                                    Descuento item - documentos
+                                    <el-tooltip
+                                        class="item"
+                                        content="Mostrar una columna con el descuento del producto en el detalle del documento"
+                                        effect="dark"
+                                        placement="top-start"
+                                    >
+                                        <i class="fa fa-info-circle"></i>
+                                    </el-tooltip>
+                                </label>
+
+                                <div
+                                    :class="{
+                                        'has-danger':
+                                            errors.show_item_discounts,
+                                    }"
+                                    class="form-group"
+                                >
+                                    <el-switch
+                                        v-model="form.show_item_discounts"
+                                        active-text="Si"
+                                        inactive-text="No"
+                                        @change="submit"
+                                    ></el-switch>
+                                    <small
+                                        v-if="errors.show_item_discounts"
+                                        class="text-danger"
+                                        v-text="
+                                            errors.show_item_discounts[0]
+                                        "
+                                    ></small>
+                                </div>
+                            </div>
+
+                                    <div class="col-md-6 mt-4">
+                                <label class="control-label">
+                                    Stock item - documentos
+                                    <el-tooltip
+                                        class="item"
+                                        content="Mostrar una columna con el stock del producto en el detalle del documento"
+                                        effect="dark"
+                                        placement="top-start"
+                                    >
+                                        <i class="fa fa-info-circle"></i>
+                                    </el-tooltip>
+                                </label>
+
+                                <div
+                                    :class="{
+                                        'has-danger':
+                                            errors.show_item_stock,
+                                    }"
+                                    class="form-group"
+                                >
+                                    <el-switch
+                                        v-model="form.show_item_stock"
+                                        active-text="Si"
+                                        inactive-text="No"
+                                        @change="submit"
+                                    ></el-switch>
+                                    <small
+                                        v-if="errors.show_item_stock"
+                                        class="text-danger"
+                                        v-text="
+                                            errors.show_item_stock[0]
+                                        "
+                                    ></small>
+                                </div>
+                            </div>
                         </div>
                     </el-tab-pane>
 

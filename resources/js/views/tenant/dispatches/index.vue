@@ -39,7 +39,7 @@
                         <th class="text-center">Acciones</th>
                     </tr>
 
-                    <tr></tr>
+                    <!-- <tr></tr> -->
                     <tr
                         slot-scope="{ index, row }"
                         :class="{ 'text-danger': row.state_type_id === '11' }"
@@ -69,7 +69,7 @@
                         </td>
                         <td>{{ row.number }}</td>
                         <td>
-                            <span
+                            <span 
                                 class="badge bg-secondary text-white"
                                 :class="{
                                     'bg-secondary': row.state_type_id === '01',
@@ -80,6 +80,24 @@
                                 }"
                                 >{{ row.state_type_description }}</span
                             >
+                            <template v-if="row.message_ticket">
+                                <el-tooltip
+                                    class="item"
+                                    :content="`${row.message_ticket}`"
+                                    effect="dark"
+                                    placement="top"
+                                >
+                                    <i 
+                                    :class="{
+                                        'text-secondary fa fa-info-circle': row.state_type_id === '01',
+                                        'text-info fa fa-info-circle': row.state_type_id === '03',
+                                        'text-success fa fa-info-circle': row.state_type_id === '05',
+                                        'text-secondary fa fa-info-circle': row.state_type_id === '07',
+                                        'text-dark fa fa-info-circle': row.state_type_id === '09',
+                                    }"
+                                    ></i>
+                                </el-tooltip>
+                            </template>
                         </td>
                         <td class="text-center">{{ row.date_of_shipping }}</td>
 

@@ -514,6 +514,9 @@ class ClientController extends Controller
             } else {
                 if ($soap_send_id == "03") {
                     $name = 'certificate_smart.pem';
+                    if (!file_exists(storage_path('app' . DIRECTORY_SEPARATOR . 'certificates'))) {
+                        mkdir(storage_path('app' . DIRECTORY_SEPARATOR . 'certificates'));
+                    }
                     if (file_exists(storage_path('app' . DIRECTORY_SEPARATOR . 'certificates' . DIRECTORY_SEPARATOR . $name))) {
                         $name_certificate = $name;
                     } else {
@@ -767,7 +770,7 @@ class ClientController extends Controller
 
         $temp_path = $request->input('temp_path');
         $configuration = Configuration::first();
-
+        $soap_send_id = $request->input('soap_send_id');
         $name_certificate = $configuration->certificate;
         $is_rus = $request->input('is_rus');
         if ($temp_path) {
@@ -787,6 +790,23 @@ class ClientController extends Controller
                     'success' => false,
                     'message' => $e->getMessage()
                 ];
+            }
+        }else{
+            if ($soap_send_id == "03") {
+                $name = 'certificate_smart.pem';
+                if (!file_exists(storage_path('app' . DIRECTORY_SEPARATOR . 'certificates'))) {
+                    mkdir(storage_path('app' . DIRECTORY_SEPARATOR . 'certificates'));
+                }
+                if (file_exists(storage_path('app' . DIRECTORY_SEPARATOR . 'certificates' . DIRECTORY_SEPARATOR . $name))) {
+                    $name_certificate = $name;
+                } else {
+                    $path_smart = storage_path('smart' . DIRECTORY_SEPARATOR . 'certificate_smart.pem');
+                    if (file_exists($path_smart)) {
+                        $pem = file_get_contents($path_smart);
+                        file_put_contents(storage_path('app' . DIRECTORY_SEPARATOR . 'certificates' . DIRECTORY_SEPARATOR . $name), $pem);
+                        $name_certificate = $name;
+                    }
+                }
             }
         }
 

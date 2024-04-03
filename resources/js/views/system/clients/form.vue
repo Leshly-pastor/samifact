@@ -949,11 +949,11 @@ export default {
                 this.form.soap_type_id == "02" &&
                 this.form.soap_send_id == "03";
             console.log(this.form);
-            if (this.isSmart) {
-                this.form.soap_username = `20611567759FACTUR`;
-            } else {
+  //          if (this.isSmart) {
+//                this.form.soap_username = `20611567759FACTUR`;
+            // } else {
                 this.form.soap_username = null;
-            }
+            // }
         },
         downloadCert(type) {
             window.open(`/storage/uploads/certf/${type}`, "_blank");

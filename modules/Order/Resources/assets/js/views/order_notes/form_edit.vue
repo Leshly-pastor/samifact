@@ -680,6 +680,13 @@
                                     OP.GRAVADA: {{ currency_type.symbol }}
                                     {{ form.total_taxed }}
                                 </p>
+                                <p
+                                    class="text-end"
+                                    v-if="form.total_discount > 0"
+                                >
+                                    DESCUENTO TOTAL: {{ currency_type.symbol }}
+                                    {{ form.total_discount }}
+                                </p>
                                 <p class="text-end" v-if="form.total_igv > 0">
                                     IGV: {{ currency_type.symbol }}
                                     {{ form.total_igv }}
@@ -787,7 +794,7 @@ export default {
     },
     async created() {
         await this.initForm();
-        await this.$http.get(`/${this.resource}/tables`).then((response) => {
+        await this.$http.get(`/${this.resource}/tables`).then(async (response) => {
             this.currency_types = response.data.currency_types;
             this.establishments = response.data.establishments;
             this.all_customers = response.data.customers;
@@ -808,7 +815,7 @@ export default {
             this.changeDateOfIssue();
             this.changeCurrencyType();
             this.allCustomers();
-            this.initRecord();
+            await this.initRecord();
         });
         this.loading_form = true;
         this.$eventHub.$on("reloadDataPersons", (customer_id) => {
@@ -1095,6 +1102,7 @@ export default {
                 );
             });
             this.form.items = items;
+            // console.log("🚀 ~ changeCurrencyType ~ items:", items)
             this.calculateTotal();
         },
         calculateTotal() {
@@ -1111,6 +1119,7 @@ export default {
             let total_igv_free = 0;
 
             this.form.items.forEach((row) => {
+                console.log("🚀 ~ this.form.items.forEach ~ row:", row)
                 total_discount += parseFloat(row.total_discount);
                 total_charge += parseFloat(row.total_charge);
 
@@ -1166,6 +1175,7 @@ export default {
             this.form.total_igv_free = _.round(total_igv_free, 2);
             this.form.total_exportation = _.round(total_exportation, 2);
             this.form.total_taxed = _.round(total_taxed, 2);
+            this.form.total_discount = _.round(total_discount, 2);
             this.form.total_exonerated = _.round(total_exonerated, 2);
             this.form.total_unaffected = _.round(total_unaffected, 2);
             this.form.total_free = _.round(total_free, 2);

@@ -113,6 +113,10 @@ function calculateRowItem(row_old, currency_type_id_new, exchange_rate_sale, pig
     //     }
     //     row.discounts.splice(index, discount)
     // })
+        //if row.discounts exists and is a object convert to array
+    if (row.discounts && typeof row.discounts === 'object') {
+        row.discounts = Object.values(row.discounts)
+    }
     if (row.discounts && row.discounts.length > 0) {
         row.discounts.forEach((discount, index) => {
 
@@ -220,6 +224,7 @@ function calculateRowItem(row_old, currency_type_id_new, exchange_rate_sale, pig
     let total_other_taxes = 0
 
     let total_discount = discount_base + discount_no_base
+
     let total_charge = charge_base + charge_no_base
     let total_value = total_value_partial - total_discount + total_charge
     let total_base_igv = total_value_partial - discount_base + total_isc

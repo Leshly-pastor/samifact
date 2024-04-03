@@ -95,7 +95,7 @@ export default {
     computed: {
         toAttend() {
             let total = this.sizesSelected.reduce(
-                (acc, obj) => acc + obj.qty,
+                (acc, obj) => acc + (obj.qty||0),
                 0
             );
             return this.quantity - total;
@@ -106,7 +106,7 @@ export default {
     methods: {
           calculateToAttend() {
       let total = this.sizesSelected.reduce(
-        (acc, obj) => acc + obj.qty,
+        (acc, obj) => acc +( obj.qty||0),
         0
       );
       return this.quantity - total;
@@ -122,14 +122,14 @@ export default {
         },
         async create() {
             this.initForm();
-            this.sizesSelected = this.sizes;
+            this.sizesSelected = JSON.parse(JSON.stringify(this.sizes));
 
             await this.getRecords();
             if (this.sizesSelected.length > 0) {
                 _.forEach(this.sizesSelected, (row) => {
                     let size = _.find(this.records, { size: row.size });
                     if (size) {
-                        size.qty = row.qty;
+                        size.qty = row.qty || 0;
                     }
                 });
               
@@ -192,7 +192,7 @@ export default {
         changeHasSale(row, index) {
             let sizeIndex = _.findIndex(this.sizesSelected, { size: row.size });
             if (sizeIndex > -1) {
-                this.sizesSelected[sizeIndex].qty = row.qty;
+                this.sizesSelected[sizeIndex].qty = row.qty || 0;
             } else {
                 this.sizesSelected.push(row);
             }
@@ -208,7 +208,6 @@ export default {
         checkedLot() {
             _.forEach(this.sizesSelected, (row) => {
                 let lot = _.find(this.records, { id: row.id });
-                console.log(row);
                 if (lot) {
                     lot.has_sale = true;
                 }
@@ -224,12 +223,13 @@ export default {
             //has una copia profunda de sizesSelected
          let sizesSelected = _.cloneDeep(this.sizesSelected);
 
-
+            sizesSelected = sizesSelected.filter((row) => row.qty > 0);
             this.$emit("addRowSelectSize", sizesSelected);
             this.close();
         },
         close() {
-            // this.sizesSelected = [];
+            this.sizesSelected = [];
+            
             this.$emit("update:showDialog", false);
         },
     },

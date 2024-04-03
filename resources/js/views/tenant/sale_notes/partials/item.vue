@@ -1739,6 +1739,7 @@ export default {
             ) {
                 this.form.name_product_pdf = this.form.item.name_product_pdf;
             }
+            this.sizes = this.form.item.sizes || [];
         },
         focusTotalItem(change) {
             if (!change && this.form.item.calculate_quantity) {

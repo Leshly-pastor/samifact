@@ -141,6 +141,9 @@ use App\Models\Tenant\Skin;
 class Configuration extends ModelTenant
 {
     protected $fillable = [
+        'show_purchase_unit_price',
+        'show_item_discounts',
+        'show_item_stock',
         'presentation_pdf',
         'order_note_not_blocked',
         'document_columns',
@@ -346,6 +349,9 @@ class Configuration extends ModelTenant
     ];
 
     protected $casts = [
+        'show_purchase_unit_price' => 'boolean',
+        'show_item_discounts' => 'boolean',
+        'show_item_stock' => 'boolean',
         'order_note_not_blocked' => 'boolean',
         'document_columns' => 'boolean',
         'name_pdf' => 'boolean',
@@ -607,6 +613,9 @@ class Configuration extends ModelTenant
         $currency = CurrencyType::all();
         $skins = Skin::all();
         return [
+            'show_purchase_unit_price' => (bool) $this->show_purchase_unit_price,
+            'show_item_discounts' => (bool) $this->show_item_discounts,
+            'show_item_stock' => (bool) $this->show_item_stock,
             'presentation_pdf' => (bool) $this->presentation_pdf,
             'order_note_not_blocked' => (bool) $this->order_note_not_blocked,
             'document_columns' => (bool) $this->document_columns,

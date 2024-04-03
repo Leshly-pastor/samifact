@@ -212,6 +212,7 @@ class DocumentUpdateInput
                     'update_description' => Functions::valueKeyInArray($row, 'update_description', false),
                     'additional_data' => Functions::valueKeyInArray($row, 'additional_data'),
                     'seller_id' => Functions::valueKeyInArray($row, 'seller_id'),
+                    'discounts_acc' => Functions::valueKeyInArray($row, 'discounts_acc', null),
                 ];
             }
 

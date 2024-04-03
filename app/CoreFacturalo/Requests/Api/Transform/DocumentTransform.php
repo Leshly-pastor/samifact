@@ -30,7 +30,7 @@ class DocumentTransform
             'purchase_order' => Functions::valueKeyInArray($inputs, 'numero_orden_de_compra'),
             'folio' => Functions::valueKeyInArray($inputs, 'folio'),
 //            'establishment' => EstablishmentTransform::transform($inputs['datos_del_emisor']),
-            'customer' => PersonTransform::transform($inputs['datos_del_cliente_o_receptor']),
+            'customer' => PersonTransform::transform($inputs,'datos_del_cliente_o_receptor'),
             'total_prepayment' => Functions::valueKeyInArray($totals, 'total_anticipos'),
             'total_discount' => Functions::valueKeyInArray($totals, 'total_descuentos'),
             'total_charge' => Functions::valueKeyInArray($totals, 'total_cargos'),

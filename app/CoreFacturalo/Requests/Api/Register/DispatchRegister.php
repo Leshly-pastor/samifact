@@ -55,8 +55,13 @@ class DispatchRegister
                 ->firstOrCreate([
                     'plate_number' => $transport['plate_number']
                 ], [
-                    'model' => $transport['model'],
-                    'brand' => $transport['brand']
+                    'model'                  => $transport['model'],
+                    'brand'                  => $transport['brand'],
+                    'tuc'                    => $transport['tuc'],
+                    'auth_plate_primary'     => $transport['auth_plate_primary'],
+                    'secondary_plate_number' => $transport['secondary_plate_number'],
+                    'auth_plate_secondary'   => $transport['auth_plate_secondary'],
+                    'tuc_secondary'          => $transport['tuc_secondary'],
                 ]);
 
             return $record->id;

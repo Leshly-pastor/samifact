@@ -1233,6 +1233,7 @@ export default {
             await this.$eventHub.$on("cancelSale", () => {
                 this.is_payment = false;
                 this.getTables();
+                this.getFoods();
                 this.initForm(this.customer_default.id);
                 this.changeExchangeRate();
                 this.ordenId = null;

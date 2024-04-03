@@ -119,6 +119,7 @@ class OrderNote extends ModelTenant
         'currency_type',
         'items',
         'fee',
+        
     ];
 
     protected $fillable = [

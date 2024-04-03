@@ -4,8 +4,8 @@
 /public/downloads
 /public/uploads
 public/cookie.txt
-# /public/logo/
-# /public/images/*
+/public/logo/
+/public/images/*
 !/public/images/fondos/
 /public/storage
 /public/padron_extract/*

@@ -119,7 +119,8 @@ class ServiceData
                 }
 
                 $res_data = [
-                    'name' => $data['nombre_completo'],
+                    'name' => ''.$data['apellido_paterno'].' '.$data['apellido_materno'].' '.$data['nombres'].'',
+                    // 'name' => $data['nombre_completo'],
                     'trade_name' => '',
                     'location_id' => [
                         $department_id,
