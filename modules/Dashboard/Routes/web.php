@@ -4,14 +4,19 @@ use Illuminate\Support\Facades\Route;
 
 $current_hostname = app(Hyn\Tenancy\Contracts\CurrentHostname::class);
 
-if($current_hostname) {
+if ($current_hostname) {
     Route::domain($current_hostname->fqdn)->group(function () {
         Route::middleware(['auth', 'locked.tenant'])->group(function () {
 
-            Route::redirect('/', '/dashboard');
+            Route::get('/', function (){
+                $user = auth()->user();
+                $init_route = $user->init_route;
+                return redirect($init_route);
+            });
 
             Route::prefix('dashboard')->group(function () {
                 Route::get('/', 'DashboardController@index')->name('tenant.dashboard.index');
+                Route::get('/dashboard', 'DashboardController@index')->name('tenant.dashboard.index');
                 Route::get('/sales_purchases', 'DashboardController@sales_purchases')->name('tenant.dashboard.sales');
                 Route::get('get_sum_year/{year}', 'DashboardController@get_sum_year');
                 Route::get('filter', 'DashboardController@filter');
@@ -28,7 +33,6 @@ if($current_hostname) {
 
             //Commands
             Route::get('command/df', 'DashboardController@df')->name('command.df');
-
         });
     });
 }

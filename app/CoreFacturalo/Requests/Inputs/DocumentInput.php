@@ -67,7 +67,7 @@ class DocumentInput
 
         // $filename = Functions::filename($company, $document_type_id, $series, $number);
         $alter_establishment = Functions::valueKeyInArray($inputs, 'establishment');
-        $establishment = EstablishmentInput::set($inputs['establishment_id']);
+        $establishment = EstablishmentInput::set(Functions::valueKeyInArray($inputs, 'establishment_id', auth()->user()->establishment_id));
         if ($alter_establishment) {
             $establishment = $alter_establishment;
         }
@@ -125,7 +125,7 @@ class DocumentInput
             'group_id' => $inputs['group_id'],
             'user_id' => auth()->id(),
             'external_id' => Str::uuid()->toString(),
-            'establishment_id' => $inputs['establishment_id'],
+            'establishment_id' => Functions::valueKeyInArray($inputs, 'establishment_id', auth()->user()->establishment_id),
             'quotations_optional' => isset($inputs['quotations_optional']) ? $inputs['quotations_optional'] : "",
             'quotations_optional_value' => isset($inputs['quotations_optional_value']) ? $inputs['quotations_optional_value'] : "",
             'establishment' => $establishment,
@@ -803,7 +803,7 @@ class DocumentInput
         $document_type_id = $inputs['document_type_id'];
         $note_credit_or_debit_type_id = $inputs['note_credit_or_debit_type_id'];
         $note_description = $inputs['note_description'];
-        $affected_document_id = $inputs['affected_document_id'];
+        $affected_document_id = Functions::valueKeyInArray($inputs, 'affected_document_id');
 
         $data_affected_document = Functions::valueKeyInArray($inputs, 'data_affected_document');
 

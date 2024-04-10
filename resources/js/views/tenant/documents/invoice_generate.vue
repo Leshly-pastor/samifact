@@ -1775,11 +1775,37 @@
                                                     </template>
                                                 </td>
                                                 <td
+                                                    style="
+                                                        width: 150px !important;
+                                                    "
                                                     v-if="
                                                         configuration.show_item_stock
                                                     "
                                                 >
-                                                {{ row.item.stock}}
+                                                    <template
+                                                        v-if="
+                                                            configuration.modify_item_stock
+                                                        "
+                                                    >
+                                                        <el-input
+                                                            v-model="
+                                                                row.item.stock
+                                                            "
+                                                            type="number"
+                                                            step="0.0001"
+                                                            class="text-end"
+                                                            @input="
+                                                                changeStockItem(
+                                                                    row,
+                                                                    index
+                                                                )
+                                                            "
+                                                        >
+                                                        </el-input>
+                                                    </template>
+                                                    <template v-else>
+                                                        {{ row.item.stock }}
+                                                    </template>
                                                 </td>
                                                 <td
                                                     class="text-end"
@@ -1840,8 +1866,47 @@
                                                         configuration.show_purchase_unit_price
                                                     "
                                                     class="text-end"
+                                                    style="
+                                                        height: 40px !important;
+                                                        width: 40px !important;
+                                                    "
                                                 >
-                                                        {{ Number(row.item.purchase_unit_price).toFixed(2) }}
+                                                    <template
+                                                        v-if="
+                                                            configuration.modify_purchase_unit_price
+                                                        "
+                                                    >
+                                                        <el-input
+                                                            v-model="
+                                                                row.item
+                                                                    .purchase_unit_price
+                                                            "
+                                                            type="number"
+                                                            step="0.0001"
+                                                            class="text-end"
+                                                            @input="
+                                                                changePurchaseUnitPriceItem(
+                                                                    row,
+                                                                    index
+                                                                )
+                                                            "
+                                                        >
+                                                            <span
+                                                                slot="prepend"
+                                                                >{{
+                                                                    currency_type.symbol
+                                                                }}</span
+                                                            >
+                                                        </el-input>
+                                                    </template>
+                                                    <template v-else>
+                                                        {{
+                                                            Number(
+                                                                row.item
+                                                                    .purchase_unit_price
+                                                            ).toFixed(2)
+                                                        }}</template
+                                                    >
                                                 </td>
                                                 <td
                                                     class="text-end"
@@ -1935,12 +2000,16 @@
                                                     </template>
                                                 </td>
                                                 <td
-                                                class="text-end"
+                                                    class="text-end"
                                                     v-if="
                                                         configuration.show_item_discounts
                                                     "
                                                 >
-                                                    {{Number(row.total_discount).toFixed(2)}}
+                                                    {{
+                                                        Number(
+                                                            row.total_discount
+                                                        ).toFixed(2)
+                                                    }}
                                                 </td>
                                                 <td
                                                     class="text-end"
@@ -3882,7 +3951,7 @@ export default {
     ],
     data() {
         return {
-            colspan:9,
+            colspan: 9,
             showAll: true,
             activeNames: ["1"],
             is_amount_charge: true,
@@ -4100,14 +4169,14 @@ export default {
         },
     },
     async created() {
-        if(this.configuration.show_item_stock){
-                this.colspan += 1 ;
+        if (this.configuration.show_item_stock) {
+            this.colspan += 1;
         }
-        if(this.configuration.show_item_discounts){
-            this.colspan += 1 ;
+        if (this.configuration.show_item_discounts) {
+            this.colspan += 1;
         }
-        if(this.configuration.show_purchase_unit_price){
-            this.colspan += 1 ;
+        if (this.configuration.show_purchase_unit_price) {
+            this.colspan += 1;
         }
         this.loadConfiguration();
         this.$store.commit("setConfiguration", this.configuration);
@@ -4314,6 +4383,101 @@ export default {
         this.formatTooltip(20);
     },
     methods: {
+        changeStockItem(row, idx) {
+            if (this.timer) clearTimeout(this.timer);
+            this.timer = setTimeout(async () => {
+                try {
+                    this.loading = true;
+                    await this.$confirm(
+                        `¿Está seguro de cambiar el stock de ${row.item.description} ?`,
+                        "Advertencia",
+                        {
+                            confirmButtonText: "Aceptar",
+                            cancelButtonText: "Cancelar",
+                            type: "warning",
+                        }
+                    );
+
+                    let {
+                        warehouse_id,
+                        item: { id, stock },
+                    } = row;
+                    const response = await this.$http.post(
+                        `/items/${id}/update-stock-item`,
+                        {
+                            warehouse_id,
+                            stock,
+                        }
+                    );
+                    if (response.data.success) {
+                        this.$message({
+                            type: "success",
+                            message: response.data.message,
+                        });
+                    } else {
+                        this.$message({
+                            type: "error",
+                            message:
+                                "Ocurrió un error al actualizar el precio de compra.",
+                        });
+                    }
+                } catch (e) {
+                    row.item.stock = row.item.origin_stock;
+                    this.form.items[idx] = row;
+                } finally {
+                    this.loading = false;
+                }
+            }, 650);
+        },
+        changePurchaseUnitPriceItem(row, idx) {
+            if (this.timer) clearTimeout(this.timer);
+
+            this.timer = setTimeout(async () => {
+                try {
+                    this.loading = true;
+                    await this.$confirm(
+                        `¿Está seguro de cambiar el precio de compra de ${row.item.description} ?`,
+                        "Advertencia",
+                        {
+                            confirmButtonText: "Aceptar",
+                            cancelButtonText: "Cancelar",
+                            type: "warning",
+                        }
+                    );
+                    let {
+                        item: { purchase_unit_price, id },
+                    } = row;
+                    const response = await this.$http.post(
+                        `/items/${id}/update-purchase-unit-price`,
+                        {
+                            purchase_unit_price,
+                        }
+                    );
+                    if (response.data.success) {
+                        this.$message({
+                            type: "success",
+                            message: response.data.message,
+                        });
+                    } else {
+                        this.$message({
+                            type: "error",
+                            message:
+                                "Ocurrió un error al actualizar el precio de compra.",
+                        });
+                    }
+                } catch (e) {
+                    row.item.purchase_unit_price =
+                        row.item.origin_purchase_unit_price;
+                    this.form.items[idx] = row;
+                    console.log(
+                        "🚀 ~ this.timer=setTimeout ~ this.form.items:",
+                        this.form.items
+                    );
+                } finally {
+                    this.loading = false;
+                }
+            }, 650);
+        },
         changeCollapse() {},
         calculatePeriodDays(cuotas, days) {
             let date_of_issue = this.form.date_of_issue;
@@ -5501,7 +5665,7 @@ export default {
 
                 i.discounts = i.discounts ? Object.values(i.discounts) : [];
                 let total_discount = 0;
-                if(i.discounts.length > 0){
+                if (i.discounts.length > 0) {
                     total_discount = i.discounts.reduce((acc, discount) => {
                         return acc + Number(discount.amount);
                     }, 0);
@@ -5552,9 +5716,8 @@ export default {
                         (Number(new_item.unit_price) + amount) *
                         exchange_rate_sale;
                 } else {
-                    new_item.sale_unit_price = Number(
-                        new_item.unit_price) + amount
-                    ;
+                    new_item.sale_unit_price =
+                        Number(new_item.unit_price) + amount;
                     new_item.unit_price = Number(new_item.unit_price) + amount;
                 }
             } else {
@@ -6604,6 +6767,8 @@ export default {
             this.form.guides.splice(index, 1);
         },
         addRow(row) {
+            row.item.origin_purchase_unit_price = row.item.purchase_unit_price;
+            row.item.origin_stock = row.item.stock;
             if (this.configuration.edit_info_documents) {
                 let { unit_value, unit_price } = row;
                 row.unit_value_edit = _.round(unit_value, 4);
@@ -6613,7 +6778,7 @@ export default {
                 row.seller_id = this.form.seller_id;
             }
             let total_discount = 0;
-            if(row.discounts.length!=0){
+            if (row.discounts.length != 0) {
                 row.discounts.forEach((discount) => {
                     total_discount += discount.amount;
                 });

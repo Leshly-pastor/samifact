@@ -56,6 +56,7 @@ class UserResource extends JsonResource {
             'type'             => $this->type,
             'zone_id'             => $this->zone_id,
             'modules'          => $modules,
+            'init_route'      => $this->init_route,
             'levels'           => $levels,
             'locked'           => (bool)$this->locked,
             'integrate_user_type_id' => $this->integrate_user_type_id,

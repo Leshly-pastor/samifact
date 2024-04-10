@@ -381,6 +381,7 @@
                                     <el-select
                                         @change="checkSoap"
                                         v-model="form.soap_send_id"
+                                        :disabled="form.soap_type_id == '03'"
                                     >
                                         <el-option
                                             v-for="(
@@ -442,7 +443,7 @@
                             </div>
                         </div>
                         <template
-                            v-if="form.soap_type_id == '02' || toggle == true"
+                            v-if="form.soap_type_id == '02' || toggle == true && form.soap_type_id !== '03'"
                         >
                             <div class="row">
                                 <div class="col-md-12 mt-2">
@@ -525,7 +526,9 @@
                             </div>
                         </div>
                         <br />
-                        <div class="row">
+                        <div class="row"
+                        v-if="form.soap_type_id !== '03'"
+                        >
                             <div class="col-md-4">
                                 <div
                                     :class="{
@@ -897,6 +900,7 @@ export default {
             soap_types: [
                 { id: "01", description: "Demo" },
                 { id: "02", description: "Producción" },
+                { id: "03", description: "Interno" },
             ],
             toggle: false,
             certificate_admin: "",

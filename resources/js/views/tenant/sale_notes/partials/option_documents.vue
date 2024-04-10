@@ -812,7 +812,10 @@ export default {
             ) {
                 this.document.payment_condition_id = "01";
             }
-
+            if(this.document.payment_condition_id == undefined){
+                this.document.payment_condition_id = "01";
+                this.clickAddPayment();
+            }
             this.assignPlateNumberToItems(q);
             //console.log(this.document);
         },

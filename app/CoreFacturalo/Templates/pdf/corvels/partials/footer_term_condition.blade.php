@@ -5,12 +5,12 @@
     <link href="{{ $path_style }}" rel="stylesheet" />
 </head>
 <body>
-<table class="full-width">
+{{-- <table class="full-width">
     <tr>
         <td class="">
             {!!$document->terms_condition!!}
         </td>
     </tr>
     <br><br>
-</table>
+</table> --}}
 </body>

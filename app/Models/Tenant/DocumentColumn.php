@@ -102,7 +102,11 @@ class DocumentColumn extends TenantModel
                     return 0;
                 }
             case  'unit_value':
-                return $document_item->unit_value;
+                if ($configuration->change_decimal_quantity_unit_price_pdf) {
+                    return  $document_item->generalApplyNumberFormat($document_item->unit_value, $configuration->decimal_quantity_unit_price_pdf);
+                } else {
+                    return number_format($document_item->unit_value, 2);
+                }
             case  'total_value':
                 return $document_item->total_value;
             case  'unit_price':

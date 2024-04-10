@@ -1933,7 +1933,6 @@ export default {
                     this.form.discounts = this.recordItem.discounts;
                     this.form.charges = this.recordItem.charges;
                 }
-                console.log("🚀 ~ create ~ this.recordItem.discounts_acc:", this.recordItem.discounts_acc)
                 this.discounts = this.recordItem.discounts_acc || [];
                 if (this.discounts.length > 0) {
                     this.form.discounts = [];

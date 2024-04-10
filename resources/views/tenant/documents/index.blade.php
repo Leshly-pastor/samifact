@@ -2,7 +2,7 @@
 
 @section('content')
     <tenant-documents-index 
-    
+        :is-optometry="{{ json_encode($is_optometry) }}"
         :to_anulate="{{ json_encode($to_anulate) }}" :is-client="{{ json_encode($is_client) }}"
         :is-auditor="{{ json_encode($is_auditor) }}"
         :is-comercial="{{ json_encode($is_comercial) }}"

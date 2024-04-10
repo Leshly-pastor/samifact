@@ -9,8 +9,8 @@ table {
     border-collapse: collapse;
 }
 @page {
-  margin: 35 35 30 35;
-  padding: 35 35 30 35;
+  margin: 25 35 30 35;
+  padding: 25 35 30 35;
 }
 .font-md {
     font-size: 12px;

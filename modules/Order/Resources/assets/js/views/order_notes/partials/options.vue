@@ -270,7 +270,11 @@
                 <br />
                 <div
                     class="col-lg-12"
-                    v-if="is_document_type_invoice && document.fee && document.fee.length == 0"
+                    v-if="
+                        is_document_type_invoice &&
+                        document.fee &&
+                        document.fee.length == 0
+                    "
                 >
                     <table>
                         <thead>
@@ -373,7 +377,10 @@
                         </thead>
 
                         <tbody>
-                            <tr v-for="(row, index) in document.fee" :key="index">
+                            <tr
+                                v-for="(row, index) in document.fee"
+                                :key="index"
+                            >
                                 <td>{{ index + 1 }}</td>
                                 <td>{{ row.date }}</td>
                                 <td>{{ row.amount }}</td>
@@ -486,14 +493,14 @@ import SaleNoteOptions from "@views/sale_notes/partials/options.vue";
 import SetTip from "@components/SetTip.vue";
 import ListRestrictItems from "@components/secondary/ListRestrictItems.vue";
 import { fnRestrictSaleItemsCpe } from "@mixins/functions";
-import Table from '../../../../../../../Finance/Resources/assets/js/views/balance/partial/Table.vue';
+import Table from "../../../../../../../Finance/Resources/assets/js/views/balance/partial/Table.vue";
 
 export default {
     components: {
         DocumentOptions,
         SaleNoteOptions,
         SetTip,
-        ListRestrictItems
+        ListRestrictItems,
     },
     mixins: [fnRestrictSaleItemsCpe],
     props: [
@@ -503,7 +510,7 @@ export default {
         "showGenerate",
         "type",
         "typeUser",
-        "configuration"
+        "configuration",
     ],
     data() {
         return {
@@ -537,7 +544,7 @@ export default {
             payment_method_types: [],
             global_discount_types: [],
             load_list_document_items: false,
-            cash_id:null,
+            cash_id: null,
         };
     },
     created() {
@@ -548,17 +555,17 @@ export default {
     computed: {
         isInvoiceDocument() {
             return ["01", "03"].includes(this.document.document_type_id);
-        }
+        },
     },
     methods: {
         //showGenerate
-           hasCashOpen() {
+        hasCashOpen() {
             let has_cash = this.payment_destinations.some(
-                payment_destination => payment_destination.cash_id != null
+                (payment_destination) => payment_destination.cash_id != null
             );
             if (has_cash) {
                 this.cash_id = this.payment_destinations.find(
-                    payment_destination => payment_destination.cash_id != null
+                    (payment_destination) => payment_destination.cash_id != null
                 ).cash_id;
             }
             return has_cash;
@@ -587,11 +594,11 @@ export default {
                 id: null,
                 document_id: null,
                 date_of_payment: moment().format("YYYY-MM-DD"),
-                payment_method_type_id: this.form.order_note
-                    .payment_method_type_id,
+                payment_method_type_id:
+                    this.form.order_note.payment_method_type_id,
                 payment_destination_id: null,
                 reference: null,
-                payment: payment
+                payment: payment,
             });
         },
         initForm() {
@@ -602,24 +609,23 @@ export default {
                 external_id: null,
                 identifier: null,
                 date_of_issue: null,
-                order_note: null
+                order_note: null,
             };
 
             this.form_cash_document = {
                 document_id: null,
-                sale_note_id: null
+                sale_note_id: null,
             };
         },
         getCustomer() {
             this.$http
                 .get(
-                    `/${this.resource_documents}/search/customer/${
-                        this.form.order_note.customer_id
-                    }`
+                    `/${this.resource_documents}/search/customer/${this.form.order_note.customer_id}`
                 )
-                .then(response => {
+                .then((response) => {
                     this.customers = response.data.customers;
-                    this.document.customer_id = this.form.order_note.customer_id;
+                    this.document.customer_id =
+                        this.form.order_note.customer_id;
                     this.changeCustomer();
                 });
         },
@@ -629,13 +635,11 @@ export default {
         searchRemoteCustomers(input) {
             if (input.length > 0) {
                 this.loading_search = true;
-                let parameters = `input=${input}&document_type_id=${
-                    this.form.document_type_id
-                }&operation_type_id=${this.form.operation_type_id}`;
+                let parameters = `input=${input}&document_type_id=${this.form.document_type_id}&operation_type_id=${this.form.operation_type_id}`;
 
                 this.$http
                     .get(`/${this.resource}/search/customers?${parameters}`)
-                    .then(response => {
+                    .then((response) => {
                         this.customers = response.data.customers;
                         this.loading_search = false;
                     });
@@ -679,7 +683,7 @@ export default {
                 guides: [],
                 additional_information: null,
                 actions: {
-                    format_pdf: "a4"
+                    format_pdf: "a4",
                 },
                 order_note_id: null,
                 is_receivable: false,
@@ -688,7 +692,7 @@ export default {
                 seller_id: 0,
 
                 worker_full_name_tips: null, //propinas
-                total_tips: 0 //propinas
+                total_tips: 0, //propinas
             };
 
             this.cleanFormTip();
@@ -710,16 +714,16 @@ export default {
         validatePaymentDestination() {
             let error_by_item = 0;
 
-            this.document.payments.forEach(item => {
+            this.document.payments.forEach((item) => {
                 if (item.payment_destination_id == null) error_by_item++;
             });
 
             return {
-                error_by_item: error_by_item
+                error_by_item: error_by_item,
             };
         },
         async submit() {
-              if (!this.hasCashOpen()) {
+            if (!this.hasCashOpen()) {
                 this.$message.error("Debe abrir caja para realizar la venta");
                 return false;
             }
@@ -727,22 +731,25 @@ export default {
             if (this.document.items.length === 0)
                 return this.$message.error("No tiene productos agregados.");
 
-            if(this.document.payment_condition_id == '01'){
-                let validate_payment_destination = await this.validatePaymentDestination();
+            if (this.document.payment_condition_id == "01") {
+                let validate_payment_destination =
+                    await this.validatePaymentDestination();
 
-            if (validate_payment_destination.error_by_item > 0) {
-                return this.$message.error(
-                    "El destino del pago es obligatorio"
-                );
-            }
-            }else{
+                if (validate_payment_destination.error_by_item > 0) {
+                    return this.$message.error(
+                        "El destino del pago es obligatorio"
+                    );
+                }
+            } else {
                 this.document.payments = [];
             }
-
+            if (this.form.order_note.observation) {
+                this.document.additional_information =
+                    this.form.order_note.observation;
+            }
             // validacion restriccion de productos
-            const validate_restrict_sale_items_cpe = this.fnValidateRestrictSaleItemsCpe(
-                this.document
-            );
+            const validate_restrict_sale_items_cpe =
+                this.fnValidateRestrictSaleItemsCpe(this.document);
             if (!validate_restrict_sale_items_cpe.success)
                 return this.$message.error(
                     validate_restrict_sale_items_cpe.message
@@ -758,7 +765,7 @@ export default {
             }
             if (this.quantity > 1) {
                 try {
-                await  this.$confirm(
+                    await this.$confirm(
                         "¿Está seguro de generar " +
                             this.quantity +
                             " comprobantes?",
@@ -766,7 +773,7 @@ export default {
                         {
                             confirmButtonText: "Generar",
                             cancelButtonText: "Cancelar",
-                            type: "warning"
+                            type: "warning",
                         }
                     );
                 } catch (e) {
@@ -777,7 +784,7 @@ export default {
             try {
                 let response = null;
                 this.isSending = true;
-                if(this.cash_id){
+                if (this.cash_id) {
                     this.document.cash_id = this.cash_id;
                 }
                 for (let i = 0; i < this.quantity; i++) {
@@ -809,7 +816,8 @@ export default {
 
                     this.$eventHub.$emit("reloadData");
                     this.resetDocument();
-                    this.document.customer_id = this.form.order_note.customer_id;
+                    this.document.customer_id =
+                        this.form.order_note.customer_id;
                     this.changeCustomer();
 
                     this.clickClose();
@@ -830,14 +838,14 @@ export default {
         saveCashDocument() {
             this.$http
                 .post(`/cash/cash_document`, this.form_cash_document)
-                .then(response => {
+                .then((response) => {
                     if (response.data.success) {
                         // console.log(response)
                     } else {
                         this.$message.error(response.data.message);
                     }
                 })
-                .catch(error => {
+                .catch((error) => {
                     console.log(error);
                 });
         },
@@ -846,9 +854,7 @@ export default {
                 return this.$message.error("El número es obligatorio");
             }
             window.open(
-                `https://wa.me/51${this.form.customer_telephone}?text=${
-                    this.form.message_text
-                }`,
+                `https://wa.me/51${this.form.customer_telephone}?text=${this.form.message_text}`,
                 "_blank"
             );
         },
@@ -865,11 +871,11 @@ export default {
                 mensaje:
                     "Pedido  N° " +
                     this.form.identifier +
-                    " ha sido generado correctamente"
+                    " ha sido generado correctamente",
             };
             this.$http
                 .post(`/whatsapp`, form)
-                .then(response => {
+                .then((response) => {
                     if (response.data.success == true) {
                         this.$message.success(response.data.message);
                         this.loading_Whatsapp = false;
@@ -878,7 +884,7 @@ export default {
                         this.loading_Whatsapp = false;
                     }
                 })
-                .catch(error => {
+                .catch((error) => {
                     this.loading_Whatsapp = false;
                     if (error.response.status === 422) {
                         this.$message.error(error.response.data.message);
@@ -897,7 +903,9 @@ export default {
 
             this.document.establishment_id = q.establishment_id;
             this.document.fee = q.fee;
-            this.document.payment_condition_id = q.payment_condition_id ? q.payment_condition_id : '01';
+            this.document.payment_condition_id = q.payment_condition_id
+                ? q.payment_condition_id
+                : "01";
             // this.document.date_of_issue = q.date_of_issue
             this.document.time_of_issue = moment().format("HH:mm:ss");
             // this.document.customer_id = q.customer_id
@@ -932,23 +940,23 @@ export default {
             this.document.guides = q.guides;
             this.document.additional_information = null;
             this.document.actions = {
-                format_pdf: "a4"
+                format_pdf: "a4",
             };
             this.document.order_note_id = this.form.id;
             this.document.seller_id = q.user_id;
         },
         getSaleLotsGroup(lots_group) {
-            return _.filter(lots_group, lot_group => {
+            return _.filter(lots_group, (lot_group) => {
                 return lot_group.compromise_quantity > 0;
             });
         },
         transformSaleLotsGroup(sale_lots_group) {
-            return sale_lots_group.map(lot_group => {
+            return sale_lots_group.map((lot_group) => {
                 return {
                     id: lot_group.id,
                     code: lot_group.code,
                     date_of_due: lot_group.date_of_due,
-                    compromise_quantity: lot_group.compromise_quantity
+                    compromise_quantity: lot_group.compromise_quantity,
                 };
             });
         },
@@ -956,7 +964,7 @@ export default {
             let new_items = items;
 
             if (this.document.document_type_id != "80") {
-                new_items = items.map(row => {
+                new_items = items.map((row) => {
                     // si existe propiedad regularizada en json item
                     if (row.item.IdLoteSelected) {
                         if (Array.isArray(row.item.IdLoteSelected)) {
@@ -971,9 +979,10 @@ export default {
 
                             if (sale_lots_group.length > 0) {
                                 // generar arreglo de lotes vendidos con la data necesaria para que sea procesado en registro de cpe
-                                row.IdLoteSelected = this.transformSaleLotsGroup(
-                                    sale_lots_group
-                                );
+                                row.IdLoteSelected =
+                                    this.transformSaleLotsGroup(
+                                        sale_lots_group
+                                    );
                             }
                         }
                     }
@@ -990,7 +999,7 @@ export default {
             this.isSending = false;
             await this.$http
                 .get(`/${this.resource}/option/tables`)
-                .then(response => {
+                .then((response) => {
                     this.all_document_types =
                         response.data.document_types_invoice;
                     this.all_series = response.data.series;
@@ -1005,9 +1014,10 @@ export default {
 
             await this.$http
                 .get(`/${this.resource}/record2/${this.recordId}`)
-                .then(response => {
+                .then((response) => {
                     this.form = response.data.data;
-                    this.form.order_note.seller_id = this.form.order_note.user_id;
+                    this.form.order_note.seller_id =
+                        this.form.order_note.user_id;
                     // this.validateIdentityDocumentType()
                     this.getCustomer();
                     let type = this.type == "edit" ? "editado" : "registrado";
@@ -1041,7 +1051,7 @@ export default {
             1		DNI
             */
             let customer = _.find(this.customers, {
-                id: this.document.customer_id
+                id: this.document.customer_id,
             });
 
             if (
@@ -1054,9 +1064,9 @@ export default {
                     _.overSome([
                         // {'id': '01'}, // Factura
                         {
-                            id: "03"
+                            id: "03",
                         }, // Boleta
-                        ["id", "80"] // Nota de venta
+                        ["id", "80"], // Nota de venta
                     ])
                 );
                 // this.document_types = _.filter(this.all_document_types, {id: "03"});
@@ -1066,7 +1076,7 @@ export default {
 
             // recorrer items para determinar si hay productos de exportacion
             let item_export = this.form.order_note.items.filter(
-                item => item.affectation_igv_type_id == 40
+                (item) => item.affectation_igv_type_id == 40
             );
             // calcular cantidad y asignar true a exportacion para habilitar factura
             if (item_export.length > 0) {
@@ -1083,7 +1093,7 @@ export default {
         filterSeries() {
             this.document.series_id = null;
             this.series = _.filter(this.all_series, {
-                document_type_id: this.document.document_type_id
+                document_type_id: this.document.document_type_id,
             });
             this.document.series_id =
                 this.series.length > 0 ? this.series[0].id : null;
@@ -1111,9 +1121,9 @@ export default {
                 .post(`/${this.resource}/email`, {
                     customer_email: this.customer_email,
                     id: this.form.id,
-                    customer_id: this.form.order_note.customer_id
+                    customer_id: this.form.order_note.customer_id,
                 })
-                .then(response => {
+                .then((response) => {
                     if (response.data.success) {
                         this.$message.success(
                             "El correo fue enviado satisfactoriamente"
@@ -1122,13 +1132,13 @@ export default {
                         this.$message.error("Error al enviar el correo");
                     }
                 })
-                .catch(error => {
+                .catch((error) => {
                     this.$message.error("Error al enviar el correo");
                 })
                 .then(() => {
                     this.loading = false;
                 });
-        }
-    }
+        },
+    },
 };
 </script>

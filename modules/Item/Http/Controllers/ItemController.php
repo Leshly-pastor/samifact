@@ -14,6 +14,7 @@ use App\Models\Tenant\Document;
 use App\Models\Tenant\SaleNote;
 use App\Models\Tenant\Quotation;
 use App\Models\Tenant\Item;
+use App\Models\Tenant\ItemWarehouse;
 use App\Models\Tenant\PurchaseItem;
 use App\Models\Tenant\SaleNoteItem;
 use App\Models\Tenant\QuotationItem;
@@ -39,11 +40,55 @@ use Modules\Item\Imports\{
 
 class ItemController extends Controller
 {
-    public function ItemsDocumentErrors($hash){
+    public function updateStockItem(Request $request, $id)
+    {
+        $stock = $request->stock;
+        $warehouse_id = $request->warehouse_id;
+        $item = Item::findOrFail($id);
+        if ($warehouse_id) {
+            $item_warehouse = ItemWarehouse::where('item_id', $id)->where('warehouse_id', $warehouse_id)->first();
+            if ($item_warehouse) {
+                $item_warehouse->stock = $stock;
+                $item_warehouse->save();
+            } else {
+                $item_warehouse = ItemWarehouse::where('item_id', $id)->first();
+                $item_warehouse->stock = $stock;
+                $item_warehouse->save();
+            }
+        } else {
+            $item_warehouse = ItemWarehouse::where('item_id', $id)->first();
+            $item_warehouse->stock = $stock;
+            $item_warehouse->save();
+        }
+        $stock = 0;
+        $items_warehouses = ItemWarehouse::where('item_id', $id)->get();
+        foreach ($items_warehouses as $item_warehouse) {
+            $stock += $item_warehouse->stock;
+        }
+        $item->stock = $stock;
+        $item->save();
+        return [
+            'success' => true,
+            'message' => 'Stock actualizado'
+        ];
+    }
+    public function updatePurchaseUnitPrice(Request $request, $id)
+    {
+        $purchase_unit_price = $request->purchase_unit_price;
+        $item = Item::findOrFail($id);
+        $item->purchase_unit_price = $purchase_unit_price;
+        $item->save();
+        return [
+            'success' => true,
+            'message' => 'Precio de compra actualizado'
+        ];
+    }
+    public function ItemsDocumentErrors($hash)
+    {
 
         $exists_data = Cache::has($hash);
 
-        if(!$exists_data){
+        if (!$exists_data) {
             return [
                 'success' => false,
                 'message' => 'No se encontró los datos del documento'
@@ -53,10 +98,11 @@ class ItemController extends Controller
         $data = Cache::get($hash);
 
         return (new ItemDocumentErrorExport)
-        ->records($data)
-        ->download('Productos_nuevos_'.Carbon::now().'.xlsx');
+            ->records($data)
+            ->download('Productos_nuevos_' . Carbon::now() . '.xlsx');
     }
-    public function uploadItemsDocumentNews(Request $request){
+    public function uploadItemsDocumentNews(Request $request)
+    {
         $type = $request->type;
         if ($request->hasFile('file')) {
             try {
@@ -286,7 +332,7 @@ class ItemController extends Controller
         $item = Item::findOrFail($id);
 
         return [
-            'sizes' => $item->sizes->transform(function ($row)  {
+            'sizes' => $item->sizes->transform(function ($row) {
                 return [
                     'warehouse_id' => $row->warehouse->id,
                     'warehouse_description' => $row->warehouse->description,
@@ -294,8 +340,7 @@ class ItemController extends Controller
                     'item_id' => $row->id,
                     'size' => $row->size,
                 ];
-            })
-            ,
+            }),
             'warehouses' => $item->warehouses->transform(function ($row) use ($item) {
                 return [
                     'warehouse_id' => $row->warehouse->id,

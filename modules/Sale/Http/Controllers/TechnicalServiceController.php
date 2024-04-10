@@ -68,6 +68,7 @@ class TechnicalServiceController extends Controller
             'id' => 'Número',
             'customer' => 'Cliente',
             'date_of_issue' => 'Fecha de emisión',
+            'plate_number' => 'Placa',
         ];
     }
 
@@ -84,7 +85,14 @@ class TechnicalServiceController extends Controller
             $records = TechnicalService::whereHas('person', function ($query) use ($request) {
                 $query->where('name', 'like', "%{$request->value}%");
             });
-        } else {
+        } 
+        
+        else if ($request->column == 'plate_number') {
+            $records = TechnicalService::whereHas('technical_service_car', function ($query) use ($request) {
+                $query->where('plate_number', 'like', "%{$request->value}%");
+            });
+        }
+        else {
             $records = TechnicalService::where($request->column, 'like', "%{$request->value}%");
         }
 

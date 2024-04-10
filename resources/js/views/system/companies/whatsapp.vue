@@ -2,14 +2,14 @@
     <div>
         <div class="card mb-2">
             <div class="card-header">
-                <h3 class="my-0 font-weight-bold">
+                <!-- <h3 class="my-0 font-weight-bold">
                     <span  :class="{
                             'text-danger': state === false,
                             'text-success': state === true
                         }">
                         {{status_whatsapp}}
                     </span>
-                </h3>
+                </h3> -->
             </div>
             <div class="card-body">
                 <div class="row">
@@ -119,6 +119,7 @@ export default {
         this.loading_status = true
         await this.$http.post(`${this.resource}/api/status`,this.form)
         .then(response => {
+            console.log("🚀 ~ created ~ this.form:", this.form)
             this.loading_status = false
             this.status_whatsapp = response.data.message
             this.state =response.data.success

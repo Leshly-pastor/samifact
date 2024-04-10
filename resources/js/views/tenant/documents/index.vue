@@ -41,6 +41,12 @@
                         <i class="fa fa-upload"></i> Importar Formato
                     </button>
                 </span>
+                    <a
+                    v-if="!isComercial"
+                    :href="`/${resource}/note_other`"
+                    class="btn btn-custom btn-sm mt-2 mr-2"
+                    ><i class="fa fa-plus-circle"></i> Nueva Nota dcto externo</a
+                >
                 <a
                     v-if="!isComercial"
                     :href="`/${resource}/create`"
@@ -774,7 +780,7 @@
                                 @click.prevent="clickKillDocument(row.id)"
                                 v-if="
                                     configuration.delete_documents &&
-                                    !isComercial
+                                    !isComercial && !isOptometry
                                 "
                             >
                                 ELIMINAR
@@ -1164,6 +1170,7 @@ export default {
         "to_anulate",
         "isAuditor",
         "isComercial",
+        "isOptometry",
         "isClient",
         "typeUser",
         "import_documents",

@@ -232,6 +232,14 @@
                             </table>
                         </div>
                     </div>
+                    <div class="row" v-if="currentRent.observations">
+                        <div class="col-12">
+                            <label>Observaciones:</label>
+                            <p>
+                                {{ currentRent.observations }}
+                            </p>
+                        </div>
+                    </div>
                     <div class="row">
                         <div class="col -lg-3">
                             <label for="" class="control-label">
@@ -905,9 +913,19 @@ export default {
                     "El destino del pago es obligatorio"
                 );
             }
-
+    
             this.updateDataForSend();
-            this.loading = true;
+                    if(this.currentRent.observations !== null && this.currentRent.observations !== ''){
+                        if(this.document.document_type_id === '80'){
+                            this.document.observation = this.currentRent.observations;
+                }else{
+                    this.document.additional_information = this.currentRent.observations;
+                
+                }
+            }
+                    // console.log("🚀 ~ onGoToInvoice ~ this.document:", this.document)
+// return;
+                    this.loading = true;
             this.$http
                 .post(`/${this.resource_documents}`, this.document)
                 .then((response) => {

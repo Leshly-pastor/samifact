@@ -28,8 +28,8 @@ class DocumentCollection extends ResourceCollection
             $btn_consult_cdr = false;
             $btn_delete_doc_type_03 = false;
             $btn_constancy_detraction = false;
-         
-            
+
+
 
             $affected_document = null;
 
@@ -88,9 +88,9 @@ class DocumentCollection extends ResourceCollection
                 // #750
                 $btn_guide = true;
             }
-            if($row->no_stock){
+            if ($row->no_stock) {
                 $no_stock_document = $row->no_stock_document;
-                if($no_stock_document && $no_stock_document->completed){
+                if ($no_stock_document && $no_stock_document->completed) {
                     $btn_guide = false;
                 }
             }
@@ -107,7 +107,7 @@ class DocumentCollection extends ResourceCollection
             }
 
             $total_payment = $row->payments->sum('payment');
-            if($row->bill_of_exchange_id){
+            if ($row->bill_of_exchange_id) {
                 $total_payment += $row->bill_of_exchange_document->total;
             }
 
@@ -158,22 +158,22 @@ class DocumentCollection extends ResourceCollection
             $btn_check_voided_pse = false;
             $btn_check_pse = false;
             $btn_voided_pse = false;
-            if($row->state_type_id === '03'  && $row->soap_type_id === '02' && $company->pse){
-            // if($row->state_type_id === '03'  && $company->pse){
+            if ($row->state_type_id === '03'  && $row->soap_type_id === '02' && $company->pse) {
+                // if($row->state_type_id === '03'  && $company->pse){
                 $btn_check_pse = true;
             }
-            
-            if($row->state_type_id === '01'  && $row->soap_type_id === '02' && $company->pse){
-                // if($row->state_type_id === '03'  && $company->pse){
-                    $btn_send_pse = true;
-                }
-            if($row->state_type_id === '05'  && $row->soap_type_id === '02' && $company->pse){
-                // if($row->state_type_id === '03'  && $company->pse){
-                    $btn_voided_pse = true;
-                    $btn_voided = false;
-                }
 
-            if($row->state_type_id == '13' && $row->soap_type_id === '02' && $company->pse){
+            if ($row->state_type_id === '01'  && $row->soap_type_id === '02' && $company->pse) {
+                // if($row->state_type_id === '03'  && $company->pse){
+                $btn_send_pse = true;
+            }
+            if ($row->state_type_id === '05'  && $row->soap_type_id === '02' && $company->pse) {
+                // if($row->state_type_id === '03'  && $company->pse){
+                $btn_voided_pse = true;
+                $btn_voided = false;
+            }
+
+            if ($row->state_type_id == '13' && $row->soap_type_id === '02' && $company->pse) {
                 $btn_check_voided_pse = true;
             }
             return [
@@ -181,7 +181,7 @@ class DocumentCollection extends ResourceCollection
                 'alter_company' => $row->alter_company,
                 'btn_pdf_voided' => $btn_pdf_voided,
                 'bill_of_exchange_id' => $row->bill_of_exchange_id,
-                'btn_check_voided_pse' => $btn_check_voided_pse, 
+                'btn_check_voided_pse' => $btn_check_voided_pse,
                 'btn_voided_pse' => $btn_voided_pse,
                 'btn_send_pse' => $btn_send_pse,
                 'btn_check_pse' => $btn_check_pse,
@@ -260,7 +260,11 @@ class DocumentCollection extends ResourceCollection
                 }) : null,
                 'affected_documents' => (in_array($row->document_type_id, ['07', '08'])) ? $row->affected_documents2->transform(function ($row) {
                     return [
-                        'document_type_id' => $row->affected_document->document_type_id,
+                        'document_type_id' => isset($row->affected_document) ?  $row->affected_document->document_type_id
+                            : (isset($row->data_affected_document) ?
+                                $row->data_affected_document->document_type_id
+                                : null
+                            )
                     ];
                 }) : [],
                 'auditor_state' => (bool)$row->auditor_state,

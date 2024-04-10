@@ -10,6 +10,8 @@ if ($hostname) {
 
 
 
+            Route::post('items/{id}/update-stock-item', 'ItemController@updateStockItem');
+            Route::post('items/{id}/update-purchase-unit-price', 'ItemController@updatePurchaseUnitPrice');
             Route::get('items/items-document-error/{hash}', 'ItemController@ItemsDocumentErrors');
             Route::post('items/items-document', 'ItemController@uploadItemsDocument');
             Route::post('items/items-document-news', 'ItemController@uploadItemsDocumentNews');

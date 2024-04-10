@@ -1400,7 +1400,7 @@ export default {
             this.cleanTotalItem();
             this.calculateTotal();
 
-                if(this.configuration.discounts_acc){
+            if (this.configuration.discounts_acc) {
                 this.discounts = [];
                 this.addDiscount();
             }
@@ -1470,7 +1470,8 @@ export default {
         },
         async clickAddItem() {
             this.validateQuantity();
-if (this.discounts.length != 0) {
+            this.discounts = this.discounts.filter((d) => d.percentage > 0);
+            if (this.discounts.length != 0) {
                 this.setDiscounts();
             }
             if (this.form.item.lots_enabled) {
@@ -1519,7 +1520,7 @@ if (this.discounts.length != 0) {
             }
             // this.initializeFields()
             this.$emit("add", this.row);
-                    this.discounts = [];
+            this.discounts = [];
             this.setFocusSelectItem();
         },
         cleanItems() {

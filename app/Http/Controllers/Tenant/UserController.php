@@ -15,6 +15,7 @@ use App\Models\Tenant\User;
 use App\Models\Tenant\Configuration;
 use App\Models\Tenant\Zone;
 use App\Models\Tenant\Catalogs\IdentityDocumentType;
+use App\Models\Tenant\CustomInitRoute;
 use Illuminate\Http\Request;
 use Modules\Finance\Helpers\UploadFileHelper;
 use Illuminate\Support\Facades\DB;
@@ -142,10 +143,10 @@ class UserController extends Controller
         $config_permission_to_edit_cpe = $configuration->permission_to_edit_cpe;
         $config_regex_password_user = $configuration->regex_password_user;
         $zones = Zone::all();
-
+        $routes = CustomInitRoute::all();
         $identity_document_types = IdentityDocumentType::filterDataForPersons()->get();
 
-        return compact('modules', 'establishments', 'types', 'documents', 'series', 'config_permission_to_edit_cpe', 'zones', 'identity_document_types', 'config_regex_password_user');
+        return compact('modules','routes', 'establishments', 'types', 'documents', 'series', 'config_permission_to_edit_cpe', 'zones', 'identity_document_types', 'config_regex_password_user');
     }
 
     public function regenerateToken(User $user)
@@ -191,7 +192,7 @@ class UserController extends Controller
             $user->establishment_id = $request->input('establishment_id');
             $user->type = $request->input('type');
             $user->integrate_user_type_id = $request->input('integrate_user_type_id');
-
+            $user->init_route = $request->input('init_route');
             // Zona por usuario
             // $user->zone_id = $request->input('zone_id');
 
@@ -333,7 +334,9 @@ class UserController extends Controller
 
     public function records_lite()
     {
-        $records = User::where('type', '!=', 'integrator')->get()
+        $records = User::where('type', '!=', 'integrator')
+        ->where('type', '!=', 'superadmin')
+        ->get()
             ->transform(function ($user) {
                 return [
                     'id' => $user->id,
@@ -345,7 +348,9 @@ class UserController extends Controller
     }
     public function records()
     {
-        $records = User::where('type', '!=', 'integrator')->get();
+        $records = User::where('type', '!=', 'integrator')
+        ->where('type', '!=', 'superadmin')
+        ->get();
 
         return new UserCollection(collect($records));
     }

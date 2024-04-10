@@ -68,6 +68,7 @@
             'destiny',
             'document_id',
             'sale_note_id'
+            ,'observations'
         ];
 
         protected $casts = [

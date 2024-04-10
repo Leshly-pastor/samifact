@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\Tenant;
 
 use App\Http\Controllers\Controller;
@@ -14,7 +15,13 @@ class NoteController extends Controller
 
         return view('tenant.documents.note', compact('document_affected', 'configuration'));
     }
+    public function createOther()
+    {
+        $api_token = \App\Models\Tenant\Configuration::getApiServiceToken();
+        $configuration = Configuration::first();
 
+        return view('tenant.documents.note_other', compact('configuration', 'api_token'));
+    }
     public function record($document_id)
     {
         $record = Document::find($document_id);
@@ -27,28 +34,24 @@ class NoteController extends Controller
 
         $record = Document::wherehas('affected_documents')->find($document_id);
 
-        if($record){
+        if ($record) {
 
             return [
                 'success' => true,
-                'data' => $record->affected_documents->transform(function($row, $key) {
-                            return [
-                                'id' => $row->id,
-                                'document_id' => $row->document_id,
-                                'document_type_description' => $row->document->document_type->description,
-                                'description' => $row->document->number_full,
-                            ];
-                        })
+                'data' => $record->affected_documents->transform(function ($row, $key) {
+                    return [
+                        'id' => $row->id,
+                        'document_id' => $row->document_id,
+                        'document_type_description' => $row->document->document_type->description,
+                        'description' => $row->document->number_full,
+                    ];
+                })
             ];
-            
         }
 
         return [
             'success' => false,
             'data' => []
         ];
-
     }
-
-
 }

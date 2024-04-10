@@ -141,6 +141,8 @@ use App\Models\Tenant\Skin;
 class Configuration extends ModelTenant
 {
     protected $fillable = [
+        'modify_purchase_unit_price',
+        'modify_item_stock',
         'show_purchase_unit_price',
         'show_item_discounts',
         'show_item_stock',
@@ -349,6 +351,8 @@ class Configuration extends ModelTenant
     ];
 
     protected $casts = [
+        'modify_purchase_unit_price' => 'boolean',
+        'modify_item_stock' => 'boolean',
         'show_purchase_unit_price' => 'boolean',
         'show_item_discounts' => 'boolean',
         'show_item_stock' => 'boolean',
@@ -613,6 +617,8 @@ class Configuration extends ModelTenant
         $currency = CurrencyType::all();
         $skins = Skin::all();
         return [
+            'modify_purchase_unit_price' => (bool) $this->modify_purchase_unit_price,
+            'modify_item_stock' => (bool) $this->modify_item_stock,
             'show_purchase_unit_price' => (bool) $this->show_purchase_unit_price,
             'show_item_discounts' => (bool) $this->show_item_discounts,
             'show_item_stock' => (bool) $this->show_item_stock,

@@ -11,8 +11,8 @@
 <head>
 </head>
 
-<body>
-    <div style="border: 3px double #000; padding: 15px; height: 95%;">
+<body style="padding-top:1px;margin-top:1px;">
+    <div style="border: 3px double #000; height: 95%;">
         <table class="full-width">
             <tr>
                 @if ($company->logo)
@@ -30,7 +30,7 @@
                 <td width="50%" class="pl-3">
                     <center>
                         <div class="text-center">
-                            <h2 class="font-xxlg font-bold">{{ $company->name }}</h2>
+                            <h2 class="font-lg font-bold">{{ $company->name }}</h2>
                             <h6 style="text-transform: uppercase;">
                                 {{ $establishment->address !== '-' ? $establishment->address : '' }}
                                 {{ $establishment->district_id !== '-' ? ', ' . $establishment->district->description : '' }}
@@ -56,7 +56,7 @@
                                 <h6>{{ $establishment->aditional_information !== '-' ? $establishment->aditional_information : '' }}
                                 </h6>
                             @endisset
-                            <h5 class="font-lg font-bold">{{ 'R.U.C. ' . $company->number }}</h5>
+                            <h5 class="font-sm font-bold">{{ 'R.U.C. ' . $company->number }}</h5>
                         </div>
                     </center>
                 </td>
@@ -64,14 +64,14 @@
         </table><br><br>
         <table class="full-width pt-5" style=" padding-top: 20px;">
             <tr>
-                <td width="25%" class="amarillo p-3 font-lg font-bold">
+                <td width="25%" class="amarillo p-3 font-sm font-bold">
                     COTIZACION Nº
                 </td>
-                <td width="20%" class="pl-3 font-lg font-bold">
+                <td width="20%" class="pl-3 font-sm font-bold">
                     <center>{{ str_pad($document->id, 8, '0', STR_PAD_LEFT) }}</center>
                 </td>
-                <td width="55%" class=" font-lg  text-center amarillo">
-                    <h5 class="text-center font-lg font-bold">FECHA: {{ $document->date_of_issue->format('Y-m-d') }}
+                <td width="55%" class=" font-sm  text-center amarillo">
+                    <h5 class="text-center font-sm font-bold">FECHA: {{ $document->date_of_issue->format('Y-m-d') }}
                     </h5>
                     {{-- <h3 class="text-center">{{ $tittle }}</h3> --}}
                 </td>
@@ -79,13 +79,13 @@
         </table>
         <table class="full-width mt-5">
             <tr>
-                <td width="16%" class="amarillo p-2 font-bold">EMPRESA:</td>
-                <td width="45%" class=" p-2">{{ $customer->name }}</td>
-                <td class="amarillo p-2 font-bold">{{ $customer->identity_document_type->description }}:</td>
-                <td class=" p-2">{{ $customer->number }}</td>
+                <td width="16%" class="amarillo p-1 font-bold">EMPRESA:</td>
+                <td width="45%" class=" p-1">{{ $customer->name }}</td>
+                <td class="amarillo p-1 font-bold">{{ $customer->identity_document_type->description }}:</td>
+                <td class=" p-1">{{ $customer->number }}</td>
             </tr>
             <tr>
-                <td class="align-top amarillo p-2 font-bold">VENDEDOR:</td>
+                <td class="align-top amarillo p-1 font-bold">VENDEDOR:</td>
                 <td colspan="">
                     @if ($document->seller->name)
                         {{ $document->seller->name }}
@@ -93,7 +93,7 @@
                         {{ $document->user->name }}
                     @endif
                 </td>
-                <td class="align-center amarillo p-2 font-bold">Condición de Pago:</td>
+                <td class="align-center amarillo p-1 font-bold">Condición de Pago:</td>
                 @if ($document->payment_method_type && isset($document->payment_method_type->description))
                     {{ $document->payment_method_type->description }}
                 @else
@@ -102,42 +102,42 @@
                 </td>
             </tr>
             <tr>
-                <td class="align-top amarillo p-2 font-bold">CONTACTO:</td>
+                <td class="align-top amarillo p-1 font-bold">CONTACTO:</td>
                 <td colspan="">
                     @if ($document->contact)
                         {{ $document->contact }}
                     @endif
                 </td>
-                <td class="align-center amarillo p-2 font-bold">TIEMPO DE VALIDEZ:</td>
+                <td class="align-center amarillo p-1 font-bold">TIEMPO DE VALIDEZ:</td>
                 <td colspan="">{{ $document->date_of_due }}</td>
             </tr>
             <tr>
-                <td class="align-top amarillo p-2 font-bold">TELEFONO:</td>
+                <td class="align-top amarillo p-1 font-bold">TELEFONO:</td>
                 <td colspan="">
                     @if ($document->phone)
                         {{ $document->phone }}
                     @endif
                 </td>
-                <td class="align-center amarillo p-2 font-bold">TIEMPO DE ENTREGA:</td>
+                <td class="align-center amarillo p-1 font-bold">TIEMPO DE ENTREGA:</td>
                 <td colspan="">{{ $document->delivery_date }}</td>
             </tr>
             <tr>
-                <td class="align-top amarillo p-2 font-bold">INFORMACIÓN REF.:</td>
+                <td class="align-top amarillo p-1 font-bold">INFORMACIÓN REF.:</td>
                 <td colspan="3">
                     @if ($document->referential_information)
                         {{ $document->referential_information }}
                     @endif
                 </td>
-                {{-- <td class="align-center amarillo p-2 font-bold"></td>
+                {{-- <td class="align-center amarillo p-1 font-bold"></td>
         <td colspan="">{{ $document->delivery_date }}</td> --}}
             </tr>
             {{--     @if ($customer->address !== '')
     <tr>
-         <td class="align-center amarillo p-2 font-bold">EMAIL:</td>
+         <td class="align-center amarillo p-1 font-bold">EMAIL:</td>
         <td colspan="">{{ $customer->email }}</td>
-            <td width="" class="amarillo p-2 font-bold">TIEMPO DE ENTREGA:</td>
+            <td width="" class="amarillo p-1 font-bold">TIEMPO DE ENTREGA:</td>
             <td width="">{{ $document->delivery_date }}</td>
-        <td class="align-top amarillo p-2 font-bold">VENDEDOR:</td>
+        <td class="align-top amarillo p-1 font-bold">VENDEDOR:</td>
         <td colspan="">
             @if ($document->seller->name)
                 {{ $document->seller->name }}
@@ -149,7 +149,7 @@
     @endif --}}
 
             <tr>
-                {{-- <td class="align-top amarillo p-2 font-bold">TELÉFONO:</td>
+                {{-- <td class="align-top amarillo p-1 font-bold">TELÉFONO:</td>
         <td colspan="">{{ $customer->telephone }}</td> --}}
             </tr>
 
@@ -235,7 +235,10 @@
                         <td class="text-center border-box0">
                             {{-- @foreach ($row->getPrintExtraData() as $row_data) --}}
                             <img src="data:{{ mime_content_type(public_path(parse_url($extra_string['image_url'], PHP_URL_PATH))) }};base64, {{ base64_encode(file_get_contents(public_path(parse_url($extra_string['image_url'], PHP_URL_PATH)))) }}"
-                                alt="{{ $company->name }}" alt="" class="item_logo" style="max-width: 150px;">
+                                alt="{{ $company->name }}" alt="" class="item_logo"
+                                style="max-width: 150px;max-height: 150px; ">
+                            {{-- alt="{{ $company->name }}" alt="" class="item_logo"
+                                style="max-width: 150px;"> --}}
 
                             {{-- @endforeach --}}
                         </td>
@@ -344,6 +347,14 @@
                             @endforeach
                         </tbody>
                     </table>
+        </table>
+        <table class="full-width">
+            <tr>
+                <td class="">
+                    {!! $document->terms_condition !!}
+                </td>
+            </tr>
+            <br><br>
         </table>
 
         {{-- {!!$document->terms_condition!!} --}}

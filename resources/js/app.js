@@ -228,6 +228,10 @@ Vue.component(
     "tenant-documents-note",
     require("./views/tenant/documents/note.vue").default
 );
+Vue.component(
+    "tenant-documents-note-other",
+    require("./views/tenant/documents/note_other.vue").default
+);
 
 // purchase-settlements
 Vue.component(

@@ -199,6 +199,23 @@
                                     v-text="errors.destiny[0]"
                                 ></small>
                             </div>
+                            <div
+                                class="form-group col-12 col-md-4"
+                                :class="{ 'has-danger': errors.observations }"
+                            >
+                                <label for="notes">Observación</label>
+                                <el-input
+                                    v-model="form.observations"
+                                    :rows="3"
+                                    type="textarea"
+                                ></el-input>
+
+                                <small
+                                    class="text-danger"
+                                    v-if="errors.observations"
+                                    v-text="errors.observations[0]"
+                                ></small>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -282,7 +299,7 @@
                             <div
                                 class="col-12 col-md-2 form-group"
                                 :class="{ 'has-danger': errors.duration }"
-                                v-if="rate &&  !form.undefined_out"
+                                v-if="rate && !form.undefined_out"
                             >
                                 <label for="rate">Cant. noches</label>
                                 <el-input-number
@@ -298,8 +315,9 @@
                                     v-text="errors.duration[0]"
                                 ></small>
                             </div>
-                            <div class="col-12 col-md-2 text-center"
-                              v-if="!form.undefined_out"
+                            <div
+                                class="col-12 col-md-2 text-center"
+                                v-if="!form.undefined_out"
                             >
                                 <h6>
                                     Total a pagar:
@@ -355,7 +373,7 @@
                                 ></small>
                             </div>
                             <div
-                              v-if="!form.undefined_out"
+                                v-if="!form.undefined_out"
                                 class="col-6 col-md-3 form-group"
                                 :class="{ 'has-danger': errors.output_date }"
                             >
@@ -389,15 +407,12 @@
                                     v-text="errors.output_time[0]"
                                 ></small>
                             </div>
-                              <div
+                            <div
                                 class="col-6 col-md-3 form-group d-flex align-items-end"
                                 :class="{ 'has-danger': errors.undefined_out }"
                             >
-                            
-                                <el-checkbox
-                                    v-model="form.undefined_out"
-                                >
-                                Salida indefinida
+                                <el-checkbox v-model="form.undefined_out">
+                                    Salida indefinida
                                 </el-checkbox>
                                 <small
                                     class="text-danger"

@@ -53,7 +53,7 @@ class HotelRentController extends Controller
 				$request->merge(['output_date' => $now->addMonth()->format('Y-m-d')]);
 			}
 
-			$rent = HotelRent::create($request->only('undefined_out', 'customer_id', 'customer', 'notes', 'towels', 'hotel_room_id', 'hotel_rate_id', 'duration', 'quantity_persons', 'payment_status', 'output_date', 'output_time', 'input_date', 'input_time', 'destiny'));
+			$rent = HotelRent::create($request->only('undefined_out', 'customer_id', 'customer', 'notes', 'towels', 'hotel_room_id', 'hotel_rate_id', 'duration', 'quantity_persons', 'payment_status', 'output_date', 'output_time', 'input_date', 'input_time', 'destiny','observations'));
 
 			$room->status = 'OCUPADO';
 			$room->save();

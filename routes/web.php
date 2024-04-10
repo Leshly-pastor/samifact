@@ -10,6 +10,7 @@ use App\Http\Controllers\Tenant\SettingController;
 use App\Http\Controllers\Tenant\NameDocumentController;
 use App\Http\Controllers\Tenant\NameQuotationsController;
 use App\Http\Controllers\Tenant\PurchaseResponsibleLicenseController;
+use Illuminate\Support\Facades\Auth;
 use Modules\Dashboard\Http\Controllers\DashboardController;
 
 $hostname = app(Hyn\Tenancy\Contracts\CurrentHostname::class);
@@ -421,6 +422,7 @@ if ($hostname) {
             // Route::get('documents/consult_cdr/{document}', 'Tenant\DocumentController@consultCdr');
             Route::post('documents/email', 'Tenant\DocumentController@email');
             Route::get('documents/note/{document}', 'Tenant\NoteController@create');
+            Route::get('documents/note_other', 'Tenant\NoteController@createOther');
             Route::get('documents/note/record/{document}', 'Tenant\NoteController@record');
             Route::get('documents/item/tables', 'Tenant\DocumentController@item_tables');
             Route::get('documents/table/{table}', 'Tenant\DocumentController@table');

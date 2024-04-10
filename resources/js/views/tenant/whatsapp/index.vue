@@ -16,7 +16,7 @@
 
         </div>
         <div class="card mb-0">
-            <div class="card-header">
+            <!-- <div class="card-header">
                 <h3 class="my-0 font-weight-bold">
                     <span  :class="{
                             'text-danger': state === false,
@@ -25,7 +25,7 @@
                         {{status_whatsapp}}
                     </span>
                 </h3>
-            </div>
+            </div> -->
             <div class="card-body">
                 <div class="row">
                     <div class="col-md-6">

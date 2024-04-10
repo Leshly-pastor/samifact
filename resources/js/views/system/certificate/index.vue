@@ -11,13 +11,13 @@
                 <div class="col-md-6 py-2">
                     <div class="form-group">
                         <label class="control-label">Usuario</label>
-                        <el-input v-model="spe_username"></el-input>
+                        <el-input v-model="pse_username"></el-input>
                     </div>
                 </div>
                 <div class="col-md-6 py-2">
                     <div class="form-group">
                         <label class="control-label">Contraseña</label>
-                        <el-input v-model="spe_password"></el-input>
+                        <el-input v-model="pse_password"></el-input>
                     </div>
                 </div>
                 <div class="col-md-12 py-2">

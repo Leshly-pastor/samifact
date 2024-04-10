@@ -974,6 +974,32 @@
                             </template>
                         </div>
                     </el-tab-pane>
+                            <el-tab-pane class name="five">
+                        <span slot="label">Ruta de inicio</span>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div
+                                    :class="{ 'has-danger': errors.route }"
+                                    class="form-group"
+                                >
+                                    <label class="control-label"
+                                        >Ruta de inicio</label
+                                    >
+                                    <el-select
+                                        v-model="form.init_route"
+                                        filterable
+                                    >
+                                        <el-option
+                                            v-for="option in routes"
+                                            :key="option.id"
+                                            :label="option.description"
+                                            :value="option.route"
+                                        ></el-option>
+                                    </el-select>
+                                </div>
+                            </div>
+                        </div>
+                    </el-tab-pane>
                     <template v-if="isIntegrateSystem">
                         <el-tab-pane
                             name="integrateSystemPane"
@@ -1068,6 +1094,7 @@ export default {
             document_types: [],
             loading: false,
             userTypes: [],
+            routes:[],
         };
     },
     updated() {
@@ -1081,6 +1108,8 @@ export default {
             this.modules = response.data.modules;
             this.establishments = response.data.establishments;
             this.zones = response.data.zones;
+            this.tables = response.data.tables;
+            this.routes = response.data.routes;
             this.types = response.data.types;
             this.documents = response.data.documents;
             this.config_permission_to_edit_cpe =

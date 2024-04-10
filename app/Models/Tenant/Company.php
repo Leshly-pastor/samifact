@@ -77,6 +77,9 @@ class Company extends ModelTenant
     public function getCodDigemid() {
         return $this->cod_digemid;
     }
+    public static function isInterno(){
+        return Company::first()->soap_type_id == '03';
+    }
     public function isSmart(){
         return $this->certificate == 'certificate_smart.pem';
     }

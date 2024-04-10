@@ -166,6 +166,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
+        'init_route',
         'integrate_user_type_id',
         'auditor',
         'name',

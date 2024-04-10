@@ -19,7 +19,8 @@ class InternalModeTenant
         $configuration = Company::first();
 
         if($configuration->soap_type_id == '03'){
-            abort(403);
+            // abort(403);
+            return redirect('/sale-notes/create');
         }
 
         return $next($request);

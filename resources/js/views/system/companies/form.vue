@@ -93,7 +93,8 @@
                 soap_types: [],
                 toggle: false, //Creando el objeto a retornar con v-model
                 soap_sends: [ { value: '01', text: 'Sunat' }, { value: '02', text: 'Ose' }],
-                soap_types: [{id: "01", description: "Demo"}, {id: "02", description: "Producción"}],
+                soap_types: [{id: "01", description: "Demo"}, {id: "02", description: "Producción"},
+                {id: "03", description: "Interno"}],
             }
         },
         async created() {

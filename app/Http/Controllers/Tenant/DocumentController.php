@@ -329,7 +329,7 @@ class DocumentController extends Controller
     }
     public function index(Request $request)
     {
-
+        $is_optometry = BusinessTurn::isOptometry();
         $is_comercial  = auth()->user()->integrate_user_type_id == 2;
         $to_anulate = $request->input('to_anulate') ?? false;
         $is_client = $this->getIsClient();
@@ -347,6 +347,7 @@ class DocumentController extends Controller
         return view(
             'tenant.documents.index',
             compact(
+                'is_optometry',
                 'is_comercial',
                 'document_state_types',
                 'is_auditor',

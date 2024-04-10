@@ -2071,9 +2071,9 @@
                                     ></small>
                                 </div>
                             </div>
-                                <div class="col-md-6 mt-4">
+                            <div class="col-md-6 mt-4">
                                 <label class="control-label">
-                                    Precio de comprar - documentos
+                                    Precio de compra - documentos
                                     <el-tooltip
                                         class="item"
                                         content="Mostrar una columna con el precio de compra del producto en el detalle del documento"
@@ -2106,8 +2106,36 @@
                                     ></small>
                                 </div>
                             </div>
+    <div class="col-md-6 mt-4">
+                                <label class="control-label">
+                                    Modificar precio de compra - documentos
+                                    
+                                </label>
 
-                                <div class="col-md-6 mt-4">
+                                <div
+                                    :class="{
+                                        'has-danger':
+                                            errors.modify_purchase_unit_price,
+                                    }"
+                                    class="form-group"
+                                >
+                                    <el-switch
+                                        :disabled="!form.show_purchase_unit_price"
+                                        v-model="form.modify_purchase_unit_price"
+                                        active-text="Si"
+                                        inactive-text="No"
+                                        @change="submit"
+                                    ></el-switch>
+                                    <small
+                                        v-if="errors.modify_purchase_unit_price"
+                                        class="text-danger"
+                                        v-text="
+                                            errors.modify_purchase_unit_price[0]
+                                        "
+                                    ></small>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mt-4">
                                 <label class="control-label">
                                     Descuento item - documentos
                                     <el-tooltip
@@ -2136,14 +2164,12 @@
                                     <small
                                         v-if="errors.show_item_discounts"
                                         class="text-danger"
-                                        v-text="
-                                            errors.show_item_discounts[0]
-                                        "
+                                        v-text="errors.show_item_discounts[0]"
                                     ></small>
                                 </div>
                             </div>
 
-                                    <div class="col-md-6 mt-4">
+                            <div class="col-md-6 mt-4">
                                 <label class="control-label">
                                     Stock item - documentos
                                     <el-tooltip
@@ -2158,8 +2184,7 @@
 
                                 <div
                                     :class="{
-                                        'has-danger':
-                                            errors.show_item_stock,
+                                        'has-danger': errors.show_item_stock,
                                     }"
                                     class="form-group"
                                 >
@@ -2172,9 +2197,33 @@
                                     <small
                                         v-if="errors.show_item_stock"
                                         class="text-danger"
-                                        v-text="
-                                            errors.show_item_stock[0]
-                                        "
+                                        v-text="errors.show_item_stock[0]"
+                                    ></small>
+                                </div>
+                            </div>
+                                    <div class="col-md-6 mt-4">
+                                <label class="control-label">
+                                    Modificar stock item - documentos
+                                
+                                </label>
+
+                                <div
+                                    :class="{
+                                        'has-danger': errors.modify_item_stock,
+                                    }"
+                                    class="form-group"
+                                >
+                                    <el-switch
+                                        :disabled="!form.show_item_stock"
+                                        v-model="form.modify_item_stock"
+                                        active-text="Si"
+                                        inactive-text="No"
+                                        @change="submit"
+                                    ></el-switch>
+                                    <small
+                                        v-if="errors.modify_item_stock"
+                                        class="text-danger"
+                                        v-text="errors.modify_item_stock[0]"
                                     ></small>
                                 </div>
                             </div>
@@ -3193,7 +3242,7 @@
                                     ></small>
                                 </div>
                             </div>
-                                    <div class="col-md-6 mt-4">
+                            <div class="col-md-6 mt-4">
                                 <label class="control-label"
                                     >Presentación en pdf
                                     <el-tooltip
@@ -3202,8 +3251,7 @@
                                         placement="top-start"
                                     >
                                         <div slot="content">
-                                            Muestra la presentación en el
-                                            pdf
+                                            Muestra la presentación en el pdf
                                         </div>
                                         <i class="fa fa-info-circle"></i>
                                     </el-tooltip>
