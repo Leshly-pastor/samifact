@@ -376,7 +376,7 @@ class Quotation extends ModelTenant
         if($user->type === 'seller') {
             $btn_options = $btn_options && ($configuration->quotation_allow_seller_generate_sale);
         } else {
-            $btn_options = $btn_options && ($user->type === 'admin');
+            $btn_options = $btn_options && ($user->type === 'admin'|| $user->type === 'superadmin');
         }
         $items = new Collection();
 

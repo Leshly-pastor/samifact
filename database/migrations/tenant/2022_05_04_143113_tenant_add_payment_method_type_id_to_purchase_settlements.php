@@ -14,8 +14,10 @@ class TenantAddPaymentMethodTypeIdToPurchaseSettlements extends Migration
     public function up()
     {
         Schema::table('purchase_settlements', function (Blueprint $table) {
-            $table->char('payment_method_type_id', 2)->nullable()->after('currency_type_id');
-            $table->foreign('payment_method_type_id')->references('id')->on('payment_method_types');
+            if (!Schema::hasColumn('purchase_settlements', 'payment_method_type_id')) {
+                $table->char('payment_method_type_id', 2)->nullable()->after('currency_type_id');
+                $table->foreign('payment_method_type_id')->references('id')->on('payment_method_types');
+            }
         });
     }
 
@@ -27,8 +29,10 @@ class TenantAddPaymentMethodTypeIdToPurchaseSettlements extends Migration
     public function down()
     {
         Schema::table('purchase_settlements', function (Blueprint $table) {
-            $table->dropForeign(['payment_method_type_id']);
-            $table->dropColumn('payment_method_type_id');  
+            if (Schema::hasColumn('purchase_settlements', 'payment_method_type_id')) {
+                $table->dropForeign(['payment_method_type_id']);
+                $table->dropColumn('payment_method_type_id');
+            }
         });
     }
 }

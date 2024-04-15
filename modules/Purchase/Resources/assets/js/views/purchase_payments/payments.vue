@@ -12,6 +12,7 @@
                                 <th>Método de pago</th>
                                 <th>Destino</th>
                                 <th>Referencia</th>
+                                <th>Glosa</th>
                                 <th>Archivo</th>
                                 <th class="text-end">Monto</th>
                                 <th></th>
@@ -25,6 +26,7 @@
                                     <td>{{ row.payment_method_type_description }}</td>
                                     <td>{{ row.destination_description }}</td>
                                     <td>{{ row.reference }}</td>
+                                    <td>{{ row.glosa }}</td>
                                     <td class="text-center">
                                         <button  type="button" v-if="row.filename" class="btn waves-effect waves-light btn-sm btn-primary" @click.prevent="clickDownloadFile(row.filename)">
                                             <i class="fas fa-file-download"></i>
@@ -68,6 +70,12 @@
                                         <div class="form-group mb-0" :class="{'has-danger': row.errors.reference}">
                                             <el-input v-model="row.reference"></el-input>
                                             <small class="text-danger" v-if="row.errors.reference" v-text="row.errors.reference[0]"></small>
+                                        </div>
+                                    </td>
+                                        <td>
+                                        <div class="form-group mb-0" :class="{'has-danger': row.errors.glosa}">
+                                            <el-input v-model="row.glosa"></el-input>
+                                            <small class="text-danger" v-if="row.errors.glosa" v-text="row.errors.glosa[0]"></small>
                                         </div>
                                     </td>
                                     <td>
@@ -226,6 +234,7 @@
                     payment_method_type_id: null,
                     payment_destination_id:null,
                     reference: null,
+                    glosa:null,
                     filename: null,
                     temp_path: null,
                     payment: 0,
@@ -253,6 +262,7 @@
                     payment_method_type_id: this.records[index].payment_method_type_id,
                     payment_destination_id: this.records[index].payment_destination_id,
                     reference: this.records[index].reference,
+                    glosa: this.records[index].glosa,
                     filename: this.records[index].filename,
                     temp_path: this.records[index].temp_path,
                     payment: this.records[index].payment,

@@ -41,6 +41,7 @@
                                         <template v-if="row.payment_received === null">
 
                                             <span class="d-block" v-if="row.reference"><b>Referencia:</b> {{ row.reference }}</span>
+                                            <span class="d-block" v-if="row.glosa"><b>Glosa:</b> {{ row.glosa }}</span>
                                             <button  type="button" v-if="row.filename" class="btn waves-effect waves-light btn-sm btn-primary mb-2  mt-2" @click.prevent="clickDownloadFile(row.filename)">
                                                 <i class="fas fa-fw fa-file-download"></i>
                                                 Descargar voucher
@@ -56,6 +57,9 @@
                                             <template v-if="row.payment_received">
 
                                                 <span class="d-block" v-if="row.reference"><b>Referencia:</b> {{ row.reference }}</span>
+                                                <div>
+                                                    <span class="d-block" v-if="row.glosa"><b>Glosa:</b> {{ row.glosa }}</span>
+                                                </div>
                                                 <button  type="button" v-if="row.filename" class="btn btn-sm btn-primary mb-2  mt-2" @click.prevent="clickDownloadFile(row.filename)">
                                                     <i class="fas fa-fw fa-file-download"></i>
                                                     Descargar voucher
@@ -187,7 +191,12 @@
                                                 <el-input v-model="row.reference" placeholder="Referencia y/o N° Operación" :disabled="row.payment_received == '0'"></el-input>
                                                 <small class="text-danger" v-if="row.errors.reference" v-text="row.errors.reference[0]"></small>
                                             </div>
+                                            <div class="form-group mb-0" :class="{'has-danger': row.errors.glosa}">
+                                                <el-input v-model="row.glosa" placeholder="Glosa" :disabled="row.payment_received == '0'"></el-input>
+                                                <small class="text-danger" v-if="row.errors.glosa" v-text="row.errors.glosa[0]"></small>
+                                            </div>
                                         </div>
+                                        
                                     </td>
                                     <td class="series-table-actions text-end px-0">
                                         <button type="button" class="btn waves-effect waves-light btn-sm btn-info" @click.prevent="clickSubmit(index)">
@@ -398,6 +407,7 @@
                     reference: null,
                     filename: null,
                     temp_path: null,
+                    glosa: null,
                     payment: parseFloat(this.document.total_difference),
                     // payment: 0,                    
                     errors: {},
@@ -427,6 +437,7 @@
                     reference: this.records[index].reference,
                     filename: this.records[index].filename,
                     temp_path: this.records[index].temp_path,
+                    glosa: this.records[index].glosa,
                     payment: this.records[index].payment,
                     payment_received: this.records[index].payment_received,
                 };

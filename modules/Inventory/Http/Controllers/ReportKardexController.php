@@ -449,7 +449,7 @@ class ReportKardexController extends Controller
     {
         $warehouses = [];
         $user = User::query()->find(auth()->id());
-        if ($user->type === 'admin') {
+        if ($user->type === 'admin'|| $user->type === 'superadmin') {
             $warehouses[] = [
                 'id' => 'all',
                 'name' => 'Todos'

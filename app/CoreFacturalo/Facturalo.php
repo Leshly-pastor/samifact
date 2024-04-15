@@ -1538,6 +1538,7 @@ class Facturalo
                     "date_of_payment" => $row['date_of_payment'],
                     "payment_method_type_id" => $row['payment_method_type_id'],
                     "reference" => $row['reference'],
+                    "glosa" => isset($row['glosa']) ? $row['glosa'] : null,
                     "payment_destination_id" => isset($row['payment_destination_id']) ? $row['payment_destination_id'] : null,
                     "change" => $change,
                     "payment" => $payment,
@@ -1603,6 +1604,7 @@ class Facturalo
                     "date_of_payment" => $row['date_of_payment'],
                     "payment_method_type_id" => $row['payment_method_type_id'],
                     "reference" => $row['reference'],
+                    "glosa" => isset($row['glosa']) ? $row['glosa'] : null,
                     "payment_destination_id" => isset($row['payment_destination_id']) ? $row['payment_destination_id'] : null,
                     "change" => $change,
                     "payment" => $payment,
@@ -1617,7 +1619,6 @@ class Facturalo
                 $row['payment'] = $row['payment'] - abs($balance);
                 $this->apply_change = true;
             }
-
             $record = $document->payments()->create($row);
 
             // para carga de voucher

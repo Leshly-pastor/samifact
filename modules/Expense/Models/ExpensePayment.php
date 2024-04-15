@@ -57,6 +57,7 @@
         ];
 
         protected $fillable = [
+            'glosa',
             'expense_id',
             'date_of_payment',
             'expense_method_type_id',

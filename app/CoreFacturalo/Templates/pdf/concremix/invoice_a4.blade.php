@@ -367,10 +367,10 @@ if ($logo) {
         @endphp
         @if ($document_description)
             <td class="text-center desc">Representación impresa de la {{ $document_description }} <br />Esta puede
-                ser consultada en {!! url('/buscar') !!}</td>
+                ser consultada en <a href="{!! route('search.index', ['external_id' => $document->external_id]) !!}" style="text-decoration: none; font-weight: bold;color:black;">{!! url('/buscar') !!}</a></td>
         @else
             <td class="text-center desc">Representación impresa del Comprobante de Pago Electrónico. <br />Esta
-                puede ser consultada en {!! url('/buscar') !!}</td>
+                puede ser consultada en <a href="{!! route('search.index', ['external_id' => $document->external_id]) !!}" style="text-decoration: none; font-weight: bold;color:black;">{!! url('/buscar') !!}</a></td>
         @endif
     </tr>
 </table>

@@ -233,6 +233,9 @@
                                     <th v-if="form.payments.length > 0">
                                         Referencia
                                     </th>
+                                            <th v-if="form.payments.length > 0">
+                                        Glosa
+                                    </th>
                                     <th v-if="form.payments.length > 0">
                                         Monto
                                     </th>
@@ -296,6 +299,13 @@
                                         <div class="form-group mb-2 mr-2">
                                             <el-input
                                                 v-model="row.reference"
+                                            ></el-input>
+                                        </div>
+                                    </td>
+                                            <td>
+                                        <div class="form-group mb-2 mr-2">
+                                            <el-input
+                                                v-model="row.glosa"
                                             ></el-input>
                                         </div>
                                     </td>

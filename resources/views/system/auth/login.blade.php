@@ -29,7 +29,7 @@ $configuration = Configuration::first();
                         <div class="sh-11">
                           <a href="javascript:void(0)">
                             <?php
-                            $logo = $configuration->logo !=null ? "storage/uploads/logos/{$configuration->logo}" : "logo/logo-blue-light.svg" 
+                            $logo = $configuration->logo !=null ? "storage/uploads/logos/{$configuration->logo}" : "logo/logo-blue-light.png" 
                             ?>
                              <img src="{{$logo}}" height="70px">
                         </a>

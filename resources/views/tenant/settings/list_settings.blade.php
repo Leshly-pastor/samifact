@@ -272,7 +272,7 @@
                                         Inventarios</a>
                                 </li>
                             @endif
-                            @if ($user->type === 'admin')
+                            @if ($user->type === 'admin' || $user->type === 'superadmin' )
                                 <li>
                                     <a href="{{ route('tenant.sale_notes.configuration') }}">
                                         <i data-cs-icon="note" class="icon" data-cs-size="18"></i>

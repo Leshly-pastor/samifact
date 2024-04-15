@@ -2227,6 +2227,32 @@
                                     ></small>
                                 </div>
                             </div>
+                                        <div class="col-md-6 mt-4">
+                                <label class="control-label">
+                                    Mostrar historial de productos - vendedores
+                                
+                                </label>
+
+                                <div
+                                    :class="{
+                                        'has-danger': errors.sellers_see_history,
+                                    }"
+                                    class="form-group"
+                                >
+                                    <el-switch
+                                        
+                                        v-model="form.sellers_see_history"
+                                        active-text="Si"
+                                        inactive-text="No"
+                                        @change="submit"
+                                    ></el-switch>
+                                    <small
+                                        v-if="errors.sellers_see_history"
+                                        class="text-danger"
+                                        v-text="errors.sellers_see_history[0]"
+                                    ></small>
+                                </div>
+                            </div>
                         </div>
                     </el-tab-pane>
 

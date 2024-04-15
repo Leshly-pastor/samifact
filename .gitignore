@@ -5,6 +5,7 @@
 /public/uploads
 public/cookie.txt
 /public/logo/
+!/public/logo/logo-blue-light.*
 /public/images/*
 !/public/images/fondos/
 /public/storage

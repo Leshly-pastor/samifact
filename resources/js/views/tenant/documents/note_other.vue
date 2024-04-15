@@ -21,6 +21,7 @@
                                 >Tipo documento afectado</label
                             >
                             <el-select
+                                @change="changeDocumentAffected"
                                 v-model="
                                     data_affected_document.document_type_id
                                 "
@@ -850,6 +851,21 @@ export default {
         },
     },
     methods: {
+         changeDocumentAffected(){
+            let { document_type_id } = this.data_affected_document;
+            let char = document_type_id === "01" ? "F" : "B";
+        
+            this.series = this.all_series.filter(s => {
+                return (
+                    s.document_type_id === this.form.document_type_id &&
+                    s.number.charAt(0) === char
+                );
+            });
+            let [serie] = this.series;
+            if (serie) {
+                this.form.series_id = serie.id;
+            }
+        },
         async changeCustomer() {
             this.person_type_id = null;
             this.customer_addresses = [];

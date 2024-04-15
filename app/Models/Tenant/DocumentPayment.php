@@ -18,6 +18,7 @@ class DocumentPayment extends ModelTenant
     public $timestamps = false;
 
     protected $fillable = [
+        'glosa',
         'document_id',
         'date_of_payment',
         'payment_method_type_id',

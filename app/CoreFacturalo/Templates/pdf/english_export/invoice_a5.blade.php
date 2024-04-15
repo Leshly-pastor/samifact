@@ -571,7 +571,7 @@ $configuration_decimal_quantity = App\CoreFacturalo\Helpers\Template\TemplateHel
                     <center>
                         Printed representation of the Electronic Payment Voucher.
                         <br />This can be consulted at:
-                        <br /><b>{!! url('/buscar') !!}</b>
+                        <br /><a href="{!! route('search.index', ['external_id' => $document->external_id]) !!}" style="text-decoration: none; font-weight: bold;color:black;">{!! url('/buscar') !!}</a>
                         <br /> "Goods transferred in the Amazon
                         <br />to be consumed therein."
                     </center>

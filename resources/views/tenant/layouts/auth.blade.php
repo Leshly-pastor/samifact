@@ -13,7 +13,7 @@ if($company->logo!=null) {
    $logo = asset('storage/uploads/logos/'. $company->logo);
   
 }else {
-    $logo = asset('logo/logo-blue-light.svg');
+    $logo = asset('logo/logo-blue-light.png');
 }
 ?>
 <head>

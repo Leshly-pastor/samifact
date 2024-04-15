@@ -2083,6 +2083,7 @@ class SaleNoteController extends Controller
                     "date_of_payment" => $row['date_of_payment'],
                     "payment_method_type_id" => $row['payment_method_type_id'],
                     "reference" => $row['reference'],
+                    "glosa" => isset($row['glosa']) ? $row['glosa'] : null,
                     "payment_destination_id" => isset($row['payment_destination_id']) ? $row['payment_destination_id'] : null,
                     "payment_filename" => isset($row['payment_filename']) ? $row['payment_filename'] : null,
                     "change" => $change,

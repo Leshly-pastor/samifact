@@ -11,7 +11,7 @@
                             <div
                                 class="form-group"
                                 :class="{
-                                    'has-danger': errors.document_type_id
+                                    'has-danger': errors.document_type_id,
                                 }"
                             >
                                 <label class="control-label"
@@ -174,7 +174,7 @@
                             <div
                                 class="form-group"
                                 :class="{
-                                    'has-danger': errors.currency_type_id
+                                    'has-danger': errors.currency_type_id,
                                 }"
                             >
                                 <label class="control-label">Moneda</label>
@@ -200,7 +200,7 @@
                             <div
                                 class="form-group"
                                 :class="{
-                                    'has-danger': errors.exchange_rate_sale
+                                    'has-danger': errors.exchange_rate_sale,
                                 }"
                             >
                                 <label class="control-label"
@@ -224,93 +224,96 @@
                                 ></small>
                             </div>
                         </div>
-                          <div
-                        v-if="form.purchase_period"
-                        class="col-sm-12 col-md-6 col-lg-4"
+                        <div
+                            v-if="form.purchase_period"
+                            class="col-sm-12 col-md-6 col-lg-4"
                         >
-                        <label>Periodo de compra (SUNAT)</label>
-                        <el-date-picker
-                        clearable
-                        v-model="form.sunat_date"
-                        value-format="yyyy-MM-dd"
-                         type="month"
-                        >
-                        </el-date-picker>
-
+                            <label>Periodo de compra (SUNAT)</label>
+                            <el-date-picker
+                                clearable
+                                v-model="form.sunat_date"
+                                value-format="yyyy-MM-dd"
+                                type="month"
+                            >
+                            </el-date-picker>
                         </div>
                         <template v-if="configuration.purchases_control">
                             <div
-                            class="form-group col-sm-12 col-md-6 col-lg-4"
-                            :class="{ 'has-danger': errors.purchase_license }"
-                        >
-                            <label>
-                                Placa
-
-                                <a
-                                    href="#"
-                                    @click.prevent="showPurchaseLicenseModal"
-                                >
-                                    [+ Nuevo]
-                                </a>
-                            </label>
-
-                            <el-select
-                                v-model="form.license_id"
-                                filterable
-                                remote
-                                popper-class="el-select-customers"
-                                clearable
-                                placeholder="Buscar producto"
-                                :remote-method="searchRemoteLicense"
-                                :loading="loading_search"
+                                class="form-group col-sm-12 col-md-6 col-lg-4"
+                                :class="{
+                                    'has-danger': errors.purchase_license,
+                                }"
                             >
-                                <el-option
-                                    v-for="option in licenses"
-                                    :key="option.id"
-                                    :value="option.id"
-                                    :label="option.license"
-                                ></el-option>
-                            </el-select>
-                        </div>
-                        <div
-                            class="form-group col-sm-12 col-md-6 col-lg-4"
-                            :class="{
-                                'has-danger': errors.purchase_responsible,
-                            }"
-                        >
-                            <label>
-                                Responsable
+                                <label>
+                                    Placa
 
-                                <a
-                                    href="#"
-                                    @click.prevent="
-                                        showPurchaseResponsibleModal
-                                    "
+                                    <a
+                                        href="#"
+                                        @click.prevent="
+                                            showPurchaseLicenseModal
+                                        "
+                                    >
+                                        [+ Nuevo]
+                                    </a>
+                                </label>
+
+                                <el-select
+                                    v-model="form.license_id"
+                                    filterable
+                                    remote
+                                    popper-class="el-select-customers"
+                                    clearable
+                                    placeholder="Buscar producto"
+                                    :remote-method="searchRemoteLicense"
+                                    :loading="loading_search"
                                 >
-                                    [+ Nuevo]
-                                </a>
-                            </label>
-                          <el-select
-                                v-model="form.responsible_id"
-                                filterable
-                                remote
-                                popper-class="el-select-customers"
-                                clearable
-                                placeholder="Buscar producto"
-                                :remote-method="searchRemoteResponsible"
-                                :loading="loading_search"
+                                    <el-option
+                                        v-for="option in licenses"
+                                        :key="option.id"
+                                        :value="option.id"
+                                        :label="option.license"
+                                    ></el-option>
+                                </el-select>
+                            </div>
+                            <div
+                                class="form-group col-sm-12 col-md-6 col-lg-4"
+                                :class="{
+                                    'has-danger': errors.purchase_responsible,
+                                }"
                             >
-                                <el-option
-                                    v-for="option in responsibles"
-                                    :key="option.id"
-                                    :value="option.id"
-                                    :label="`${option.number}-${option.name}`"
-                                ></el-option>
-                            </el-select>
-                        </div>
+                                <label>
+                                    Responsable
+
+                                    <a
+                                        href="#"
+                                        @click.prevent="
+                                            showPurchaseResponsibleModal
+                                        "
+                                    >
+                                        [+ Nuevo]
+                                    </a>
+                                </label>
+                                <el-select
+                                    v-model="form.responsible_id"
+                                    filterable
+                                    remote
+                                    popper-class="el-select-customers"
+                                    clearable
+                                    placeholder="Buscar producto"
+                                    :remote-method="searchRemoteResponsible"
+                                    :loading="loading_search"
+                                >
+                                    <el-option
+                                        v-for="option in responsibles"
+                                        :key="option.id"
+                                        :value="option.id"
+                                        :label="`${option.number}-${option.name}`"
+                                    ></el-option>
+                                </el-select>
+                            </div>
                         </template>
-            
-                          <div class="col-md-3">
+
+                        <div class="col-md-3">
                             <div class="form-group">
                                 <label for="const_detraccion">
                                     Const. Detracción
@@ -347,10 +350,8 @@
                                 ></el-input>
                             </div>
                         </div>
-                                    <div      class="col-sm-12 col-md-6 col-lg-8">
-
-                        </div>
-     <div class="col-md-3 mt-4">
+                        <div class="col-sm-12 col-md-6 col-lg-8"></div>
+                        <div class="col-md-3 mt-4">
                             <div class="form-group">
                                 <el-checkbox
                                     v-model="form.purchase_period"
@@ -396,7 +397,7 @@
                                     v-model="localHasGlobalIgv"
                                     :disabled="
                                         form.items.length != 0 &&
-                                            configuration.enabled_global_igv_to_purchase
+                                        configuration.enabled_global_igv_to_purchase
                                     "
                                     @change="changeHasGlobalIgv"
                                     >¿La compra tiene igv?
@@ -414,9 +415,7 @@
 
                         <div class="col-lg-6 col-md-6" v-if="form.has_client">
                             <div class="form-group">
-                                <label class="control-label">
-                                    Clientes
-                                </label>
+                                <label class="control-label"> Clientes </label>
 
                                 <el-select
                                     v-model="form.customer_id"
@@ -445,7 +444,7 @@
                                 <div
                                     :class="{
                                         'has-danger':
-                                            errors.payment_condition_id
+                                            errors.payment_condition_id,
                                     }"
                                     class="form-group"
                                 >
@@ -457,8 +456,9 @@
                                         @change="changePaymentCondition"
                                     >
                                         <el-option
-                                            v-for="(option,
-                                            idx) in payment_conditions"
+                                            v-for="(
+                                                option, idx
+                                            ) in payment_conditions"
                                             :key="idx"
                                             :label="option.name"
                                             :value="option.id"
@@ -520,6 +520,14 @@
                                                     "
                                                     class="pb-2"
                                                 >
+                                                    Glosa
+                                                </th>
+                                                <th
+                                                    v-if="
+                                                        form.payments.length > 0
+                                                    "
+                                                    class="pb-2"
+                                                >
                                                     Monto
                                                 </th>
                                                 <th width="15%">
@@ -536,8 +544,9 @@
                                         </thead>
                                         <tbody>
                                             <tr
-                                                v-for="(row,
-                                                index) in form.payments"
+                                                v-for="(
+                                                    row, index
+                                                ) in form.payments"
                                                 :key="index"
                                             >
                                                 <td>
@@ -555,8 +564,9 @@
                                                             "
                                                         >
                                                             <el-option
-                                                                v-for="(option,
-                                                                idx) in cashPaymentMethod"
+                                                                v-for="(
+                                                                    option, idx
+                                                                ) in cashPaymentMethod"
                                                                 :key="idx"
                                                                 :label="
                                                                     option.description
@@ -579,8 +589,9 @@
                                                             filterable
                                                         >
                                                             <el-option
-                                                                v-for="(option,
-                                                                idx) in payment_destinations"
+                                                                v-for="(
+                                                                    option, idx
+                                                                ) in payment_destinations"
                                                                 :key="idx"
                                                                 :label="
                                                                     option.description
@@ -600,6 +611,15 @@
                                                             v-model="
                                                                 row.reference
                                                             "
+                                                        ></el-input>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div
+                                                        class="form-group mb-2 mr-2"
+                                                    >
+                                                        <el-input
+                                                            v-model="row.glosa"
                                                         ></el-input>
                                                     </div>
                                                 </td>
@@ -672,8 +692,9 @@
                                                         "
                                                     >
                                                         <el-option
-                                                            v-for="(option,
-                                                            idx) in creditPaymentMethod"
+                                                            v-for="(
+                                                                option, idx
+                                                            ) in creditPaymentMethod"
                                                             :key="idx"
                                                             :label="
                                                                 option.description
@@ -765,7 +786,9 @@
                                                                 class="fa fa-plus font-weight-bold text-info"
                                                             ></i>
                                                             <span
-                                                                style="color: #777777"
+                                                                style="
+                                                                    color: #777777;
+                                                                "
                                                                 >Agregar
                                                                 cuota</span
                                                             ></a
@@ -961,7 +984,7 @@
                                             class="form-group"
                                             :class="{
                                                 'has-danger':
-                                                    errors.perception_number
+                                                    errors.perception_number,
                                             }"
                                         >
                                             <el-input
@@ -990,7 +1013,7 @@
                                             class="form-group"
                                             :class="{
                                                 'has-danger':
-                                                    errors.perception_date
+                                                    errors.perception_date,
                                             }"
                                         >
                                             <el-date-picker
@@ -1022,7 +1045,7 @@
                                             class="form-group"
                                             :class="{
                                                 'has-danger':
-                                                    errors.total_perception
+                                                    errors.total_perception,
                                             }"
                                         >
                                             <el-input
@@ -1089,14 +1112,15 @@
             :recordId="purchaseNewId"
             :showClose="false"
         ></purchase-options>
-           <responsible-modal
+        <responsible-modal
             :external="true"
             :showDialog.sync="showResponsibleDialog"
         ></responsible-modal>
-        <license-modal 
-        @reloadDataLicense="reloadDataLicense"
-        :external="true"
-        :showDialog.sync="showLicenseDialog"></license-modal>
+        <license-modal
+            @reloadDataLicense="reloadDataLicense"
+            :external="true"
+            :showDialog.sync="showLicenseDialog"
+        ></license-modal>
     </div>
 </template>
 
@@ -1107,11 +1131,11 @@ import PurchaseOptions from "./partials/options.vue";
 import {
     functions,
     exchangeRate,
-    fnPaymentsFee
+    fnPaymentsFee,
 } from "../../../mixins/functions";
 import {
     calculateRowItem,
-    showNamePdfOfDescription
+    showNamePdfOfDescription,
 } from "../../../helpers/functions";
 import ResponsibleModal from "./partials/responsible_modal.vue";
 import LicenseModal from "./partials/license_modal.vue";
@@ -1119,18 +1143,23 @@ export default {
     props: {
         resourceId: {
             required: true,
-            default: 0
-        }
+            default: 0,
+        },
     },
-    components: {       ResponsibleModal,
-        LicenseModal,PurchaseFormItem, PersonForm, PurchaseOptions },
+    components: {
+        ResponsibleModal,
+        LicenseModal,
+        PurchaseFormItem,
+        PersonForm,
+        PurchaseOptions,
+    },
     mixins: [functions, exchangeRate, fnPaymentsFee],
     data() {
         return {
-                   input_person: {},
+            input_person: {},
             showLicenseDialog: false,
             showResponsibleDialog: false,
-                   licenses: [],
+            licenses: [],
             responsibles: [],
             currentItem: null,
             input_person: {},
@@ -1169,14 +1198,14 @@ export default {
             purchaseNewId: null,
             localHasGlobalIgv: false,
             warehouses: [],
-            currentIndex: null
+            currentIndex: null,
         };
     },
     async created() {
         await this.initForm();
-        await this.$http.get(`/${this.resource}/tables`).then(response => {
-                   this.responsibles = response.data.responsibles;
-                this.licenses = response.data.licenses;
+        await this.$http.get(`/${this.resource}/tables`).then((response) => {
+            this.responsibles = response.data.responsibles;
+            this.licenses = response.data.licenses;
             this.document_types = response.data.document_types_invoice;
             this.currency_types = response.data.currency_types;
             this.establishment = response.data.establishment;
@@ -1209,7 +1238,7 @@ export default {
             this.initRecord();
         });
 
-        this.$eventHub.$on("reloadDataPersons", supplier_id => {
+        this.$eventHub.$on("reloadDataPersons", (supplier_id) => {
             this.reloadDataSuppliers(supplier_id);
         });
 
@@ -1223,23 +1252,23 @@ export default {
         this.initGlobalIgv();
     },
     computed: {
-        creditPaymentMethod: function() {
+        creditPaymentMethod: function () {
             return _.filter(this.payment_method_types, { is_credit: true });
         },
-        cashPaymentMethod: function() {
+        cashPaymentMethod: function () {
             return _.filter(this.payment_method_types, { is_credit: false });
         },
-        isCreditPaymentCondition: function() {
+        isCreditPaymentCondition: function () {
             return ["02", "03"].includes(this.form.payment_condition_id);
-        }
+        },
     },
     methods: {
-         reloadDataLicense(license){
-            let {id} = license;
+        reloadDataLicense(license) {
+            let { id } = license;
             this.licenses.push(license);
             this.form.license_id = id;
         },
-          reloadDataResponsible(responsible_id) {
+        reloadDataResponsible(responsible_id) {
             this.$http
                 .get(`/purchases-responsible/record/${responsible_id}`)
                 .then((response) => {
@@ -1252,21 +1281,21 @@ export default {
                 const response = await this.$http.get(
                     `/purchases-license/records?value=${input}&column=license`
                 );
-                if(response.status == 200){
+                if (response.status == 200) {
                     this.licenses = response.data.data;
                 }
             }
         },
-       async searchRemoteResponsible(input) {
-          if (input.length >= 2) {
+        async searchRemoteResponsible(input) {
+            if (input.length >= 2) {
                 const response = await this.$http.get(
                     `/purchases-responsible/records?value=${input}`
                 );
-                if(response.status == 200){
+                if (response.status == 200) {
                     this.responsibles = response.data.data;
                 }
             }
-       },
+        },
         showPurchaseResponsibleModal() {
             this.showResponsibleDialog = true;
         },
@@ -1274,7 +1303,7 @@ export default {
             this.showLicenseDialog = true;
         },
         changeIgvPurchase() {
-            this.form.items = this.form.items.map(i =>
+            this.form.items = this.form.items.map((i) =>
                 this.changePercentageIgv(i)
             );
             this.calculateTotal();
@@ -1357,7 +1386,7 @@ export default {
 
                 this.$http
                     .get(`/reports/data-table/persons/customers?${parameters}`)
-                    .then(response => {
+                    .then((response) => {
                         this.customers = response.data.persons;
                         this.loading_search = false;
 
@@ -1381,13 +1410,13 @@ export default {
             let acum_total = 0;
             let q_affectation_free = 0;
 
-            await this.form.payments.forEach(item => {
+            await this.form.payments.forEach((item) => {
                 acum_total += parseFloat(item.payment);
                 if (item.payment <= 0 || item.payment == null) error_by_item++;
             });
 
             //determinate affectation igv
-            await this.form.items.forEach(item => {
+            await this.form.items.forEach((item) => {
                 if (item.affectation_igv_type.free) {
                     q_affectation_free++;
                 }
@@ -1403,14 +1432,14 @@ export default {
                 return {
                     success: false,
                     message:
-                        "Los montos ingresados superan al monto a pagar o son incorrectos"
+                        "Los montos ingresados superan al monto a pagar o son incorrectos",
                 };
             }
 
             if (this.form.has_client && !this.form.customer_id) {
                 return {
                     success: false,
-                    message: "Debe seleccionar un cliente"
+                    message: "Debe seleccionar un cliente",
                 };
             }
 
@@ -1421,7 +1450,7 @@ export default {
                 ) {
                     return {
                         success: false,
-                        message: "Debe registrar al menos un pago"
+                        message: "Debe registrar al menos un pago",
                     };
                 }
 
@@ -1431,14 +1460,14 @@ export default {
                 ) {
                     return {
                         success: false,
-                        message: "Debe registrar al menos una cuota"
+                        message: "Debe registrar al menos una cuota",
                     };
                 }
             }
 
             return {
                 success: true,
-                message: null
+                message: null,
             };
         },
         clickCancel(index) {
@@ -1453,7 +1482,7 @@ export default {
                 payment_method_type_id: "01",
                 reference: null,
                 payment_destination_id: this.getPaymentDestinationId(),
-                payment: 0
+                payment: 0,
             });
 
             this.calculatePayments();
@@ -1478,7 +1507,7 @@ export default {
         initInputPerson() {
             this.input_person = {
                 number: "",
-                identity_document_type_id: ""
+                identity_document_type_id: "",
             };
         },
         keyupEnterSupplier() {
@@ -1504,10 +1533,11 @@ export default {
         },
         keyupSupplier(e) {
             if (e.key !== "Enter") {
-                this.input_person.number = this.$refs.select_person.$el.getElementsByTagName(
-                    "input"
-                )[0].value;
-                let exist_persons = this.suppliers.filter(supplier => {
+                this.input_person.number =
+                    this.$refs.select_person.$el.getElementsByTagName(
+                        "input"
+                    )[0].value;
+                let exist_persons = this.suppliers.filter((supplier) => {
                     let pos = supplier.description.search(
                         this.input_person.number
                     );
@@ -1531,13 +1561,13 @@ export default {
         },
         setCurrencyType() {
             this.currency_type = _.find(this.currency_types, {
-                id: this.form.currency_type_id
+                id: this.form.currency_type_id,
             });
         },
         async initRecord() {
             await this.$http
                 .get(`/${this.resource}/record/${this.resourceId}`)
-                .then(response => {
+                .then((response) => {
                     let dato = response.data.data.purchase;
                     this.form.id = dato.id;
                     this.form.document_type_id = dato.document_type_id;
@@ -1564,7 +1594,7 @@ export default {
                     this.form.customer_id = dato.customer_id;
                     this.form.establishment_id = dato.establishment_id;
                     this.form.sunat_date = dato.sunat_date;
-                    if(dato.sunat_date){
+                    if (dato.sunat_date) {
                         this.form.purchase_period = true;
                     }
                     this.setCurrencyType();
@@ -1586,15 +1616,19 @@ export default {
 
                     if (this.form.payment_condition_id == "02")
                         this.readonly_date_of_due = true;
-                    if(this.license_id){
-                        let license = _.find(this.licenses, { id: this.license_id });
-                        if(!license){
-                            this.reloadDataLicense({id:this.license_id});
+                    if (this.license_id) {
+                        let license = _.find(this.licenses, {
+                            id: this.license_id,
+                        });
+                        if (!license) {
+                            this.reloadDataLicense({ id: this.license_id });
                         }
                     }
-                    if(this.responsible_id){
-                        let responsible = _.find(this.responsibles, { id: this.responsible_id });
-                        if(!responsible){
+                    if (this.responsible_id) {
+                        let responsible = _.find(this.responsibles, {
+                            id: this.responsible_id,
+                        });
+                        if (!responsible) {
                             this.reloadDataResponsible(this.responsible_id);
                         }
                     }
@@ -1608,7 +1642,7 @@ export default {
             await this.getPercentageIgv();
         },
         getPayments(payments) {
-            payments.forEach(it => {
+            payments.forEach((it) => {
                 it.payment_destination_id =
                     it.global_payment.destination_type ==
                     "App\Models\Tenant\Cash"
@@ -1628,7 +1662,7 @@ export default {
             }
 
             let payment_method_type = _.find(this.payment_method_types, {
-                id: id
+                id: id,
             });
 
             if (payment_method_type.number_days) {
@@ -1666,7 +1700,7 @@ export default {
         },
         filterSuppliers() {
             if (this.form.document_type_id === "01") {
-                this.suppliers = _.filter(this.all_suppliers, item => {
+                this.suppliers = _.filter(this.all_suppliers, (item) => {
                     return ["6", "0"].includes(item.identity_document_type_id);
                 });
                 this.selectSupplier();
@@ -1683,13 +1717,13 @@ export default {
         initForm() {
             this.errors = {};
             this.form = {
-                        const_detraccion: null,
+                const_detraccion: null,
                 date_detraccion: null,
                 percentage_detraccion: null,
                 license_id: null,
                 responsible_id: null,
                 purchase_period: false,
-                sunat_date:null,
+                sunat_date: null,
                 purchase_payments_id: 0,
                 id: 0,
                 establishment_id: null,
@@ -1733,7 +1767,7 @@ export default {
                 has_client: false,
                 has_payment: false,
                 payment_condition_id: "01",
-                fee: []
+                fee: [],
             };
 
             // this.clickAddPayment()
@@ -1743,7 +1777,8 @@ export default {
             this.initGlobalIgv();
         },
         initGlobalIgv() {
-            this.localHasGlobalIgv = this.configuration.checked_global_igv_to_purchase;
+            this.localHasGlobalIgv =
+                this.configuration.checked_global_igv_to_purchase;
         },
         resetForm() {
             this.initForm();
@@ -1781,7 +1816,7 @@ export default {
         async changeDateOfIssue() {
             this.form.date_of_due = this.form.date_of_issue;
             await this.searchExchangeRateByDate(this.form.date_of_issue).then(
-                response => {
+                (response) => {
                     this.form.exchange_rate_sale = response;
                 }
             );
@@ -1808,10 +1843,10 @@ export default {
         },
         changeCurrencyType() {
             this.currency_type = _.find(this.currency_types, {
-                id: this.form.currency_type_id
+                id: this.form.currency_type_id,
             });
             let items = [];
-            this.form.items.forEach(row => {
+            this.form.items.forEach((row) => {
                 items.push(
                     calculateRowItem(
                         row,
@@ -1839,7 +1874,7 @@ export default {
             let total_base_isc = 0;
             let total_isc = 0;
 
-            this.form.items.forEach(row => {
+            this.form.items.forEach((row) => {
                 total_discount += parseFloat(row.total_discount);
                 total_charge += parseFloat(row.total_charge);
 
@@ -1897,7 +1932,7 @@ export default {
         },
         calculatePerception() {
             let supplier = _.find(this.all_suppliers, {
-                id: this.form.supplier_id
+                id: this.form.supplier_id,
             });
 
             if (supplier) {
@@ -1909,7 +1944,7 @@ export default {
 
                     this.form.perception_date = moment().format("YYYY-MM-DD");
 
-                    this.form.items.forEach(row => {
+                    this.form.items.forEach((row) => {
                         quantity_item_perception += row.item.has_perception
                             ? 1
                             : 0;
@@ -1938,12 +1973,12 @@ export default {
         validatePaymentDestination() {
             let error_by_item = 0;
 
-            this.form.payments.forEach(item => {
+            this.form.payments.forEach((item) => {
                 if (item.payment_destination_id == null) error_by_item++;
             });
 
             return {
-                error_by_item: error_by_item
+                error_by_item: error_by_item,
             };
         },
         async submit() {
@@ -1952,7 +1987,8 @@ export default {
                 return this.$message.error(validate.message);
             }
 
-            let validate_payment_destination = await this.validatePaymentDestination();
+            let validate_payment_destination =
+                await this.validatePaymentDestination();
 
             if (validate_payment_destination.error_by_item > 0) {
                 return this.$message.error(
@@ -1961,13 +1997,13 @@ export default {
             }
 
             this.loading_submit = true;
-            if(!this.form.purchase_period){
+            if (!this.form.purchase_period) {
                 this.form.sunat_date = null;
             }
             // await this.changePaymentMethodType(false)
             await this.$http
                 .post(`/${this.resource}/update`, this.form)
-                .then(response => {
+                .then((response) => {
                     if (response.data.success) {
                         this.resetForm();
                         this.purchaseNewId = response.data.data.id;
@@ -1976,7 +2012,7 @@ export default {
                         this.$message.error(response.data.message);
                     }
                 })
-                .catch(error => {
+                .catch((error) => {
                     if (error.response.status === 422) {
                         this.errors = error.response.data;
                     } else {
@@ -1993,12 +2029,12 @@ export default {
         reloadDataSuppliers(supplier_id) {
             this.$http
                 .get(`/${this.resource}/table/suppliers`)
-                .then(response => {
+                .then((response) => {
                     this.aux_supplier_id = supplier_id;
                     this.all_suppliers = response.data;
                     this.filterSuppliers();
                 });
-        }
-    }
+        },
+    },
 };
 </script>

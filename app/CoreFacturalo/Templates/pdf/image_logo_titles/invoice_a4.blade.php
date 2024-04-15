@@ -533,7 +533,7 @@ $paymentDetailed = TemplateHelper::getDetailedPayment($document,'d-m-Y')
                                 <center>
                                     Representación impresa del Comprobante de Pago Electrónico.
                                     <br />Esta puede ser consultada en:
-                                    <br /><b>{!! url('/buscar') !!}</b>
+                                    <br /><a href="{!! route('search.index', ['external_id' => $document->external_id]) !!}" style="text-decoration: none; font-weight: bold;color:black;">{!! url('/buscar') !!}</a>
                                     <br /> "Bienes transferidos en la Amazonía
                                     <br />para ser consumidos en la misma".
                                 </center>

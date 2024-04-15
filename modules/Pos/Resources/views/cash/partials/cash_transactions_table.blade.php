@@ -20,15 +20,13 @@
                 <th>
                     Tipo transacción
                 </th>
+                <th>Método de pago</th>
                 <th>
                     Tipo documento
                 </th>
                 <th>
                     Documento
                 </th>
-                @isset($detail)
-                    <th>N° Operación</th>
-    @endif
     <th>
         Fecha emisión
     </th>
@@ -38,6 +36,11 @@
     <th>
         N° Documento
     </th>
+    @if (count($income_records) > 0)
+    <th>
+        Referencia
+    </th>
+    @endif
     <th>
         Moneda
     </th>
@@ -59,17 +62,15 @@
                     {{ $value['type_transaction'] }}
                 </td>
                 <td class="celda">
+                    {{ $value['payment_method_description'] }}
+                </td>
+                <td class="celda">
                     {{ $value['document_type_description'] }}
                 </td>
                 <td class="celda">
                     {{ $value['number'] }}
                 </td>
-                @isset($detail)
-                
-                    <td class="celda">
-                        {{$value['reference']}}
-                    </td>
-                @endisset
+        
                 <td class="celda">
                     {{ $value['date_of_issue'] }}
                 </td>
@@ -79,6 +80,12 @@
                 <td class="celda">
                     {{ $value['customer_number'] }}
                 </td>
+                @if (count($income_records) > 0)
+                
+                <td class="celda">
+                    {{$value['reference']}}
+                </td>
+            @endisset
                 <td class="celda">
                     {{ $value['currency_type_id'] }}
                 </td>

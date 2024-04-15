@@ -1195,6 +1195,7 @@ class DocumentController extends Controller
         $document = Document::find($id);
         $pse = new PseService($document);
         $response = $pse->download_file();
+        
         return $response;
     }
     public function jsonPse($id)

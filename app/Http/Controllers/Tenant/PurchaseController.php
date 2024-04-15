@@ -1009,7 +1009,7 @@ class PurchaseController extends Controller
                         break;
                     }
 
-                    if ((int)$lot_group->quantity != (int)$element->quantity) {
+                    if ((int)$lot_group->quantity < (int)$element->quantity) {
                         $message = "Los productos del lote {$element->lot_code} han sido vendidos!";
                         $validated = false;
                         break;

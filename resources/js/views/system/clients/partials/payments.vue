@@ -444,6 +444,7 @@ export default {
                 this.$message({ message: response.message, type: "error" });
             }
             this.pass = false;
+            this.loading = false;
         },
         changePaymentMethodType(row) {
             let payment_method_type = _.find(this.payment_method_types, {

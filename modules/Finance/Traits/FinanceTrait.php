@@ -2,7 +2,7 @@
 
 namespace Modules\Finance\Traits;
 
-use App\Models\Tenant\{Configuration, DocumentPayment, PurchasePayment, SaleNotePayment, PurchaseSettlementPayment};
+use App\Models\Tenant\{Configuration, Document, DocumentPayment, PurchasePayment, SaleNotePayment, PurchaseSettlementPayment};
 use App\Models\Tenant\BankAccount;
 use App\Models\Tenant\Cash;
 use App\Models\Tenant\Company;
@@ -81,13 +81,13 @@ trait FinanceTrait
             return null;
         } else {
 
-            $company_active_id = Cache::get("cash_".$user->id);
-            if($company_active_id == null){
+            $company_active_id = Cache::get("cash_" . $user->id);
+            if ($company_active_id == null) {
                 $company_active_id = $user->company_active_id;
                 // return null;
             }
             $cash = Cash::query()->where('user_id', $users_id)->where('state', true)->whereJsonContains('alter_company', ['website_id' => $company_active_id])->first();
-            Cache::forget("cash_".$user->id);
+            Cache::forget("cash_" . $user->id);
             if ($cash) {
                 return [
                     'id' => 'cash',
@@ -343,7 +343,52 @@ trait FinanceTrait
 
         return $total_credit_notes;
     }
+    public function type_payment($row, $result, $type, $requestCurrencyTipeId = "PEN")
+    {
+        $output = 0;
+        $input = 0;
+        $hasCreditForTotal = false;
+        $pay =    $this->calculateTotalCurrencyType($row->payment->associated_record_payment, $row->payment->payment, $requestCurrencyTipeId);
+        switch ($type) {
+            case ExpensePayment::class:
+                $output = $pay;
+                break;
+            case PurchasePayment::class:
+                $output = $pay;
+                break;
+            case DocumentPayment::class:
+                $payment = floatval($pay);
+                $document_payment = DocumentPayment::where('id', $result['payment_id'])->first();
+                $document = Document::where('id', $document_payment->document_id)->first();
+                if ($document) {
+                    $credit_notes = $document->affected_documents->where('note_type', 'credit');
+                    $sum = $credit_notes->sum(function ($note) use ($requestCurrencyTipeId) {
 
+                        if (in_array($note->document->state_type_id, ['01', '03', '05', '07', '13'])) {
+                            return $this->calculateTotalCurrencyType($note->document, $note->document->total, $requestCurrencyTipeId);
+                        }
+
+                        return 0;
+                    });
+
+                    if ($sum  == $payment) {
+                        $hasCreditForTotal = true;
+                    } else {
+                        $payment = $payment - $sum;
+                    }
+                }
+                $input = $payment;
+                break;
+            default:
+                $input = $pay;
+                break;
+        }
+        $result['hasCreditForTotal'] = $hasCreditForTotal;
+
+        $result['output'] = $output;
+        $result['input'] = $input;
+        return $result;
+    }
     public function calculateTotalCurrencyType($record, $payment, $requestCurrencyTipeId = 'PEN')
     {
         if ($requestCurrencyTipeId == 'PEN') {

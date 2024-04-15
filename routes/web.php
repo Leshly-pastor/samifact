@@ -26,7 +26,7 @@ if ($hostname) {
 
         //Route::post('restaurant/login', '\Modules\Restaurant\Http\Controllers\RestaurantController@login');
         Route::get('search', 'Tenant\SearchController@index')->name('search.index');
-        Route::get('buscar', 'Tenant\SearchController@index')->name('search.index');
+        Route::get('buscar/{external_id?}', 'Tenant\SearchController@index')->name('search.index');
         Route::get('search/tables', 'Tenant\SearchController@tables');
         Route::post('search', 'Tenant\SearchController@store');
 

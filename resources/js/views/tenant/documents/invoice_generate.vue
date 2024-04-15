@@ -3497,6 +3497,19 @@
                                                                                         width: 100px;
                                                                                     "
                                                                                 >
+                                                                                    Glosa
+                                                                                </th>
+                                                                                <th
+                                                                                    v-if="
+                                                                                        form
+                                                                                            .payments
+                                                                                            .length >
+                                                                                        0
+                                                                                    "
+                                                                                    style="
+                                                                                        width: 100px;
+                                                                                    "
+                                                                                >
                                                                                     Monto
                                                                                 </th>
                                                                                 <th
@@ -3649,6 +3662,13 @@
                                                                                     <el-input
                                                                                         v-model="
                                                                                             row.reference
+                                                                                        "
+                                                                                    ></el-input>
+                                                                                </td>
+                                                                                <td>
+                                                                                    <el-input
+                                                                                        v-model="
+                                                                                            row.glosa
                                                                                         "
                                                                                     ></el-input>
                                                                                 </td>

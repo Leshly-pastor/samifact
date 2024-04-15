@@ -25,6 +25,7 @@ if($hostname) {
                  * finances/balance/records
                  */
                 Route::get('balance', 'BalanceController@index')->name('tenant.finances.balance.index');
+                Route::get('balance/detail', 'BalanceController@getDetail');
                 Route::get('balance/pdf', 'BalanceController@pdf');
                 Route::get('balance/excel', 'BalanceController@excel');
                 Route::get('balance/filter', 'BalanceController@filter');

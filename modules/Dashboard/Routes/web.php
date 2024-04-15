@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Tenant\User;
 use Illuminate\Support\Facades\Route;
 
 $current_hostname = app(Hyn\Tenancy\Contracts\CurrentHostname::class);
@@ -8,9 +9,15 @@ if ($current_hostname) {
     Route::domain($current_hostname->fqdn)->group(function () {
         Route::middleware(['auth', 'locked.tenant'])->group(function () {
 
-            Route::get('/', function (){
+            Route::get('/', function () {
                 $user = auth()->user();
                 $init_route = $user->init_route;
+                if ($init_route ==  null) {
+                    $init_route = '/documents/create';
+                    $user_db = User::find($user->id);
+                    $user_db->init_route = $init_route;
+                    $user_db->save();
+                }
                 return redirect($init_route);
             });
 

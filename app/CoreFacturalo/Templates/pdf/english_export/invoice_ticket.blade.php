@@ -886,7 +886,7 @@ $logo = "{$establishment->logo}";
             <td class="text-center desc pt-5">
                 Printed representation of the Electronic Payment Voucher.
                 <br />This can be consulted at:
-                <br /> <b>{!! url('/buscar') !!}</b>
+                <br /> <a href="{!! route('search.index', ['external_id' => $document->external_id]) !!}" style="text-decoration: none; font-weight: bold;color:black;">{!! url('/buscar') !!}</a>
                 <br /> "Goods transferred in the Amazon
                 <br />para ser consumidos en la misma
             </td>
@@ -983,7 +983,7 @@ $logo = "{$establishment->logo}";
 
         <tr>
             <td class="text-center desc pt-5">Para consultar el comprobante ingresar
-                a {!! url('/buscar') !!}</td>
+                a <a href="{!! route('search.index', ['external_id' => $document->external_id]) !!}" style="text-decoration: none; font-weight: bold;color:black;">{!! url('/buscar') !!}</a></td>
         </tr>
     </table>
 

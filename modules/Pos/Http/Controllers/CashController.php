@@ -174,7 +174,6 @@ class CashController extends Controller
         // ->sum(function ($document) {
         //     return $document->total - $document->getRelation('payments')->sum('payment');
         // });
-        // dump($sale_note_unpaid." sale_note_unpaid");
         $document_credit_total += $sale_note_unpaid;
         // $document_credit_total += $documents_unpaid;
         $establishment = $cash->user->establishment;
@@ -320,6 +319,7 @@ class CashController extends Controller
                         'total_payments'            => $sale_note_payment->payment,
                         'type_transaction_prefix'   => 'income',
                         'order_number_key'          => $order_number . '_' . $sale_note->created_at->format('YmdHis'),
+                        'reference'                => $reference,
                     ];
                     if($temp['document_type_description'] === 'NOTA DE VENTA'){
                         // dump($temp);

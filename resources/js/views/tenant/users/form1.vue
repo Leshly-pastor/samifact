@@ -974,7 +974,7 @@
                             </template>
                         </div>
                     </el-tab-pane>
-                            <el-tab-pane class name="five">
+                    <el-tab-pane class name="five">
                         <span slot="label">Ruta de inicio</span>
                         <div class="row">
                             <div class="col-md-12">
@@ -1075,6 +1075,7 @@ export default {
                 permission_edit_cpe: false,
                 recreate_documents: false,
                 permission_force_send_by_summary: false,
+                init_route: "/documents/create",
             },
             modules: [],
             datai: [],
@@ -1094,7 +1095,7 @@ export default {
             document_types: [],
             loading: false,
             userTypes: [],
-            routes:[],
+            routes: [],
         };
     },
     updated() {
@@ -1130,10 +1131,6 @@ export default {
         getUserTypes() {
             this.$http("/integrate-system/user-types")
                 .then((response) => {
-                    console.log(
-                        "🚀 ~ file: form1.vue:674 ~ getUserTypes ~ response:",
-                        response
-                    );
                     this.userTypes = response.data.integrate_user_types;
                 })
                 .catch((error) => {
@@ -1158,7 +1155,6 @@ export default {
                     url = url + `/${this.form.document_id}`;
                 }
                 await this.$http.get(url).then((response) => {
-
                     this.series = response.data.data;
                 });
             }
@@ -1262,7 +1258,7 @@ export default {
                 date_of_birth: null,
                 contract_date: null,
                 position: null,
-
+                init_route: "/documents/create",
                 photo_filename: null,
                 photo_temp_image: null,
                 photo_temp_path: null,

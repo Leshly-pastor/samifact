@@ -793,7 +793,7 @@
     <div class="font-xs text-center" style="margin-top:10px;">
         <center>
             Representación impresa del Comprobante de Pago Electrónico. <br />Esta puede ser consultada en:
-            <b>{!! url('/buscar') !!}</b>
+            <a href="{!! route('search.index', ['external_id' => $document->external_id]) !!}" style="text-decoration: none; font-weight: bold;color:black;">{!! url('/buscar') !!}</a>
             @if ($customer->department_id == 16)
                 <br /> "Bienes transferidos en la Amazonía para ser consumidos en la misma".
             @endif

@@ -646,7 +646,7 @@
             </tr>
 
             <tr>
-                <td class="text-center desc-9 pt-2">Para consultar el comprobante ingresar a {!! url('/buscar') !!}</td>
+                <td class="text-center desc-9 pt-2">Para consultar el comprobante ingresar a <a href="{!! route('search.index', ['external_id' => $document->external_id]) !!}" style="text-decoration: none; font-weight: bold;color:black;">{!! url('/buscar') !!}</a></td>
             </tr>
 </table>
 

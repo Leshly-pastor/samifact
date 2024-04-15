@@ -212,8 +212,11 @@
                         >
                             DIGEMID
                         </th>
-                        <template v-if="typeUser == 'admin'">
-                            <th class="text-center">Historial</th>
+                        <template  v-if="typeUser !== 'seller' ? true : config.sellers_see_history">
+                            <th class="text-center"
+                            
+                        
+                            >Historial</th>
                         </template>
                         <th class="text-left">Stock</th>
                         <th class="text-left" v-if="isMajolica">Metraje</th>
@@ -327,7 +330,7 @@
                             {{ row.cod_digemid }}
                         </td>
 
-                        <template v-if="typeUser == 'admin'">
+                        <template  v-if="typeUser !== 'seller' ? true : config.sellers_see_history">
                             <td
                                 class="text-center"
                                 :class="{ 'text-danger': row.active === false }"

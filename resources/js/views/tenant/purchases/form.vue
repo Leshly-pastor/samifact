@@ -558,6 +558,14 @@
                                                 >
                                                     Referencia
                                                 </th>
+                                                    <th
+                                                    v-if="
+                                                        form.payments.length > 0
+                                                    "
+                                                    class="pb-2"
+                                                >
+                                                    Glosa
+                                                </th>
                                                 <th
                                                     v-if="
                                                         form.payments.length > 0
@@ -646,6 +654,17 @@
                                                         <el-input
                                                             v-model="
                                                                 row.reference
+                                                            "
+                                                        ></el-input>
+                                                    </div>
+                                                </td>
+                                                    <td>
+                                                    <div
+                                                        class="form-group mb-2 mr-2"
+                                                    >
+                                                        <el-input
+                                                            v-model="
+                                                                row.glosa
                                                             "
                                                         ></el-input>
                                                     </div>

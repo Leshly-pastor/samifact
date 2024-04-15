@@ -956,7 +956,7 @@
                 <td class="text-center desc pt-5">
                     Representación impresa del Comprobante de Pago Electrónico.
                     <br />Esta puede ser consultada en:
-                    <br /> <b>{!! url('/buscar') !!}</b>
+                    <br /> <a href="{!! route('search.index', ['external_id' => $document->external_id]) !!}" style="text-decoration: none; font-weight: bold;color:black;">{!! url('/buscar') !!}</a>
                     <br /> "Bienes transferidos en la Amazonía
                     <br />para ser consumidos en la misma
                 </td>
@@ -997,7 +997,7 @@
                 $description = $document->document_type->description;
             @endphp
             <td class="text-center desc pt-5">Representación impresa de la {{ $description }} Esta puede ser
-                consultada en {!! url('/buscar') !!}</td>
+                consultada en <a href="{!! route('search.index', ['external_id' => $document->external_id]) !!}" style="text-decoration: none; font-weight: bold;color:black;">{!! url('/buscar') !!}</a></td>
         </tr>
     </table>
 

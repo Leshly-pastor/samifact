@@ -48,7 +48,7 @@ class AuthorizedDiscountUserController extends Controller
     {
         $user = auth()->user();
 
-        if($user->type === 'admin')
+        if($user->type === 'admin'|| $user->type === 'superadmin')
         {
             $authorized_discount_user = $user->authorized_discount_users()->create([
                 'date' => date('Y-m-d'),

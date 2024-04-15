@@ -73,12 +73,13 @@
             $text_style= $vc_config->view_tutorials==true ? "text-dark" : "text-white";
             $bg_foreground = $vc_config->view_tutorials==true ? "bg-foreground" : "";
             ?>
-            <div style="padding:150px;" class=" sw-lg-70 min-h-100 d-flex justify-content-center align-items-center shadow-deep py-5 full-page-content-right-border {{$bg_foreground}}">
+            {{-- <div style="padding:150px;" class=" sw-lg-70 min-h-100 d-flex justify-content-center align-items-center  py-5 full-page-content-right-border {{$bg_foreground}}"> --}}
+            <div  class=" sw-lg-70 min-h-100 d-flex justify-content-center align-items-center  py-5 full-page-content-right-border {{$bg_foreground}}">
                 <div class="sw-lg-50 px-5">
                     <div class="sh-11">
                         <a href="javascript:void(0)">
                             <?php
-                            $logo = $company->logo !=null ? "storage/uploads/logos/{$company->logo}" : "logo/logo-blue-light.svg" 
+                            $logo = $company->logo !=null ? "storage/uploads/logos/{$company->logo}" : "logo/logo-blue-light.png" 
                             ?>
                              <img src="{{$logo}}" height="70px">
                         </a>

@@ -5,10 +5,15 @@
         </div>
         <div class="card mb-0">
             <div class="card-body">
-                <data-table :resource="resource" @changeCurrency="changeCurrency" >
+                <data-table
+                    :resource="resource"
+                    @changeCurrency="changeCurrency"
+                >
                     <tr slot="heading">
                         <th class="">#</th>
-                        <th class=""><strong>Nombre de la cuenta / Total pagos</strong></th>
+                        <th class="">
+                            <strong>Nombre de la cuenta / Total pagos</strong>
+                        </th>
                         <th class="text-center"><strong>CPE</strong></th>
                         <th class="text-center"><strong>N. Venta</strong></th>
                         <th class="text-center"><strong>Cotización</strong></th>
@@ -17,100 +22,137 @@
                         <th class="text-center"><strong>Ingresos</strong></th>
                         <th class="text-center"><strong>Compras</strong></th>
                         <th class="text-center"><strong>Gastos</strong></th>
-                        <th class="text-center"><strong>Prestamos Bancarios</strong></th>
-                        <th class="text-center"><strong>Pago Prestamos Bancarios</strong></th>
-                        <th v-show="seller_can_view_balance"
-                            class="text-center"><strong>Saldo</strong></th>
-                    <tr>
+                        <th class="text-center">
+                            <strong>Prestamos Bancarios</strong>
+                        </th>
+                        <th class="text-center">
+                            <strong>Pago Prestamos Bancarios</strong>
+                        </th>
+                        <th
+                            v-show="seller_can_view_balance"
+                            class="text-center"
+                        >
+                            <strong>Saldo</strong>
+                        </th>
+
+                        <!-- <th class="text-center"><strong>Detalle</strong></th> -->
+                    </tr>
+
+                    <tr></tr>
                     <tr slot-scope="{ index, row }">
                         <td>{{ index }}</td>
                         <td>{{ row.description }}</td>
-                        <td class="text-center">{{cuurencySymbol}} {{ row.document_payment }}</td>
-                        <td class="text-center">{{cuurencySymbol}} {{ row.sale_note_payment }}</td>
-                        <td class="text-center">{{cuurencySymbol}} {{ row.quotation_payment }}</td>
-                        <td class="text-center">{{cuurencySymbol}} {{ row.contract_payment }}</td>
-                        <td class="text-center">{{cuurencySymbol}} {{ row.technical_service_payment }}</td>
-                        <td class="text-center">{{cuurencySymbol}} {{ row.income_payment }}</td>
-                        <td class="text-center">{{cuurencySymbol}} {{ row.purchase_payment }}</td>
-                        <td class="text-center">{{cuurencySymbol}} {{ row.expense_payment }}</td>
-                        <td class="text-center">{{cuurencySymbol}} {{ row.bank_loan }}</td>
-                        <td class="text-center">{{cuurencySymbol}} {{ row.bank_loan_payment }}</td>
-                        <td v-show="seller_can_view_balance"
-                            class="text-center">{{cuurencySymbol}} {{ row.balance }}
+                        <td class="text-center">
+                            {{ cuurencySymbol }} {{ row.document_payment }}
                         </td>
+                        <td class="text-center">
+                            {{ cuurencySymbol }} {{ row.sale_note_payment }}
+                        </td>
+                        <td class="text-center">
+                            {{ cuurencySymbol }} {{ row.quotation_payment }}
+                        </td>
+                        <td class="text-center">
+                            {{ cuurencySymbol }} {{ row.contract_payment }}
+                        </td>
+                        <td class="text-center">
+                            {{ cuurencySymbol }}
+                            {{ row.technical_service_payment }}
+                        </td>
+                        <td class="text-center">
+                            {{ cuurencySymbol }} {{ row.income_payment }}
+                        </td>
+                        <td class="text-center">
+                            {{ cuurencySymbol }} {{ row.purchase_payment }}
+                        </td>
+                        <td class="text-center">
+                            {{ cuurencySymbol }} {{ row.expense_payment }}
+                        </td>
+                        <td class="text-center">
+                            {{ cuurencySymbol }} {{ row.bank_loan }}
+                        </td>
+                        <td class="text-center">
+                            {{ cuurencySymbol }} {{ row.bank_loan_payment }}
+                        </td>
+                        <td
+                            v-show="seller_can_view_balance"
+                            class="text-center"
+                        >
+                            {{ cuurencySymbol }} {{ row.balance }}
+                        </td>
+                        <!-- <td class="text-center">
+                            <el-button
+                                type="primary"
+                                size="mini"
+                                @click="showDetail(row)"
+                            >
+                                <i class="fas fa-file-alt"></i>
+                            </el-button>
+                        </td> -->
                     </tr>
                 </data-table>
             </div>
         </div>
-
-
     </div>
 </template>
 
 <script>
-
-import DataTable from './partial/Table.vue'
+import DataTable from "./partial/Table.vue";
 // import DataTable from '../../components/DataTableWithoutPaging.vue'
-import {mapActions, mapState} from "vuex/dist/vuex.mjs";
-import {exchangeRate, functions} from "../../../../../../../resources/js/mixins/functions";
+import { mapActions, mapState } from "vuex/dist/vuex.mjs";
+import {
+    exchangeRate,
+    functions,
+} from "../../../../../../../resources/js/mixins/functions";
 import moment from "moment";
 
 export default {
-    props: [
-        'configuration',
-        'user'
-    ],
+    props: ["configuration", "user"],
     mixins: [functions, exchangeRate],
-    components: {DataTable},
+    components: { DataTable },
     data() {
         return {
-            resource: 'finances/balance',
+            resource: "finances/balance",
             form: {},
             seller_can_view_balance: false,
-            currency: 'PEN'
-        }
+            currency: "PEN",
+        };
     },
 
     created() {
-        this.loadConfiguration()
-        this.$store.commit('setConfiguration', this.configuration)
-        this.getExchangeRate()
-        this.CanViewBalance()
+        this.loadConfiguration();
+        this.$store.commit("setConfiguration", this.configuration);
+        this.getExchangeRate();
+        this.CanViewBalance();
     },
     computed: {
-
-        ...mapState([
-            'exchange_rate_sale',
-            'config',
-        ]),
+        ...mapState(["exchange_rate_sale", "config"]),
         cuurencySymbol() {
-            return this.currency == 'PEN' ? 'S/': '$'
-        }
+            return this.currency == "PEN" ? "S/" : "$";
+        },
     },
     methods: {
-        ...mapActions([
-            'loadConfiguration',
-        ]),
+        showDetail(row) {
+            console.log("🚀 ~ showDetail ~ row:", row);
+        },
+        ...mapActions(["loadConfiguration"]),
         CanViewBalance() {
-            if (this.user.type === 'admin') {
+            if (this.user.type === "admin") {
                 this.seller_can_view_balance = true;
             } else {
-                this.seller_can_view_balance = this.config.seller_can_view_balance;
+                this.seller_can_view_balance =
+                    this.config.seller_can_view_balance;
             }
             return this.seller_can_view_balance;
         },
         getExchangeRate() {
-            let date = moment().format('YYYY-MM-DD');
-            this.searchExchangeRateByDate(date)
-                .then(response => {
-                    this.$store.commit('setExchangeRateSale', response)
-                });
-
+            let date = moment().format("YYYY-MM-DD");
+            this.searchExchangeRateByDate(date).then((response) => {
+                this.$store.commit("setExchangeRateSale", response);
+            });
         },
         changeCurrency(value) {
-            this.currency = value
-        }
-
-    }
-}
+            this.currency = value;
+        },
+    },
+};
 </script>

@@ -906,7 +906,7 @@ class PseServiceDispatch
             $sender_data['name'] = $this->company->name;
         }
         $xml->addChild('tidoir', $sender_data['identity_document_type_id']);
-        $xml->addChild('nomcia',  $this->removeAccentMark($sender_data['name']));
+        $xml->addChild('nomcia',  $this->removeAccentMark($this->format_characters($sender_data['name'])));
     }
     function setRelatedDocument($xml)
     {
@@ -1033,11 +1033,13 @@ class PseServiceDispatch
     function setVehicleInfo($xml)
     {
         $transport_data = $this->document->transport_data;
-        $plate_number = $transport_data["plate_number"];
-        $brand = $transport_data["brand"];
-        $xml->addChild('plaveh', $plate_number);
-        $xml->addChild('autmtr', $this->company->mtc_auth);
-        $xml->addChild('marveh', $brand);
+        if($transport_data){
+            $brand = $transport_data["brand"];
+            $plate_number = $transport_data["plate_number"];
+            $xml->addChild('plaveh', $plate_number);
+            $xml->addChild('autmtr', $this->company->mtc_auth);
+            $xml->addChild('marveh', $brand);
+        }
     }
     function getNameAndLastName($full_name)
     {
@@ -1058,7 +1060,8 @@ class PseServiceDispatch
     function setDriverInfo($xml)
     {
         $driver = $this->document->driver;
-        $xml->addChild('tidoco', $driver->identity_document_type_id);
+        if($driver!=null){
+            $xml->addChild('tidoco', $driver->identity_document_type_id);
         $xml->addChild('nudocu', $driver->number);
         $identity_document_type_id = $driver->identity_document_type_id;
         $identity_document_type = IdentityDocumentType::find($identity_document_type_id);
@@ -1070,6 +1073,7 @@ class PseServiceDispatch
         $xml->addChild('nomcho', $full_name['name']);
         $xml->addChild('apecho', $full_name['last_name']);
         $xml->addChild('licveh', $driver->license);
+        }
     }
 
     function setOriginAddress($xml)

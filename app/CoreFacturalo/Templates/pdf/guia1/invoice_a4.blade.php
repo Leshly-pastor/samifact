@@ -521,7 +521,7 @@ $logo = $establishment__->logo ?? $company->logo;
             @endforeach
         @endif
         <tr>
-            <td class="font-xs">Representacion impresa de la {{ $document->document_type->description }}, esta puede ser consultada en {!! url('/buscar') !!}</td>
+            <td class="font-xs">Representacion impresa de la {{ $document->document_type->description }}, esta puede ser consultada en <a href="{!! route('search.index', ['external_id' => $document->external_id]) !!}" style="text-decoration: none; font-weight: bold;color:black;">{!! url('/buscar') !!}</a></td>
         </tr>
     </table>
 @endif

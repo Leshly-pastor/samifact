@@ -192,7 +192,12 @@ class UserController extends Controller
             $user->establishment_id = $request->input('establishment_id');
             $user->type = $request->input('type');
             $user->integrate_user_type_id = $request->input('integrate_user_type_id');
-            $user->init_route = $request->input('init_route');
+            $init_route = $request->input('init_route');
+            if ($init_route == null) {
+                $init_route = '/documents/create';
+            }
+            $user->init_route = $init_route;
+
             // Zona por usuario
             // $user->zone_id = $request->input('zone_id');
 

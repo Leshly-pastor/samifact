@@ -13,12 +13,12 @@ class TenantAddPurchaseSettlementIdToKardex extends Migration
      */
     public function up()
     {
-        Schema::table('kardex', function (Blueprint $table) {
-
-            $table->unsignedInteger('purchase_settlement_id')->nullable()->after('purchase_id');
-            $table->foreign('purchase_settlement_id')->references('id')->on('purchase_settlements')->onDelete('cascade');
-
-        });
+        if (!Schema::hasColumn('kardex', 'purchase_settlement_id')) {
+            Schema::table('kardex', function (Blueprint $table) {
+                $table->unsignedInteger('purchase_settlement_id')->nullable()->after('purchase_id');
+                $table->foreign('purchase_settlement_id')->references('id')->on('purchase_settlements')->onDelete('cascade');
+            });
+        }
     }
 
     /**
@@ -28,9 +28,11 @@ class TenantAddPurchaseSettlementIdToKardex extends Migration
      */
     public function down()
     {
-        Schema::table('kardex', function (Blueprint $table) {
-            $table->dropForeign(['purchase_settlement_id']);
-            $table->dropColumn('purchase_settlement_id');     
-        });
+        if (Schema::hasColumn('kardex', 'purchase_settlement_id')) {
+            Schema::table('kardex', function (Blueprint $table) {
+                $table->dropForeign(['purchase_settlement_id']);
+                $table->dropColumn('purchase_settlement_id');
+            });
+        }
     }
 }

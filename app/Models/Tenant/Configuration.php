@@ -141,6 +141,7 @@ use App\Models\Tenant\Skin;
 class Configuration extends ModelTenant
 {
     protected $fillable = [
+        'sellers_see_history',
         'modify_purchase_unit_price',
         'modify_item_stock',
         'show_purchase_unit_price',
@@ -351,6 +352,7 @@ class Configuration extends ModelTenant
     ];
 
     protected $casts = [
+        'sellers_see_history' => 'boolean',
         'modify_purchase_unit_price' => 'boolean',
         'modify_item_stock' => 'boolean',
         'show_purchase_unit_price' => 'boolean',
@@ -617,6 +619,7 @@ class Configuration extends ModelTenant
         $currency = CurrencyType::all();
         $skins = Skin::all();
         return [
+            'sellers_see_history' => (bool) $this->sellers_see_history,
             'modify_purchase_unit_price' => (bool) $this->modify_purchase_unit_price,
             'modify_item_stock' => (bool) $this->modify_item_stock,
             'show_purchase_unit_price' => (bool) $this->show_purchase_unit_price,

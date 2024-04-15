@@ -6,7 +6,10 @@ use App\Models\Tenant\BankAccount;
 use App\Models\Tenant\Cash;
 use App\Models\Tenant\Company;
 use App\Models\Tenant\Configuration;
+use App\Models\Tenant\Document;
+use App\Models\Tenant\DocumentPayment;
 use App\Models\Tenant\Establishment;
+use App\Models\Tenant\PurchasePayment;
 use App\Models\Tenant\TransferAccountPayment;
 use Auth;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -18,6 +21,8 @@ use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Collection;
 use Illuminate\View\View;
+use Modules\Expense\Models\ExpensePayment;
+use Modules\Finance\Exports\BalanceDetailExport;
 use Modules\Finance\Exports\BalanceExport;
 use Modules\Finance\Models\GlobalPayment;
 use Modules\Finance\Traits\FinanceTrait;
@@ -84,6 +89,79 @@ class BalanceController extends Controller
         return $data;
     }
 
+    public function getDetail(Request $request)
+    {
+        $requestCurrencyTipeId = $request['currency_type_id'];
+        $data_of_period = $this->getDatesOfPeriod($request);
+        $params = (object)[
+            'date_start' => $data_of_period['d_start'],
+            'date_end' => $data_of_period['d_end'],
+        ];
+        $id = $request->id;
+        $is_cash = $id == 'cash';
+        $detail = null;
+        if ($is_cash) {
+            $detail = GlobalPayment::whereFilterPaymentType($params)
+                ->with(['payment'])
+                ->whereDestinationType(Cash::class)
+                ->orderBy('created_at', 'desc')
+                ->get()
+                ->transform(function ($row) use ($requestCurrencyTipeId) {
+                    $payment = $row->payment;
+                    $type = $row->payment_type;
+                    $result = [
+                        'payment_id' => $payment->id,
+                        'date' => Carbon::parse($payment->date_of_payment)->format('Y-m-d'),
+                        'reference' => $payment->reference,
+                        'glosa' => $payment->glosa,
+                        'payment'  => $payment->payment,
+                        
+                    ];
+                    $result = $this->type_payment($row,$result, $type,$requestCurrencyTipeId);
+                    return $result;
+                });
+        } else {
+            $detail = GlobalPayment::whereFilterPaymentType($params)
+                ->with(['payment'])
+                ->whereDestinationType(BankAccount::class)
+                ->where('destination_id', $id)
+                ->orderBy('created_at', 'desc')
+                ->get()
+                ->transform(function ($row)  use ($requestCurrencyTipeId){
+                    $payment = $row->payment;
+                    $type = $row->payment_type;
+                    $result = [
+                        'payment_id' => $payment->id,
+                        'date' => Carbon::parse($payment->date_of_payment)->format('Y-m-d'),
+                        'reference' => $payment->reference,
+                        'glosa' => $payment->glosa,
+                        'payment'  => $payment->payment,
+                    ];
+                    $result = $this->type_payment($row,$result, $type, $requestCurrencyTipeId);
+                    return $result;
+                });
+        }
+        //sort detail by date
+        $records = $detail->sortByDesc('date');
+        //filtra y elimina los que tengan hasCreditForTotal en true
+        $records = $records->filter(function ($record) {
+            return !$record['hasCreditForTotal'];
+        });
+        
+        $company = Company::first();
+        $establishment = ($request->establishment_id)
+            ? Establishment::findOrFail($request->establishment_id)
+            : auth()->user()->establishment;
+
+        return (new BalanceDetailExport)
+            ->records($records)
+            ->company($company)
+            ->establishment($establishment)
+            ->download('BalanceDetail_' . Carbon::now() . '.xlsx');
+    }
+
+
+
     /**
      * @param array $request
      *
@@ -116,7 +194,9 @@ class BalanceController extends Controller
         return $balance_by_bank_acounts->push($balance_by_cash);
     }
 
+    public function setInitBalance(){
 
+    }
     /**
      * @param Request $request
      *

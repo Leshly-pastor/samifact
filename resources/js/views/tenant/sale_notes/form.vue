@@ -585,6 +585,13 @@
                                                         form.payments.length > 0
                                                     "
                                                 >
+                                                    Glosa
+                                                </th>
+                                                <th
+                                                    v-if="
+                                                        form.payments.length > 0
+                                                    "
+                                                >
                                                     Monto
                                                 </th>
 
@@ -694,6 +701,15 @@
                                                             v-model="
                                                                 row.reference
                                                             "
+                                                        ></el-input>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div
+                                                        class="form-group mb-2 mr-2"
+                                                    >
+                                                        <el-input
+                                                            v-model="row.glosa"
                                                         ></el-input>
                                                     </div>
                                                 </td>
@@ -1362,7 +1378,10 @@
                                                     </thead>
                                                     <tbody>
                                                         <tr v-if="!showAll">
-                                                            <td colspan="3" class="text-start">
+                                                            <td
+                                                                colspan="3"
+                                                                class="text-start"
+                                                            >
                                                                 Se muestran las
                                                                 primeras y
                                                                 últimas 5 cuotas
@@ -1748,7 +1767,7 @@ export default {
         this.changeCurrencyType();
     },
     methods: {
-        changeCollapse(){},
+        changeCollapse() {},
         calculatePeriodDays(cuotas, days) {
             let date_of_issue = this.form.date_of_issue;
             if (!cuotas || !days) return;
@@ -2154,7 +2173,7 @@ export default {
             return null;
         },
         setTotalDefaultPayment() {
-            if (this.form.payments.length > 0) {
+            if (this.form.payments.length == 1 ) {
                 this.form.payments[0].payment = this.form.total;
             }
         },
@@ -2248,6 +2267,12 @@ export default {
             }
         },
         setDataUpdate() {
+            if (
+                this.form.payment_condition_id == undefined ||
+                this.form.payment_condition_id == null
+            ) {
+                this.form.payment_condition_id = "01";
+            }
             if (this.form.total_charge > 0)
                 this.total_global_charge = this.form.total_charge;
 
@@ -2256,6 +2281,8 @@ export default {
                 : [];
 
             this.form.discounts = this.getDataGlobalDiscount();
+            console.log("🚀 ~ setDataUpdate ~ this.form:", JSON.stringify(this.form.payments))
+
         },
         getDataGlobalDiscount() {
             const discounts = this.form.discounts
@@ -2400,7 +2427,7 @@ export default {
             };
 
             this.total_discount_no_base = 0;
-
+            
             this.clickAddPayment();
             this.enabled_payments = true;
             this.total_global_charge = 0;
@@ -2457,7 +2484,7 @@ export default {
             this.customers = this.all_customers;
         },
         addRow(row) {
-            console.log("🚀 ~ addRow ~ row:", row)
+            console.log("🚀 ~ addRow ~ row:", row);
             // this.form.items.push(row)
             if (this.form.seller_id) {
                 row.seller_id = this.form.seller_id;

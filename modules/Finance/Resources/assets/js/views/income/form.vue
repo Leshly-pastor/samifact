@@ -193,6 +193,9 @@
                                         Referencia
                                     </th>
                                     <th v-if="form.payments.length > 0">
+                                        Glosa
+                                    </th>
+                                    <th v-if="form.payments.length > 0">
                                         Monto
                                     </th>
                                     <th width="15%">
@@ -256,6 +259,13 @@
                                     <td>
                                         <div class="form-group mb-2 mr-2">
                                             <el-input
+                                                v-model="row.glosa"
+                                            ></el-input>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="form-group mb-2 mr-2">
+                                            <el-input
                                                 v-model="row.payment"
                                             ></el-input>
                                         </div>
@@ -313,10 +323,7 @@
                                             :key="index"
                                         >
                                             <td>{{ index + 1 }}</td>
-                                            <td>{{ row.description }}
-
-                                                
-                                            </td>
+                                            <td>{{ row.description }}</td>
                                             <td class="text-end">
                                                 {{ currency_type.symbol }}
                                                 {{ row.total }}
@@ -388,7 +395,7 @@ import { functions, exchangeRate } from "@mixins/functions";
 export default {
     components: { IncomeFormItem, IncomeOptions, PersonForm },
     mixins: [functions, exchangeRate],
-        props: ["id"],
+    props: ["id"],
     data() {
         return {
             timer: null,
@@ -413,7 +420,7 @@ export default {
             customers: [],
         };
     },
-   async created() {
+    async created() {
         this.initForm();
         this.$http.get(`/${this.resource}/tables`).then((response) => {
             this.income_reasons = response.data.income_reasons;
@@ -447,12 +454,15 @@ export default {
         await this.isUpdate();
     },
     methods: {
-             async isUpdate() {
+        async isUpdate() {
             if (this.id) {
                 await this.$http
                     .get(`/${this.resource}/record/${this.id}`)
                     .then((response) => {
-                        console.log("🚀 ~ file: form.vue:452 ~ .then ~ response:", response)
+                        console.log(
+                            "🚀 ~ file: form.vue:452 ~ .then ~ response:",
+                            response
+                        );
                         this.form = response.data.data.income;
                     });
             }

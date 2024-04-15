@@ -763,7 +763,7 @@ class Document extends ModelTenant
             $user = auth()->user();
         }
 
-        return ($user->type === 'admin') ? null : $query->where('user_id', $user->id)->orWhere('seller_id', $user->id)->latest();
+        return ($user->type === 'admin' || $user->type === 'superadmin') ? null : $query->where('user_id', $user->id)->orWhere('seller_id', $user->id)->latest();
         // return ($user->type == 'seller') ? $query->where('user_id', $user->id) : null;
     }
 

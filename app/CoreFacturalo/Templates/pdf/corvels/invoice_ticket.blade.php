@@ -437,7 +437,7 @@ $establishment = $document->establishment;
 
                 <br/>Representación impresa del Comprobante de Pago Electrónico.
                 <br/>Esta puede ser consultada en:
-                <br/> <b>{!! url('/buscar') !!}</b>
+                <br/> <a href="{!! route('search.index', ['external_id' => $document->external_id]) !!}" style="text-decoration: none; font-weight: bold;color:black;">{!! url('/buscar') !!}</a>
                 <br/> "Bienes transferidos en la Amazonía
                 <br/>para ser consumidos en la misma
 <br>
@@ -460,7 +460,7 @@ $establishment = $document->establishment;
             <td class="text-center desc pt-1">
                 Representación impresa del Comprobante de Pago Electrónico.
                 <br/>Esta puede ser consultada en:
-                <br/> <b>{!! url('/buscar') !!}</b>
+                <br/> <a href="{!! route('search.index', ['external_id' => $document->external_id]) !!}" style="text-decoration: none; font-weight: bold;color:black;">{!! url('/buscar') !!}</a>
                 <br/> "Bienes transferidos en la Amazonía
                 <br/>para ser consumidos en la misma
             </td>
@@ -504,7 +504,7 @@ $establishment = $document->establishment;
         </tr>
 
     <tr>
-        <td class="text-center desc pt-1" colspan="2">Representación impresa del Comprobante de Pago Electrónico. <br/>Esta puede ser consultada en {!! url('/buscar') !!}</td>
+        <td class="text-center desc pt-1" colspan="2">Representación impresa del Comprobante de Pago Electrónico. <br/>Esta puede ser consultada en <a href="{!! route('search.index', ['external_id' => $document->external_id]) !!}" style="text-decoration: none; font-weight: bold;color:black;">{!! url('/buscar') !!}</a></td>
     </tr>
 </table>
 

@@ -913,19 +913,22 @@ export default {
                     "El destino del pago es obligatorio"
                 );
             }
-    
+
             this.updateDataForSend();
-                    if(this.currentRent.observations !== null && this.currentRent.observations !== ''){
-                        if(this.document.document_type_id === '80'){
-                            this.document.observation = this.currentRent.observations;
-                }else{
-                    this.document.additional_information = this.currentRent.observations;
-                
+            if (
+                this.currentRent.observations !== null &&
+                this.currentRent.observations !== ""
+            ) {
+                if (this.document.document_type_id === "80") {
+                    this.document.observation = this.currentRent.observations;
+                } else {
+                    this.document.additional_information =
+                        this.currentRent.observations;
                 }
             }
-                    // console.log("🚀 ~ onGoToInvoice ~ this.document:", this.document)
-// return;
-                    this.loading = true;
+            // console.log("🚀 ~ onGoToInvoice ~ this.document:", this.document)
+            // return;
+            this.loading = true;
             this.$http
                 .post(`/${this.resource_documents}`, this.document)
                 .then((response) => {

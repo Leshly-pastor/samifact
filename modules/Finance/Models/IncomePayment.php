@@ -13,6 +13,7 @@ class IncomePayment extends ModelTenant
     public $timestamps = false;
 
     protected $fillable = [
+        'glosa',
         'income_id',
         'date_of_payment',
         'payment_method_type_id',
