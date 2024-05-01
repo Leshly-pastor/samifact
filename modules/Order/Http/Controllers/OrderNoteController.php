@@ -231,7 +231,11 @@ class OrderNoteController extends Controller
     {
 
         $customers = $this->table('customers');
-        $establishments = Establishment::where('id', auth()->user()->establishment_id)->get();
+        if(auth()->user()){
+            $establishments = Establishment::where('id', auth()->user()->establishment_id)->get();
+        }else{
+            $establishments = Establishment::all();
+        }
         $currency_types = CurrencyType::whereActive()->get();
         $serie = Series::where('document_type_id', "PD")->where("establishment_id", $establishments[0]->id)->first();
         if ($serie) {

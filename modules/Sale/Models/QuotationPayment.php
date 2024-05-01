@@ -37,9 +37,10 @@ class QuotationPayment extends ModelTenant
         'date_of_payment' => 'date',
     ];
 
-    public function quotation(){
-            
-            return $this->belongsTo(Quotation::class);
+    public function quotation()
+    {
+
+        return $this->belongsTo(Quotation::class);
     }
 
     public function payment_method_type()
@@ -56,12 +57,13 @@ class QuotationPayment extends ModelTenant
     {
         return $this->morphOne(GlobalPayment::class, 'payment');
     }
- 
+
     public function associated_record_payment()
     {
         return $this->belongsTo(Quotation::class, 'quotation_id');
     }
-    
+
+
     public function payment_file()
     {
         return $this->morphOne(PaymentFile::class, 'payment');
@@ -78,12 +80,12 @@ class QuotationPayment extends ModelTenant
     public function scopeWhereFilterCashPayment($query)
     {
         return $query->where('payment_method_type_id', PaymentMethodType::CASH_PAYMENT_ID)
-                    ->whereHas('global_payment', function($query){
-                        return $query->where('destination_type', Cash::class);
-                    });
+            ->whereHas('global_payment', function ($query) {
+                return $query->where('destination_type', Cash::class);
+            });
     }
 
-    
+
     /**
      * 
      * Obtener informacion del pago y registro origen relacionado
@@ -118,14 +120,14 @@ class QuotationPayment extends ModelTenant
     public function scopeFilterRelationsPayments($query)
     {
         return $query->generalPaymentsWithOutRelations()
-                    ->with([
-                        'payment_method_type' => function($payment_method_type){
-                            $payment_method_type->select('id', 'description');
-                        }, 
-                    ]);
+            ->with([
+                'payment_method_type' => function ($payment_method_type) {
+                    $payment_method_type->select('id', 'description');
+                },
+            ]);
     }
 
-    
+
     /**
      * 
      * Filtros para obtener pagos en efectivo
@@ -138,7 +140,7 @@ class QuotationPayment extends ModelTenant
         return $query->where('payment_method_type_id', PaymentMethodType::CASH_PAYMENT_ID);
     }
 
-    
+
     /**
      * 
      * Filtros para obtener pagos con transferencia
@@ -150,5 +152,4 @@ class QuotationPayment extends ModelTenant
     {
         return $query->where('payment_method_type_id', PaymentMethodType::TRANSFER_PAYMENT_ID);
     }
-    
 }

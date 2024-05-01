@@ -54,6 +54,7 @@ class PurchasePayment extends ModelTenant
         return $this->morphOne(PaymentFile::class, 'payment');
     }
     
+
     public function purchase()
     {
         return $this->belongsTo(Purchase::class);

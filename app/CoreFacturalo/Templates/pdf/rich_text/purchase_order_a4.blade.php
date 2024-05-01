@@ -271,6 +271,14 @@ if ($logo) {
 </table>
 <table class="full-width">
     <tr>
+        <td  colspan="2" class="align-top text-right font-bold">
+            OBSERVACION: 
+        </td>
+        <td colspan="5" class="align-top" >
+            {{ $document->observation }}
+        </td>
+    </tr>
+    <tr>
         {{-- <td width="65%">
             @foreach($document->legends as $row)
                 <p>Son: <span class="font-bold">{{ $row->value }} {{ $document->currency_type->description }}</span></p>

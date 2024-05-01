@@ -408,6 +408,13 @@
                                     Inicio Ciclo Facturacion
                                 </th>
                                 <th
+                                    v-if="columns.end_billing_cycle.visible"
+                                    scope="col"
+                                    class="text-end"
+                                >
+                                    Fin Ciclo Facturacion
+                                </th>
+                                <th
                                     v-if="columns.count_doc_month.visible"
                                     scope="col"
                                     class="text-center"
@@ -756,7 +763,7 @@
                                     </div>
                                 </td>
 
-                                <td v-if="columns.start_billing_cycle.visible">
+                                <td v-if="columns.start_billing_cycle.visible" class="text-center">
                                     <template v-if="row.start_billing_cycle">
                                         <span></span>
                                         <span>{{
@@ -765,7 +772,7 @@
                                     </template>
                                     <template v-else>
                                         <el-date-picker
-                                            v-model="row.select_date_billing"
+                                            v-model="row.start_billing_cycle"
                                             placeholder="..."
                                             type="date"
                                             value-format="yyyy-MM-dd"
@@ -777,6 +784,22 @@
                                             "
                                         ></el-date-picker>
                                     </template>
+                                </td>
+
+                                <td v-if="columns.end_billing_cycle.visible" class="text-center">
+                                
+                                    
+                                        <el-date-picker
+                                            v-model="row.end_billing_cycle"
+                                            type="date"
+                                            value-format="yyyy-MM-dd"
+                                            @change="
+                                                setEndBillingCycle(
+                                                    $event,
+                                                    row.id
+                                                )
+                                            "
+                                        ></el-date-picker>
                                 </td>
                                 <td
                                     v-if="columns.count_doc_month.visible"
@@ -973,7 +996,7 @@
                                         ></el-switch>
                                     </template>
                                 </td> -->
-                                   <td
+                                <td
                                     v-if="columns.max_items.visible"
                                     class="text-center"
                                 >
@@ -1269,6 +1292,10 @@ export default {
                     title: "Inicio Ciclo Fact.",
                     visible: false,
                 },
+                end_billing_cycle: {
+                    title: "Fin Ciclo Fact.",
+                    visible: true,
+                },
                 count_doc_month: {
                     title: "Facturación",
                     visible: false,
@@ -1539,7 +1566,7 @@ export default {
                 })
                 .then(() => {});
         },
-    changeLockedItem(row) {
+        changeLockedItem(row) {
             this.$http
                 .post(`${this.resource}/locked_item`, row)
                 .then((response) => {

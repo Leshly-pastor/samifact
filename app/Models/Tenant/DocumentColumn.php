@@ -68,7 +68,9 @@ class DocumentColumn extends TenantModel
             case  'barcode':
                 return $item->barcode;
             case  'internal_code':
-                return $document_item->item->internal_code;
+                $item_id = $document_item->item_id;
+                $item = Item::select('internal_id')->find($item_id);
+                return $item->internal_id ?? "-";
             case  'factory_code':
                 return $item->factory_code;
             case  'cod_digemid':

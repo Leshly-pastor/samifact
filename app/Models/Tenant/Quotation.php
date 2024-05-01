@@ -454,6 +454,11 @@ class Quotation extends ModelTenant
             'updated_at' => $row->updated_at->format('Y-m-d H:i:s'),
             'print_ticket' => $row->getUrlPrintPdf('ticket'),
             'filename' => $row->filename,
+            'message_text' => "Su cotización {$row->number_full} ha sido generado correctamente, " .
+                "puede revisarlo en el siguiente enlace: " . url('') . "/print/quotation/{$row->external_id}/a4" . "",
+            // 'number_full' => $row->number_full,
+            'full_number' => $row->number_full,
+            'print_a4' => url('')."/print/quotation/{$row->external_id}/a4",
         ];
     }
 

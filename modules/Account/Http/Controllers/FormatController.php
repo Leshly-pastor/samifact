@@ -48,7 +48,7 @@ class FormatController extends Controller
 
         $type = $request->input('type');
         $month = $request->input('month');
-
+        $add_reference = $request->input('add_reference') === 'true' ? true : false;
         $d_start = Carbon::parse($month . '-01')->format('Y-m-d');
         $d_end = Carbon::parse($month . '-01')->endOfMonth()->format('Y-m-d');
 
@@ -66,6 +66,7 @@ class FormatController extends Controller
             $data['records'] = $this->getSaleDocuments($d_start, $d_end);
             $reportFormatSaleExport = new ReportFormatSaleExport();
             $reportFormatSaleExport->data($data);
+            $reportFormatSaleExport->addReference($add_reference);
             // return $reportFormatSaleExport->view();
             return $reportFormatSaleExport
                 ->download($filename . '.xlsx');
@@ -79,6 +80,7 @@ class FormatController extends Controller
 
         $reportFormatPurchaseExport = new ReportFormatPurchaseExport();
         $reportFormatPurchaseExport->data($data);
+        $reportFormatPurchaseExport->addReference($add_reference);
         // return $reportFormatPurchaseExport->view();
         return $reportFormatPurchaseExport
             ->download($filename . '.xlsx');
@@ -185,7 +187,12 @@ class FormatController extends Controller
                 }
 
                 $nc =  $row->document_type_id == "07";
+                $reference = $row->payments->map(function ($payment) {
+                    return $payment->reference;
+                })->implode('-');
+
                 return [
+                    'reference' => $reference,
                     'date_of_issue'                      => $row->date_of_issue->format('d/m/Y'),
                     'document_type_id'                   => $row->document_type_id,
                     'state_type_id'                      => $row->state_type_id,
@@ -327,8 +334,11 @@ class FormatController extends Controller
                 $total_exonerated = round($row->total_exonerated, 2);
                 $total_unaffected = round($row->total_unaffected, 2);
                 $total_isc = round($row->total_isc, 2);
-
+                $reference = $row->payments->map(function ($payment) {
+                    return $payment->reference;
+                })->implode('-');
                 return [
+                    'reference' => $reference,
                     'date_of_issue' => $row->date_of_issue->format('d/m/Y'),
                     'date_of_due' => $row->date_of_due->format('d/m/Y'),
                     'state_type_id' => $row->state_type_id,

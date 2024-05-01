@@ -1,5 +1,5 @@
 <template>
-    <div v-if="typeUser == 'admin'">
+    <div >
         <!-- <header
         class="page-header"
         style="display: flex; justify-content: space-between; align-items: center"
@@ -1361,6 +1361,7 @@ export default {
         };
     },
     async created() {
+        console.log("🚀 ~ created ~ this.configuration:", this.configuration)
         this.loadConfiguration();
         this.$store.commit("setConfiguration", this.configuration);
         this.initForm();

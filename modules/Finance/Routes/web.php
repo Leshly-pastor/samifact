@@ -54,6 +54,7 @@ if($hostname) {
                     Route::get('/filter', 'UnpaidController@filter');
                     // Route::post('/records', 'UnpaidController@records');
                     Route::get('/records', 'UnpaidController@records');
+                    Route::post('/multiple-pay', 'UnpaidController@multiplePay');
                     Route::get('/unpaidall', 'UnpaidController@unpaidall')->name('unpaidall');
                     Route::get('/report-payment-method-days', 'UnpaidController@reportPaymentMethodDays');
                     Route::get('/pdf', 'UnpaidController@pdf');

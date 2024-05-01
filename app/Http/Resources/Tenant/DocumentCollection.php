@@ -112,13 +112,20 @@ class DocumentCollection extends ResourceCollection
             }
 
             $balance = number_format($row->total - $total_payment, 2, ".", "");
-
+            if($row->sale_note_id) {
+                $sale_note = $row->sale_note;
+                if($sale_note->payments && ($sale_note->paid == 1||$sale_note->total_canceled == 1)) {
+                    $total_payment += $sale_note->payments->sum('payment');
+                }
+            }
             if ($row->retention) {
                 $balance = number_format($row->total - $row->retention->amount - $total_payment, 2, ".", "");
             } else {
                 $balance = number_format($row->total - $total_payment, 2, ".", "");
             }
-
+            if($balance < 0) {
+                $balance = number_format(0, 2, ".", "");
+            }
             $message_regularize_shipping = null;
 
             if ($row->regularize_shipping) {

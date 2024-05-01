@@ -313,7 +313,7 @@
                             </div>
                         </template>
 
-                        <div class="col-md-3">
+                    <div class="row">    <div class="col-md-3">
                             <div class="form-group">
                                 <label for="const_detraccion">
                                     Const. Detracción
@@ -349,7 +349,7 @@
                                     placeholder="Porcentaje Detracción"
                                 ></el-input>
                             </div>
-                        </div>
+                        </div></div>
                         <div class="col-sm-12 col-md-6 col-lg-8"></div>
                         <div class="col-md-3 mt-4">
                             <div class="form-group">

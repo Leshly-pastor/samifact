@@ -349,6 +349,28 @@
                                 ></small>
                             </div>
                         </div>
+                        <div class="col-12">
+                            <div
+                                class="form-group"
+                                :class="{
+                                    'has-danger': errors.additional_information,
+                                }"
+                            >
+                                <label class="control-label"
+                                    >Observaciones</label
+                                >
+                                <el-input
+                                    v-model="form.additional_information"
+                                    type="textarea"
+                                    :autosize="{ minRows: 2, maxRows: 4 }"
+                                ></el-input>
+                                <small
+                                    class="text-danger"
+                                    v-if="errors.additional_information"
+                                    v-text="errors.additional_information[0]"
+                                ></small>
+                            </div>
+                        </div>
                         <div
                             class="col-md-4 custom-mt-button"
                             v-if="isCreditNote && hasDiscounts"
@@ -851,11 +873,11 @@ export default {
         },
     },
     methods: {
-         changeDocumentAffected(){
+        changeDocumentAffected() {
             let { document_type_id } = this.data_affected_document;
             let char = document_type_id === "01" ? "F" : "B";
-        
-            this.series = this.all_series.filter(s => {
+
+            this.series = this.all_series.filter((s) => {
                 return (
                     s.document_type_id === this.form.document_type_id &&
                     s.number.charAt(0) === char

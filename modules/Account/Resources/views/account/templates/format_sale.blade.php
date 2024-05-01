@@ -118,6 +118,9 @@
             <td>ESTADO</td>
         @endif
         <td>OBSERVACION</td>
+        @if($add_reference)
+        <td>REFERENCIA</td>
+        @endif
     </tr>
     @foreach ($records as $row)
         <tr>
@@ -202,6 +205,9 @@
                 <td>{{ $row['state_type_description'] }}</td>
             @endif
             <td>{{ $obs }}</td>
+            @if($add_reference)
+            <td>{{ $row['reference'] }}</td>
+            @endif
             @php
                 $total_tax += $total_igv;
                 $total_value += $total_taxed;

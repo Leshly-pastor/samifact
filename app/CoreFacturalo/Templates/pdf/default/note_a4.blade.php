@@ -150,6 +150,20 @@ if ($logo) {
         <td>:</td>
         <td>{{ $document_base->note_description }}</td>
     </tr>
+    @if($document->additional_information)
+    <tr>
+        <td>Observación</td>
+        <td>:</td>
+        <td>
+            @foreach($document->additional_information as $information)
+                <span>{{ $information }}</span>
+                @if(!$loop->last)
+                    -
+                @endif
+            @endforeach
+        </td>
+    </tr>
+    @endif
 </table>
 <table class="full-width mt-10 mb-10">
     <thead class="">

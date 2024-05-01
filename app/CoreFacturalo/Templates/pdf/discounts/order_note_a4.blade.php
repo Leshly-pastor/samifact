@@ -193,82 +193,172 @@
         </thead>
         <tbody>
             @foreach ($document->items as $row)
-                @php
-                    /** @var \Modules\Order\Models\OrderNoteItem $row */
-                    $row = $row;
-                    $item = $row->item;
-                @endphp
                 <tr>
-                    <td class="text-left">
-                        {!! $row->getTemplateDescription() !!}
-                        @if (!empty($item->presentation))
-                            {!! $item->presentation->description !!}
+                    <td class="text-left align-top">
+                        @if ($row->name_product_pdf)
+                            {!! $row->name_product_pdf !!}
+                        @else
+                            {!! $row->item->description !!}
                         @endif
+
+                        @if ($row->total_isc > 0)
+                            <br /><span style="font-size: 9px">ISC : {{ $row->total_isc }}
+                                ({{ $row->percentage_isc }}%)</span>
+                        @endif
+
+   
+
+                        @if ($row->total_plastic_bag_taxes > 0)
+                            <br /><span style="font-size: 9px">ICBPER : {{ $row->total_plastic_bag_taxes }}</span>
+                        @endif
+
                         @if ($row->attributes)
                             @foreach ($row->attributes as $attr)
-                                <br /><span style="font-size: 9px">{!! $attr->description !!} : {{ $attr->value }}</span>
+                                <br /><span style="font-size: 9px">{!! $attr->description !!} :
+                                    {{ $attr->value }}</span>
                             @endforeach
                         @endif
-                        @if ($row->discounts && !$configurations->discounts_acc)
+                        @if ($row->discounts)
                             @foreach ($row->discounts as $dtos)
-                                <br /><span style="font-size: 9px">{{ $dtos->factor * 100 }}%
-                                    {{ $dtos->description }}</span>
+                                @if ($dtos->is_amount == false)
+                                    <br /><span style="font-size: 9px">{{ $dtos->factor * 100 }}
+                                        {{ $dtos->description }}</span>
+                                @endif
                             @endforeach
                         @endif
-                    </td>
-                    <td class="text-center align-top"> {{ $row->getStringQty() }} </td>
-                    <td class="text-center align-top">{{ symbol_or_code($item->unit_type_id) }}</td>
-
-
-
-                    <td class="text-right align-top"> {{ number_format($row->total / $row->quantity, 2) }} </td>
-                    <td class="text-right align-top">
-                        @if ($configurations->discounts_acc)
-                            @if ($row->discounts_acc)
-                                @php
-                                    $discounts_acc = (array) $row->discounts_acc;
-                                @endphp
-                                @foreach ($discounts_acc as $key => $disto)
-                                    <span style="font-size: 9px">{{ $disto->percentage }}%
-                                        @if ($key + 1 != count($discounts_acc))
-                                            +
-                                        @endif
-                                    </span>
+                        @isset($row->item->sizes_selected)
+                            @if (count($row->item->sizes_selected) > 0)
+                                @foreach ($row->item->sizes_selected as $size)
+                                    <small> Característica {{ $size->size }} | {{ $size->qty }} und.</small> <br>
                                 @endforeach
                             @endif
-                        @else
-                            @if ($row->discounts)
-                                @php
-                                    $total_discount_line = 0;
-                                    foreach ($row->discounts as $disto) {
-                                        $amount = $disto->amount;
-                                        if ($disto->is_split) {
-                                            $amount = $amount * 1.18;
-                                        }
-                                        $total_discount_line = $total_discount_line + $amount;
-                                        $total_discount_items += $total_discount_line;
-                                    }
-                                @endphp
-                                {{ number_format($total_discount_line, 2) }}
-                            @else
-                                0
-                            @endif
+                        @endisset
+                        @if ($row->charges)
+                            @foreach ($row->charges as $charge)
+                                <br /><span style="font-size: 9px">{{ $document->currency_type->symbol }}
+                                    {{ $charge->amount }} ({{ $charge->factor * 100 }}%)
+                                    {{ $charge->description }}</span>
+                            @endforeach
+                        @endif
+
+                        @if ($row->item->is_set == 1)
+                            <br>
+                            @inject('itemSet', 'App\Services\ItemSetService')
+                            @foreach ($itemSet->getItemsSet($row->item_id) as $item)
+                                {{ $item }}<br>
+                            @endforeach
+                        @endif
+
+                        @if ($row->item->used_points_for_exchange ?? false)
+                            <br>
+                            <span style="font-size: 9px">*** Canjeado por {{ $row->item->used_points_for_exchange }}
+                                puntos ***</span>
+                        @endif
+
+                        @if ($document->has_prepayment)
+                            <br>
+                            *** Pago Anticipado ***
                         @endif
                     </td>
-                    @if ($configuration_decimal_quantity->change_decimal_quantity_unit_price_pdf)
-                        <td class="text-right align-top">
-                            {{ $row->generalApplyNumberFormat($row->unit_price, $configuration_decimal_quantity->decimal_quantity_unit_price_pdf) }}
-                        </td>
+
+                    </td>
+
+
+
+                    <td class="text-center align-top">
+                        @if ((int) $row->quantity != $row->quantity)
+                            {{ $row->quantity }}
+                        @else
+                            {{ number_format($row->quantity, 0) }}
+                        @endif
+                    </td>
+                    <td class="text-center align-top">{{ symbol_or_code($row->item->unit_type_id) }}</td>
+
+
+                    </td>
+                    <td class="text-center align-top">
+                        @if ($configurations->discounts_acc && $row->discounts_acc)
+                            @php
+                                $original_price = 0;
+                                // $base = $row->discounts_acc;
+                                foreach ($row->discounts_acc as $key => $disto) {
+                                    $original_price = $disto->original_price ?? 0;
+                                }
+                            @endphp
+                            {{ number_format($original_price, 2) }}
+                        @else
+                            {{ number_format($row->total / $row->quantity, 2) }}
+                        @endif
+                    </td>
+                </tr>
+
+                <td class="text-center align-top">
+                    @if ($configurations->discounts_acc)
+                        @if ($row->discounts_acc)
+                            @php
+                                $discounts_acc = (array) $row->discounts_acc;
+                            @endphp
+                            @foreach ($discounts_acc as $key => $disto)
+                                <span style="">{{ $disto->percentage }}
+                                    @if ($key + 1 != count($discounts_acc))
+                                        -
+                                    @endif
+                                </span>
+                            @endforeach
+                        @endif
                     @else
-                        <td class="text-right align-top">{{ number_format($row->unit_price, 2) }}</td>
+                        @if ($row->discounts)
+                            @php
+                                $total_discount_line = 0;
+                                foreach ($row->discounts as $disto) {
+                                    $amount = $disto->amount;
+                                    if ($disto->is_split) {
+                                        $amount = $amount * 1.18;
+                                    }
+                                    $total_discount_line = $total_discount_line + $amount;
+                                    $total_discount_items += $total_discount_line;
+                                }
+                            @endphp
+                            {{ number_format($total_discount_line, 2) }}
+                        @else
+                            0
+                        @endif
                     @endif
-                    <td class="text-right align-top">{{ number_format($row->unit_price * $row->quantity, 2) }}</td>
-                </tr>
-                <tr>
-                    <td colspan="7" class="border-bottom"></td>
-                </tr>
+
+                    @if ($configuration_decimal_quantity->change_decimal_quantity_unit_price_pdf)
+                <td class="text-right align-top">
+                    {{ $row->generalApplyNumberFormat($row->unit_price, $configuration_decimal_quantity->decimal_quantity_unit_price_pdf) }}
+                </td>
+            @else
+                <td class="text-right align-top">{{ number_format($row->unit_price, 2) }}</td>
+            @endif
+            </td>
+            <td class="text-right align-top">{{ number_format($row->unit_price * $row->quantity, 2) }}</td>
+            </tr>
+            <tr>
+                <td colspan="7" class="border-bottom"></td>
+            </tr>
             @endforeach
-            @if ($document->total_exportation > 0)
+            </td>
+        </tr>
+        <tr>
+            {{-- <td width="65%">
+            @foreach ($document->legends as $row)
+                <p>Son: <span class="font-bold">{{ $row->value }} {{ $document->currency_type->description }}</span></p>
+            @endforeach
+            <br/>
+            <strong>Información adicional</strong>
+            @foreach ($document->additional_information as $information)
+                <p>@if (\App\CoreFacturalo\Helpers\Template\TemplateHelper::canShowNewLineOnObservation())
+                            {!! \App\CoreFacturalo\Helpers\Template\TemplateHelper::SetHtmlTag($information) !!}
+                        @else
+                            {{$information}}
+                        @endif</p>
+            @endforeach
+        </td> --}}
+        </tr>
+
+        @if ($document->total_exportation > 0)
                 <tr>
                     <td colspan="6" class="text-right font-bold">Op. Exportación:
                         {{ $document->currency_type->symbol }}</td>
@@ -303,13 +393,6 @@
                     <td class="text-right font-bold">{{ number_format($document->total_taxed, 2) }}</td>
                 </tr>
             @endif
-            @if ($document->total_discount > 0)
-                <tr>
-                    <td colspan="6" class="text-right font-bold">Descuento TOTAL:
-                        {{ $document->currency_type->symbol }}</td>
-                    <td class="text-right font-bold">{{ number_format($document->total_discount, 2) }}</td>
-                </tr>
-            @endif
             <tr>
                 <td colspan="6" class="text-right font-bold">IGV: {{ $document->currency_type->symbol }}</td>
                 <td class="text-right font-bold">{{ number_format($document->total_igv, 2) }}</td>
@@ -319,41 +402,11 @@
                 </td>
                 <td class="text-right font-bold">{{ number_format($document->total, 2) }}</td>
             </tr>
-        </tbody>
     </table>
-    <table class="full-width">
-        <tr>
-            <td width="65%" style="text-align: top; vertical-align: top;">
-                <br>
-                @foreach ($accounts as $account)
-                    <p>
-                        <span class="font-bold">{{ $account->bank->description }}</span>
-                        {{ $account->currency_type->description }}
-                        <span class="font-bold">N°:</span> {{ $account->number }}
-                        @if ($account->cci)
-                            - <span class="font-bold">CCI:</span> {{ $account->cci }}
-                        @endif
-                    </p>
-                @endforeach
-            </td>
-        </tr>
-        <tr>
-            {{-- <td width="65%">
-            @foreach ($document->legends as $row)
-                <p>Son: <span class="font-bold">{{ $row->value }} {{ $document->currency_type->description }}</span></p>
-            @endforeach
-            <br/>
-            <strong>Información adicional</strong>
-            @foreach ($document->additional_information as $information)
-                <p>@if (\App\CoreFacturalo\Helpers\Template\TemplateHelper::canShowNewLineOnObservation())
-                            {!! \App\CoreFacturalo\Helpers\Template\TemplateHelper::SetHtmlTag($information) !!}
-                        @else
-                            {{$information}}
-                        @endif</p>
-            @endforeach
-        </td> --}}
-        </tr>
-    </table>
+
+    
+
+    
 
     <table class="full-width" style="margin-top: 15px;">
         @foreach ($document->fee as $key => $quote)

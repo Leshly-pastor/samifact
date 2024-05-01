@@ -3640,6 +3640,11 @@
                                                                                             row.payment_destination_id
                                                                                         "
                                                                                         filterable
+                                                                                        @change="
+                                                                                            changePaymentDestination(
+                                                                                                index
+                                                                                            )
+                                                                                        "
                                                                                     >
                                                                                         <el-option
                                                                                             v-for="(
@@ -3704,6 +3709,9 @@
                                                                                 colspan="5"
                                                                             >
                                                                                 <label
+                                                                                    v-if="
+                                                                                        !blockAddPayments
+                                                                                    "
                                                                                     class="control-label"
                                                                                 >
                                                                                     <a
@@ -3911,6 +3919,7 @@ import {
     pointSystemFunctions,
     fnRestrictSaleItemsCpe,
     cash,
+    advance,
 } from "../../../mixins/functions";
 import {
     calculateRowItem,
@@ -3968,6 +3977,7 @@ export default {
         pointSystemFunctions,
         fnRestrictSaleItemsCpe,
         cash,
+        advance,
     ],
     data() {
         return {
@@ -4133,6 +4143,13 @@ export default {
         };
     },
     computed: {
+        blockAddPayments() {
+            return (
+                this.form.payments.filter(
+                    (payment) => payment.payment_destination_id === "advance"
+                ).length > 0
+            );
+        },
         getDisplayedRows() {
             return this.showAll
                 ? this.form.fee
@@ -5812,11 +5829,7 @@ export default {
             }
         },
         changePaymentDestination(index) {
-            // if(this.form.payments[index].payment_method_type_id=='01'){
-            //     this.payment_destinations = this.cash
-            // }else{
-            //     this.payment_destinations = this.payment_destinations
-            // }
+            this.checkHasAdvance(index);
         },
         changeEnabledPayments() {
             // this.clickAddPayment()
@@ -7316,6 +7329,13 @@ export default {
             };
         },
         async submit() {
+            let payWithAdvance =  this.payWithAdvance();
+            if(payWithAdvance){
+                let enoughAdvance = this.enoughAdvance();
+                if(!enoughAdvance){
+                    return this.$message.error("El monto del anticipo no es suficiente para realizar la venta");
+                }
+            }
             if (this.configuration.multi_companies && !this.form.company_id) {
                 this.$message.error("Debe seleccionar una empresa");
                 return false;
@@ -7424,7 +7444,10 @@ export default {
                         validate_restrict_sale_items_cpe.message
                     );
             }
+    // console.log(this.form.payments);
 
+            
+    //         return;
             this.loading_submit = true;
             let path = `/${this.resource}`;
             if (this.isUpdate) {
@@ -7452,6 +7475,7 @@ export default {
                             this.$eventHub.$emit("reloadDataItems", null);
                             let company_id = this.form.company_id;
 
+            
                             this.resetForm();
                             if (this.configuration.multi_companies) {
                                 this.form.company_id = company_id;
@@ -7464,7 +7488,12 @@ export default {
                                 response.data.data.id;
 
                             // this.savePaymentMethod();
-                            this.saveCashDocument();
+                            if (payWithAdvance) {
+                                this.form_cash_document.advance_id = payWithAdvance;
+                                this.saveAdvanceDocument();
+                            } else {
+                                this.saveCashDocument();
+                            }
 
                             this.autoPrintDocument();
                         } else {
@@ -7539,6 +7568,7 @@ export default {
                     .catch(displayError);
             }
         },
+    
         saveCashDocument() {
             this.$http
                 .post(`/cash/cash_document`, this.form_cash_document)
@@ -7592,6 +7622,7 @@ export default {
                 });
         },
         async changeCustomer() {
+            this.getAdvance(this.form.customer_id);
             this.person_type_id = null;
             this.customer_addresses = [];
             this.form.customer_address_id = null;

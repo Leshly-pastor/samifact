@@ -2,7 +2,7 @@
 
 namespace Modules\Finance\Traits;
 
-use App\Models\Tenant\{Configuration, Document, DocumentPayment, PurchasePayment, SaleNotePayment, PurchaseSettlementPayment};
+use App\Models\Tenant\{Advance, Configuration, Document, DocumentPayment, PurchasePayment, SaleNotePayment, PurchaseSettlementPayment};
 use App\Models\Tenant\BankAccount;
 use App\Models\Tenant\Cash;
 use App\Models\Tenant\Company;
@@ -57,6 +57,18 @@ trait FinanceTrait
     /**
      * @return array|null
      */
+    public function getAdvanceId($person_id)
+    {
+        $advance = Advance::where('person_id', $person_id)->where('state', true)->first();
+        if ($advance) {
+            return  $advance->id;
+        }
+        return null;
+    }
+
+    /**
+     * @return array|null
+     */
     public function getCash($user_id = null)
     {
         $configuration = Configuration::first();
@@ -101,6 +113,18 @@ trait FinanceTrait
     }
 
     public function createGlobalPayment($model, $row)
+    {   
+        
+        $destination = $this->getDestinationRecord($row);
+        $company = Company::active();
+        $model->global_payment()->create([
+            'user_id' => auth()->id(),
+            'soap_type_id' => $company->soap_type_id,
+            'destination_id' => $destination['destination_id'],
+            'destination_type' => $destination['destination_type'],
+        ]);
+    }
+    public function createGlobalPaymentOriginal($model, $row)
     {
 
         $destination = $this->getDestinationRecord($row);
@@ -112,18 +136,23 @@ trait FinanceTrait
             'destination_type' => $destination['destination_type'],
         ]);
     }
-
     public function getDestinationRecord($row)
     {
         $user_id  = null;
+        $person_id = null;
         if (isset($row['user_id'])) {
             $user_id = $row['user_id'];
+        }
+        if (isset($row['person_id'])) {
+            $person_id = $row['person_id'];
         }
         if ($row['payment_destination_id'] === 'cash') {
             $destination_id = $this->getCash($user_id)['cash_id'];
             $destination_type = Cash::class;
+        } else if ($row['payment_destination_id'] === 'advance') {
+            $destination_id = $this->getAdvanceId($person_id);
+            $destination_type = Advance::class;
         } else {
-
             $destination_id = $row['payment_destination_id'];
             $destination_type = BankAccount::class;
         }

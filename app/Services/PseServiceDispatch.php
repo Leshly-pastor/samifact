@@ -1085,7 +1085,7 @@ class PseServiceDispatch
         }
         if ($origin_address) {
             $xml->addChild('ubiori', $origin_address->location_id);
-            $xml->addChild('dirori', $origin_address->address);
+            $xml->addChild('dirori', $this->format_characters($origin_address->address));
         }
     }
 

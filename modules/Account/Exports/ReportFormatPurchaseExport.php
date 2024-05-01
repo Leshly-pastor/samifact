@@ -11,6 +11,7 @@ class ReportFormatPurchaseExport implements  FromView
     use Exportable;
 
     protected $data;
+    protected $add_reference;
 
     public function data($data)
     {
@@ -18,8 +19,16 @@ class ReportFormatPurchaseExport implements  FromView
 
         return $this;
     }
+
+    public function addReference($add_reference)
+    {
+        $this->add_reference = $add_reference;
+
+        return $this;
+    }
     
     public function view(): View {
+        $this->data['add_reference'] = $this->add_reference;
         return view('account::account.templates.format_purchase', $this->data);
     }
 }

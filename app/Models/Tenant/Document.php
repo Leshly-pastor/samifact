@@ -223,7 +223,6 @@ class Document extends ModelTenant
         'additional_data',
         'filename',
         'hash',
-        'qr',
         'has_xml',
         'has_pdf',
         'has_cdr',

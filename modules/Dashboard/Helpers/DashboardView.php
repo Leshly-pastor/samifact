@@ -282,8 +282,9 @@ class DashboardView
         /*
          * Documents
          */
-        $document_payments = DB::connection('tenant')
 
+         
+        $document_payments = DB::connection('tenant')
             ->table('document_payments')
             ->select('document_id', DB::raw('SUM(payment) as total_payment'))
             ->groupBy('document_id');
@@ -356,18 +357,25 @@ class DashboardView
             ->select(DB::raw($bills_of_exchanges_select));
         $documents = DB::connection('tenant')
             ->table('documents')
-            //->where('customer_id', $customer_id)
             ->join('persons', 'persons.id', '=', 'documents.customer_id')
             ->join('users', 'users.id', '=', 'documents.user_id')
             ->leftJoinSub($document_payments, 'payments', function ($join) {
                 $join->on('documents.id', '=', 'payments.document_id');
             })
-            // ->leftJoinSub($bill_of_exchanges, 'bills', function ($join) {
-            //     $join->on('documents.id', '=', 'bills.document_id');
-            // })
             ->leftJoinSub(Document::getQueryCreditNotes(), 'credit_notes', function ($join) {
                 $join->on('documents.id', '=', 'credit_notes.affected_document_id');
             })
+            ->whereNotExists(function ($query) {
+                $query->select(DB::raw('sale_notes.id'))
+                    ->from('sale_notes')
+                    ->whereRaw('sale_notes.id = documents.sale_note_id')
+                    ->where(function ($query) {
+                        $query->where('sale_notes.total_canceled', true)
+                            ->orWhere('sale_notes.paid', true);
+                    });
+            })
+
+
             ->whereIn('state_type_id', ['01', '03', '05', '07', '13'])
             ->whereIn('document_type_id', ['01', '03', '08'])
             ->select(DB::raw($document_select));
@@ -375,7 +383,7 @@ class DashboardView
         // dd($documents->get());
         // dd($documents->toSql());
 
-        if ($stablishmentUnpaidAll !== 1) {
+        if ($stablishmentUnpaidAll !== 1 && $stablishmentUnpaidAll !== "1") {
             $documents->where('documents.establishment_id', $establishment_id);
         }
 
@@ -406,7 +414,7 @@ class DashboardView
             ->where('sale_notes.changed', false)
             ->where('sale_notes.total_canceled', false);
 
-        if ($stablishmentUnpaidAll !== 1) {
+            if ($stablishmentUnpaidAll !== 1 && $stablishmentUnpaidAll !== "1") {
             $sale_notes
                 ->where('sale_notes.establishment_id', $establishment_id);
         }

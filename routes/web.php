@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Tenant\AdvancesController;
 use App\Http\Controllers\Tenant\BillOfExchangeController;
 use App\Http\Controllers\Tenant\BillOfExchangePayController;
 use App\Http\Controllers\Tenant\MultiCompanyController;
@@ -877,7 +878,24 @@ if ($hostname) {
             Route::get('pos/validate_stock/{item}/{quantity}', 'Tenant\PosController@validate_stock');
             Route::get('pos/items', 'Tenant\PosController@item');
             Route::get('pos/search_items_cat', 'Tenant\PosController@search_items_cat');
-
+            Route::prefix('advances')->group(function (){
+                Route::get('/', [AdvancesController::class, 'index'])->name('tenant.advances.index')
+                ;
+                Route::post('/', [AdvancesController::class, 'store']);
+                Route::get('/records', [AdvancesController::class, 'records']);
+                Route::get('/record/{id}', [AdvancesController::class, 'record']);
+                Route::post('/advance_document', [AdvancesController::class, 'advanceDocument']);
+                Route::get('/columns', [AdvancesController::class, 'columns']);
+                Route::get('/type/{type}', [AdvancesController::class, 'index'])->name('tenant.advances.index');
+                Route::delete('/{id}', [AdvancesController::class, 'destroy']);
+                Route::get('/persons/{type}', [AdvancesController::class, 'persons']);
+                Route::get('/get-advance/{person_id}', [AdvancesController::class, 'getAdvance']);
+                Route::get('report-a4/{cash}', [AdvancesController::class,'reportA4']);
+                Route::get('report-ticket/{cash}/{format?}', [AdvancesController::class, 'reportTicket']);
+                Route::get('report-excel/{cash}', [AdvancesController::class, 'reportExcel']);
+                Route::get('simple/report-a4/{cash}', [AdvancesController::class, 'reportSimpleA4']);
+                // Route::get('report-cash-income-egress/{cash}', [AdvancesController::class, 'reportCashIncomeEgress']);
+            });
             Route::get('cash', 'Tenant\CashController@index')->name('tenant.cash.index');
             Route::get('cash/get_cash/{user_id}', 'Tenant\CashController@getCashSeller');
             Route::get('cash/columns', 'Tenant\CashController@columns');

@@ -635,10 +635,13 @@ class User extends Authenticatable
             'type',
             ['seller']
         );
-        $query->orWhere(
-            'id',
-            auth()->user()->id
-        );
+        if (auth()->user()) {
+            $query->orWhere(
+                'id',
+                auth()->user()->id
+            );
+        }
+
         return  $query;
     }
 

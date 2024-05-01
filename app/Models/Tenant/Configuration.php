@@ -141,6 +141,7 @@ use App\Models\Tenant\Skin;
 class Configuration extends ModelTenant
 {
     protected $fillable = [
+        'current_cash_destination_duplicate',
         'sellers_see_history',
         'modify_purchase_unit_price',
         'modify_item_stock',
@@ -352,6 +353,7 @@ class Configuration extends ModelTenant
     ];
 
     protected $casts = [
+        'current_cash_destination_duplicate' => 'boolean',
         'sellers_see_history' => 'boolean',
         'modify_purchase_unit_price' => 'boolean',
         'modify_item_stock' => 'boolean',
@@ -619,6 +621,7 @@ class Configuration extends ModelTenant
         $currency = CurrencyType::all();
         $skins = Skin::all();
         return [
+            'current_cash_destination_duplicate' => (bool) $this->current_cash_destination_duplicate,
             'sellers_see_history' => (bool) $this->sellers_see_history,
             'modify_purchase_unit_price' => (bool) $this->modify_purchase_unit_price,
             'modify_item_stock' => (bool) $this->modify_item_stock,

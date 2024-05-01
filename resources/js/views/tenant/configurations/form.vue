@@ -2106,10 +2106,9 @@
                                     ></small>
                                 </div>
                             </div>
-    <div class="col-md-6 mt-4">
+                            <div class="col-md-6 mt-4">
                                 <label class="control-label">
                                     Modificar precio de compra - documentos
-                                    
                                 </label>
 
                                 <div
@@ -2120,8 +2119,12 @@
                                     class="form-group"
                                 >
                                     <el-switch
-                                        :disabled="!form.show_purchase_unit_price"
-                                        v-model="form.modify_purchase_unit_price"
+                                        :disabled="
+                                            !form.show_purchase_unit_price
+                                        "
+                                        v-model="
+                                            form.modify_purchase_unit_price
+                                        "
                                         active-text="Si"
                                         inactive-text="No"
                                         @change="submit"
@@ -2201,10 +2204,9 @@
                                     ></small>
                                 </div>
                             </div>
-                                    <div class="col-md-6 mt-4">
+                            <div class="col-md-6 mt-4">
                                 <label class="control-label">
                                     Modificar stock item - documentos
-                                
                                 </label>
 
                                 <div
@@ -2227,20 +2229,19 @@
                                     ></small>
                                 </div>
                             </div>
-                                        <div class="col-md-6 mt-4">
+                            <div class="col-md-6 mt-4">
                                 <label class="control-label">
                                     Mostrar historial de productos - vendedores
-                                
                                 </label>
 
                                 <div
                                     :class="{
-                                        'has-danger': errors.sellers_see_history,
+                                        'has-danger':
+                                            errors.sellers_see_history,
                                     }"
                                     class="form-group"
                                 >
                                     <el-switch
-                                        
                                         v-model="form.sellers_see_history"
                                         active-text="Si"
                                         inactive-text="No"
@@ -2250,6 +2251,62 @@
                                         v-if="errors.sellers_see_history"
                                         class="text-danger"
                                         v-text="errors.sellers_see_history[0]"
+                                    ></small>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 mt-4">
+                                <label class="control-label">
+                                    Destino pagos - documentos duplicados
+                                    <i
+                                        class="fa fa-info-circle"
+                                        data-toggle="tooltip"
+                                        data-placement="top"
+                                        title="Elegir la caja a la cual irán los pagos del documento duplicado"
+                                    ></i>
+                                </label>
+
+                                <div
+                                    :class="{
+                                        'has-danger':
+                                            errors.current_cash_destination_duplicate,
+                                    }"
+                                    class="form-group"
+                                >
+                                    <el-select
+                                        v-model="
+                                            form.current_cash_destination_duplicate
+                                        "
+                                        @change="submit"
+                                    >
+                                        <el-option
+                                            v-for="(destination, idx) in [
+                                                {
+                                                    id: 1,
+                                                    description: 'Caja actual',
+                                                    value: true,
+                                                },
+                                                {
+                                                    id: 2,
+                                                    description:
+                                                        'Caja del documento original',
+                                                    value: false,
+                                                },
+                                            ]"
+                                            :key="idx"
+                                            :label="destination.description"
+                                            :value="destination.value"
+                                        ></el-option>
+                                    </el-select>
+                                    <small
+                                        v-if="
+                                            errors.current_cash_destination_duplicate
+                                        "
+                                        class="text-danger"
+                                        v-text="
+                                            errors
+                                                .current_cash_destination_duplicate[0]
+                                        "
                                     ></small>
                                 </div>
                             </div>

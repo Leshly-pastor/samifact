@@ -95,12 +95,133 @@ export const functions = {
         },
     },
 };
+export const advance = {
+    methods: {
+        saveAdvanceDocument() {
+            this.$http
+                .post(`/advances/advance_document`, this.form_cash_document)
+                .then((response) => {
+                    if (!response.data.success) {
+                        this.$message.error(response.data.message);
+                    }
+                })
+                .catch((error) => console.log(error));
+        },
+        enoughAdvance(base="form") {
+            let advance = this.payment_destinations.find(
+                (payment) => payment.id == "advance"
+            );
+            let [payment] = this[base].payments;
+
+            let final_balance = advance.final_balance;
+            let payment_amount = payment.payment;
+
+            return final_balance >= payment_amount;
+        },
+        payWithAdvanceDocument(personProp = "customer_id") {
+            let result = undefined;
+            if (this.document.payments.length == 1) {
+                let [payment] = this.document.payments;
+                if (payment.payment_destination_id == "advance") {
+                    let advance = this.payment_destinations.find(
+                        (payment) => payment.id == "advance"
+                    );
+                    let person_id = undefined;
+                    if(this.document[personProp] != undefined){
+                        person_id = this.document[personProp];
+                    }
+
+                    this.document.payments[0].person_id = person_id;
+                    result = advance.advance_id;
+                }
+            }
+            this.form_cash_document.advance_id = null;
+            return result;
+        },
+        payWithAdvance(personProp = "customer_id") {
+            let result = undefined;
+            if (this.form.payments.length == 1) {
+                let [payment] = this.form.payments;
+                if (payment.payment_destination_id == "advance") {
+                    let advance = this.payment_destinations.find(
+                        (payment) => payment.id == "advance"
+                    );
+                    let person_id = undefined;
+                    if(this.form[personProp] != undefined){
+                        person_id = this.form[personProp];
+                    }else if (this.document && this.document[personProp] != undefined){
+                        person_id = this.document[personProp];
+                        
+                    }
+
+                    this.form.payments[0].person_id = person_id;
+                    result = advance.advance_id;
+                }
+            }
+            this.form_cash_document.advance_id = null;
+            return result;
+        },
+        removeAdvanceFromDestinations() {
+            this.payment_destinations = this.payment_destinations.filter(
+                (payment) => payment.id !== "advance"
+            );
+            console.log("🚀 ~ removeAdvanceFromDestinations ~ this.payment_destinations:", this.payment_destinations)
+        },
+        checkHasAdvance(idx) {
+            if (this.form.payments.length > 1) {
+                let payment = this.form.payments[idx];
+                let payment_destination_id = payment.payment_destination_id;
+                if (payment_destination_id === "advance") {
+                    this.$message({
+                        showClose: true,
+                        type: "warning",
+                        message:
+                            "No se puede seleccionar 'adelanto' en una forma de pago diferente a las demás.",
+                    });
+                    //elige otro destino pero que no sea el que tenga el id "advance"
+                    let other = this.payment_destinations.find(
+                        (payment) => payment.id !== "advance"
+                    );
+                    this.form.payments[idx].payment_destination_id = other
+                        ? other.id
+                        : other;
+
+                    return false;
+                }
+            }
+            return true;
+        },
+        async getAdvance(personId) {
+            this.removeAdvanceFromDestinations();
+            const response = await this.$http(
+                `/advances/get-advance/${personId}`
+            );
+            if (response.status === 200) {
+                let { data } = response;
+                let { success } = data;
+                if (success) {
+                    this.payment_destinations.unshift(data);
+                } else {
+                    this.payment_destinations =
+                        this.payment_destinations.filter((payment) => {
+                            return payment.id !== "advance";
+                        });
+
+                    this.form.payments.map((payment) => {
+                        payment.payment_destination_id =
+                            this.payment_destinations[0].id;
+                    });
+                }
+            }
+        },
+    },
+};
 export const cash = {
     methods: {
         async getCash(user_id) {
-            let {admin_seller_cash} = this.configuration;
+            let { admin_seller_cash } = this.configuration;
             console.log(admin_seller_cash);
-            if(!admin_seller_cash || this.typeUser != "admin") return;
+            if (!admin_seller_cash || this.typeUser != "admin") return;
             const response = await this.$http.get("/cash/get_cash/" + user_id);
             let error = false;
             if (response.status === 200) {

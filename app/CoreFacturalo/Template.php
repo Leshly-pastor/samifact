@@ -15,7 +15,15 @@ class Template
         }
 
         $path_template =  $this->validate_template($base_template, $template, $format_pdf);
-        // Log::info($document);
+        if(isset($document->document_type_id) && $document->document_type_id === '01'|| $document->document_type_id === '03') {
+            $sale_note = $document->sale_note;
+            if($sale_note){
+                if( $sale_note->total_canceled == 1 || $sale_note->paid == 1 && count($document->payments) == 0){
+                    $payments = $sale_note->payments;
+                    $document->setRelation('payments', $payments);
+                }
+            }
+        }
         return self::render($path_template, $company, $document);
     }
 

@@ -1,8 +1,5 @@
 <template>
     <div class="card mb-0 pt-2 pt-md-0" v-loading="loading">
-        <!-- <div class="card-header">
-            <h3 class="my-0">Nuevo Comprobante</h3>
-        </div> -->
         <div class="tab-content" v-if="loading_form">
             <div class="invoice">
                 <header class="clearfix">
@@ -574,7 +571,7 @@
                                             >
                                                 Referencia
                                             </th>
-                                                <th
+                                            <th
                                                 v-if="form.payments.length > 0"
                                                 class="pb-2"
                                             >
@@ -588,6 +585,7 @@
                                             </th>
                                             <th width="15%">
                                                 <a
+                                                    v-if="!blockAddPayments"
                                                     href="#"
                                                     @click.prevent="
                                                         clickAddPayment
@@ -636,6 +634,11 @@
                                                             row.payment_destination_id
                                                         "
                                                         filterable
+                                                        @change="
+                                                            changePaymentDestination(
+                                                                index
+                                                            )
+                                                        "
                                                     >
                                                         <el-option
                                                             v-for="(
@@ -659,7 +662,7 @@
                                                     ></el-input>
                                                 </div>
                                             </td>
-                                                <td>
+                                            <td>
                                                 <div
                                                     class="form-group mb-2 mr-2"
                                                 >
@@ -1342,7 +1345,7 @@ import TermsCondition from "./partials/terms_condition.vue";
 import QuotationFormItem from "./partials/item.vue";
 import PersonForm from "../persons/form.vue";
 import QuotationOptions from "../quotations/partials/options.vue";
-import { functions, exchangeRate } from "../../../mixins/functions";
+import { functions, exchangeRate, advance } from "../../../mixins/functions";
 import {
     calculateRowItem,
     showNamePdfOfDescription,
@@ -1371,9 +1374,10 @@ export default {
         "vue-ckeditor": VueCkeditor.component,
         ResultExcelProducts,
     },
-    mixins: [functions, exchangeRate],
+    mixins: [functions, exchangeRate, advance],
     data() {
         return {
+            form_cash_document:{},
             companies: [],
             business_turns: [],
             loading: false,
@@ -1490,10 +1494,20 @@ export default {
         await this.createQuotationFromSO();
     },
     computed: {
+        blockAddPayments() {
+            return (
+                this.form.payments.filter(
+                    (payment) => payment.payment_destination_id === "advance"
+                ).length > 0
+            );
+        },
         ...mapState(["config"]),
     },
     mounted() {},
     methods: {
+        changePaymentDestination(index) {
+            this.checkHasAdvance(index);
+        },
         async changeCompany() {
             try {
                 this.loading = true;
@@ -1809,6 +1823,7 @@ export default {
             this.showDialogAddItem = true;
         },
         changeCustomer() {
+            this.getAdvance(this.form.customer_id);
             this.customer_addresses = [];
             let customer = _.find(this.customers, {
                 id: this.form.customer_id,
@@ -1941,6 +1956,7 @@ export default {
             }
         },
         initForm() {
+            this.form_cash_document = {};
             this.errors = {};
             this.form = {
                 series_id: null,
@@ -2272,6 +2288,15 @@ export default {
             };
         },
         async submit() {
+            let payWithAdvance = this.payWithAdvance();
+            if (payWithAdvance) {
+                let enoughAdvance = this.enoughAdvance();
+                if (!enoughAdvance) {
+                    return this.$message.error(
+                        "El monto del anticipo no es suficiente para realizar la venta"
+                    );
+                }
+            }
             if (this.configuration.multi_companies) {
                 if (!this.form.company_id) {
                     return this.$message.error(
@@ -2310,7 +2335,14 @@ export default {
                     if (response.data.success) {
                         this.resetForm();
                         this.quotationNewId = response.data.data.id;
-                        this.saveCashDocument(this.quotationNewId);
+                        if (payWithAdvance) {
+                            this.form_cash_document.quotation_id =
+                                this.quotationNewId;
+                            this.form_cash_document.advance_id = payWithAdvance;
+                            this.saveAdvanceDocument();
+                        } else {
+                            this.saveCashDocument(this.quotationNewId);
+                        }
 
                         if (this.saleOpportunityId) {
                             this.$message.success(

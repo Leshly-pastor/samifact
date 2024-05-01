@@ -43,6 +43,7 @@ use App\CoreFacturalo\Services\Helpers\SendDocumentPse;
 use App\CoreFacturalo\WS\Validator\XmlErrorCodeProvider;
 use App\Models\Tenant\Catalogs\UnitType;
 use App\Models\Tenant\DispatchRelated;
+use App\Models\Tenant\DocumentPayment;
 use App\Models\Tenant\Item;
 use App\Models\Tenant\ItemSeller;
 use App\Models\Tenant\ItemUnitType;
@@ -53,6 +54,7 @@ use App\Services\PseServiceDispatch;
 use Carbon\Carbon;
 use GuzzleHttp\Client;
 use Illuminate\Support\Facades\Log;
+use Modules\Finance\Models\GlobalPayment;
 use Modules\Suscription\Models\Tenant\SuscriptionPayment;
 
 /**
@@ -268,7 +270,7 @@ class Facturalo
                     $this->documents->ticket_single_shipment = 0;
                     $this->documents->number = (int) $doc->number + 1;
                     $this->documents->hash = null;
-                    $this->documents->qr = null;
+                    // $this->documents->qr = null;
                     $this->documents->state_type_id = '01';
                     $company = Company::first();
                     $filename = Functions::filename($company, $this->documents->document_type_id, $this->documents->series, $this->documents->number);
@@ -1111,13 +1113,13 @@ class Facturalo
     public function onlySenderXmlSignedBill()
     {
         $res = $this->senderXmlSigned();
-        
+
         //Log::info($res);
         if ($res->isSuccess()) {
 
             $cdrResponse = $res->getCdrResponse();
             $beta = $cdrResponse->getIsBeta();
-            if($beta && !$this->isDemo) {
+            if ($beta && !$this->isDemo) {
                 $this->response = [
                     'sent' => true,
                     'code' => "0000",
@@ -1134,7 +1136,7 @@ class Facturalo
 
             $code = $cdrResponse->getCode();
             $description = $cdrResponse->getDescription();
-            Log::info($code." ".$description);
+            Log::info($code . " " . $description);
             $this->response = [
                 'sent' => true,
                 'code' => $cdrResponse->getCode(),
@@ -1376,6 +1378,7 @@ class Facturalo
             $this->response = [
                 'sent' => true,
                 'code' => $cdrResponse->getCode(),
+            // para carga de voucher
                 'description' => $cdrResponse->getDescription(),
                 'notes' => $cdrResponse->getNotes()
             ];
@@ -1515,10 +1518,9 @@ class Facturalo
 
         $total = $document->total;
         $balance = $total - collect($payments)->sum('payment');
-
         $search_cash = ($balance < 0) ? collect($payments)->firstWhere('payment_method_type_id', '01') : null;
         $this->apply_change = false;
-
+        $configuration = Configuration::first();
         if ($balance < 0 && $search_cash) {
             $payments = collect($payments)->map(function ($row) use ($balance) {
 
@@ -1546,7 +1548,6 @@ class Facturalo
                 ];
             });
         }
-
         foreach ($payments as $row) {
 
             if ($balance < 0 && !$this->apply_change) {
@@ -1572,6 +1573,20 @@ class Facturalo
             //considerar la creacion de una caja chica cuando recien se crea el cliente
             if (isset($row['payment_destination_id'])) {
                 $this->createGlobalPayment($record, $row);
+            } else {
+                if ($configuration->current_cash_destination_duplicate) {
+                    $row['payment_destination_id'] = 'cash';
+                    $this->createGlobalPayment($record, $row);
+                } else {
+                    $global_payment = GlobalPayment::where('payment_id', $row['id'])
+                        ->where('payment_type', DocumentPayment::class)
+                        ->first();
+                    if($global_payment){
+                        $global_payment_replicate = $global_payment->replicate();
+                        $global_payment_replicate->payment_id = $record->id;
+                        $global_payment_replicate->save();
+                    }
+                }
             }
         }
     }
@@ -1620,11 +1635,10 @@ class Facturalo
                 $this->apply_change = true;
             }
             $record = $document->payments()->create($row);
-
-            // para carga de voucher
             $this->saveFilesFromPayments($row, $record, 'documents');
-
-            //considerar la creacion de una caja chica cuando recien se crea el cliente
+            
+            // $customer_id = $document->customer_id;
+            // $row['person_id'] = $customer_id;
             if (isset($row['payment_destination_id'])) {
                 $this->createGlobalPayment($record, $row);
             }

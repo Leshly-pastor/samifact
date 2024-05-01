@@ -1262,7 +1262,7 @@ class DocumentController extends Controller
                 $facturalo->setActions(['send_xml_signed' => (bool) $configuration->send_auto]);
             }
             $facturalo->updateHash();
-            $facturalo->updateQr();
+            // $facturalo->updateQr();
             if ($duplicate == true) {
                 $facturalo->createPdf($result, $type, $format);
             } else {

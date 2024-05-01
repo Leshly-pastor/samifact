@@ -2,18 +2,20 @@
 
 namespace App\Http\Controllers\Tenant\Api;
 
+use App\CoreFacturalo\Requests\Inputs\Functions;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use App\Models\Tenant\{
     Quotation,
-    Company
+    Company,
+    Series
 };
 use App\Http\Resources\Tenant\QuotationCollection;
 use App\Http\Controllers\Tenant\QuotationController as QuotationControllerWeb;
 use App\Mail\Tenant\QuotationEmail;
 use App\Http\Controllers\Tenant\EmailController;
-
+use Modules\Document\Models\SeriesConfiguration;
 
 class QuotationController extends Controller
 {
@@ -46,8 +48,31 @@ class QuotationController extends Controller
          DB::connection('tenant')->transaction(function () use ($request) {
             $quotation_web = new QuotationControllerWeb;
             $data = $quotation_web->mergeData($request);
+            $series = Functions::valueKeyInArray($data, "prefix", null);
+            $series_id = Functions::valueKeyInArray($data, "series_id", null);
             $data['terms_condition'] = $quotation_web->getTermsCondition();
-
+            if ($series_id) {
+                $series_configuration = Series::find($series_id);
+                $data["prefix"] = $series_configuration->number;
+            }
+            if (Quotation::count() == 0 && $series) {
+                $series_configuration = SeriesConfiguration::where([['document_type_id', "COT"], ['series', $series]])->first();
+                $number = $series_configuration->number ?? 1;
+                $data["id"] = $number;
+                $data["number"] = $number;
+            }
+            $number = Functions::valueKeyInArray($data, "number", null);
+            if (!$number) {
+                //get last id from table
+                $last_id = Quotation::where('prefix', $data["prefix"])->orderBy('id', 'desc')->first();
+                if ($last_id) {
+                    if ($last_id->number) {
+                        $data["number"] = $last_id->number + 1;
+                    } else {
+                        $data["number"] = $last_id->id + 1;
+                    }
+                }
+            }
             $this->quotation =  Quotation::create($data);
 
             foreach ($data['items'] as $row) {
@@ -63,6 +88,7 @@ class QuotationController extends Controller
         return [
             'success' => true,
             'data' => [
+                'id' => $this->quotation->id,
                 'number_full' => $this->quotation->number_full,
                 'external_id' => $this->quotation->external_id,
                 'filename' => $this->quotation->filename,

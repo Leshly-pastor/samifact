@@ -451,6 +451,7 @@ Vue.component(
     "tenant-pos-index",
     require("./views/tenant/pos/index.vue").default
 );
+Vue.component("advances-index", require("./views/tenant/advances/index.vue").default);
 Vue.component("cash-index", require("./views/tenant/cash/index.vue").default);
 Vue.component(
     "tenant-card-brands-index",

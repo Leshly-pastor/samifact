@@ -77,6 +77,9 @@ class UnpaidCollection extends ResourceCollection
                 $document = SaleNote::find($row->id);
                 $web_platforms = $document->getPlatformThroughItems();
                 $purchase_order = $document->purchase_order;
+                if($document->due_date){
+                    $date_of_due = $document->due_date->format('Y/m/d');
+                }
             } 
             elseif ($row->type == 'bill_of_exchange'){
                 $document = BillOfExchange::find($row->id);

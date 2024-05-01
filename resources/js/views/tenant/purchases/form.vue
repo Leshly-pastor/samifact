@@ -30,7 +30,12 @@
                                             option, index
                                         ) in document_types"
                                         :key="index"
-                                        :label="option.description == 'NOTA DE ENTRADA' ? 'NOTA DE VENTA':option.description"
+                                        :label="
+                                            option.description ==
+                                            'NOTA DE ENTRADA'
+                                                ? 'NOTA DE VENTA'
+                                                : option.description
+                                        "
                                         :value="option.id"
                                     ></el-option>
                                 </el-select>
@@ -355,15 +360,6 @@
                         </template>
                         <div class="col-12">&nbsp;</div>
 
-                        <div class="col-md-3 mt-2 mb-2">
-                            <div class="form-group">
-                                <el-checkbox
-                                    v-model="form.purchase_period"
-                                    @change="changeHasClient"
-                                    >¿Desea aplicar la compra para otro periodo?
-                                </el-checkbox>
-                            </div>
-                        </div>
                         <div class="col-md-3">
                             <div class="form-group">
                                 <label for="const_detraccion">
@@ -399,6 +395,16 @@
                                     v-model="form.percentage_detraccion"
                                     placeholder="Porcentaje Detracción"
                                 ></el-input>
+                            </div>
+                        </div>
+                        <div class="col-md-3"></div>
+                        <div class="col-md-8 mt-2 mb-2">
+                            <div class="form-group">
+                                <el-checkbox
+                                    v-model="form.purchase_period"
+                                    @change="changeHasClient"
+                                    >¿Desea aplicar la compra para otro periodo?
+                                </el-checkbox>
                             </div>
                         </div>
 
@@ -558,7 +564,7 @@
                                                 >
                                                     Referencia
                                                 </th>
-                                                    <th
+                                                <th
                                                     v-if="
                                                         form.payments.length > 0
                                                     "
@@ -576,6 +582,7 @@
                                                 </th>
                                                 <th width="15%">
                                                     <a
+                                                        v-if="!blockAddPayments"
                                                         class="text-center font-weight-bold text-info"
                                                         href="#"
                                                         @click.prevent="
@@ -631,6 +638,7 @@
                                                                 row.payment_destination_id
                                                             "
                                                             filterable
+                                                            @change="changePaymentDestination(index)"
                                                         >
                                                             <el-option
                                                                 v-for="(
@@ -658,14 +666,12 @@
                                                         ></el-input>
                                                     </div>
                                                 </td>
-                                                    <td>
+                                                <td>
                                                     <div
                                                         class="form-group mb-2 mr-2"
                                                     >
                                                         <el-input
-                                                            v-model="
-                                                                row.glosa
-                                                            "
+                                                            v-model="row.glosa"
                                                         ></el-input>
                                                     </div>
                                                 </td>
@@ -1420,6 +1426,7 @@ import {
     functions,
     fnPaymentsFee,
     operationsForDiscounts,
+    advance,
 } from "../../../mixins/functions";
 import {
     calculateRowItem,
@@ -1443,8 +1450,21 @@ export default {
         InputLotGroup,
         ResultExcelProducts,
     },
-    mixins: [functions, exchangeRate, fnPaymentsFee, operationsForDiscounts],
+    mixins: [
+        functions,
+        exchangeRate,
+        fnPaymentsFee,
+        operationsForDiscounts,
+        advance,
+    ],
     computed: {
+        blockAddPayments() {
+            return (
+                this.form.payments.filter(
+                    (payment) => payment.payment_destination_id === "advance"
+                ).length > 0
+            );
+        },
         ...mapState(["config", "establishment", "hasGlobalIgv"]),
         creditPaymentMethod: function () {
             return _.filter(this.payment_method_types, { is_credit: true });
@@ -1467,6 +1487,7 @@ export default {
     },
     data() {
         return {
+            form_cash_document:{},
             hash: null,
             showResultExcelProducts: false,
             registered: 0,
@@ -1533,7 +1554,7 @@ export default {
                 this.currency_types = data.currency_types;
                 this.payment_conditions = data.payment_conditions;
                 // this.establishment = data.establishment
-                 this.affectation_igv_types = data.affectation_igv_types;
+                this.affectation_igv_types = data.affectation_igv_types;
                 this.all_suppliers = data.suppliers;
                 this.discount_types = data.discount_types;
                 this.payment_method_types = data.payment_method_types;
@@ -1593,6 +1614,9 @@ export default {
         this.initGlobalIgv();
     },
     methods: {
+        changePaymentDestination(index){
+                this.checkHasAdvance(index);
+        },
         async uploadFileNewItems(event) {
             let file = event.target.files[0];
 
@@ -2161,6 +2185,7 @@ export default {
             }
         },
         changeSupplier() {
+            this.getAdvance(this.form.supplier_id);
             this.calculatePerception();
         },
         filterSuppliers() {
@@ -2181,6 +2206,7 @@ export default {
             this.aux_supplier_id = null;
         },
         initForm() {
+            this.form_cash_document = {};
             this.errors = {};
             this.form = {
                 const_detraccion: null,
@@ -2322,7 +2348,7 @@ export default {
         },
 
         addRow(row) {
-            console.log("🚀 ~ file: form.vue:2303 ~ addRow ~ row:", row)
+            console.log("🚀 ~ file: form.vue:2303 ~ addRow ~ row:", row);
             if (this.form.igv_10) {
                 row = this.changePercentageIgv(row);
             }
@@ -2512,7 +2538,34 @@ export default {
                 message: message,
             };
         },
+        async saveCashDocument(purchase_id) {
+            if (!this.id) {
+                await this.$http
+                    .post(`/cash/cash_document`, {
+                         purchase_id,
+                    })
+                    .then((response) => {
+                        if (response.data.success) {
+                            // console.log(response)
+                        } else {
+                            this.$message.error(response.data.message);
+                        }
+                    })
+                    .catch((error) => {
+                        console.log(error);
+                    });
+            }
+        },
         async submit() {
+            let payWithAdvance = this.payWithAdvance("supplier_id");
+            if (payWithAdvance) {
+                let enoughAdvance = this.enoughAdvance();
+                if (!enoughAdvance) {
+                    return this.$message.error(
+                        "El monto del anticipo no es suficiente para realizar la venta"
+                    );
+                }
+            }
             let validate_item_series = await this.validationItemSeries();
             if (!validate_item_series.success) {
                 return this.$message.error(validate_item_series.message);
@@ -2551,11 +2604,20 @@ export default {
                                 duration: 2 * 3000,
                                 type: "success",
                             });
-
                             this.close();
                         } else {
-                            this.resetForm();
                             this.purchaseNewId = response.data.data.id;
+                            if(payWithAdvance){
+                                this.form_cash_document.purchase_id = this.purchaseNewId;
+                                this.form_cash_document.advance_id = payWithAdvance;
+                                console.log("🚀 ~ .then ~ this.form_cash_document:", JSON.stringify(this.form_cash_document))
+                                
+                                this.saveAdvanceDocument();
+                            }else{
+                                this.saveCashDocument(response.data.data.id);
+                            }
+                            this.resetForm();
+
                             this.showDialogOptions = true;
                         }
                     } else {

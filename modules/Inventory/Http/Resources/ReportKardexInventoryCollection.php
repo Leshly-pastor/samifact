@@ -53,7 +53,7 @@ class ReportKardexInventoryCollection extends ResourceCollection
                 $cpe_input = ($row->quantity > 0) ?  (isset($row->inventory_kardexable->sale_note_id) || isset($row->inventory_kardexable->order_note_id) ? "-" : $row->quantity):"-";
                 $cpe_output = ($row->quantity < 0) ?  (isset($row->inventory_kardexable->sale_note_id) || isset($row->inventory_kardexable->order_note_id) ? "-" : $row->quantity):"-";
                 $cpe_discounted_stock = false;
-                $cpe_doc_asoc = isset($row->inventory_kardexable->note) ? $row->inventory_kardexable->note->affected_document->getNumberFullAttribute() : '-';
+                $cpe_doc_asoc = isset($row->inventory_kardexable->note) && isset($row->inventory_kardexable->note->affected_document) ? $row->inventory_kardexable->note->affected_document->getNumberFullAttribute() : '-';
                 if(isset($row->inventory_kardexable->dispatch)){
                     if($row->inventory_kardexable->dispatch->transfer_reason_type->discount_stock){
                         // $cpe_input = '-';

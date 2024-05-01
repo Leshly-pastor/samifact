@@ -14,46 +14,47 @@
                 class="right-wrapper pull-right"
                 v-if="typeUser != 'integrator'"
             >
-                <span v-if="import_documents == true">
-                    <button
-                        type="button"
-                        class="btn btn-custom btn-sm mt-2 mr-2"
-                        @click.prevent="clickImport()"
-                    >
-                        <i class="fa fa-upload"></i> Importar Formato 1
-                    </button>
-                </span>
-                <span v-if="import_documents_second == true">
-                    <button
-                        type="button"
-                        class="btn btn-custom btn-sm mt-2 mr-2"
-                        @click.prevent="clickImportSecond()"
-                    >
-                        <i class="fa fa-upload"></i> Importar Formato 2
-                    </button>
-                </span>
-                <span v-if="document_import_excel">
-                    <button
-                        type="button"
-                        class="btn btn-custom btn-sm mt-2 mr-2"
-                        @click.prevent="clickImportExcel"
-                    >
-                        <i class="fa fa-upload"></i> Importar Formato
-                    </button>
-                </span>
-                    <a
-                    v-if="!isComercial"
-                    :href="`/${resource}/note_other`"
-                    class="btn btn-custom btn-sm mt-2 mr-2"
-                    ><i class="fa fa-plus-circle"></i> Nueva Nota dcto externo</a
-                >
-                <a
-                    v-if="!isComercial"
-                    :href="`/${resource}/create`"
-                    class="btn btn-custom btn-sm mt-2 mr-2"
-                    ><i class="fa fa-plus-circle"></i> Nuevo</a
-                >
                 <div class="btn-group flex-wrap" v-if="!isComercial">
+                    <span v-if="import_documents == true">
+                        <button
+                            type="button"
+                            class="btn btn-custom btn-sm mt-2 mr-2"
+                            @click.prevent="clickImport()"
+                        >
+                            <i class="fa fa-upload"></i> Importar Formato 1
+                        </button>
+                    </span>
+                    <span v-if="import_documents_second == true">
+                        <button
+                            type="button"
+                            class="btn btn-custom btn-sm mt-2 mr-2"
+                            @click.prevent="clickImportSecond()"
+                        >
+                            <i class="fa fa-upload"></i> Importar Formato 2
+                        </button>
+                    </span>
+                    <span v-if="document_import_excel">
+                        <button
+                            type="button"
+                            class="btn btn-custom btn-sm mt-2 mr-2"
+                            @click.prevent="clickImportExcel"
+                        >
+                            <i class="fa fa-upload"></i> Importar Formato
+                        </button>
+                    </span>
+                    <a
+                        v-if="!isComercial"
+                        :href="`/${resource}/note_other`"
+                        class="btn btn-custom btn-sm mt-2 mr-2"
+                        ><i class="fa fa-plus-circle"></i> Nota dcto
+                        externo</a
+                    >
+                    <a
+                        v-if="!isComercial"
+                        :href="`/${resource}/create`"
+                        class="btn btn-custom btn-sm mt-2 mr-2"
+                        ><i class="fa fa-plus-circle"></i> Nuevo</a
+                    >
                     <button
                         type="button"
                         class="btn btn-custom btn-sm mt-2 mr-2 dropdown-toggle"
@@ -107,7 +108,7 @@
                 </div>
             </div>
         </div>
-        <div class="card mb-0">
+        <div class="card mb-0 w-100">
             <!--
             <div class="data-table-visible-columns">
 
@@ -322,9 +323,15 @@
                             {{ row.date_of_due }}
                         </td>
                         <td v-if="configuration.multi_companies">
-                            <template v-if="row.alter_company && row.alter_company.name && row.alter_company.number">
+                            <template
+                                v-if="
+                                    row.alter_company &&
+                                    row.alter_company.name &&
+                                    row.alter_company.number
+                                "
+                            >
                                 <strong>
-                                {{ row.alter_company.name.toUpperCase() }}
+                                    {{ row.alter_company.name.toUpperCase() }}
                                 </strong>
                                 <br />
                                 <small>
@@ -780,7 +787,8 @@
                                 @click.prevent="clickKillDocument(row.id)"
                                 v-if="
                                     configuration.delete_documents &&
-                                    !isComercial && !isOptometry
+                                    !isComercial &&
+                                    !isOptometry
                                 "
                             >
                                 ELIMINAR

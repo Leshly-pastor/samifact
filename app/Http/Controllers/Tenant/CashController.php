@@ -448,6 +448,7 @@ class CashController extends Controller
                 'sale_note_id' => $request->sale_note_id,
                 'quotation_id' => $request->quotation_id,
                 'package_handler_id' => $request->package_handler_id,
+                'purchase_id' => $request->purchase_id,
             ];
 
             $cash->cash_documents()->updateOrCreate($req);

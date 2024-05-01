@@ -1,20 +1,24 @@
 <?php
 
+use App\Http\Controllers\Tenant\QuotationController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Modules\Order\Http\Controllers\Api\OrderNoteController;
+use Modules\Order\Http\Controllers\OrderNoteController as ControllersOrderNoteController;
+use Modules\Finance\Http\Controllers\UnpaidController;
 Route::get('generate_token', 'Tenant\Api\AppController@getSeries');
 $hostname = app(Hyn\Tenancy\Contracts\CurrentHostname::class);
 if ($hostname) {
     Route::domain($hostname->fqdn)->group(function () {
 
-        
+
 
         Route::post('login', 'Tenant\Api\AppController@login');
         Route::get('qz/crt/override', function () {
 
             return file_get_contents('qz/crt/override.crt');
         });
-        
+
         Route::post('qz/signing', function (Request $request) {
             $KEY = file_get_contents('qz/signing/key.pem');
             $req = $request->input('request');
@@ -29,7 +33,7 @@ if ($hostname) {
         });
         //app loreto inventario
         Route::prefix('inventory')->group(function () {
-          Route::get('search_items', '\modules\Inventory\Http\Controllers\InventoryController@searchItems');
+            Route::get('search_items', '\modules\Inventory\Http\Controllers\InventoryController@searchItems');
         });
 
         //reportes caja
@@ -43,10 +47,14 @@ if ($hostname) {
         Route::middleware(['auth:api', 'locked.tenant'])->group(function () {
 
             Route::get('app/company-params', 'Tenant\ItemController@tables'); // Parámetros de la empresa
-
+            Route::prefix('order-notes')
+                ->group(function () {
+                    Route::get('tables', [ControllersOrderNoteController::class, 'tables']);
+                    // Route::get('Route::get('tables', 'OrderNoteController@tables')')
+                });
             // whatsapp
             Route::post('whatsapp', 'Tenant\WhatsappController@sendwhatsapp');
-            
+
             // PRODUCTOS
             Route::get('app/paginate-items', 'Tenant\ItemController@records'); // Listar items por paginación
             Route::get('app/retrieve-item/{id}', 'Tenant\ItemController@record'); // Obtener la información de un producto
@@ -59,12 +67,19 @@ if ($hostname) {
 
             // CLIENTES
             Route::prefix('app/persons')->group(function () {
-               Route::get('/columns', 'Tenant\PersonController@columns');
-               Route::get('/tables', 'Tenant\PersonController@tables');
-               Route::get('/{type}/records', 'Tenant\PersonController@records');
-               Route::get('/record/{person}', 'Tenant\PersonController@record');
-               Route::post('', 'Tenant\PersonController@store');
-               Route::delete('/{person}', 'Tenant\PersonController@destroy');
+                Route::get('/columns', 'Tenant\PersonController@columns');
+                Route::get('/tables', 'Tenant\PersonController@tables');
+                Route::get('/{type}/records', 'Tenant\PersonController@records');
+                Route::get('/record/{person}', 'Tenant\PersonController@record');
+                Route::post('', 'Tenant\PersonController@store');
+                Route::delete('/{person}', 'Tenant\PersonController@destroy');
+            });
+            Route::prefix('app/dispatch_addresses')->group(function () {
+                Route::get('tables', '\Modules\Dispatch\Http\Controllers\DispatchAddressController@tables');
+                Route::post('/', '\Modules\Dispatch\Http\Controllers\DispatchAddressController@store');
+                Route::delete('/{id}', '\Modules\Dispatch\Http\Controllers\DispatchAddressController@destroy');
+                Route::get('get_options/{sender_id}', '\Modules\Dispatch\Http\Controllers\DispatchAddressController@getOptions');
+                Route::get('search/{person_id}', '\Modules\Dispatch\Http\Controllers\DispatchAddressController@searchAddress');
             });
             // CAJA CHICA
             Route::post('app/cash', 'Tenant\CashController@store');
@@ -90,7 +105,54 @@ if ($hostname) {
             Route::post('app/cash/cash_document', 'Tenant\CashController@cash_document');
             Route::get('app/documents/record/{document}', 'Tenant\DocumentController@record');
             Route::post('app/documents/email', 'Tenant\DocumentController@email');
+            Route::prefix('app/order-notes')
+            ->group(function () {
+                Route::get('tables', [ControllersOrderNoteController::class, 'tables']);
+                Route::get('/record2/{id}', [ControllersOrderNoteController::class, 'record2']);
+                Route::get('/records', [ControllersOrderNoteController::class, 'records']);
+                Route::get('/voided/{id}', [ControllersOrderNoteController::class, 'voided']);
+                // Route::get('Route::get('tables', 'OrderNoteController@tables')')
+            });
+            Route::prefix('app/quotations')
+            ->group(function () {
+                // Route::get('tables', [ControllersOrderNoteController::class, 'tables']);
+                Route::get('/record2/{id}', [QuotationController::class, 'record2']);
+                Route::get('/anular/{id}', [QuotationController::class, 'anular']);
+                // Route::get('Route::get('tables', 'OrderNoteController@tables')')
+            });
 
+            Route::prefix('/finances/unpaid')->group(function () {
+                Route::get('/filter', '\Modules\Finance\Http\Controllers\UnpaidController@filter');
+                Route::get('/records', '\Modules\Finance\Http\Controllers\UnpaidController@records');
+                Route::post('/multiple-pay', '\Modules\Finance\Http\Controllers\UnpaidController@multiplePay');
+                Route::get('/unpaidall', '\Modules\Finance\Http\Controllers\UnpaidController@unpaidall')->name('unpaidall');
+                Route::get('/report-payment-method-days', '\Modules\Finance\Http\Controllers\UnpaidController@reportPaymentMethodDays');
+                Route::get('/pdf', '\Modules\Finance\Http\Controllers\UnpaidController@pdf');
+                Route::get('/pdf_h', '\Modules\Finance\Http\Controllers\UnpaidController@pdf_h');
+                Route::get('/print/{document_id}/{type}/{format}', '\Modules\Finance\Http\Controllers\UnpaidController@toPrint');
+            });
+            Route::get('document_payments/records/{document_id}', 'Tenant\DocumentPaymentController@records');
+            Route::get('document_payments/document/{document_id}', 'Tenant\DocumentPaymentController@document');
+            Route::get('document_payments/tables', 'Tenant\DocumentPaymentController@tables');
+            Route::post('document_payments', 'Tenant\DocumentPaymentController@store');
+            Route::delete('document_payments/{document_payment}', 'Tenant\DocumentPaymentController@destroy');
+            Route::get('document_payments/initialize_balance', 'Tenant\DocumentPaymentController@initialize_balance');
+            Route::get('document_payments/report/{start}/{end}/{report}', 'Tenant\DocumentPaymentController@report');
+
+            Route::get('sale_note_payments/records/{sale_note}', 'Tenant\SaleNotePaymentController@records');
+            Route::get('sale_note_payments/document/{sale_note}', 'Tenant\SaleNotePaymentController@document');
+            Route::get('sale_note_payments/tables', 'Tenant\SaleNotePaymentController@tables');
+            Route::post('sale_note_payments', 'Tenant\SaleNotePaymentController@store');
+            Route::delete('sale_note_payments/{sale_note_payment}', 'Tenant\SaleNotePaymentController@destroy');
+
+            Route::prefix('quotation_payments')->group(function () {
+        
+                Route::get('/records/{quotation}', '\Modules\Sale\Http\Controllers\QuotationPaymentController@records');
+                Route::get('/document/{quotation}', '\Modules\Sale\Http\Controllers\QuotationPaymentController@document');
+                Route::get('/tables', '\Modules\Sale\Http\Controllers\QuotationPaymentController@tables');
+                Route::post('', '\Modules\Sale\Http\Controllers\QuotationPaymentController@store');
+                Route::delete('/{quotation_payment}', '\Modules\Sale\Http\Controllers\QuotationPaymentController@destroy');
+            });
             //NOTA DE VENTA
             Route::post('app/sale-notes', 'Tenant\SaleNoteController@store');
             Route::get('app/sale-notes/record/{salenote}', 'Tenant\SaleNoteController@record');
@@ -111,19 +173,19 @@ if ($hostname) {
 
             Route::get('app/items/tables', 'Tenant\ItemController@tables');
             Route::get('app/items/record/{item}', 'Tenant\ItemController@record');
-             /** Apis v2 Mobile */
+            /** Apis v2 Mobile */
 
             Route::prefix('restaurant')->group(function () {
 
-                Route::get('search_orden_document',[Modules\Restaurant\Http\Controllers\PosController::class, 'search_orden_document']);
-                Route::post('printevent',[Modules\Restaurant\Http\Controllers\OrdenController::class, 'printevent']);
-                Route::get('pos/listtables',[Modules\Restaurant\Http\Controllers\PosController::class, 'listtables']);
-                Route::get('totales_sales',[Modules\Restaurant\Http\Controllers\PosController::class, 'total_sales']);
+                Route::get('search_orden_document', [Modules\Restaurant\Http\Controllers\PosController::class, 'search_orden_document']);
+                Route::post('printevent', [Modules\Restaurant\Http\Controllers\OrdenController::class, 'printevent']);
+                Route::get('pos/listtables', [Modules\Restaurant\Http\Controllers\PosController::class, 'listtables']);
+                Route::get('totales_sales', [Modules\Restaurant\Http\Controllers\PosController::class, 'total_sales']);
                 Route::get('ordens-items', '\Modules\Restaurant\Http\Controllers\OrdenItemController@records');
                 Route::get('tables/records-area/{area_id}', '\Modules\Restaurant\Http\Controllers\TableController@recordsByArea');
                 Route::get('data_tables/{area_id}/{pin}', '\Modules\Restaurant\Http\Controllers\DashboardController@data_tables');
-                Route::post('loginping','Tenant\AuthenticateController@loginping');
-                Route::post('authenticate','Tenant\AuthenticateController@authenticate');
+                Route::post('loginping', 'Tenant\AuthenticateController@loginping');
+                Route::post('authenticate', 'Tenant\AuthenticateController@authenticate');
                 Route::post('change-observation', '\Modules\Restaurant\Http\Controllers\OrdenItemController@updateObservation');
                 Route::post('worker/send-orden', '\Modules\Restaurant\Http\Controllers\OrdenController@store');
                 Route::get('ordens-ready/{id}', '\Modules\Restaurant\Http\Controllers\OrdenItemController@ordenReady');
@@ -145,119 +207,120 @@ if ($hostname) {
                 Route::get('persons/search/{barcode}', 'Tenant\PersonController@getPersonByBarcode');
                 Route::get('persons/accumulated-points/{id}', 'Tenant\PersonController@getAccumulatedPoints');
 
-              //configurations
-              Route::get('configurations/record', 'Tenant\ConfigurationController@record');
-             //Items
-            Route::get('items/columns', 'Tenant\ItemController@columns');
-            Route::get('items/records', 'Tenant\ItemController@records_restaurant');
-            Route::get('items/tables', 'Tenant\ItemController@tables');
-            Route::get('items/record/{item}', 'Tenant\ItemController@record');
-            Route::post('items', 'Tenant\ItemController@store');
-            Route::delete('items/{item}', 'Tenant\@destroy');
-            Route::post('items/import', 'Tenant\ItemController@import');
-            Route::post('items/categories', 'Tenant\Api\CategoryController@store');
-            Route::get('items/categories/columns', 'Tenant\Api\CategoryController@columns');
-            Route::get('items/categories/records', 'Tenant\Api\CategoryController@records');
-            Route::get('items/categories/record/{id}', 'Tenant\Api\CategoryController@record');
-            Route::delete('items/categories/{id}', 'Tenant\Api\CategoryController@destroy');
+                //configurations
+                Route::get('configurations/record', 'Tenant\ConfigurationController@record');
+                //Items
+                Route::get('items/columns', 'Tenant\ItemController@columns');
+                Route::get('items/records', 'Tenant\ItemController@records_restaurant');
+                Route::get('items/tables', 'Tenant\ItemController@tables');
+                Route::get('items/record/{item}', 'Tenant\ItemController@record');
+                Route::post('items', 'Tenant\ItemController@store');
+                Route::delete('items/{item}', 'Tenant\@destroy');
+                Route::post('items/import', 'Tenant\ItemController@import');
+                Route::post('items/categories', 'Tenant\Api\CategoryController@store');
+                Route::get('items/categories/columns', 'Tenant\Api\CategoryController@columns');
+                Route::get('items/categories/records', 'Tenant\Api\CategoryController@records');
+                Route::get('items/categories/record/{id}', 'Tenant\Api\CategoryController@record');
+                Route::delete('items/categories/{id}', 'Tenant\Api\CategoryController@destroy');
 
-            Route::post('brands', 'BrandController@store');
-            Route::post('items/catalog', 'Tenant\ItemController@catalog');
-            Route::get('items/import/tables', 'Tenant\ItemController@tablesImport');
-            Route::post('items/upload', 'Tenant\ItemController@upload');
-            Route::post('items/visible_store', 'Tenant\ItemController@visibleStore');
-            Route::post('items/duplicate', 'Tenant\ItemController@duplicate');
-            Route::get('items/disable/{item}', 'Tenant\ItemController@disable');
-            Route::get('items/enable/{item}', 'Tenant\ItemController@enable');
-            Route::get('items/images/{item}', 'Tenant\ItemController@images');
-            Route::get('items/images/delete/{id}', 'Tenant\ItemController@delete_images');
-            Route::get('items/export', 'Tenant\ItemController@export')->name('tenant.items.export');
-            Route::get('items/export/wp', 'Tenant\ItemController@exportWp')->name('tenant.items.export.wp');
-            Route::get('items/export/digemid', 'Tenant\ItemController@exportDigemid');
-            Route::get('items/search-items', 'Tenant\ItemController@searchItems');
-            Route::get('items/search/item/{item}', 'Tenant\ItemController@searchItemById');
-            Route::get('items/item/tables', 'Tenant\ItemController@item_tables');
-            Route::get('items/export/barcode', 'Tenant\ItemController@exportBarCode')->name('tenant.items.export.barcode');
-            Route::get('items/export/extra_atrributes/PDF', 'Tenant\ItemController@downloadExtraDataPdf');
-            Route::get('items/export/extra_atrributes/XLSX', 'Tenant\ItemController@downloadExtraDataItemsExcel');
-            Route::get('items/export/barcode_full', 'Tenant\ItemController@exportBarCodeFull');
-            Route::get('items/export/barcode/print', 'Tenant\ItemController@printBarCode')->name('tenant.items.export.barcode.print');
-            Route::get('items/export/barcode/print_x', 'Tenant\ItemController@printBarCodeX')->name('tenant.items.export.barcode.print.x');
-            Route::get('items/export/barcode/last', 'Tenant\ItemController@itemLast')->name('tenant.items.last');
+                Route::post('brands', 'BrandController@store');
+                Route::post('items/catalog', 'Tenant\ItemController@catalog');
+                Route::get('items/import/tables', 'Tenant\ItemController@tablesImport');
+                Route::post('items/upload', 'Tenant\ItemController@upload');
+                Route::post('items/visible_store', 'Tenant\ItemController@visibleStore');
+                Route::post('items/duplicate', 'Tenant\ItemController@duplicate');
+                Route::get('items/disable/{item}', 'Tenant\ItemController@disable');
+                Route::get('items/enable/{item}', 'Tenant\ItemController@enable');
+                Route::get('items/images/{item}', 'Tenant\ItemController@images');
+                Route::get('items/images/delete/{id}', 'Tenant\ItemController@delete_images');
+                Route::get('items/export', 'Tenant\ItemController@export')->name('tenant.items.export');
+                Route::get('items/export/wp', 'Tenant\ItemController@exportWp')->name('tenant.items.export.wp');
+                Route::get('items/export/digemid', 'Tenant\ItemController@exportDigemid');
+                Route::get('items/search-items', 'Tenant\ItemController@searchItems');
+                Route::get('items/search/item/{item}', 'Tenant\ItemController@searchItemById');
+                Route::get('items/item/tables', 'Tenant\ItemController@item_tables');
+                Route::get('items/export/barcode', 'Tenant\ItemController@exportBarCode')->name('tenant.items.export.barcode');
+                Route::get('items/export/extra_atrributes/PDF', 'Tenant\ItemController@downloadExtraDataPdf');
+                Route::get('items/export/extra_atrributes/XLSX', 'Tenant\ItemController@downloadExtraDataItemsExcel');
+                Route::get('items/export/barcode_full', 'Tenant\ItemController@exportBarCodeFull');
+                Route::get('items/export/barcode/print', 'Tenant\ItemController@printBarCode')->name('tenant.items.export.barcode.print');
+                Route::get('items/export/barcode/print_x', 'Tenant\ItemController@printBarCodeX')->name('tenant.items.export.barcode.print.x');
+                Route::get('items/export/barcode/last', 'Tenant\ItemController@itemLast')->name('tenant.items.last');
 
-              //Establishments
-              Route::get('establishments/create', 'Tenant\EstablishmentController@create');
-              Route::get('establishments/tables', 'Tenant\EstablishmentController@tables');
-              Route::get('establishments/record/{establishment}', 'Tenant\EstablishmentController@record');
-              Route::post('establishments', 'Tenant\EstablishmentController@store');
-              Route::get('establishments/records', 'Tenant\EstablishmentController@records');
-              Route::delete('establishments/{establishment}', 'Tenant\EstablishmentController@destroy');
+                //Establishments
+                Route::get('establishments/create', 'Tenant\EstablishmentController@create');
+                Route::get('establishments/tables', 'Tenant\EstablishmentController@tables');
+                Route::get('establishments/record/{establishment}', 'Tenant\EstablishmentController@record');
+                Route::post('establishments', 'Tenant\EstablishmentController@store');
+                Route::get('establishments/records', 'Tenant\EstablishmentController@records');
+                Route::delete('establishments/{establishment}', 'Tenant\EstablishmentController@destroy');
 
-              Route::get('ordens/records', 'Tenant\Api\OrdenController@records');
-              Route::get('food-list/records', 'Tenant\Api\FoodController@records');
-              Route::get('food-list/record/{id}', 'Tenant\Api\FoodController@record');
-              Route::get('food-list/delete-image/{id}', 'Tenant\Api\FoodController@deleteImage');
-              Route::get('food-list/{id}', 'Tenant\Api\FoodController@active');
-              Route::post('food-list/upload-image', 'Tenant\Api\FoodController@uploadImage');
-              Route::post('food-list', 'Tenant\Api\FoodController@store');
+                Route::get('ordens/records', 'Tenant\Api\OrdenController@records');
+                Route::get('food-list/records', 'Tenant\Api\FoodController@records');
+                Route::get('food-list/record/{id}', 'Tenant\Api\FoodController@record');
+                Route::get('food-list/delete-image/{id}', 'Tenant\Api\FoodController@deleteImage');
+                Route::get('food-list/{id}', 'Tenant\Api\FoodController@active');
+                Route::post('food-list/upload-image', 'Tenant\Api\FoodController@uploadImage');
+                Route::post('food-list', 'Tenant\Api\FoodController@store');
 
-              Route::get('workers-type/columns', 'Tenant\Api\WorkersTypeController@columns');
-              Route::get('workers-type/records', 'Tenant\Api\WorkersTypeController@records');
-              Route::get('workers-type/actives', 'Tenant\Api\WorkersTypeController@actives');
-              Route::get('workers-type/record/{id}', 'Tenant\Api\WorkersTypeController@record');
-              Route::get('workers-type/{id}', 'Tenant\Api\WorkersTypeController@active');
-              Route::post('workers-type', 'Tenant\Api\WorkersTypeController@store');
-              Route::delete('workers-type/{id}', 'Tenant\Api\WorkersTypeController@destroy');
+                Route::get('workers-type/columns', 'Tenant\Api\WorkersTypeController@columns');
+                Route::get('workers-type/records', 'Tenant\Api\WorkersTypeController@records');
+                Route::get('workers-type/actives', 'Tenant\Api\WorkersTypeController@actives');
+                Route::get('workers-type/record/{id}', 'Tenant\Api\WorkersTypeController@record');
+                Route::get('workers-type/{id}', 'Tenant\Api\WorkersTypeController@active');
+                Route::post('workers-type', 'Tenant\Api\WorkersTypeController@store');
+                Route::delete('workers-type/{id}', 'Tenant\Api\WorkersTypeController@destroy');
 
-              Route::get('areas/columns', '\Modules\Restaurant\Http\Controllers\AreaController@columns');
-              Route::get('areas/records', '\Modules\Restaurant\Http\Controllers\AreaController@records');
-              Route::get('areas/actives', '\Modules\Restaurant\Http\Controllers\AreaController@actives');
-              Route::get('areas/record/{id}', '\Modules\Restaurant\Http\Controllers\AreaController@record');
-              Route::delete('areas/{id}', '\Modules\Restaurant\Http\Controllers\AreaController@destroy');
-              Route::post('areas', '\Modules\Restaurant\Http\Controllers\AreaController@store');
+                Route::get('areas/columns', '\Modules\Restaurant\Http\Controllers\AreaController@columns');
+                Route::get('areas/records', '\Modules\Restaurant\Http\Controllers\AreaController@records');
+                Route::get('areas/actives', '\Modules\Restaurant\Http\Controllers\AreaController@actives');
+                Route::get('areas/record/{id}', '\Modules\Restaurant\Http\Controllers\AreaController@record');
+                Route::delete('areas/{id}', '\Modules\Restaurant\Http\Controllers\AreaController@destroy');
+                Route::post('areas', '\Modules\Restaurant\Http\Controllers\AreaController@store');
 
-              Route::get('status-tables/records', '\Modules\Restaurant\Http\Controllers\StatusTableController@records');
-              Route::get('status-tables/columns', '\Modules\Restaurant\Http\Controllers\StatusTableController@columns');
-              Route::get('status-tables/{id}', '\Modules\Restaurant\Http\Controllers\StatusTableController@active');
-              Route::get('status-tables/record/{id}', '\Modules\Restaurant\Http\Controllers\StatusTableController@record');
-              Route::post('status-tables', '\Modules\Restaurant\Http\Controllers\StatusTableController@store');
+                Route::get('status-tables/records', '\Modules\Restaurant\Http\Controllers\StatusTableController@records');
+                Route::get('status-tables/columns', '\Modules\Restaurant\Http\Controllers\StatusTableController@columns');
+                Route::get('status-tables/{id}', '\Modules\Restaurant\Http\Controllers\StatusTableController@active');
+                Route::get('status-tables/record/{id}', '\Modules\Restaurant\Http\Controllers\StatusTableController@record');
+                Route::post('status-tables', '\Modules\Restaurant\Http\Controllers\StatusTableController@store');
 
-              Route::get('status-orden/records', 'Tenant\Api\StatusOrdenController@records');
-              Route::get('status-orden/columns', 'Tenant\Api\StatusOrdenController@columns');
-              Route::get('status-orden/{id}', 'Tenant\Api\StatusOrdenController@active');
-              Route::get('status-orden/record/{id}', 'Tenant\Api\StatusOrdenController@record');
-              Route::post('status-orden', 'Tenant\Api\StatusOrdenController@store');
+                Route::get('status-orden/records', 'Tenant\Api\StatusOrdenController@records');
+                Route::get('status-orden/columns', 'Tenant\Api\StatusOrdenController@columns');
+                Route::get('status-orden/{id}', 'Tenant\Api\StatusOrdenController@active');
+                Route::get('status-orden/record/{id}', 'Tenant\Api\StatusOrdenController@record');
+                Route::post('status-orden', 'Tenant\Api\StatusOrdenController@store');
 
-              Route::get('tables/columns', '\Modules\Restaurant\Http\Controllers\TableController@columns');
-              Route::get('tables/records', '\Modules\Restaurant\Http\Controllers\TableController@records');
-              Route::get('tables/record/{id}', '\Modules\Restaurant\Http\Controllers\TableController@record');
-              Route::post('tables', '\Modules\Restaurant\Http\Controllers\TableController@store');
-              Route::delete('tables/{id}', '\Modules\Restaurant\Http\Controllers\TableController@destroy');
+                Route::get('tables/columns', '\Modules\Restaurant\Http\Controllers\TableController@columns');
+                Route::get('tables/records', '\Modules\Restaurant\Http\Controllers\TableController@records');
+                Route::get('tables/record/{id}', '\Modules\Restaurant\Http\Controllers\TableController@record');
+                Route::post('tables', '\Modules\Restaurant\Http\Controllers\TableController@store');
+                Route::delete('tables/{id}', '\Modules\Restaurant\Http\Controllers\TableController@destroy');
 
-              Route::get('workers/records', 'Tenant\Api\WorkerController@records');
-              Route::get('workers/{id}', 'Tenant\Api\WorkerController@active');
-              Route::get('workers/record/{id}', 'Tenant\Api\WorkerController@record');
-              Route::post('workers', 'Tenant\Api\WorkerController@store');
-              Route::post('destroy', 'Tenant\Api\WorkerController@destroy');
+                Route::get('workers/records', 'Tenant\Api\WorkerController@records');
+                Route::get('workers/{id}', 'Tenant\Api\WorkerController@active');
+                Route::get('workers/record/{id}', 'Tenant\Api\WorkerController@record');
+                Route::post('workers', 'Tenant\Api\WorkerController@store');
+                Route::post('destroy', 'Tenant\Api\WorkerController@destroy');
 
-              Route::get('pos/search_orden', 'Tenant\Api\PosController@search');
-              Route::post('pos/orden_payment', 'Tenant\Api\PosController@payment');
-              Route::get('pos/foods', 'Tenant\Api\PosController@foods');
-              Route::get('pos/tables', 'Tenant\PosController@tables');
-              Route::get('pos/payment_tables','Tenant\PosController@payment_tables');
+                Route::get('pos/search_orden', 'Tenant\Api\PosController@search');
+                Route::post('pos/orden_payment', 'Tenant\Api\PosController@payment');
+                Route::get('pos/foods', 'Tenant\Api\PosController@foods');
+                Route::get('pos/tables', 'Tenant\PosController@tables');
+                Route::get('pos/payment_tables', 'Tenant\PosController@payment_tables');
             });
 
             //reporte general
             // Route::get('report/format/download', 'Tenant\Api\ClinicaController@download_report');
             Route::get('account/format/download', '\Modules\Account\Http\Controllers\FormatController@download');
             Route::post('account/report/email', 'Tenant\Api\AppController@accountReportEmail');
-            
+
             //categorias
             Route::get('category/details/{id}', 'Tenant\Api\AppController@category_detail');
             Route::delete('category/delete/{id}', 'Tenant\Api\AppController@category_destroy');
             Route::get('categories', 'Tenant\Api\AppController@categories');
             Route::post('categories', 'Tenant\Api\AppController@category');
-
+            Route::get('brands', 'Tenant\Api\AppController@brands');
+            Route::post('brands', 'Tenant\Api\AppController@brand');
             //guias
             Route::get('dispatch/list', 'Tenant\Api\AppController@dispatches_list');
             Route::post('dispatch/create', 'Tenant\Api\AppController@dispatches_create');
@@ -329,7 +392,7 @@ if ($hostname) {
 
 
             //pagos documentos
-            Route::get('document_payments/records/{document_id}', 'Tenant\Api\AppController@recordsPayments');
+            // Route::get('document_payments/records/{document_id}', 'Tenant\Api\AppController@recordsPayments');
             Route::get('document_payments/change/{payment_type_id}/{payment_id}', 'Tenant\Api\AppController@changePayment');
 
             //pagos nota de venta
@@ -337,7 +400,7 @@ if ($hostname) {
             Route::get('sale_note_payments/change/{payment_type_id}/{payment_id}', 'Tenant\Api\AppController@changeNoteSalePayment');
 
 
-                // caja
+            // caja
             Route::get('cash/open/{value}', 'Tenant\Api\AppController@opencash');
             Route::get('cash/check', 'Tenant\Api\AppController@opening_cash_check');
             Route::get('cash/records/loretosoft', 'Tenant\Api\AppController@records');
@@ -393,6 +456,7 @@ if ($hostname) {
             Route::post('person', 'Tenant\Api\AppController@person');
             Route::get('document/search-items', 'Tenant\Api\AppController@searchItems');
             Route::get('document/search-customers', 'Tenant\Api\AppController@searchCustomers');
+            Route::get('search-customers', 'Tenant\Api\AppController@searchCustomers');
             Route::post('sale-note/emailLS', 'Tenant\Api\AppController@saleNote_email');
             Route::post('sale-note/{id}/generate-cpe', 'Tenant\Api\SaleNoteController@generateCPE');
             Route::get('sale-notes/anulate/{id}', 'Tenant\Api\AppController@anulateNote');
@@ -437,11 +501,11 @@ if ($hostname) {
             // Cotizaciones
             Route::get('quotations/list', 'Tenant\Api\QuotationController@list');
             Route::post('quotations', 'Tenant\Api\QuotationController@store');
+            Route::get('app/quotations/records', 'Tenant\QuotationController@records');
             Route::post('quotations/email', 'Tenant\Api\QuotationController@email');
 
             //Caja
             Route::post('cash/restaurant', 'Tenant\Api\CashController@storeRestaurant');
-
         });
 
         Route::get('documents/search/customers', 'Tenant\DocumentController@searchCustomers');
@@ -466,8 +530,6 @@ if ($hostname) {
             Route::get('restaurant/partner/list', 'System\Api\RestaurantPartnerController@list');
             Route::post('restaurant/partner/store', 'System\Api\RestaurantPartnerController@store');
             Route::post('restaurant/partner/search', 'System\Api\RestaurantPartnerController@search');
-
         });
     });
-
 }

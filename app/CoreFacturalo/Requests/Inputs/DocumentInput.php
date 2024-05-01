@@ -119,6 +119,7 @@ class DocumentInput
             'alter_company' => $alter_company,
             'company_id' => $company_id,
             'cash_id' => $cash_id,
+            'total_canceled' => Functions::valueKeyInArray($inputs, 'total_canceled', 0),
             'child_id' => Functions::valueKeyInArray($inputs, 'child_id'),
             'months' => Functions::valueKeyInArray($inputs, 'months', []),
             'type' => $inputs['type'],

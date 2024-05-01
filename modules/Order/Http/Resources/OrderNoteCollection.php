@@ -57,6 +57,8 @@ class OrderNoteCollection extends ResourceCollection
                 'created_at' => $row->created_at->format('Y-m-d H:i:s'),
                 'updated_at' => $row->updated_at->format('Y-m-d H:i:s'),
                 'print_a4' => url('')."/order-notes/print/{$row->external_id}/a4",
+                'full_number' => $row->number_full,
+                
             ];
         });
     }

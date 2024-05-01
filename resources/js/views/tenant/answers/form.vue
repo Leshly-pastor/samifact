@@ -86,11 +86,9 @@
                 }, {
                 value: 'link',
                 label: 'link',
-                disabled: true
                 }, {
                 value: 'media',
                 label: 'media',
-                disabled: true
                 }],
                 title:null
             }

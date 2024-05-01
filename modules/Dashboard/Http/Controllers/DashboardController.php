@@ -73,7 +73,7 @@ class DashboardController extends Controller
     }
     public function index()
     {
-        if (auth()->user()->type != 'admin' || !auth()->user()->searchModule('dashboard'))
+        if (!auth()->user()->searchModule('dashboard'))
             return redirect()->route('tenant.documents.index');
         
         $company = Company::select('soap_type_id')->first();

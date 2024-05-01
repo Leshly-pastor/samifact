@@ -538,6 +538,7 @@ class SaleNoteController extends Controller
         if ($is_integrate_system) {
             return [
                 'customer_id' => 'Cliente',
+
                 'date_of_issue' => 'Fecha de emisión',
                 'quotation_number' => 'N° Cotización',
             ];
@@ -545,6 +546,7 @@ class SaleNoteController extends Controller
         return [
             'date_of_issue' => 'Fecha de emisión',
             'customer' => 'Cliente',
+            'seller' => 'Vendedor',
         ];
     }
 
@@ -594,6 +596,13 @@ class SaleNoteController extends Controller
         }
         if ($request->column == 'customer') {
             $records->whereHas('person', function ($query) use ($request) {
+                $query
+                    ->where('name', 'like', "%{$request->value}%")
+                    ->orWhere('number', 'like', "%{$request->value}%");
+            })
+                ->latest();
+        } else if ($request->column == 'seller') {
+            $records->whereHas('seller', function ($query) use ($request) {
                 $query
                     ->where('name', 'like', "%{$request->value}%")
                     ->orWhere('number', 'like', "%{$request->value}%");
@@ -880,15 +889,15 @@ class SaleNoteController extends Controller
                 }
             }
             $this->sale_note =  SaleNote::query()->updateOrCreate(['id' => $inputs['id']], $data);
-            
+
             // $this->deleteAlFees($this->sale_note->fee);
             SaleNoteFee::where('sale_note_id', $this->sale_note->id)->delete();
             $this->deleteAllPayments($this->sale_note->payments);
-            
+
             //se elimina los items para activar el evento deleted del modelo y controlar el inventario
             $this->deleteAllItems($this->sale_note->items);
 
-            $fee = Functions::valueKeyInArray($inputs, 'fee',[]);
+            $fee = Functions::valueKeyInArray($inputs, 'fee', []);
             $this->saveFees($this->sale_note, $fee);
             // $this->sale_note->fee()->
             $configuration = Configuration::first();
@@ -1916,16 +1925,45 @@ class SaleNoteController extends Controller
     }
 
 
-    public function dispatches()
+    public function dispatches(Request $request)
     {
-        $dispatches = Dispatch::latest()->get(['id', 'series', 'number'])->transform(function ($row) {
-            return [
-                'id' => $row->id,
-                'series' => $row->series,
-                'number' => $row->number,
-                'number_full' => "{$row->series}-{$row->number}",
-            ];
-        });;
+        $input =  $request->input;
+
+        if ($input) {
+            $dispatches = Dispatch::latest()
+                ->when(strpos($input, '-') !== false, function ($query) use ($input) {
+                    [$series, $number] = explode('-', $input);
+                    return $query->where('series', $series)
+                        ->where('number', $number);
+                })
+                ->when(strpos($input, '-') === false, function ($query) use ($input) {
+                    return $query->where('number', 'like', "%{$input}%");
+                })
+                ->take(20)
+                ->get(['id', 'series', 'number'])
+                ->transform(function ($row) {
+                    return [
+                        'id' => $row->id,
+                        'series' => $row->series,
+                        'number' => $row->number,
+                        'number_full' => "{$row->series}-{$row->number}",
+                    ];
+                });
+        } else {
+            $dispatches = Dispatch::latest()
+                ->take(20)
+                ->get(['id', 'series', 'number'])
+                ->transform(function ($row) {
+                    return [
+                        'id' => $row->id,
+                        'series' => $row->series,
+                        'number' => $row->number,
+                        'number_full' => "{$row->series}-{$row->number}",
+                    ];
+                });
+        }
+
+
 
         return $dispatches;
     }
@@ -2047,7 +2085,8 @@ class SaleNoteController extends Controller
     }
 
 
-    public function saveFees($sale_note, $fees){
+    public function saveFees($sale_note, $fees)
+    {
         foreach ($fees as $row) {
             $sale_note->fee()->create($row);
         }

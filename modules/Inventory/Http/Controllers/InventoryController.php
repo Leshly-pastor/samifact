@@ -50,7 +50,8 @@ class InventoryController extends Controller
         ];
     }
 
-    public function recordsApp(Request $request){
+    public function recordsApp(Request $request)
+    {
         $column = $request->input('column');
         if ($column == 'warehouse') {
             $records = ItemWarehouse::with(['item', 'warehouse'])
@@ -106,7 +107,13 @@ class InventoryController extends Controller
                 if ($this->applyAdvancedRecordsSearch() && $request->column === 'description') {
                     if ($request->value) $query->whereAdvancedRecordsSearch($request->column, $request->value);
                 } else {
-                    $query->where($request->column, 'like', '%' . $request->value . '%');
+                    if ($request->column === 'description') {
+                        $query->where('description', 'like', '%' . $request->value . '%')
+                            ->orWhere('internal_id', 'like', '%' . $request->value . '%');
+                    } else {
+
+                        $query->where($request->column, 'like', '%' . $request->value . '%');
+                    }
                 }
             })
             ->orderBy('item_id');
@@ -298,7 +305,7 @@ class InventoryController extends Controller
                             $item_size_stock->size = $size_;
                             $item_size_stock->stock = $item_size_stock->stock +  $size['quantity'];
                             $item_size_stock->update();
-                        }else{
+                        } else {
                             $new = new ItemSizeStock();
                             $new->item_id = $item_id;
                             $new->warehouse_id = $warehouse_id;
@@ -306,7 +313,6 @@ class InventoryController extends Controller
                             $new->stock = $size['quantity'];
                             $new->save();
                         }
-
                     } else {
                         $exit = ItemSizeStock::where('item_id', $item_id)->where('warehouse_id', $warehouse_id)->where('size', $size['size'])->first();
                         if ($exit) {

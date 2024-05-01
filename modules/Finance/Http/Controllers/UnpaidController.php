@@ -37,7 +37,13 @@ use Mpdf\Mpdf;
 use App\CoreFacturalo\Template;
 use App\CoreFacturalo\Helpers\Storage\StorageDocument;
 use App\CoreFacturalo\Helpers\Functions\GeneralPdfHelper;
-
+use App\Http\Controllers\Tenant\DocumentPaymentController;
+use App\Http\Controllers\Tenant\SaleNotePaymentController;
+use App\Http\Requests\Tenant\DocumentPaymentRequest;
+use App\Http\Requests\Tenant\SaleNotePaymentRequest;
+use App\Models\Tenant\CashDocumentCredit;
+use App\Models\Tenant\DocumentPayment;
+use Illuminate\Support\Facades\DB;
 
 class UnpaidController extends Controller
 {
@@ -89,14 +95,90 @@ class UnpaidController extends Controller
         return compact('customers', 'establishments', 'users', 'payment_method_types', 'web_platforms');
     }
 
+    public function multiplePay(Request $request)
+    {
+        $payment = (object) $request->all();
+        $selecteds = $payment->selecteds;
+
+        foreach ($selecteds as $selected) {
+            $type = $selected["type"];
+            $total_payment = $selected["payment"];
+            if ($type == 'document') {
+                $document_id = $selected["id"];
+                $document_payment = clone $payment;
+                $document_payment->document_id = $document_id;
+                $document_payment->payment = $total_payment;
+                $request_document_payment = new DocumentPaymentRequest();
+                $request_document_payment->merge((array)$document_payment);
+                (new DocumentPaymentController())->store($request_document_payment);
+            }
+            if ($type == 'sale_note') {
+                $sale_note_id = $selected["id"];
+                $sale_note_payment = clone $payment;
+                $sale_note_payment->sale_note_id = $sale_note_id;
+                $sale_note_payment->payment = $total_payment;
+                $request_sale_note_payment = new SaleNotePaymentRequest();
+                $request_sale_note_payment->merge((array)$sale_note_payment);
+                (new SaleNotePaymentController())->store($request_sale_note_payment);
+            }
+        }
+        return [
+            'success' => true,
+            "message" => "Pagos realizados con éxito"
+        ];
+    }
+    function document_payment($id, $payment)
+    {
+
+        $data =  DB::connection('tenant')->transaction(function () use ($id, $payment) {
+
+            $record = DocumentPayment::firstOrNew(['id' => $id]);
+            $record->fill($payment);
+            $record->save();
+            $this->createGlobalPayment($record, $payment);
+
+            $this->saveFiles($record, $payment, 'documents');
+
+            return $record;
+        });
+
+        $document_balance = (object)$this->document($payment->document_id);
+
+        if ($document_balance->total_difference < 1) {
+
+            $credit = CashDocumentCredit::where([
+                ['status', 'PENDING'],
+                ['document_id', $request->document_id]
+            ])->first();
+
+            if ($credit) {
+
+                $cash = Cash::where([
+                    ['user_id', auth()->user()->id],
+                    ['state', true],
+                ])->first();
+
+                $credit->status = 'PROCESSED';
+                $credit->cash_id_processed = $cash->id;
+                $credit->save();
+
+                $req = [
+                    'document_id' => $request->document_id,
+                    'sale_note_id' => null
+                ];
+
+                $cash->cash_documents()->updateOrCreate($req);
+            }
+        }
+    }
     public function records(Request $request)
     {
 
         $records = (new DashboardView())->getUnpaidFilterUser($request->all());
         $config = Configuration::first();
         return (new UnpaidCollection($records
-        ->orderBy('date_of_issue', 'asc')
-        ->paginate(config('tenant.items_per_page'))))->additional([
+            ->orderBy('date_of_issue', 'asc')
+            ->paginate(config('tenant.items_per_page'))))->additional([
             'configuration' => $config->finances
         ]);
     }
@@ -127,14 +209,14 @@ class UnpaidController extends Controller
     }
 
 
-    public function pdf_h(Request $request){
+    public function pdf_h(Request $request)
+    {
         $records = $this->transformRecords((new DashboardView())->getUnpaidFilterUser($request->all())->get());
 
         $company = Company::first();
 
         $pdf = PDF::loadView('finance::unpaid.reports.report_pdf_h', compact("records", "company"))
-        ->setPaper('a4', 'landscape');
-        ;
+            ->setPaper('a4', 'landscape');;
 
         $filename = 'Reporte_Cuentas_Por_Cobrar_' . date('YmdHis');
 

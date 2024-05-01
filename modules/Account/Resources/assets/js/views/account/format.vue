@@ -67,11 +67,20 @@
                         </el-select>
                     </div>
 
-                    <div class="col-md-3 " v-if="form.type == 'sale'">
+                    <div class="col-md-3">
                         <el-checkbox
+                            v-if="form.type == 'sale'"
                             class="checkbox mt-4"
                             v-model="form.add_state_type"
                             >Agregar columna estado - CPE
+                        </el-checkbox>
+                        <el-checkbox
+                            v-if="
+                                form.type == 'sale' || form.type == 'purchase'
+                            "
+                            class="checkbox mt-4"
+                            v-model="form.add_reference"
+                            >Agregar referencia de pago
                         </el-checkbox>
                     </div>
                 </div>
@@ -82,12 +91,8 @@
                     type="primary"
                     @click.prevent="clickDownload"
                 >
-                    <template v-if="loading_submit">
-                        Generando...
-                    </template>
-                    <template v-else>
-                        Generar
-                    </template>
+                    <template v-if="loading_submit"> Generando... </template>
+                    <template v-else> Generar </template>
                 </el-button>
             </div>
             <!--</div>-->
@@ -102,7 +107,7 @@ import { mapActions, mapState } from "vuex";
 export default {
     props: ["currencies", "configuration"],
     computed: {
-        ...mapState(["config", "currencys"])
+        ...mapState(["config", "currencys"]),
     },
     data() {
         return {
@@ -111,7 +116,7 @@ export default {
             title: null,
             resource: "account",
             error: {},
-            form: {}
+            form: {},
         };
     },
     created() {
@@ -129,17 +134,17 @@ export default {
             this.form = {
                 month: moment().format("YYYY-MM"),
                 type: "sale",
-                add_state_type: false
+                add_state_type: false,
             };
         },
         clickDownload() {
             this.loading_submit = true;
             let query = queryString.stringify({
-                ...this.form
+                ...this.form,
             });
             window.open(`/${this.resource}/format/download?${query}`, "_blank");
             this.loading_submit = false;
-        }
-    }
+        },
+    },
 };
 </script>

@@ -608,6 +608,8 @@
 
                                                 <th width="15%">
                                                     <a
+
+                                                        v-if="!blockAddPayments"
                                                         href="#"
                                                         @click.prevent="
                                                             clickAddPayment
@@ -677,6 +679,11 @@
                                                                 row.payment_destination_id
                                                             "
                                                             filterable
+                                                            @change="
+                                                                changePaymentDestination(
+                                                                    index
+                                                                )
+                                                            "
                                                         >
                                                             <el-option
                                                                 v-for="(
@@ -1540,7 +1547,12 @@
 import SaleNotesFormItem from "./partials/item.vue";
 import PersonForm from "../persons/form.vue";
 import SaleNotesOptions from "./partials/options.vue";
-import { functions, exchangeRate, cash } from "../../../mixins/functions";
+import {
+    functions,
+    exchangeRate,
+    cash,
+    advance,
+} from "../../../mixins/functions";
 import {
     calculateRowItem,
     sumAmountDiscountsNoBaseByItem,
@@ -1562,8 +1574,15 @@ export default {
         DocumentTransportForm,
         DocumentDispatchForm,
     },
-    mixins: [functions, exchangeRate, cash],
+    mixins: [functions, exchangeRate, cash, advance],
     computed: {
+            blockAddPayments() {
+            return (
+                this.form.payments.filter(
+                    (payment) => payment.payment_destination_id === "advance"
+                ).length > 0
+            );
+        },
         getDisplayedRows() {
             return this.showAll
                 ? this.form.fee
@@ -1601,6 +1620,7 @@ export default {
     },
     data() {
         return {
+            form_cash_document: {},
             cuotaNumber: 1,
             cuotaDays: 30,
             showAll: true,
@@ -1767,6 +1787,9 @@ export default {
         this.changeCurrencyType();
     },
     methods: {
+        changePaymentDestination(index) {
+            this.checkHasAdvance(index);
+        },
         changeCollapse() {},
         calculatePeriodDays(cuotas, days) {
             let date_of_issue = this.form.date_of_issue;
@@ -2173,7 +2196,7 @@ export default {
             return null;
         },
         setTotalDefaultPayment() {
-            if (this.form.payments.length == 1 ) {
+            if (this.form.payments.length == 1) {
                 this.form.payments[0].payment = this.form.total;
             }
         },
@@ -2281,8 +2304,10 @@ export default {
                 : [];
 
             this.form.discounts = this.getDataGlobalDiscount();
-            console.log("🚀 ~ setDataUpdate ~ this.form:", JSON.stringify(this.form.payments))
-
+            console.log(
+                "🚀 ~ setDataUpdate ~ this.form:",
+                JSON.stringify(this.form.payments)
+            );
         },
         getDataGlobalDiscount() {
             const discounts = this.form.discounts
@@ -2323,6 +2348,7 @@ export default {
             this.form.payments.splice(index, 1);
         },
         changeCustomer() {
+            this.getAdvance(this.form.customer_id);
             this.person_type_id = null;
             let customer = _.find(this.customers, {
                 id: this.form.customer_id,
@@ -2363,6 +2389,7 @@ export default {
             }
         },
         initForm() {
+            this.form_cash_document = {};
             this.monthsSelected = [];
             this.monthCollege = [];
             this.collegeYear = [];
@@ -2427,7 +2454,7 @@ export default {
             };
 
             this.total_discount_no_base = 0;
-            
+
             this.clickAddPayment();
             this.enabled_payments = true;
             this.total_global_charge = 0;
@@ -2848,6 +2875,15 @@ export default {
             };
         },
         async submit() {
+            let payWithAdvance = this.payWithAdvance();
+            if (payWithAdvance) {
+                let enoughAdvance = this.enoughAdvance();
+                if (!enoughAdvance) {
+                    return this.$message.error(
+                        "El monto del anticipo no es suficiente para realizar la venta"
+                    );
+                }
+            }
             if (this.configuration.multi_companies) {
                 if (!this.form.company_id) {
                     return this.$message.error(
@@ -2942,8 +2978,16 @@ export default {
                         this.resetForm();
                         this.saleNotesNewId = response.data.data.id;
                         this.showDialogOptions = true;
-                        this.saveCashDocument(response.data.data.id);
 
+                        // this.saveCashDocument();
+                        if (payWithAdvance) {
+                            this.form_cash_document.sale_note_id =
+                                response.data.data.id;
+                            this.form_cash_document.advance_id = payWithAdvance;
+                            this.saveAdvanceDocument();
+                        } else {
+                            this.saveCashDocument(response.data.data.id);
+                        }
                         this.isUpdate();
                     } else {
                         this.$message.error(response.data.message);

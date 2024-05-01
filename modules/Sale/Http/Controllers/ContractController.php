@@ -90,7 +90,8 @@ class ContractController extends Controller
         return [
             'date_of_issue' => 'Fecha de emisión',
             'delivery_date' => 'Fecha de entrega',
-            'user_name' => 'Vendedor'
+            'user_name' => 'Vendedor',
+            'client_name' => 'Cliente'
         ];
     }
 
@@ -116,7 +117,15 @@ class ContractController extends Controller
                             $query->where('name', 'like', "%{$request->value}%");
                         });
 
-        }else{
+        }  else if($request->column == 'client_name'){
+
+            $records = Contract::whereHas('person', function($query) use($request){
+                            $query->where('name', 'like', "%{$request->value}%");
+                        });
+
+        }
+        
+        else{
 
             $records = Contract::where($request->column, 'like', "%{$request->value}%");
 

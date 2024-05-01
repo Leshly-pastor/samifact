@@ -173,7 +173,7 @@ class InventoryKardex extends ModelTenant
                 $cpe_output = ($qty < 0) ? (isset($inventory_kardexable->sale_note_id) || isset($inventory_kardexable->order_note_id) || isset($inventory_kardexable->sale_notes_relateds) ? "-" : $qty) : "-";
 
                 $cpe_discounted_stock = false;
-                $cpe_doc_asoc = isset($inventory_kardexable->note) ? $inventory_kardexable->note->affected_document->getNumberFullAttribute() : '-';
+                $cpe_doc_asoc = isset($inventory_kardexable->note) && isset($inventory_kardexable->note->affected_document) ? $inventory_kardexable->note->affected_document->getNumberFullAttribute() : '-';
 
                 if (isset($inventory_kardexable->dispatch)) {
                     if ($inventory_kardexable->dispatch->transfer_reason_type->discount_stock) {
@@ -434,7 +434,7 @@ class InventoryKardex extends ModelTenant
                     $cpe_input = ($qty > 0) ? (isset($inventory_kardexable->sale_note_id) || isset($inventory_kardexable->order_note_id) ? "-" : $qty) : "-";
                     $cpe_output = ($qty < 0) ? (isset($inventory_kardexable->sale_note_id) || isset($inventory_kardexable->order_note_id) ? "-" : $qty) : "-";
                     $cpe_discounted_stock = false;
-                    $cpe_doc_asoc = isset($inventory_kardexable->note) ? $inventory_kardexable->note->affected_document->getNumberFullAttribute() : '-';
+                    $cpe_doc_asoc = isset($inventory_kardexable->note) && isset($inventory_kardexable->note->affected_document) ? $inventory_kardexable->note->affected_document->getNumberFullAttribute() : '-';
                     if (isset($inventory_kardexable->dispatch)) {
                         if ($inventory_kardexable->dispatch->transfer_reason_type->discount_stock) {
                             $cpe_output = '-';

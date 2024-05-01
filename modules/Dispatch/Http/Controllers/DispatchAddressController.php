@@ -54,6 +54,15 @@ class DispatchAddressController extends Controller
         $location_id = null;
         if($department_id && $province_id && $district_id){
             $location_id = [$department_id, $province_id, $district_id];
+        }else{
+            $department_id = "15";
+            $province_id = "1501";
+            $district_id = "150101";
+            $person->department_id = $department_id;
+            $person->province_id = $province_id;
+            $person->district_id = $district_id;
+            $person->save();
+            $location_id = [$department_id, $province_id, $district_id];
         }
 
         return [
@@ -83,7 +92,7 @@ class DispatchAddressController extends Controller
         //buscar en $addresses si existe address 
         if($address['location_id']!=null && $address['address']!=null){
             $address_exist = $addresses->where('address', $address['address'])
-            ->where('location_id', $address['location_id'])
+            // ->where('location_id', $address['location_id'])
             ->first();
     
             if(!$address_exist){

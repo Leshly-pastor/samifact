@@ -612,6 +612,7 @@ class OrderNote extends ModelTenant
         return [
             'can_generate' => $can_generate,
             'id' => $this->id,
+            'full_number' => $this->number_full,
             'discounted_stock' => (bool) $this->discounted_stock,
             'quotation' => (object)$quotation,
             'soap_type_id' => $this->soap_type_id,
@@ -666,6 +667,8 @@ class OrderNote extends ModelTenant
             'print_a4' => url('') . "/order-notes/print/{$this->external_id}/a4",
             'filename' => $this->filename,
             'print_ticket' => $this->getUrlPrintPdf('ticket'),
+            'message_text' => "Su pedido {$this->number_full} ha sido generado correctamente, puede revisarlo en el siguiente enlace: " .
+            url('') . "/order-notes/print/{$this->external_id}/a4" . '',
         ];
     }
 

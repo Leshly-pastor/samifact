@@ -194,6 +194,25 @@
             </tr>
         @endif
 
+        @if ($document->isPointSystem())
+        <tr>
+            <td>
+                <p class="desc">P. Acumulados:</p>
+            </td>
+            <td>
+                <p class="desc">{{ $document->person->accumulated_points }}
+                </p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <p class="desc">Puntos por la compra:</p>
+            </td>
+            <td>
+                <p class="desc">{{ $document->getPointsBySale() }}</p>
+            </td>
+        </tr>
+    @endif
         @if ($document->reference_data)
             <tr>
                 <td class="align-top">

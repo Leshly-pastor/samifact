@@ -27,7 +27,9 @@ class InventoryController extends Controller
         $item_description = $request->input('value');
         $records = ItemWarehouse::with(['item', 'warehouse'])
                                 ->whereHas('item', function($query) use($item_description) {
-                                    $query->where('description', 'like', '%' . $item_description . '%');
+                                    $query->where('description', 'like', '%' . $item_description . '%')
+                                    ->orWhere('internal_id', 'like', '%' . $item_description . '%')
+                                    ;
                                 })->orderBy('item_id');
 
 //        dd($records);

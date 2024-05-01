@@ -165,10 +165,16 @@
                         <el-checkbox v-model="generate_dispatch"
                             >Generar Guía Remisión</el-checkbox
                         >
+
                         <el-select
-                            v-model="dispatch_id"
+                            v-model="form.dispatch_id"
                             popper-class="el-select-document_type"
                             filterable
+                            remote
+                            clearable
+                            placeholder="Buscar producto"
+                            :remote-method="searchDispatches"
+                            :loading="loading_search"
                             v-if="generate_dispatch"
                         >
                             <el-option
@@ -197,6 +203,7 @@
                                 <th>Monto</th>
                                 <th style="width: 30px">
                                     <a
+                                        v-if="!blockAddPayments"
                                         style="font-size: 18px"
                                         href="#"
                                         @click.prevent="clickAddFee"
@@ -249,7 +256,7 @@
                 </div>
                 <div
                     class="col-lg-12"
-                    v-show="document.payment_condition_id != '02'"
+                    v-show="document.payment_condition_id != '02' && !payed"
                 >
                     <table>
                         <thead>
@@ -304,6 +311,9 @@
                                             :disabled="
                                                 row.payment_destination_disabled
                                             "
+                                            @change="
+                                                changePaymentDestination(index)
+                                            "
                                         >
                                             <el-option
                                                 v-for="option in payment_destinations"
@@ -341,6 +351,9 @@
                             </tr>
                         </tbody>
                     </table>
+                </div>
+                <div class="col-12 alert alert-success" v-if="payed">
+                    <strong> Nota de venta cancelada </strong>
                 </div>
 
                 <template v-if="fnApplyRestrictSaleItemsCpe">
@@ -392,14 +405,18 @@
 import DocumentOptions from "../../documents/partials/options.vue";
 import moment from "moment";
 import ListRestrictItems from "@components/secondary/ListRestrictItems.vue";
-import { fnRestrictSaleItemsCpe } from "@mixins/functions";
+import { fnRestrictSaleItemsCpe, advance } from "@mixins/functions";
 
 export default {
     components: { DocumentOptions, ListRestrictItems },
-    mixins: [fnRestrictSaleItemsCpe],
+    mixins: [fnRestrictSaleItemsCpe, advance],
     props: ["show", "recordId", "showClose", "showGenerate"],
     data() {
         return {
+            form_cash_document: {},
+            timer: null,
+            loading_search: false,
+            payed: false,
             sellers: [],
             titleDialog: null,
             loading: false,
@@ -431,12 +448,23 @@ export default {
         };
     },
     created() {
-        this.initForm();
         this.initDocument();
 
         // console.log(moment().format('YYYY-MM-DD'))
     },
+    computed: {
+        blockAddPayments() {
+            return (
+                this.form.payments.filter(
+                    (payment) => payment.payment_destination_id === "advance"
+                ).length > 0
+            );
+        },
+    },
     methods: {
+        changePaymentDestination(index) {
+            this.checkHasAdvance(index);
+        },
         hasCashOpen() {
             let has_cash = this.payment_destinations.some(
                 (payment_destination) => payment_destination.cash_id != null
@@ -523,6 +551,7 @@ export default {
             this.generate = this.showGenerate ? true : false;
             this.errors = {};
             this.form = {
+                dispatch_id: null,
                 id: null,
                 external_id: null,
                 identifier: null,
@@ -535,6 +564,7 @@ export default {
         },
         initDocument() {
             this.document = {
+                dispatch_id: null,
                 document_type_id: null,
                 series_id: null,
                 establishment_id: null,
@@ -632,6 +662,15 @@ export default {
             };
         },
         async submit() {
+            let payWithAdvance = this.payWithAdvanceDocument();
+            if (payWithAdvance) {
+                let enoughAdvance = this.enoughAdvance("document");
+                if (!enoughAdvance) {
+                    return this.$message.error(
+                        "El monto del anticipo no es suficiente para realizar la venta"
+                    );
+                }
+            }
             if (this.configuration.multi_companies) {
                 let serie = _.find(this.series, {
                     id: this.document.series_id,
@@ -657,17 +696,21 @@ export default {
                 return this.$message.error("No tiene productos agregados.");
 
             if (this.generate_dispatch) {
-                if (!this.dispatch_id) {
+                if (!this.form.dispatch_id) {
                     return this.$message.error(
                         "Debe seleccionar una guía base"
                     );
+                } else {
+                    this.document.dispatch_id = this.form.dispatch_id;
                 }
+            } else {
+                this.form.dispatch_id = null;
             }
 
             let validate_payment_destination =
                 await this.validatePaymentDestination();
 
-            if (validate_payment_destination.error_by_item > 0) {
+            if (validate_payment_destination.error_by_item > 0 && !this.payed) {
                 return this.$message.error(
                     validate_payment_destination.message
                 );
@@ -686,11 +729,20 @@ export default {
             if (this.cash_id) {
                 this.document.cash_id = this.cash_id;
             }
+            if (this.payed) {
+                this.document.payments = [];
+            }
             await this.$http
                 .post(`/${this.resource_documents}`, this.document)
                 .then((response) => {
                     if (response.data.success) {
                         this.documentNewId = response.data.data.id;
+                        if (payWithAdvance) {
+                            this.form_cash_document.document_id =
+                                response.data.data.id;
+                            this.form_cash_document.advance_id = payWithAdvance;
+                            this.saveAdvanceDocument();
+                        }
                         this.showDialogDocumentOptions = true;
                         this.$http
                             .get(`/${this.resource}/changed/${this.form.id}`)
@@ -801,7 +853,13 @@ export default {
             };
             this.document.sale_note_id = this.form.id;
             // this.document.payments = q.payments;
-            this.document.payments = this.getPaymentsData(q);
+            let { total_canceled, paid } = this.form;
+            this.payed = total_canceled || paid;
+            if (!this.payed) {
+                this.document.payments = this.getPaymentsData(q);
+            } else {
+                this.document.total_canceled = total_canceled;
+            }
             this.document.seller_id = q.seller_id;
             this.document.user_id = q.user_id;
             this.document.fee = [];
@@ -812,7 +870,7 @@ export default {
             ) {
                 this.document.payment_condition_id = "01";
             }
-            if(this.document.payment_condition_id == undefined){
+            if (this.document.payment_condition_id == undefined) {
                 this.document.payment_condition_id = "01";
                 this.clickAddPayment();
             }
@@ -846,6 +904,7 @@ export default {
             }
         },
         async create() {
+            this.initForm();
             let url = `/${this.resource}/option/tables`;
             if (this.recordId) {
                 url = `/${this.resource}/option/tables/${this.recordId}`;
@@ -877,6 +936,7 @@ export default {
                     this.titleDialog =
                         "Nota de venta registrada: " + this.form.number_full;
                 });
+            this.getAdvance(this.document.customer_id);
 
             await this.$http
                 .get(`/${this.resource}/dispatches`)
@@ -886,6 +946,25 @@ export default {
         },
         changeDocumentType() {
             this.filterSeries();
+        },
+        searchDispatches(input) {
+            if (this.timer) {
+                clearTimeout(this.timer);
+            }
+            this.timer = setTimeout(() => {
+                this.loading_search = true;
+                this.$http
+                    .get(`/${this.resource}/dispatches?input=${input}`)
+                    .then((response) => {
+                        this.dispatches = response.data;
+                    })
+                    .catch((error) => {
+                        this.$message.error(error.response.data.message);
+                    })
+                    .then(() => {
+                        this.loading_search = false;
+                    });
+            }, 600);
         },
         async validateIdentityDocumentType() {
             let identity_document_types = ["0", "1"];
@@ -925,6 +1004,8 @@ export default {
         clickClose() {
             this.$emit("update:show", false);
             this.initForm();
+            // this.initDocument();
+
             this.resetDocument();
             // this.flag_generate = true
         },

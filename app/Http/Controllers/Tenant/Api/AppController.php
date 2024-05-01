@@ -95,6 +95,9 @@ use Modules\ApiPeruDev\Helpers\ServiceDispatch;
 use App\CoreFacturalo\Helpers\Template\ReportHelper;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Collection;
+use Modules\Dispatch\Http\Controllers\DispatchAddressController;
+use Modules\Item\Http\Requests\BrandRequest;
+use Modules\Item\Models\Brand;
 use Modules\Pos\Http\Controllers\CashController;
 
 class AppController extends Controller
@@ -422,7 +425,11 @@ class AppController extends Controller
             ->get()
             ->take(20)
             ->transform(function ($row) {
+                
+            $dispatch_addresses =   (new DispatchAddressController)->getOptions($row->id);
+                // $addresses->push($original_address);
                 return [
+                    'dispatch_addresses' => $dispatch_addresses,
                     'id' => $row->id,
                     'description' => $row->number . ' - ' . $row->name,
                     'name' => $row->name,
@@ -435,6 +442,8 @@ class AppController extends Controller
                     'enabled' => $row->enabled,
                     'country_id' => $row->country_id,
                     'district_id' => $row->district_id,
+                    'department_id' => $row->department_id,
+                    'province_id' => $row->province_id,
                     'addresses' => $row->addresses,
                     'selected' => false
                 ];
@@ -858,13 +867,37 @@ class AppController extends Controller
             'data' => $categories
         ];
     }
-
+    public function brands(Request $request)
+    {
+        // return $request->input;
+        $brands = Brand::where("name", "like", "%{$request->input}%")->orderBy('id')->get();
+        return [
+            'success' => true,
+            'data' => $brands
+        ];
+    }
     public function category_detail($id)
     {
         $categories = Category::where("id", "=", $id)->first();
         return [
             'success' => true,
             'data' => $categories
+        ];
+    }
+    public function brand(BrandRequest $request)
+    {
+        // return $request->id;
+        $row = Brand::firstOrNew(['id' => $request->id]);
+        $row->fill($request->all());
+        $row->save();
+
+        return [
+            'success' => true,
+            'msg' => 'Marca registrada con éxito',
+            'data' => (object)[
+                'id' => $row->id,
+                'name' => $row->name,
+            ]
         ];
     }
 

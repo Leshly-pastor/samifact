@@ -28,6 +28,7 @@ class QuotationResource extends JsonResource
             'id' => $this->id,
             'external_id' => $this->external_id,
             'identifier' => $this->identifier,
+            'full_number' => $this->identifier,
             'date_of_issue' => $this->date_of_issue->format('Y-m-d'),
             'quotation' => $quotation,
             'message_text' => "Su cotización {$this->number_full} ha sido generado correctamente, " .
@@ -37,6 +38,11 @@ class QuotationResource extends JsonResource
             'customer_telephone' => $this->customer->telephone ?? null,
             'customer_id' => $this->customer_id,
             'is_integrate_system' => BusinessTurn::isIntegrateSystem(),
+            'print_ticket' => url('')."/print/quotation/{$this->external_id}/ticket",
+            'print_a4' => url('')."/print/quotation/{$this->external_id}/a4",
+            'print_a5' => url('')."/print/quotation/{$this->external_id}/a5",
+            // 'print_receipt' => url('')."/quotation/receipt/{$this->id}",
+            'print_ticket_58' => url('')."/print/quotation/{$this->external_id}/ticket_58",
         ];
     }
 

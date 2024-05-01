@@ -495,7 +495,7 @@
                                     <i class="fas fa-ellipsis-v"></i>
                                 </button>
                                 <div class="dropdown-menu dropdown-menu-end">
-                                    <template v-if="typeUser === 'admin'">
+                                    <template v-if="typeUser === 'admin' ? true : configuration.allow_edit_unit_price_to_seller">
                                         <button
                                             class="dropdown-item"
                                             @click.prevent="clickCreate(row.id)"
@@ -531,7 +531,7 @@
                                             Habilitar
                                         </button>
                                         <button
-                                            v-if="config.erase_item_indivual"
+                                            v-if="config.erase_item_indivual && typeUser === 'admin' "
                                             class="dropdown-item text-danger"
                                             @click.prevent="clickErase(row.id)"
                                         >

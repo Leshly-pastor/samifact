@@ -110,6 +110,9 @@ $col_span = 25;
         <td>TIPO</td>
         <td>SERIE</td>
         <td>NÚMERO</td>
+        @if($add_reference)
+        <td>REFERENCIA</td>
+        @endif
     </tr>
     @foreach($records as $row)
     <tr>
@@ -147,6 +150,9 @@ $col_span = 25;
         <td></td>
         <td></td>
         <td></td>
+        @if($add_reference)
+        <td>{{ $row['reference'] }}</td>
+        @endif
     </tr>
     @endforeach
 </table>

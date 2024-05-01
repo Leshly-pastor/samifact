@@ -316,6 +316,16 @@ $thridLevel = $path[2] ?? null;
                                     href="{{ route('tenant.cash.index') }}">Listado de cajas</a>
                             </li>
                         @endif
+                        
+                            <li>
+                                <a class="{{ $firstLevel === 'advances' && $thridLevel == 'customers' ? 'active' : '' }}"
+                                    href="{{ route('tenant.advances.index',['type'=>'customers']) }}">Anticipo clientes</a>
+                            </li>
+
+                            <li>
+                                <a class="{{ $firstLevel === 'advances' && $thridLevel == 'suppliers' ? 'active' : '' }}"
+                                    href="{{ route('tenant.advances.index',['type'=>'suppliers']) }}">Anticipo proovedores</a>
+                            </li>
                     </ul>
                 </li>
             @endif

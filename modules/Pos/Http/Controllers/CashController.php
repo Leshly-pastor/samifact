@@ -322,7 +322,6 @@ class CashController extends Controller
                         'reference'                => $reference,
                     ];
                     if($temp['document_type_description'] === 'NOTA DE VENTA'){
-                        // dump($temp);
                     }
                     // items
                     // dd($document->items);
@@ -1409,29 +1408,12 @@ class CashController extends Controller
     public function reportExcel($cash)
     {
         $data = $this->setDataToReport($cash);
-        // dd($data);
-
-        /*
-         $cash = Cash::findOrFail($cash);
-        $company = Company::first();
-        $methods_payment = collect(PaymentMethodType::all())->transform(function ($row) {
-            return (object)[
-                'id' => $row->id,
-                'name' => $row->description,
-                'sum' => 0
-            ];
-        });
-        set_time_limit(0);
-        */
+    
 
         $filename = "Reporte_POS - {$data['cash_user_name']} - {$data['cash_date_opening']} {$data['cash_time_opening']}";
         $report_cash_export = new ReportCashExport();
         $report_cash_export->setData($data);
-        /*
-        $report_cash_export ->cash($cash)
-            ->company($company)
-            ->methods_payment($methods_payment);
-        */
+    
         return $report_cash_export->download($filename . '.xlsx');
     }
 

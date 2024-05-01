@@ -76,7 +76,7 @@ class PseService
     public function __construct($document)
     {
         $this->dsct_item = 0;
-        $this->characters = [")", "(", "-", ".", "_", "/", "&", "\\", '"'];
+        $this->characters = [")", "(", "-", ".", "_", "/", "&", "\\", '"',"'"];
         $this->unit_types = [
             "BAR" => "BAR",
             "BG" => "BOL",
@@ -992,7 +992,7 @@ class PseService
         $xml->facelecab->addChild('codcli', '');
         $xml->facelecab->addChild('dedoid', '');
         $xml->facelecab->addChild('ubifis', $this->document->customer->district_id);
-        $xml->facelecab->addChild('dirfis', $this->document->customer->address);
+        $xml->facelecab->addChild('dirfis', $this->format_characters( $this->document->customer->address));
         $xml->facelecab->addChild('desmnd', 'SOLES');
         $xml->facelecab->addChild('dester', 'CONTADO');
         $xml->facelecab->addChild('coddoc', '');
