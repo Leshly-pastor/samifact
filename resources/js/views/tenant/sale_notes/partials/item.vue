@@ -199,7 +199,18 @@
                             ></small>
                         </div>
                     </div>
-
+<div class="row" v-if="configuration.count_unit_sale_note">
+    <div class="col-12 col-md-3 col-lg-3">
+        <label>Unidades</label>
+        <el-input
+            v-model="item_count"
+            :disabled="isUpdateItem"
+            type="number"
+            min="1"
+            step="1"
+        ></el-input>
+    </div>
+</div>
                     <template v-if="form.item_unit_types.length != 0">
                         <div class="col-md-3">
                             <div
@@ -333,7 +344,6 @@
                                 ></small>
                             </div>
                         </div>
-
                         <div class="col-md-3">
                             <div class="form-group">
                                 <label class="control-label">Total</label>
@@ -1022,6 +1032,7 @@ export default {
     },
     data() {
         return {
+            item_count: 1,
             showDialogSelectSizes: false,
             decimalQuantity: 2,
             extra_temp: undefined,
@@ -1697,6 +1708,7 @@ export default {
                     this.changePrice(this.form.item_unit_type_id);
                 }
             }
+            this.item_count = 1;
             this.form.unit_price_value = this.form.item.sale_unit_price;
             this.lots = this.form.item.lots;
 
@@ -1913,7 +1925,7 @@ export default {
 
             this.row.IdLoteSelected = IdLoteSelected;
             this.row.document_item_id = document_item_id;
-
+            this.row.item.item_count = this.item_count;
             this.$emit("add", this.row);
 
             if (this.search_item_by_barcode) {

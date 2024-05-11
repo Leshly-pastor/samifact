@@ -183,7 +183,7 @@ class AppController extends Controller
         $user = $request->user();
         $establishment = Establishment::where('id', '=', $user->establishment_id)->first();
         $configurations = Configuration::where('id', '=', 1)->first();
-// return $establishment;
+        // return $establishment;
         $permisos = new UserResource(User::findOrFail($user->id));
         // return $configurations;
         $url_logo = "" . config('tenant.app_url_base') . "" . $establishment->logo != null ? $establishment->logo : $company->logo . "";
@@ -229,11 +229,11 @@ class AppController extends Controller
             'multiple_default_document_types'   => $permisos->multiple_default_document_types,
             'default_document_types'            => $permisos->default_document_types,
             'levels'                            => collect($permisos->levels)->transform(function ($row) {
-                                                    return [
-                                                        'id'          => $row->id,
-                                                        'value'       => $row->value,
-                                                        'description' => $row->description,
-                                                    ];
+                return [
+                    'id'          => $row->id,
+                    'value'       => $row->value,
+                    'description' => $row->description,
+                ];
             }),
             // 'modules'                           => collect($permisos->levels)->transform(function ($row) {
             //                                         return [
@@ -243,7 +243,6 @@ class AppController extends Controller
             //                                         ];
             // }),
         ];
-
     }
 
     public function sellers()
@@ -260,7 +259,6 @@ class AppController extends Controller
             'success' => true,
             'data' => array('sellers' => $sellers)
         ];
-
     }
 
     public function customers()
@@ -300,7 +298,6 @@ class AppController extends Controller
             'success' => true,
             'data' => array('customers' => $customers)
         ];
-
     }
 
     public function customersAdmin()
@@ -328,7 +325,6 @@ class AppController extends Controller
             'success' => true,
             'data' => array('customers' => $customers)
         ];
-
     }
 
 
@@ -385,7 +381,6 @@ class AppController extends Controller
             'success' => true,
             'message' => "Cliente {$type_message} con éxito"
         ];
-
     }
 
     public function destroy_customer($id)
@@ -400,13 +395,10 @@ class AppController extends Controller
                 'success' => true,
                 'message' => $person_type . ' eliminado con éxito'
             ];
-
         } catch (Exception $e) {
 
             return ($e->getCode() == '23000') ? ['success' => false, 'message' => "El {$person_type} esta siendo usado por otros registros, no puede eliminar"] : ['success' => false, 'message' => "Error inesperado, no se pudo eliminar el {$person_type}"];
-
         }
-
     }
 
     public function searchCustomers(Request $request)
@@ -425,8 +417,8 @@ class AppController extends Controller
             ->get()
             ->take(20)
             ->transform(function ($row) {
-                
-            $dispatch_addresses =   (new DispatchAddressController)->getOptions($row->id);
+
+                $dispatch_addresses =   (new DispatchAddressController)->getOptions($row->id);
                 // $addresses->push($original_address);
                 return [
                     'dispatch_addresses' => $dispatch_addresses,
@@ -455,6 +447,23 @@ class AppController extends Controller
         ];
     }
 
+    public function getDispatcher(Request $request){
+        $dispatchers = Dispatcher::get()->transform(function ($row) {
+            return [
+                'id' => $row->id,
+                'identity_document_type_id' => $row->identity_document_type_id,
+                'number' => $row->number,
+                'name' => $row->name,
+                'address' => $row->address,
+                'number_mtc' => $row->number_mtc,
+            ];
+        });
+
+        return [
+            'success' => true,
+            'data' => array('dispatchers' => $dispatchers)
+        ];
+    }
     public function searchDispatcher(Request $request)
     {
         if ($request->byid != 'true') {
@@ -507,7 +516,6 @@ class AppController extends Controller
             'message' => ($id) ? 'Transportista editado con éxito' : 'Transportista registrado con éxito',
             'id' => $record->id
         ];
-
     }
 
     public function destroyDispatcher($id)
@@ -521,14 +529,10 @@ class AppController extends Controller
                 'success' => true,
                 'message' => 'Transportista eliminado con éxito'
             ];
-
         } catch (Exception $e) {
 
             return ($e->getCode() == '23000') ? ['success' => false, 'message' => 'El transportista esta siendo usado por otros registros, no puede eliminar'] : ['success' => false, 'message' => 'Error inesperado, no se pudo eliminar el transportista'];
-
         }
-
-
     }
 
     public function searchDriver(Request $request)
@@ -584,7 +588,6 @@ class AppController extends Controller
             'message' => ($id) ? 'Conductor editado con éxito' : 'Conductor registrado con éxito',
             'id' => $record->id
         ];
-
     }
 
     public function destroyDriver($id)
@@ -598,14 +601,10 @@ class AppController extends Controller
                 'success' => true,
                 'message' => 'Conductor eliminado con éxito'
             ];
-
         } catch (Exception $e) {
 
             return ($e->getCode() == '23000') ? ['success' => false, 'message' => 'El conductor esta siendo usado por otros registros, no puede eliminar'] : ['success' => false, 'message' => 'Error inesperado, no se pudo eliminar el conductor'];
-
         }
-
-
     }
 
 
@@ -659,7 +658,6 @@ class AppController extends Controller
             'message' => ($id) ? 'Vehículo editado con éxito' : 'Vehículo registrado con éxito',
             'id' => $record->id
         ];
-
     }
 
     public function destroyTransport($id)
@@ -673,16 +671,27 @@ class AppController extends Controller
                 'success' => true,
                 'message' => 'Vehículo eliminado con éxito'
             ];
-
         } catch (Exception $e) {
 
             return ($e->getCode() == '23000') ? ['success' => false, 'message' => 'El vehículo esta siendo usado por otros registros, no puede eliminar'] : ['success' => false, 'message' => 'Error inesperado, no se pudo eliminar el vehículo'];
-
         }
-
-
     }
 
+    public function getOriginAddress()
+    {
+        $originaddresses = OriginAddress::orderBy('id')->get()->transform(function ($row) {
+            return [
+                'id' => $row->id,
+                'address' => $row->address,
+                'location_id' => $row->location_id,
+                // 'model' => $row->model,
+            ];
+        });
+        return [
+            'success' => true,
+            'data' => array('originaddresses' => $originaddresses)
+        ];
+    }
     public function searchOriginAddress(Request $request)
     {
         if ($request->byid != 'true') {
@@ -734,7 +743,6 @@ class AppController extends Controller
             'message' => ($id) ? 'Dirección editada con éxito' : 'Dirección registrada con éxito',
             'id' => $record->id
         ];
-
     }
 
     public function destroyOriginAddress($id)
@@ -748,14 +756,10 @@ class AppController extends Controller
                 'success' => true,
                 'message' => 'Dirección eliminada con éxito'
             ];
-
         } catch (Exception $e) {
 
             return ($e->getCode() == '23000') ? ['success' => false, 'message' => 'La Dirección esta siendo usado por otros registros, no puede eliminar'] : ['success' => false, 'message' => 'Error inesperado, no se pudo eliminar la Dirección'];
-
         }
-
-
     }
 
     public function documents_count()
@@ -766,10 +770,11 @@ class AppController extends Controller
 
         return [
             'success' => true,
-            'data' => array('document_not_send' => $document_not_send,
-                'document_regularize' => $document_regularize)
+            'data' => array(
+                'document_not_send' => $document_not_send,
+                'document_regularize' => $document_regularize
+            )
         ];
-
     }
 
 
@@ -781,7 +786,6 @@ class AppController extends Controller
             'success' => true,
             'data' => $state_types
         ];
-
     }
 
     public function tables()
@@ -854,10 +858,9 @@ class AppController extends Controller
             'success' => true,
             'data' => array('items' => $items, 'affectation_types' => $affectation_igv_types, 'categories' => $categories, 'unittypes' => $unitTypes)
         ];
-
     }
 
-//incio categorias
+    //incio categorias
     public function categories(Request $request)
     {
         // return $request->input;
@@ -933,7 +936,7 @@ class AppController extends Controller
         }
     }
 
-//fin categorias
+    //fin categorias
 
     public function getSeries()
     {
@@ -948,7 +951,6 @@ class AppController extends Controller
                     'number' => $row->number
                 ];
             });
-
     }
 
     public function getTypeDoc()
@@ -962,7 +964,6 @@ class AppController extends Controller
                     'description' => $row->description
                 ];
             });
-
     }
 
     public function dispatches_series()
@@ -978,7 +979,6 @@ class AppController extends Controller
                     'number' => $row->number
                 ];
             });
-
     }
 
     public function dispatchesCarrierSeries()
@@ -994,9 +994,11 @@ class AppController extends Controller
                     'number' => $row->number
                 ];
             });
-
     }
 
+    public function dispatches_records()
+    {
+    }
     public function dispatches_data()
     {
 
@@ -1017,7 +1019,6 @@ class AppController extends Controller
                 ];
             });
         return compact('drivers', 'dispatchers', 'series', 'transportModeTypes', 'transferReasonTypes', 'transports');
-
     }
 
     public function dispatchesCarrierData()
@@ -1121,12 +1122,12 @@ class AppController extends Controller
         $company = Company::select('number')->first();
         $drivers = (new DriverController())->getOptions();
         $transports = (new TransportController())->getOptions();
-//        $senders = (new SenderController())->getOptions();
-//        $receivers = (new ReceiverController())->getOptions();
+        //        $senders = (new SenderController())->getOptions();
+        //        $receivers = (new ReceiverController())->getOptions();
         $related_document_types = RelatedDocumentType::get();
 
         return compact(
-        // 'customers',
+            // 'customers',
             'series',
             'transportModeTypes',
             'transferReasonTypes',
@@ -1434,7 +1435,6 @@ class AppController extends Controller
                         'voidedbol' => collect($summary),
                     ];
                 });
-
         } else {
             $records = Document::whereBetween('date_of_issue', [$startDate, $endDate])->whereTypeUser()
                 ->orderBy('date_of_issue', 'desc')
@@ -1479,7 +1479,7 @@ class AppController extends Controller
                         'payment_condition' => $row->payment_condition_id == '02' ? "CREDITO" : 'CONTADO',
                         'payment_condition_id' => $row->payment_condition_id,
                         'payment_method_type' => $row->payment_condition_id == '01' ? (sizeof($row->payments) ? $row->payments[0]->payment_method_type->description : null) : null,
-                        'payment_method_type_id' => $row->payment_condition_id == '01' ?( sizeof($row->payments) ? $row->payments[0]->payment_method_type->id : null) : null,
+                        'payment_method_type_id' => $row->payment_condition_id == '01' ? (sizeof($row->payments) ? $row->payments[0]->payment_method_type->id : null) : null,
                         'terms_condition' => $row->terms_condition,
                         'seller_name' => $row->user->name,
                         'total' => number_format($row->total, 2, '.', ','),
@@ -1487,14 +1487,14 @@ class AppController extends Controller
                         'voidedbol' => $summary,
                     ];
                 });
-
         }
         return $records;
     }
 
 
-    public function items()
+    public function items(Request $request)
     {
+        $input = $request->input;
         $affectation_igv_types = AffectationIgvType::whereActive()->get();
         $unitTypes = UnitType::whereActive()->get();
         $categories = Category::orderBy('name')->get();
@@ -1504,10 +1504,15 @@ class AppController extends Controller
 
         $items = Item::with(['brand', 'category'])
             ->whereWarehouse()
-            ->whereHasInternalId()
-            // ->whereNotIsSet()
-            // ->whereIsActive()
-            ->orderBy('description')
+            ->whereHasInternalId();
+        if ($input) {
+            $items = $items->where('description', 'like', "%{$input}%")
+                ->orWhere('internal_id', 'like', "%{$input}%");
+            // ->orWhere('barcode', 'like', "%{$input}%");
+        }
+        // ->whereNotIsSet()
+        // ->whereIsActive()
+        $items = $items->orderBy('description')
             ->take(20)
             ->get()
             ->transform(function ($row) use ($warehouse) {
@@ -1565,7 +1570,6 @@ class AppController extends Controller
             'success' => true,
             'data' => array('items' => $items, 'affectation_types' => $affectation_igv_types, 'categories' => $categories, 'unittypes' => $unitTypes)
         ];
-
     }
 
     public function ItemsSearch(Request $request)
@@ -1686,8 +1690,6 @@ class AppController extends Controller
             });
             Storage::put($directory . $file_name, (string)$image->encode('jpg', 20));
             $row->image_small = $file_name;
-
-
         } else if (!$request->input('image') && !$request->input('temp_path') && !$request->input('image_url')) {
             $row->image = 'imagen-no-disponible.jpg';
         }
@@ -1751,7 +1753,6 @@ class AppController extends Controller
                 }),
             ],
         ];
-
     }
 
     public function destroy_item($id)
@@ -1766,14 +1767,10 @@ class AppController extends Controller
                 'success' => true,
                 'message' => 'Producto eliminado con éxito'
             ];
-
         } catch (Exception $e) {
 
             return ($e->getCode() == '23000') ? ['success' => false, 'message' => 'El producto esta siendo usado por otros registros, no puede eliminar'] : ['success' => false, 'message' => 'Error inesperado, no se pudo eliminar el producto'];
-
         }
-
-
     }
 
     private function deleteRecordInitialKardex($item)
@@ -1782,7 +1779,6 @@ class AppController extends Controller
         if ($item->kardex->count() == 1) {
             ($item->kardex[0]->type == null) ? $item->kardex[0]->delete() : false;
         }
-
     }
 
     public function disable($id)
@@ -1797,11 +1793,9 @@ class AppController extends Controller
                 'success' => true,
                 'message' => 'Producto inhabilitado con éxito'
             ];
-
         } catch (Exception $e) {
 
             return ['success' => false, 'message' => 'Error inesperado, no se pudo inhabilitar el producto'];
-
         }
     }
 
@@ -1818,11 +1812,9 @@ class AppController extends Controller
                 'success' => true,
                 'message' => 'Producto habilitado con éxito'
             ];
-
         } catch (Exception $e) {
 
             return ['success' => false, 'message' => 'Error inesperado, no se pudo habilitar el producto'];
-
         }
     }
 
@@ -2129,7 +2121,6 @@ class AppController extends Controller
     {
 
         return ($document_type_id == '01') ? [6] : [1, 4, 6, 7, 0];
-
     }
 
     public function updateItem(ItemUpdateRequest $request, $itemId)
@@ -2241,10 +2232,9 @@ class AppController extends Controller
             'success' => true,
             'data' => $customers
         ];
-
     }
 
-///filtrar cpe por estados
+    ///filtrar cpe por estados
     public function filterCPE($state, $type_doc)
     {
 
@@ -2252,7 +2242,6 @@ class AppController extends Controller
         $records = $this->getFilterRecords($state, $type_doc);
 
         return new DocumentCollection($records->paginate(config('tenant.items_per_page')));
-
     }
 
     public function getFilterRecords($state, $type_doc)
@@ -2315,17 +2304,15 @@ class AppController extends Controller
                     'empresa_condicion_descripcion' => $this->company_condition[$response["data"]["condDomiRuc"]],
                 ]
             ];
-
         } else {
             return [
                 'success' => false,
                 'data' => $response["data"]
             ];
         }
-
     }
 
-//sector para caja chica
+    //sector para caja chica
 
     /**
      * @param int $total
@@ -2338,8 +2325,7 @@ class AppController extends Controller
         $total = 0,
         $currency_type_id = 'PEN',
         $exchange_rate_sale = 1
-    )
-    {
+    ) {
         if ($currency_type_id !== 'PEN') {
             $total = $total * $exchange_rate_sale;
         }
@@ -2403,7 +2389,7 @@ class AppController extends Controller
     {
         // $id = $request->input('id');
         $cashopen = Cash::where([['user_id', auth()->user()->id], ['state', true]])->first();
-// dd($value);
+        // dd($value);
 
         if ($cashopen == null) {
 
@@ -2423,22 +2409,18 @@ class AppController extends Controller
                 $cash->save();
 
                 $this->createCashTransaction($cash, $value);
-
             });
 
             return [
                 'success' => true,
                 'message' => 'Caja aperturada con éxito'
             ];
-
         } else {
             return [
                 'success' => false,
                 'message' => 'El usuario ya tiene una caja abierta'
             ];
         }
-
-
     }
 
 
@@ -2459,7 +2441,6 @@ class AppController extends Controller
         $cash_transaction = $cash->cash_transaction()->create($data);
 
         $this->createGlobalPaymentTransaction($cash_transaction, $data);
-
     }
 
 
@@ -2471,7 +2452,6 @@ class AppController extends Controller
         if ($ini_cash_transaction) {
             CashTransaction::find($ini_cash_transaction->id)->delete();
         }
-
     }
 
     //cerrar caja
@@ -2496,25 +2476,21 @@ class AppController extends Controller
                 if (in_array($cash_document->sale_note->state_type_id, ['01', '03', '05', '07', '13'])) {
                     $final_balance += ($cash_document->sale_note->currency_type_id == 'PEN') ? $cash_document->sale_note->total : ($cash_document->sale_note->total * $cash_document->sale_note->exchange_rate_sale);
                 }
-
             } else if ($cash_document->document) {
 
                 if (in_array($cash_document->document->state_type_id, ['01', '03', '05', '07', '13'])) {
                     $final_balance += ($cash_document->document->currency_type_id == 'PEN') ? $cash_document->document->total : ($cash_document->document->total * $cash_document->document->exchange_rate_sale);
                 }
-
             } else if ($cash_document->expense_payment) {
 
                 if ($cash_document->expense_payment->expense->state_type_id == '05') {
                     $final_balance -= ($cash_document->expense_payment->expense->currency_type_id == 'PEN') ? $cash_document->expense_payment->payment : ($cash_document->expense_payment->payment * $cash_document->expense_payment->expense->exchange_rate_sale);
                 }
-
             } else if ($cash_document->purchase) {
                 if (in_array($cash_document->purchase->state_type_id, ['01', '03', '05', '07', '13'])) {
                     $final_balance -= ($cash_document->purchase->currency_type_id == 'PEN') ? $cash_document->purchase->total : ($cash_document->purchase->total * $cash_document->purchase->exchange_rate_sale);
                 }
             }
-
         }
 
         $cash->final_balance = round($final_balance + $cash->beginning_balance, 2);
@@ -2526,7 +2502,6 @@ class AppController extends Controller
             'success' => true,
             'message' => 'Caja cerrada con éxito',
         ];
-
     }
 
     //reporte de caja en ticket
@@ -2554,7 +2529,8 @@ class AppController extends Controller
      *
      * @return array
      */
-    public function setDataToReport($cash_id = 0){
+    public function setDataToReport($cash_id = 0)
+    {
         $data = (new CashController)->setDataToReport($cash_id);
         return $data;
     }
@@ -2667,7 +2643,6 @@ class AppController extends Controller
                         }
 
                         $data['total_cash_income_pmt_01'] += $this->getIncomeEgressCashDestination($sale_note->payments);
-
                     }
 
                     $data['total_tips'] += $sale_note->tip ? $sale_note->tip->total : 0;
@@ -2708,7 +2683,8 @@ class AppController extends Controller
                 // dd($items);
                 // fin items
 
-            } /** Documentos de Tipo Document */
+            }
+            /** Documentos de Tipo Document */
             elseif ($cash_document->document) {
                 $record_total = 0;
                 $document = $cash_document->document;
@@ -2738,7 +2714,6 @@ class AppController extends Controller
                                 }
 
                                 if ($record->id === '01') $data['total_payment_cash_01_document'] += $record_total;
-
                             }
                         }
                     } else {
@@ -2785,7 +2760,6 @@ class AppController extends Controller
 
                     $data['total_tips'] += $document->tip ? $document->tip->total : 0;
                     $data['total_cash_income_pmt_01'] += $this->getIncomeEgressCashDestination($document->payments);
-
                 }
                 if ($record_total != $document->total) {
                     $usado .= '<br> Los montos son diferentes ' . $document->total . " vs " . $pagado . "<br>";
@@ -2828,7 +2802,8 @@ class AppController extends Controller
                 }
                 // dd($items);
                 // fin items
-            } /** Documentos de Tipo Servicio tecnico */
+            }
+            /** Documentos de Tipo Servicio tecnico */
             elseif ($cash_document->technical_service) {
                 $usado = '<br>Se usan para cash<br>';
                 $technical_service = $cash_document->technical_service;
@@ -2848,7 +2823,6 @@ class AppController extends Controller
                         }
 
                         $data['total_cash_income_pmt_01'] += $this->getIncomeEgressCashDestination($technical_service->payments);
-
                     }
 
                     $order_number = 4;
@@ -2856,7 +2830,7 @@ class AppController extends Controller
                     $temp = [
                         'type_transaction' => 'Venta',
                         'document_type_description' => 'Servicio técnico',
-                        'number' => 'TS-' . $technical_service->id,//$value->document->number_full,
+                        'number' => 'TS-' . $technical_service->id, //$value->document->number_full,
                         'date_of_issue' => $technical_service->date_of_issue->format('Y-m-d'),
                         'date_sort' => $technical_service->date_of_issue,
                         'customer_name' => $technical_service->customer->name,
@@ -2871,8 +2845,8 @@ class AppController extends Controller
                         'order_number_key' => $order_number . '_' . $technical_service->created_at->format('YmdHis'),
                     ];
                 }
-
-            } /** Documentos de Tipo Gastos */
+            }
+            /** Documentos de Tipo Gastos */
             elseif ($cash_document->expense_payment) {
                 $expense_payment = $cash_document->expense_payment;
                 $total_expense_payment = 0;
@@ -2914,7 +2888,8 @@ class AppController extends Controller
                     'order_number_key' => $order_number . '_' . $expense_payment->expense->created_at->format('YmdHis'),
 
                 ];
-            } /** Documentos de Tipo compras */
+            }
+            /** Documentos de Tipo compras */
             else if ($cash_document->purchase) {
 
                 /**
@@ -2943,7 +2918,6 @@ class AppController extends Controller
                         $data['total_cash_egress_pmt_01'] += $this->getIncomeEgressCashDestination($payments);
                         // $total_purchase_payment_method_cash += $this->getPaymentsByCashFilter($payments)->sum('payment');
                     }
-
                 }
 
                 $order_number = $purchase->document_type_id == '01' ? 7 : 8;
@@ -2964,8 +2938,8 @@ class AppController extends Controller
                     'type_transaction_prefix' => 'egress',
                     'order_number_key' => $order_number . '_' . $purchase->created_at->format('YmdHis'),
                 ];
-
-            } /** Cotizaciones */
+            }
+            /** Cotizaciones */
             else if ($cash_document->quotation) {
                 $quotation = $cash_document->quotation;
 
@@ -3012,10 +2986,8 @@ class AppController extends Controller
                         'type_transaction_prefix' => 'income',
                         'order_number_key' => $order_number . '_' . $quotation->created_at->format('YmdHis'),
                     ];
-
                 }
                 /** Cotizaciones */
-
             }
 
 
@@ -3072,12 +3044,10 @@ class AppController extends Controller
                         $temp['total_string'] = self::FormatNumber($temp['total']);
                         $all_documents[] = $temp;
                     }
-
                 }
             }
-
         }
-//        $all_documents = collect($all_documents)->sortBy('date_sort')->all();
+        //        $all_documents = collect($all_documents)->sortBy('date_sort')->all();
         /************************/
         /************************/
         $data['all_documents'] = $all_documents;
@@ -3167,7 +3137,7 @@ class AppController extends Controller
         $data = $this->setDataToReport($cash);
         // dd($data);
 
-        $quantity_rows = 30;//$cash->cash_documents()->count();
+        $quantity_rows = 30; //$cash->cash_documents()->count();
 
         $width = 78;
         // if($mm != null) {
@@ -3189,7 +3159,7 @@ class AppController extends Controller
                 'format' => [
                     $width,
                     190 +
-                    ($quantity_rows * 8),
+                        ($quantity_rows * 8),
                 ],
                 'margin_top' => 3,
                 'margin_right' => 3,
@@ -3306,8 +3276,7 @@ class AppController extends Controller
         $pdf = Pdf::loadView('tenant.cash.report_product_pdf', $data);
         $filename = "Reporte_POS_PRODUCTOS - {$data['cash']->user->name} - {$data['cash']->date_opening} {$data['cash']->time_opening}";
 
-        return $pdf->stream($filename.'.pdf');
-
+        return $pdf->stream($filename . '.pdf');
     }
 
     public function report_products_ticket($id, $is_garage = false)
@@ -3320,7 +3289,6 @@ class AppController extends Controller
         $filename = "Reporte_POS_PRODUCTOS - {$data['cash']->user->name} - {$data['cash']->date_opening} {$data['cash']->time_opening}";
 
         return $pdf->stream($filename . '.pdf');
-
     }
 
 
@@ -3362,7 +3330,6 @@ class AppController extends Controller
         $documents = $documents->merge($this->getPurchasesReportProducts($cash));
 
         return compact("cash", "company", "documents", 'is_garage');
-
     }
 
 
@@ -3394,7 +3361,6 @@ class AppController extends Controller
 
             return $data;
         });
-
     }
 
 
@@ -3427,7 +3393,6 @@ class AppController extends Controller
 
             return $data;
         });
-
     }
 
     /**
@@ -3473,7 +3438,7 @@ class AppController extends Controller
     }
 
 
-////modulo reportes
+    ////modulo reportes
 
 
     public function report($year, $month, $day, $method, $type_user, $user_id)
@@ -3606,8 +3571,6 @@ class AppController extends Controller
                     ->whereBetween('date_of_issue', [$date_start, $date_end])
                     ->get();
             }
-
-
         } else {
 
 
@@ -3664,7 +3627,6 @@ class AppController extends Controller
                     $document_total_note_credit_usd += ($document->document_type_id == '07') ? $document->total * $document->exchange_rate_sale : 0; //nota de credito
                 }
             }
-
         }
 
         $document_total = $document_total_pen + $document_total_usd;
@@ -3975,12 +3937,10 @@ class AppController extends Controller
 
 
         return $items;
-
-
     }
 
 
-//anulacion de nota de venta
+    //anulacion de nota de venta
     public function anulateNote($id)
     {
 
@@ -4002,17 +3962,13 @@ class AppController extends Controller
                 //habilito las series
                 // ItemLot::where('item_id', $item->item_id )->where('warehouse_id', $warehouse->id)->update(['has_sale' => false]);
                 $this->voidedLots($sale_note_item);
-
             }
-
         });
 
         return [
             'success' => true,
             'message' => 'N. Venta anulada con éxito'
         ];
-
-
     }
 
 
@@ -4038,7 +3994,6 @@ class AppController extends Controller
                 $wr->stock = $wr->stock + ($sale_note_item->quantity * $presentationQuantity);
                 $wr->save();
             }
-
         } else {
 
             $item = Item::findOrFail($sale_note_item->item_id);
@@ -4051,11 +4006,8 @@ class AppController extends Controller
                 $warehouse = $this->findWarehouse($sale_note_item->sale_note->establishment_id);
                 $this->createInventoryKardexSaleNote($sale_note_item->sale_note, $ind_item->id, (1 * ($sale_note_item->quantity * $presentationQuantity * $item_set_quantity)), $warehouse->id, $sale_note_item->id);
                 if (!$sale_note_item->sale_note->order_note_id) $this->updateStock($ind_item->id, (1 * ($sale_note_item->quantity * $presentationQuantity * $item_set_quantity)), $warehouse->id);
-
             }
-
         }
-
     }
 
 
@@ -4073,7 +4025,6 @@ class AppController extends Controller
                 $lot->quantity = $lot->quantity + $lt->compromise_quantity;
                 $lot->save();
             }
-
         }
 
         if (isset($item->item->lots)) {
@@ -4102,7 +4053,6 @@ class AppController extends Controller
                 $lot->quantity = $lot->quantity + $lt->compromise_quantity;
                 $lot->save();
             }
-
         }
 
         if (isset($item->item->lots)) {
@@ -4130,7 +4080,6 @@ class AppController extends Controller
                 $lot->quantity = $lot->quantity + $lt->compromise_quantity;
                 $lot->save();
             }
-
         }
 
         if (isset($item->item->lots)) {
@@ -4203,6 +4152,12 @@ class AppController extends Controller
                 $row->qr = $qrCode->displayPNGBase64($row->qr_text);
             }
             return [
+                'message_text' => "Su guía {$row->number_full} ha sido generada correctamente, puede revisarla en el siguiente enlace: " . url('') . "/downloads/dispatch/pdf/{$row->external_id}" . "",
+                'print_ticket' => url('') . "/print/dispatch/{$row->external_id}/ticket",
+                'print_a4' => url('') . "/print/dispatch/{$row->external_id}/a4",
+                'print_a5' => url('') . "/print/dispatch/{$row->external_id}/a5",
+                'print_ticket_58' => url('') . "/print/dispatch/{$row->external_id}/ticket_58",
+                'print_ticket_50' => url('') . "/print/dispatch/{$row->external_id}/ticket_50",
                 'id' => $row->id,
                 'external_id' => $row->external_id,
                 'series' => $row->series,
@@ -4276,7 +4231,7 @@ class AppController extends Controller
         ];
     }
 
-/////////crear json para guia aquiiiii
+    /////////crear json para guia aquiiiii
     public function dispatches_create(Request $request)
     {
 
@@ -4335,10 +4290,10 @@ class AppController extends Controller
                 "codigo_del_domicilio_fiscal" => "0000"
             ],
 
-//////////////////////aqui chofer o transportista
+            //////////////////////aqui chofer o transportista
             // $datos_transporte,
 
-//////////////////////aqui chofer o transportista
+            //////////////////////aqui chofer o transportista
 
             "numero_de_placa" => isset($request->license_plate) ? $request->license_plate : "",
 
@@ -4357,9 +4312,9 @@ class AppController extends Controller
 
         ];
 
-// $productos[]
+        // $productos[]
 
-// $datos_transporte = null;
+        // $datos_transporte = null;
 
         if ($request->transport_mode_type_id == "01") {
 
@@ -4371,7 +4326,6 @@ class AppController extends Controller
                 "apellidos_y_nombres_o_razon_social" => $dispatcher->name,
                 "numero_mtc" => $dispatcher->number_mtc,
             ];
-
         }
 
         if ($request->transport_mode_type_id == "02") {
@@ -4393,16 +4347,15 @@ class AppController extends Controller
                 "modelo" => $transport->model,
                 "marca" => $transport->brand,
             ];
-
         }
 
 
-// return $data_dispatch_array;
+        // return $data_dispatch_array;
 
 
         $data_dispatch = json_encode($data_dispatch_array);
 
-// return $data_dispatch;
+        // return $data_dispatch;
 
         $curl = curl_init();
 
@@ -4430,7 +4383,7 @@ class AppController extends Controller
         $dataFinal = json_decode($response, true);
 
 
-// return $response;
+        // return $response;
         // $records = Dispatch::where('external_id', '=', $dataFinal["data"]["external_id"])->get();
         if ($dataFinal != null) {
             if ($dataFinal["success"] == true) {
@@ -4527,9 +4480,7 @@ class AppController extends Controller
                 'success' => false,
                 'response' => $dataFinal
             ];
-
         }
-
     }
 
     //enviar cpe por medio de id
@@ -4584,7 +4535,7 @@ class AppController extends Controller
         }
     }
 
-// reporte general exportar account/format/donwload
+    // reporte general exportar account/format/donwload
 
     public function download_report(Request $request)
     {
@@ -4596,7 +4547,7 @@ class AppController extends Controller
 
         $company = $this->getCompany();
 
-// dd($company);
+        // dd($company);
         $filename = 'Reporte_Formato_Compras_' . date('YmdHis');
         $data = [
             'period' => $month,
@@ -4625,7 +4576,6 @@ class AppController extends Controller
         // return $reportFormatPurchaseExport->view();
         return $reportFormatPurchaseExport
             ->download($filename . '.xlsx');
-
     }
 
     /**
@@ -4676,7 +4626,6 @@ class AppController extends Controller
                         } else {
                             $note_affected_document = new Document($data_affected_document);
                             $row = $this->AdjustValueToReportByDocumentTypeAndStateType($row);
-
                         }
                     }
                 }
@@ -4731,8 +4680,10 @@ class AppController extends Controller
                     'exchange_rate_sale' => $exchange_rate_sale,
                     'currency_type_symbol' => $symbol,
                     'format_currency_type_id' => $format_currency_type_id,
-                    'affected_document' => (in_array($row->document_type_id,
-                        ['07', '08'])) ? [
+                    'affected_document' => (in_array(
+                        $row->document_type_id,
+                        ['07', '08']
+                    )) ? [
                         'date_of_issue' => !empty($note_affected_document->date_of_issue)
                             ? $note_affected_document->date_of_issue->format('d/m/Y') : null,
                         'document_type_id' => $note_affected_document->document_type_id,
@@ -4744,7 +4695,6 @@ class AppController extends Controller
             });
 
         return $data;
-
     }
 
     /**
@@ -4765,8 +4715,8 @@ class AppController extends Controller
         $document_type_id = $row->document_type_id;
         $state_type_id = $row->state_type_id;
         $type_document_to_evalue = [
-            '01',//    FACTURA ELECTRÓNICA
-            '03',//    BOLETA DE VENTA ELECTRÓNICA
+            '01', //    FACTURA ELECTRÓNICA
+            '03', //    BOLETA DE VENTA ELECTRÓNICA
             //'07',//    NOTA DE CRÉDITO
             //'08',//    NOTA DE DÉBITO
             //'09',//    GUIA DE REMISIÓN REMITENTE
@@ -4783,10 +4733,10 @@ class AppController extends Controller
         ];
         if ($is_affected == true) {
             $type_document_to_evalue = [
-                '01',//    FACTURA ELECTRÓNICA
-                '03',//    BOLETA DE VENTA ELECTRÓNICA
-                '07',//    NOTA DE CRÉDITO
-                '08',//    NOTA DE DÉBITO
+                '01', //    FACTURA ELECTRÓNICA
+                '03', //    BOLETA DE VENTA ELECTRÓNICA
+                '07', //    NOTA DE CRÉDITO
+                '08', //    NOTA DE DÉBITO
             ];
         }
         $document_state_to_evalue = [
@@ -4794,8 +4744,8 @@ class AppController extends Controller
             // '03',//  Enviado
             // '05',//  Aceptado
             // '07',//  Observado
-            '09',// Rechazado
-            '11',// Anulado
+            '09', // Rechazado
+            '11', // Anulado
             // '13',//  Por anular
         ];
         if (
@@ -4866,10 +4816,9 @@ class AppController extends Controller
                 ];
             });
         return $data;
-
     }
 
-//final de reportes
+    //final de reportes
 
 
     public function statusTicket($ticket)
@@ -4890,7 +4839,6 @@ class AppController extends Controller
         $res = ((new ServiceDispatchController())->send($external_id));
 
         return $res;
-
     }
 
     public function sendDispatchCarrier($id)
@@ -4942,7 +4890,6 @@ class AppController extends Controller
                 'message' => 'No fue posible enviar a SUNAT'
             ];
         }
-
     }
 
 
@@ -4954,7 +4901,7 @@ class AppController extends Controller
         $format = $request->input('format');
 
         $record = Item::find($id);
-// dd(public_path(auth()->user()->establishment->logo));
+        // dd(public_path(auth()->user()->establishment->logo));
         // $item_warehouse = ItemWarehouse::where([['item_id', $id], ['warehouse_id', 1]])->first();
         $item_warehouse = ItemWarehouse::where([['item_id', $id], ['warehouse_id', auth()->user()->establishment->warehouse->id]])->first();
 
@@ -4996,12 +4943,10 @@ class AppController extends Controller
 
 
         $pdf->output('barcode_' . $request->input('id') . '.pdf', 'I');
-
-
     }
 
 
-// guias de transportista
+    // guias de transportista
 
     public function dispatchesCarrierRecords(Request $request)
     {
@@ -5205,7 +5150,6 @@ class AppController extends Controller
                             $record->sum = ($record->sum + $record_total);
                         }
                     }
-
                 }
                 $temp = [
                     'type_transaction' => 'Venta',
@@ -5222,7 +5166,8 @@ class AppController extends Controller
                     'tipo' => 'sale_note',
                     'total_payments' => (!in_array($sale_note->state_type_id, $status_type_id)) ? 0 : $sale_note->payments->sum('payment'),
                 ];
-            } /** Documentos de Tipo Document */
+            }
+            /** Documentos de Tipo Document */
 
             else if ($cash_document->document) {
                 $record_total = 0;
@@ -5278,7 +5223,8 @@ class AppController extends Controller
 
                 /* Notas de credito o debito*/
                 $notes = $document->getNotes();
-            } /** Documentos de Tipo Servicio tecnico */
+            }
+            /** Documentos de Tipo Servicio tecnico */
             else if ($cash_document->technical_service) {
 
                 $usado = '<br>Se usan para cash<br>';
@@ -5299,7 +5245,7 @@ class AppController extends Controller
                 $temp = [
                     'type_transaction' => 'Venta',
                     'document_type_description' => 'Servicio técnico',
-                    'number' => 'TS-' . $technical_service->id,//$value->document->number_full,
+                    'number' => 'TS-' . $technical_service->id, //$value->document->number_full,
                     'date_of_issue' => $technical_service->date_of_issue->format('Y-m-d'),
                     'date_sort' => $technical_service->date_of_issue,
                     'customer_name' => $technical_service->customer->name,
@@ -5310,7 +5256,8 @@ class AppController extends Controller
                     'tipo' => 'technical_service',
                     'total_payments' => $technical_service->payments->sum('payment'),
                 ];
-            } /** Documentos de Tipo compras */
+            }
+            /** Documentos de Tipo compras */
             else if ($cash_document->purchase) {
 
                 /**
@@ -5336,9 +5283,7 @@ class AppController extends Controller
                             $cash_egress += $record_total;
                             $final_balance -= $record_total;
                         }
-
                     }
-
                 }
 
                 $temp = [
@@ -5356,7 +5301,8 @@ class AppController extends Controller
                     'total_payments' => (!in_array($purchase->state_type_id, $status_type_id)) ? 0 : $purchase->payments->sum('payment'),
 
                 ];
-            } /** Cotizaciones */
+            }
+            /** Cotizaciones */
             else if ($cash_document->quotation) {
                 $quotation = $cash_document->quotation;
 
@@ -5398,10 +5344,8 @@ class AppController extends Controller
                         'total_payments' => (!in_array($quotation->state_type_id, $status_type_id)) ? 0 : $quotation->payments->sum('payment'),
 
                     ];
-
                 }
                 /** Cotizaciones */
-
             }
 
 
@@ -5453,10 +5397,8 @@ class AppController extends Controller
                         $temp['total_string'] = self::FormatNumber($temp['total']);
                         $all_documents[] = $temp;
                     }
-
                 }
             }
-
         }
 
         // finanzas ingresos
@@ -5528,7 +5470,7 @@ class AppController extends Controller
         }
 
 
-//        $all_documents = collect($all_documents)->sortBy('date_sort')->all();
+        //        $all_documents = collect($all_documents)->sortBy('date_sort')->all();
         /************************/
         /************************/
         $data['all_documents'] = $all_documents;
@@ -5564,7 +5506,6 @@ class AppController extends Controller
         // return $cashProductExport->view();
         return $cashPaymentExport
             ->download($filename . '.xlsx');
-
     }
 
     /**
@@ -5604,36 +5545,36 @@ class AppController extends Controller
 
         $curl = curl_init();
         curl_setopt_array($curl, array(
-          CURLOPT_URL => ''.url("/api/account/format/download").'?add_state_type='.$request->input('add_state_type').'&month='.$request->input('month').'&type='.$request->input('type').'',
-          CURLOPT_RETURNTRANSFER => true,
-          CURLOPT_ENCODING => '',
-          CURLOPT_MAXREDIRS => 10,
-          CURLOPT_TIMEOUT => 0,
-          CURLOPT_FOLLOWLOCATION => true,
-          CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-          CURLOPT_CUSTOMREQUEST => 'GET',
-          CURLOPT_HTTPHEADER => array(
-            'Authorization: Bearer ' . auth()->user()->api_token . ''
-          ),
+            CURLOPT_URL => '' . url("/api/account/format/download") . '?add_state_type=' . $request->input('add_state_type') . '&month=' . $request->input('month') . '&type=' . $request->input('type') . '',
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'GET',
+            CURLOPT_HTTPHEADER => array(
+                'Authorization: Bearer ' . auth()->user()->api_token . ''
+            ),
         ));
         $response = curl_exec($curl);
         curl_close($curl);
 
-        $type = $request->input('type')=='purchase' ? 'compra' : 'venta';
-        $mailable= [
+        $type = $request->input('type') == 'purchase' ? 'compra' : 'venta';
+        $mailable = [
             'company'   => Company::active(),
             'toemail'   => $request->input('email'),
             'month'     => $request->input('month'),
             'type'      => $type,
-            'subject'   => "Reporte periodo ".$request->input('month')." de ".$type."",
+            'subject'   => "Reporte periodo " . $request->input('month') . " de " . $type . "",
             'attach'    => base64_encode($response),
         ];
 
-        $envio = Mail::send('tenant.templates.email.account_report',$mailable, function($message) use ($mailable){
+        $envio = Mail::send('tenant.templates.email.account_report', $mailable, function ($message) use ($mailable) {
             $message->from(config('mail.username'));
             $message->subject($mailable["subject"]);
             $message->to($mailable["toemail"]);
-            $message->attachData(base64_decode($mailable['attach']), $mailable['attach'], ['as'=>"Reporte",'mime' => "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"]);
+            $message->attachData(base64_decode($mailable['attach']), $mailable['attach'], ['as' => "Reporte", 'mime' => "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"]);
         });
 
         return [
@@ -5641,6 +5582,4 @@ class AppController extends Controller
             'message' => "Enviado correctamente",
         ];
     }
-
-
 }

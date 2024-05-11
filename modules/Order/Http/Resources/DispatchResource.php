@@ -53,6 +53,7 @@ class DispatchResource extends JsonResource
             'date_of_issue' => $this->date_of_issue->format('Y-m-d'),
             'customer_email' => optional($this->customer)->email,
             'download_external_pdf' => $this->download_external_pdf,
+            'download_pdf' => $this->download_external_pdf,
             'customer_telephone' => optional($this->person)->telephone,
             'response_message' => in_array($this->state_type_id, ['07', '09']) ? ($code ? "{$code} - " : '')."{$response_message}" : $response_message,
             'has_cdr' => $has_cdr,

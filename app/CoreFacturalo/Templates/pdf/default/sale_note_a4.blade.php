@@ -347,8 +347,11 @@
                         @endif
                         {{-- 
                             
-   
+                            
                          --}}
+                        @if ($configuration->count_unit_sale_note && isset($row->item->item_count))
+                            <strong>Cant. Unid.:</strong>{{ $row->item->item_count }}
+                        @endif
 
                         @if ($configuration->name_pdf)
                             @php
@@ -364,10 +367,10 @@
                         @endif
 
                         @if ($configuration->presentation_pdf && isset($row->item->presentation) && isset($row->item->presentation->description))
-                        <div>
-                            <span style="font-size: 9px">{{ $row->item->presentation->description }}</span>
-                        </div>
-                    @endif
+                            <div>
+                                <span style="font-size: 9px">{{ $row->item->presentation->description }}</span>
+                            </div>
+                        @endif
 
                         @isset($row->item->sizes_selected)
                             @if (count($row->item->sizes_selected) > 0)
@@ -644,30 +647,30 @@
 
         </table>
     @endif
-    @if($document->fee->count())
-    <table class="full-width">
-        @foreach ($document->fee as $key => $quote)
-            <tr>
-                <td>
-                    @if (!$configuration->show_the_first_cuota_document)
-                        &#8226;
-                        {{ 'Cuota #' . ($key + 1) }}
-                        / Fecha: {{ $quote->date }} /
-                        Monto: {{ $quote->currency_type->symbol }}{{ $quote->amount }}
-                    @else
-                        @if ($key == 0)
+    @if ($document->fee->count())
+        <table class="full-width">
+            @foreach ($document->fee as $key => $quote)
+                <tr>
+                    <td>
+                        @if (!$configuration->show_the_first_cuota_document)
                             &#8226;
-                            {{ 'Cuota #' . ($key + 1)  }}
+                            {{ 'Cuota #' . ($key + 1) }}
                             / Fecha: {{ $quote->date }} /
                             Monto: {{ $quote->currency_type->symbol }}{{ $quote->amount }}
+                        @else
+                            @if ($key == 0)
+                                &#8226;
+                                {{ 'Cuota #' . ($key + 1) }}
+                                / Fecha: {{ $quote->date }} /
+                                Monto: {{ $quote->currency_type->symbol }}{{ $quote->amount }}
+                            @endif
                         @endif
-                    @endif
 
-                </td>
+                    </td>
+                </tr>
+            @endforeach
             </tr>
-        @endforeach
-        </tr>
-    </table>
+        </table>
     @endif
     <table class="full-width">
         @php

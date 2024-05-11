@@ -107,7 +107,7 @@ export const advance = {
                 })
                 .catch((error) => console.log(error));
         },
-        enoughAdvance(base="form") {
+        enoughAdvance(base = "form") {
             let advance = this.payment_destinations.find(
                 (payment) => payment.id == "advance"
             );
@@ -127,7 +127,7 @@ export const advance = {
                         (payment) => payment.id == "advance"
                     );
                     let person_id = undefined;
-                    if(this.document[personProp] != undefined){
+                    if (this.document[personProp] != undefined) {
                         person_id = this.document[personProp];
                     }
 
@@ -147,11 +147,13 @@ export const advance = {
                         (payment) => payment.id == "advance"
                     );
                     let person_id = undefined;
-                    if(this.form[personProp] != undefined){
+                    if (this.form[personProp] != undefined) {
                         person_id = this.form[personProp];
-                    }else if (this.document && this.document[personProp] != undefined){
+                    } else if (
+                        this.document &&
+                        this.document[personProp] != undefined
+                    ) {
                         person_id = this.document[personProp];
-                        
                     }
 
                     this.form.payments[0].person_id = person_id;
@@ -165,7 +167,10 @@ export const advance = {
             this.payment_destinations = this.payment_destinations.filter(
                 (payment) => payment.id !== "advance"
             );
-            console.log("🚀 ~ removeAdvanceFromDestinations ~ this.payment_destinations:", this.payment_destinations)
+            console.log(
+                "🚀 ~ removeAdvanceFromDestinations ~ this.payment_destinations:",
+                this.payment_destinations
+            );
         },
         checkHasAdvance(idx) {
             if (this.form.payments.length > 1) {
@@ -254,10 +259,34 @@ export const cash = {
 export const exchangeRate = {
     methods: {
         async searchExchangeRateByDate(exchange_rate_date) {
-            let response = await this.$http.get(
-                `/services/exchange/${exchange_rate_date}`
+            let currency = this.currency_types.find(
+                (currency) => currency.id === this.form.currency_type_id
             );
-            return parseFloat(response.data.sale);
+            if (currency.id !== "PEN" && currency.id !== "USD") {
+                let response = await this.$http.get(
+                    `/exchange_currency/${exchange_rate_date}/${currency.id}`
+                );
+                let success = response.data.success;
+                if (!success) {
+                    this.$message.error(response.data.message);
+                }
+                return parseFloat(response.data.sale);
+            } else {
+                try {
+                    let response = await this.$http.get(
+                        `/services/exchange/${exchange_rate_date}`
+                    );
+                    return parseFloat(response.data.sale);
+                } catch (error) {
+                    if (currency.id === "USD") {
+                        
+                        let response = await this.$http.get(
+                            `/exchange_currency/${exchange_rate_date}/${currency.id}`
+                        );
+                        return parseFloat(response.data.sale);
+                    }
+                }
+            }
         },
     },
 };

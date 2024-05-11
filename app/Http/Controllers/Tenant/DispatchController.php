@@ -730,7 +730,23 @@ class DispatchController extends Controller
             'itemsFromSummary'
         );
     }
+    public function dispatchSeries(){
+        $series = Series::whereIn('document_type_id', ['09', '31'])->get()
+        ->transform(function ($row) {
+            return [
+                'id' => $row->id,
+                'contingency' => $row->contingency,
+                'document_type_id' => $row->document_type_id,
+                'establishment_id' => $row->establishment_id,
+                'number' => $row->number,
+            ];
+        });
 
+        return [
+            'success' => true,
+            'data' => $series,
+        ];
+    }
     public function downloadExternal($type, $external_id)
     {
         $retention = Dispatch::where('external_id', $external_id)->first();
@@ -953,7 +969,6 @@ class DispatchController extends Controller
                 'id',
                 'date_of_issue',
                 'soap_shipping_response',
-
                 'receiver_id'
             );
         if ($isCarrier) {

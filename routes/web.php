@@ -639,11 +639,18 @@ if ($hostname) {
             Route::post('exchange_rates', 'Tenant\ExchangeRateController@store');
 
             //Currency Types
+            Route::get('exchange_currency', 'Tenant\ExchangeCurrencyController@index')->name('tenant.exchange_currency.index');
+            Route::post('exchange_currency', 'Tenant\ExchangeCurrencyController@store');
+            Route::get('exchange_currency/tables', 'Tenant\ExchangeCurrencyController@tables');
+            Route::get('exchange_currency/records', 'Tenant\ExchangeCurrencyController@records');
+            Route::get('exchange_currency/record/{id}', 'Tenant\ExchangeCurrencyController@record');
+            Route::get('exchange_currency/{date}/{currency_id}', 'Tenant\ExchangeCurrencyController@exchange_date');
+
             Route::get('currency_types/records', 'Tenant\CurrencyTypeController@records');
             Route::get('currency_types/record/{currency_type}', 'Tenant\CurrencyTypeController@record');
             Route::post('currency_types', 'Tenant\CurrencyTypeController@store');
             Route::delete('currency_types/{currency_type}', 'Tenant\CurrencyTypeController@destroy');
-
+            
             //Perceptions
             Route::get('perceptions', 'Tenant\PerceptionController@index')->name('tenant.perceptions.index');
             Route::get('perceptions/columns', 'Tenant\PerceptionController@columns');
@@ -1115,7 +1122,9 @@ if ($hostname) {
             Route::post('certificates/saveSoapUser', 'System\CertificateController@saveSoapUser');
             Route::delete('certificates', 'System\CertificateController@destroy');
             Route::get('configurations/record', 'System\ConfigurationController@record');
-
+            //xd
+            Route::get('403', 'System\ErrorsController@index')->name('system.403.index');
+            Route::post('/errors/update', 'System\ErrorsController@update')->name('errors.update');
             Route::get('configurations', 'System\ConfigurationController@index')->name('system.configuration.index');
             Route::post('configurations/login', 'System\ConfigurationController@storeLoginSettings');
 

@@ -19,6 +19,7 @@ class CurrencyTypeResource extends JsonResource
             'active' => (bool) $this->active,
             'symbol' => $this->symbol,
             'description' => $this->description,
+            'manual_exchange' => (bool) $this->manual_exchange,
         ];
     }
 }

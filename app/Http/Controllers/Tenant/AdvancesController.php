@@ -1017,7 +1017,9 @@ class AdvancesController extends Controller
     public function getAdvance($person_id)
     {
 
-        $advance = Advance::where('person_id', $person_id)->where('state', true)->first();
+        // $advance = Advance::where('person_id', $person_id)->where('state', true)->first();
+        
+        $advance = Advance::where('person_id', $person_id)->orderBy('id', 'desc')->first();
         if ($advance) {
             $person_name = $advance->person->name;
             $final_balance = number_format($advance->final_balance, 2, '.', '');

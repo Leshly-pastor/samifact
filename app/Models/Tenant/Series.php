@@ -51,6 +51,7 @@ class Series extends ModelTenant
         'document_type_id',
         'number',
         'contingency',
+        'internal',
     ];
     protected $casts = [
         'establishment_id' => 'integer',
@@ -70,7 +71,14 @@ class Series extends ModelTenant
     {
         return $this->belongsTo(DocumentType::class, 'document_type_id');
     }
-
+    public static function isInternal($serie)
+    {
+        $found_serie = Series::where('number', $serie)->first();
+        if ($found_serie) {
+            return  (bool)$found_serie->internal;
+        }
+        return false;
+    }
     /**
      * @param $value
      */
@@ -157,6 +165,7 @@ class Series extends ModelTenant
             'number' => $this->number,
             'disabled' => $disabled,
             'next_number' => $next_number,
+            'internal' => (bool)$this->internal,
         ];
     }
     public function getCollectionData2(?object $document_number, ?int $document_id = 0, ?int  $series_id = 0, ?string $userType = 'seller'): array
@@ -178,7 +187,7 @@ class Series extends ModelTenant
                 }
             }
         }
-        if($this->document_type_id == '80'){
+        if ($this->document_type_id == '80') {
             $next_number = SaleNote::getNextNumber($this->number);
             if ($document_number) {
                 $number = $this->number;
@@ -188,7 +197,7 @@ class Series extends ModelTenant
                 }
             }
         }
-        if($this->document_type_id == 'COT'){
+        if ($this->document_type_id == 'COT') {
             $next_number = Quotation::getNextNumber($this->number);
             if ($document_number) {
                 $number = $this->number;

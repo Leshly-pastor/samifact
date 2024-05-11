@@ -634,6 +634,16 @@
                                         >
                                             Generar comprobante
                                         </el-dropdown-item>
+                                            <el-dropdown-item
+                                            :command="['clickGenerateEdit', row.id]"
+                                            v-if="
+                                                !row.changed &&
+                                                row.state_type_id != '11' &&
+                                                soapCompany != '03'
+                                            "
+                                        >
+                                            Generar comprobante (editar productos)
+                                        </el-dropdown-item>
                                     </template>
 
                                     <el-tooltip
@@ -1341,12 +1351,18 @@ export default {
         },
     },
     methods: {
+        clickGenerateEdit(id){
+            window.location.href = `/documents/create/sale-notes/${id}`;
+        },
         manageIndexCommand([command, arg1 = null, arg2 = null]) {
             console.log(
                 "🚀 ~ file: index.vue:1327 ~ manageIndexCommand ~ command:",
                 command
             );
             switch (command) {
+                case "clickGenerateEdit":
+                    this.clickGenerateEdit(arg1);
+                    break;
                 case "openDispatchFinish":
                     this.openDispatchFinish(arg1);
                     break;

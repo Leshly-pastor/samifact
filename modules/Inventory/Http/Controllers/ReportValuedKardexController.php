@@ -603,7 +603,7 @@ class ReportValuedKardexController extends Controller
     {
 
         // dd($request->all());
-
+        
         $company = Company::first();
         $establishment = ($request->establishment_id) ? Establishment::findOrFail($request->establishment_id) : null;
         $item_id = $request->item_id;

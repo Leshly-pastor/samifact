@@ -28,6 +28,7 @@ class CurrencyType extends ModelCatalog
         'active',
         'symbol',
         'description',
+        'manual_exchange',
     ];
 
     public function scopeActives($query){

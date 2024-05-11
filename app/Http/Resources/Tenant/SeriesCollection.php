@@ -21,6 +21,7 @@ class SeriesCollection extends ResourceCollection
                 'number' => $row->number,
                 'contingency' => (bool) $row->contingency,
                 'document_type_id' => $row->document_type_id,
+                'internal' => (bool) $row->internal,
             ];
         });
     }

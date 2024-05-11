@@ -29,7 +29,7 @@ class DocumentController extends Controller
         // dd($request->all());
         $fact =  DB::connection('tenant')->transaction(function () use ($request) {
             $facturalo = new Facturalo();
-            $facturalo->save($request->all());
+            $result = $facturalo->save($request->all());
             $facturalo->createXmlUnsigned();
             $company = Company::active();
             if ($company->pse && $company->soap_type_id == '02') {
@@ -40,7 +40,11 @@ class DocumentController extends Controller
             $facturalo->updateHash();
             $facturalo->updateQr();
             $facturalo->createPdf();
-            $facturalo->senderXmlSignedBill();
+            $document_result = $result->getDocument();
+            if ((!$company->pse || $company->soap_type_id != '02') && $document_result->state_type_id != '55') {
+                $facturalo->senderXmlSignedBill();
+            }
+            // $facturalo->senderXmlSignedBill();
             $facturalo->sendEmail();
 
             return $facturalo;

@@ -2310,6 +2310,58 @@
                                     ></small>
                                 </div>
                             </div>
+
+                                <div class="col-md-6 mt-4">
+                                <label class="control-label">
+                                    Ingresar total unidades x item - Nota de venta
+                                </label>
+
+                                <div
+                                    :class="{
+                                        'has-danger':
+                                            errors.count_unit_sale_note,
+                                    }"
+                                    class="form-group"
+                                >
+                                    <el-switch
+                                        v-model="form.count_unit_sale_note"
+                                        active-text="Si"
+                                        inactive-text="No"
+                                        @change="submit"
+                                    ></el-switch>
+                                    <small
+                                        v-if="errors.count_unit_sale_note"
+                                        class="text-danger"
+                                        v-text="errors.count_unit_sale_note[0]"
+                                    ></small>
+                                </div>
+                            </div>
+
+                                <div class="col-md-6 mt-4">
+                                <label class="control-label">
+                                    Descontar unidades documentos  - nota de venta
+                                </label>
+
+                                <div
+                                    :class="{
+                                        'has-danger':
+                                            errors.discount_unit_document,
+                                    }"
+                                    class="form-group"
+                                >
+                                    <el-switch
+                                        v-model="form.discount_unit_document"
+                                        active-text="Si"
+                                        inactive-text="No"
+                                        @change="submit"
+                                    ></el-switch>
+                                    <small
+                                        v-if="errors.discount_unit_document"
+                                        class="text-danger"
+                                        v-text="errors.discount_unit_document[0]"
+                                    ></small>
+                                </div>
+                            </div>
                         </div>
                     </el-tab-pane>
 

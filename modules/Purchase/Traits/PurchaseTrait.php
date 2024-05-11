@@ -16,23 +16,18 @@ trait PurchaseTrait
 
         Purchase::created(function ($purchase) {
             // $payments = $purchase->payments;
-            // // dump(count($payments));
             // $payWithAdvance = false;
             // if ($payments == 1) {
-            //     dump("hay 1 pago");
             //     $payment = $payments->first();
             //     $global_payment = $payment->global_payment;
             //     if ($global_payment) {
-            //         dump("hay global payment");
             //         $destination_type = $global_payment->destination_type;
-            //         dump($destination_type);
             //         if ($destination_type == Advance::class) {
 
             //             $payWithAdvance = true;
             //         }
             //     }
             // }
-            // // dump($payWithAdvance);
             // if ($payWithAdvance) {
             //     $destination_id = $global_payment->destination_id;
             //     $advance = Advance::find($destination_id);

@@ -20,6 +20,7 @@ class CurrencyTypeCollection extends ResourceCollection
                 'active' => ($row->active)?'Si':'No',
                 'symbol' => $row->symbol,
                 'description' => $row->description,
+                'manual_exchange' => ($row->manual_exchange)?'Si':'No',
             ];
         });
     }

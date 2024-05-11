@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\Tenant;
 
 use App\Imports\ItemsImport;
@@ -49,9 +50,9 @@ class ItemSetController extends Controller
     public function records(Request $request)
     {
         $records = Item::whereTypeUser()
-                        ->whereIsSet()
-                        ->where($request->column, 'like', "%{$request->value}%")
-                        ->orderBy('description');
+            ->whereIsSet()
+            ->where($request->column, 'like', "%{$request->value}%")
+            ->orderBy('description');
 
         return new ItemCollection($records->paginate(config('tenant.items_per_page')));
     }
@@ -60,7 +61,6 @@ class ItemSetController extends Controller
     {
         // return view('tenant.items.form');
         return view('tenant.item_sets.index');
-
     }
 
     public function tables()
@@ -73,35 +73,51 @@ class ItemSetController extends Controller
         $web_platforms = WebPlatform::get();
         $categories = Category::all();
         $brands = Brand::all();
-        // $warehouses = Warehouse::all();
         // $accounts = Account::all();
         // $tags = Tag::all();
+        $user = auth()->user();
+        $warehouses = [];
+        if ($user->type == 'admin') {
+            $warehouses = Warehouse::all();
+        } else {
+            $establishment_id = $user->establishment_id;
+            $warehouses = Warehouse::where('establishment_id', $establishment_id)->get();
+        }
 
-        return compact('unit_types',
+        return compact(
+            'unit_types',
             'currency_types',
             'brands',
             'categories',
             'attribute_types',
             'system_isc_types',
             'affectation_igv_types',
-            'web_platforms');
+            'web_platforms',
+            'warehouses'
+        );
     }
 
 
-    public function item_tables()
-    {
-
-        $individual_items = Item::whereWarehouse()->whereTypeUser()->whereNotIsSet()->whereIsActive()->get()->transform(function($row) {
-            $full_description = ($row->internal_id)?$row->internal_id.' - '.$row->description:$row->description;
-            return [
-                'id' => $row->id,
-                'full_description' => $full_description,
-                'internal_id' => $row->internal_id,
-                'description' => $row->description,
-                'sale_unit_price' => $row->sale_unit_price,
-                'purchase_unit_price' => $row->purchase_unit_price,
-            ];
-        });
+    public function item_tables(Request $request)
+    {   
+        $establishment_id = auth()->user()->establishment_id;
+        $warehouse_id = $request->warehouse_id ?? Warehouse::where('establishment_id', $establishment_id)->first()->id;
+        // $warehouse_id = $request->warehouse_id ?? Warehouse::first()->id;
+        $individual_items = Item::whereHas('warehouses', function ($query) use ($warehouse_id) {
+                $query->where('warehouse_id', $warehouse_id);
+            })->
+            // whereWarehouse()->
+            whereTypeUser()->whereNotIsSet()->whereIsActive()->get()->transform(function ($row) {
+                $full_description = ($row->internal_id) ? $row->internal_id . ' - ' . $row->description : $row->description;
+                return [
+                    'id' => $row->id,
+                    'full_description' => $full_description,
+                    'internal_id' => $row->internal_id,
+                    'description' => $row->description,
+                    'sale_unit_price' => $row->sale_unit_price,
+                    'purchase_unit_price' => $row->purchase_unit_price,
+                ];
+            });
 
         return compact('individual_items');
     }
@@ -114,8 +130,9 @@ class ItemSetController extends Controller
         return $record;
     }
 
-    public function store(ItemRequest $request) {
-        
+    public function store(ItemRequest $request)
+    {
+
         $id = $request->input('id');
 
         $record =  DB::connection('tenant')->transaction(function () use ($request, $id) {
@@ -125,21 +142,20 @@ class ItemSetController extends Controller
             $item->fill($request->all());
 
             $temp_path = $request->input('temp_path');
-            if($temp_path) {
+            if ($temp_path) {
 
                 UploadFileHelper::checkIfValidFile($request->input('image'), $temp_path, true);
-        
-                $directory = 'public'.DIRECTORY_SEPARATOR.'uploads'.DIRECTORY_SEPARATOR.'items'.DIRECTORY_SEPARATOR;
+
+                $directory = 'public' . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . 'items' . DIRECTORY_SEPARATOR;
 
                 $file_name_old = $request->input('image');
                 $file_name_old_array = explode('.', $file_name_old);
                 $file_content = file_get_contents($temp_path);
                 $datenow = date('YmdHis');
-                $file_name = Str::slug($item->description).'-'.$datenow.'.'.$file_name_old_array[1];
-                Storage::put($directory.$file_name, $file_content);
+                $file_name = Str::slug($item->description) . '-' . $datenow . '.' . $file_name_old_array[1];
+                Storage::put($directory . $file_name, $file_content);
                 $item->image = $file_name;
-
-            }else if(!$request->input('image') && !$request->input('temp_path') && !$request->input('image_url')){
+            } else if (!$request->input('image') && !$request->input('temp_path') && !$request->input('image_url')) {
                 $item->image = 'imagen-no-disponible.jpg';
             }
 
@@ -153,7 +169,6 @@ class ItemSetController extends Controller
                     'individual_item_id' => $row['individual_item_id'],
                     'quantity' => $row['quantity'],
                 ]);
-
             }
 
             $item->update();
@@ -163,10 +178,9 @@ class ItemSetController extends Controller
 
         return [
             'success' => true,
-            'message' => ($id)?'Producto compuesto editado con éxito':'Producto compuesto registrado con éxito',
+            'message' => ($id) ? 'Producto compuesto editado con éxito' : 'Producto compuesto registrado con éxito',
             'id' => $record->id
         ];
-
     }
 
     public function destroy($id)
@@ -181,14 +195,10 @@ class ItemSetController extends Controller
                 'success' => true,
                 'message' => 'Producto compuesto eliminado con éxito'
             ];
-
         } catch (Exception $e) {
 
-            return ($e->getCode() == '23000') ? ['success' => false,'message' => 'El producto compuesto esta siendo usado por otros registros, no puede eliminar'] : ['success' => false,'message' => 'Error inesperado, no se pudo eliminar el producto compuesto'];
-
+            return ($e->getCode() == '23000') ? ['success' => false, 'message' => 'El producto compuesto esta siendo usado por otros registros, no puede eliminar'] : ['success' => false, 'message' => 'Error inesperado, no se pudo eliminar el producto compuesto'];
         }
-
-
     }
 
     public function destroyItemUnitType($id)
@@ -233,7 +243,7 @@ class ItemSetController extends Controller
 
         $validate_upload = UploadFileHelper::validateUploadFile($request, 'file', 'jpg,jpeg,png,gif,svg');
 
-        if(!$validate_upload['success']){
+        if (!$validate_upload['success']) {
             return $validate_upload;
         }
 
@@ -272,32 +282,26 @@ class ItemSetController extends Controller
         ];
     }
 
-    private function deleteRecordInitialKardex($item){
+    private function deleteRecordInitialKardex($item)
+    {
 
-        if($item->kardex->count() == 1){
+        if ($item->kardex->count() == 1) {
             ($item->kardex[0]->type == null) ? $item->kardex[0]->delete() : false;
         }
-
     }
 
 
     public function visibleStore(Request $request)
     {
         $item = Item::find($request->id);
-        $visible = $request->apply_store == true ? 1 : 0 ;
+        $visible = $request->apply_store == true ? 1 : 0;
         $item->apply_store = $visible;
         $item->save();
 
         return [
             'success' => true,
-            'message' => ($visible > 0 )?'El Producto ya es visible en tienda virtual' : 'El Producto ya no es visible en tienda virtual',
+            'message' => ($visible > 0) ? 'El Producto ya es visible en tienda virtual' : 'El Producto ya no es visible en tienda virtual',
             'id' => $request->id
         ];
-
     }
-
-
-
-
-
 }

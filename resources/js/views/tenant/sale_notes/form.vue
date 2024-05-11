@@ -283,7 +283,22 @@
                                         'has-danger': errors.currency_type_id,
                                     }"
                                 >
-                                    <label class="control-label">Moneda</label>
+                                    <label class="control-label"
+                                        >Moneda
+                                        <template
+                                            v-if="currency_type.id !== 'PEN'"
+                                        >
+                                            <a
+                                                class="text-center font-weight-bold text-info"
+                                                href="#"
+                                                @click.prevent="
+                                                    showDialogExchangeRate = true
+                                                "
+                                            >
+                                                [T/C]</a
+                                            >
+                                        </template>
+                                    </label>
                                     <el-select
                                         v-model="form.currency_type_id"
                                         @change="changeCurrencyType"
@@ -608,7 +623,6 @@
 
                                                 <th width="15%">
                                                     <a
-
                                                         v-if="!blockAddPayments"
                                                         href="#"
                                                         @click.prevent="
@@ -1508,6 +1522,12 @@
             @add="addRow"
         ></sale-notes-form-item>
 
+        <exchange-currency
+            @changeExchangeRate="changeCurrencyType"
+            :showDialog.sync="showDialogExchangeRate"
+            :currency="currency_type"
+            :date="form.date_of_issue"
+        ></exchange-currency>
         <person-form
             :showDialog.sync="showDialogNewPerson"
             type="customers"
@@ -1576,7 +1596,7 @@ export default {
     },
     mixins: [functions, exchangeRate, cash, advance],
     computed: {
-            blockAddPayments() {
+        blockAddPayments() {
             return (
                 this.form.payments.filter(
                     (payment) => payment.payment_destination_id === "advance"
@@ -1620,6 +1640,7 @@ export default {
     },
     data() {
         return {
+            showDialogExchangeRate: false,
             form_cash_document: {},
             cuotaNumber: 1,
             cuotaDays: 30,
@@ -2535,10 +2556,16 @@ export default {
             this.form.items.splice(index, 1);
             this.calculateTotal();
         },
-        changeCurrencyType() {
+        async changeCurrencyType(getExchangeRate = false) {
             this.currency_type = _.find(this.currency_types, {
                 id: this.form.currency_type_id,
             });
+            if (getExchangeRate) {
+                var response = await this.searchExchangeRateByDate(
+                    this.form.date_of_issue
+                );
+                this.form.exchange_rate_sale = response;
+            }
             let items = [];
             this.form.items.forEach((row) => {
                 items.push(

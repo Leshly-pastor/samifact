@@ -25,6 +25,7 @@ $thridLevel = $path[2] ?? null;
                 </a>
             </li>
         @endif
+        
         @if (in_array('whatsapp', $vc_modules))
             @if ($configuration->chatboot)
                 <li class="mega">
@@ -1407,7 +1408,12 @@ $thridLevel = $path[2] ?? null;
                 </a>
             </li>
         @endif
-
+        <li>
+            <a href="{{ route('tenant.exchange_currency.index') }}" class="{{ $firstLevel === 'exchange_currency' ? 'active' : '' }}">
+                <i data-cs-icon="money" class="icon" data-cs-size="18"></i>
+                <span class="label">Tipo de cambio</span>
+            </a>
+        </li>
     </ul>
 </div>
 <script>

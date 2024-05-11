@@ -32,6 +32,7 @@ function calculateRowItem(row_old, currency_type_id_new, exchange_rate_sale, pig
     // console.log(row_old)
 
     let row = {
+        unit_discount: row_old.unit_discount ? row_old.unit_discount : 0,
         item_id: row_old.item.id,
         // item_description: row_old.item.description,
         item: row_old.item,

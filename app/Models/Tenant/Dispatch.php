@@ -634,6 +634,7 @@ class Dispatch extends ModelTenant
         }
         $reference = optional($this->inventory_reference)->description;
         return [
+            'document_type_id' => $this->document_type_id,  
             'alter_company' => $this->alter_company,
             'purchase_order' => $this->purchase_order,
             'is_pse' => $is_pse,

@@ -74,7 +74,7 @@ class DispatchRequest extends FormRequest
             ],
             'origin.address'=> [
                 'required_if:document_type_id, "09"',
-                'max:100',
+                'max:500',
             ],
             'related.number'=> [
                 'required_if:transfer_reason_type_id, "09"',

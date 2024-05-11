@@ -296,6 +296,10 @@ Vue.component(
     require("./views/tenant/currency_types/index.vue").default
 );
 Vue.component(
+    "tenant-exchange-currency-index",
+    require("./views/tenant/exchange_currency/index.vue").default
+);
+Vue.component(
     "tenant-retentions-index",
     require("./views/tenant/retentions/index.vue").default
 );
@@ -1253,7 +1257,11 @@ Vue.component(
     "system-plans-form",
     require("./views/system/plans/form.vue").default
 );
-
+Vue.component(
+    "exchange-currency",
+    require("./views/tenant/exchange_currency/exchange_manual.vue")
+        .default
+);
 Vue.component(
     "x-input-service",
     require("../../modules/ApiPeruDev/Resources/assets/js/components/InputService.vue")

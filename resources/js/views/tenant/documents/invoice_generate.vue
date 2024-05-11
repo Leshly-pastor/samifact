@@ -357,11 +357,29 @@
                                             class="form-group"
                                         >
                                             <label class="control-label"
-                                                >Moneda</label
-                                            >
+                                                >Moneda
+
+                                                <template
+                                                    v-if="
+                                                        currency_type.id != 'PEN'
+                                                    "
+                                                >
+                                                    <a
+                                                        class="text-center font-weight-bold text-info"
+                                                        href="#"
+                                                        @click.prevent="
+                                                            showDialogExchangeRate = true
+                                                        "
+                                                    >
+                                                        [T/C]</a
+                                                    >
+                                                </template>
+                                            </label>
                                             <el-select
                                                 v-model="form.currency_type_id"
-                                                @change="changeCurrencyType"
+                                                @change="
+                                                    changeCurrencyType(true)
+                                                "
                                             >
                                                 <el-option
                                                     v-for="(
@@ -1546,6 +1564,13 @@
                                                     Vendedor
                                                 </th>
                                                 <th
+                                                    v-if="
+                                                        configuration.discount_unit_document
+                                                    "
+                                                >
+                                                    Und a descontar
+                                                </th>
+                                                <th
                                                     class="text-center font-weight-bold"
                                                 >
                                                     Unidad
@@ -1740,6 +1765,37 @@
                                                             :value="seller.id"
                                                         ></el-option>
                                                     </el-select>
+                                                </td>
+                                                <td
+                                                    v-if="
+                                                        configuration.discount_unit_document
+                                                    "
+                                                >
+                                                    <el-input
+                                                        v-model="
+                                                            row.unit_discount
+                                                        "
+                                                        type="number"
+                                                        step="0.01"
+                                                        class="text-end"
+                                                        @input="
+                                                            changeUnitDiscountItem(
+                                                                row,
+                                                                index
+                                                            )
+                                                        "
+                                                    >
+                                                        <el-button
+                                                            @click="
+                                                                changeUnitDiscountItemRestore(
+                                                                    row,
+                                                                    index
+                                                                )
+                                                            "
+                                                            slot="append"
+                                                            icon="el-icon-refresh"
+                                                        ></el-button>
+                                                    </el-input>
                                                 </td>
                                                 <td class="text-center">
                                                     {{ row.item.unit_type_id }}
@@ -3396,7 +3452,8 @@
                                                         <div
                                                             class="col-sm-12"
                                                             v-if="
-                                                                form.total > 0
+                                                                form.total >
+                                                                    0 && !payed
                                                             "
                                                         >
                                                             <div
@@ -3738,6 +3795,15 @@
                                                                 </table>
                                                             </div>
                                                         </div>
+                                                        <div
+                                                            class="col-12 alert alert-success"
+                                                            v-if="payed"
+                                                        >
+                                                            <strong>
+                                                                Nota de venta
+                                                                cancelada
+                                                            </strong>
+                                                        </div>
                                                     </div>
                                                 </td>
                                             </tr>
@@ -3814,7 +3880,12 @@
             :showDialog.sync="showDialogNewPerson"
             type="customers"
         ></person-form>
-
+        <exchange-currency
+            @changeExchangeRate="changeCurrencyType"
+            :showDialog.sync="showDialogExchangeRate"
+            :currency="currency_type"
+            :date="form.date_of_issue"
+        ></exchange-currency>
         <document-options
             :configuration="config"
             :isContingency="is_contingency"
@@ -3981,7 +4052,10 @@ export default {
     ],
     data() {
         return {
+            showDialogExchangeRate: false,
+            // fromSaleNotePayed:false,
             colspan: 9,
+            payed: false,
             showAll: true,
             activeNames: ["1"],
             is_amount_charge: true,
@@ -4420,6 +4494,46 @@ export default {
         this.formatTooltip(20);
     },
     methods: {
+        changeUnitDiscountItemRestore(item, index) {
+            let quantity = item.item.original_quantity;
+            if (!quantity) return;
+            item.unit_discount = 0;
+            item.quantity = quantity;
+            this.form.items[index] = calculateRowItem(
+                item,
+                this.form.currency_type_id,
+                this.form.exchange_rate_sale,
+                this.percentage_igv
+            );
+            this.$forceUpdate();
+            this.calculateTotal();
+        },
+        changeUnitDiscountItem(item, index) {
+            if (this.timer) clearTimeout(this.timer);
+            this.timer = setTimeout(() => {
+                let original_quantity = Number(item.quantity);
+                let discount_quantity = Number(item.unit_discount) || 0;
+                let quantity = original_quantity - discount_quantity;
+                if (quantity < 1) {
+                    this.$message({
+                        type: "warning",
+                        message: "La cantidad no puede ser menor a 1",
+                    });
+                    item.quantity = original_quantity;
+                    return;
+                } else {
+                    item.quantity = Number(quantity).toFixed(2);
+                }
+                this.form.items[index] = calculateRowItem(
+                    item,
+                    this.form.currency_type_id,
+                    this.form.exchange_rate_sale,
+                    this.percentage_igv
+                );
+                this.$forceUpdate();
+                this.calculateTotal();
+            }, 600);
+        },
         changeStockItem(row, idx) {
             if (this.timer) clearTimeout(this.timer);
             this.timer = setTimeout(async () => {
@@ -5346,6 +5460,9 @@ export default {
             }
         },
         async onSetFormData(data) {
+            if(this.table){
+                this.payed = data.total_canceled || data.paid;
+            }
             let exchange_rate_sale = this.form.exchange_rate_sale;
             let exchange_rate_sale_today = parseFloat(
                 this.form.exchange_rate_sale
@@ -5712,6 +5829,7 @@ export default {
                 i.charges = i.charges || [];
                 i.attributes = i.attributes || [];
                 i.item.id = i.item_id;
+                i.item.original_quantity = i.quantity;
                 i.additional_information = this.onPrepareAdditionalInformation(
                     i.additional_information
                 );
@@ -6688,6 +6806,9 @@ export default {
             this.validateDateOfIssue();
 
             this.form.date_of_due = this.form.date_of_issue;
+            let currency = this.currency_types.find(
+                (element) => element.id == this.form.currency_type_id
+            );
             // if (! this.isUpdate) {
             try {
                 await this.searchExchangeRateByDate(
@@ -6800,6 +6921,8 @@ export default {
             this.form.guides.splice(index, 1);
         },
         addRow(row) {
+            row.unit_discount = 0;
+            row.item.original_quantity = row.quantity;
             row.item.origin_purchase_unit_price = row.item.purchase_unit_price;
             row.item.origin_stock = row.item.stock;
             if (this.configuration.edit_info_documents) {
@@ -6811,7 +6934,7 @@ export default {
                 row.seller_id = this.form.seller_id;
             }
             let total_discount = 0;
-            if (row.discounts.length != 0) {
+            if (row.discounts && row.discounts.length != 0) {
                 row.discounts.forEach((discount) => {
                     total_discount += discount.amount;
                 });
@@ -6844,10 +6967,18 @@ export default {
 
             if (this.config.enabled_point_system) this.setTotalExchangePoints();
         },
-        changeCurrencyType() {
+        async changeCurrencyType(getExchangeRate = false) {
             this.currency_type = _.find(this.currency_types, {
                 id: this.form.currency_type_id,
             });
+            // if (this.currency_type.manual_exchange == 1) {
+            if (getExchangeRate) {
+                var response = await this.searchExchangeRateByDate(
+                    this.form.date_of_issue
+                );
+                this.form.exchange_rate_sale = response;
+            }
+            // }
             let items = [];
             this.form.items.forEach((row) => {
                 let calculate_row = calculateRowItem(
@@ -7329,11 +7460,13 @@ export default {
             };
         },
         async submit() {
-            let payWithAdvance =  this.payWithAdvance();
-            if(payWithAdvance){
+            let payWithAdvance = this.payWithAdvance();
+            if (payWithAdvance) {
                 let enoughAdvance = this.enoughAdvance();
-                if(!enoughAdvance){
-                    return this.$message.error("El monto del anticipo no es suficiente para realizar la venta");
+                if (!enoughAdvance) {
+                    return this.$message.error(
+                        "El monto del anticipo no es suficiente para realizar la venta"
+                    );
                 }
             }
             if (this.configuration.multi_companies && !this.form.company_id) {
@@ -7444,10 +7577,9 @@ export default {
                         validate_restrict_sale_items_cpe.message
                     );
             }
-    // console.log(this.form.payments);
+            // console.log(this.form.payments);
 
-            
-    //         return;
+            //         return;
             this.loading_submit = true;
             let path = `/${this.resource}`;
             if (this.isUpdate) {
@@ -7467,6 +7599,9 @@ export default {
                 delete this.form.establishment;
                 delete this.form.series;
             }
+            if (this.payed) {
+                this.form.payments = [];
+            }
             this.$http
                 .post(path, this.form)
                 .then((response) => {
@@ -7475,7 +7610,6 @@ export default {
                             this.$eventHub.$emit("reloadDataItems", null);
                             let company_id = this.form.company_id;
 
-            
                             this.resetForm();
                             if (this.configuration.multi_companies) {
                                 this.form.company_id = company_id;
@@ -7489,7 +7623,8 @@ export default {
 
                             // this.savePaymentMethod();
                             if (payWithAdvance) {
-                                this.form_cash_document.advance_id = payWithAdvance;
+                                this.form_cash_document.advance_id =
+                                    payWithAdvance;
                                 this.saveAdvanceDocument();
                             } else {
                                 this.saveCashDocument();
@@ -7568,7 +7703,7 @@ export default {
                     .catch(displayError);
             }
         },
-    
+
         saveCashDocument() {
             this.$http
                 .post(`/cash/cash_document`, this.form_cash_document)

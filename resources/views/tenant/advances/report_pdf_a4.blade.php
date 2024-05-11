@@ -145,7 +145,7 @@
                 </td>
                 <td class="td-custom">
                     @php
-                        $total_cash = $data['cash_beginning_balance'] + $data['cash_income_x'];
+                        $total_cash = $data['cash_beginning_balance'] - $data['cash_income_x'];
                         if (isset($data['total_cash_egress_pmt_01'])) {
                             $total_cash = $total_cash - $data['total_cash_egress_pmt_01'];
                         }

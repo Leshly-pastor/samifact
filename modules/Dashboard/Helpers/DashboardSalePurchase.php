@@ -95,7 +95,6 @@ class DashboardSalePurchase
                     ->whereIn('state_type_id', ['01','03','05','07','13'])->get();
 
         }
-
         foreach ($sale_notes as $sn) {
             $documents->push($sn);
         }
@@ -278,27 +277,27 @@ class DashboardSalePurchase
                         ->whereIn('state_type_id', ['01','03','05','07','13'])->get();
 
         }
-
+        
         $document_items = collect([]);
         $sale_note_items = collect([]);
-
+        
         foreach ($documents as $doc) {
             foreach ($doc->items as $item) {
                 $document_items->push($item);
             }
         }
-
+        
         foreach ($sale_notes as $s_notes) {
             foreach ($s_notes->items as $item) {
                 $sale_note_items->push($item);
             }
         }
-
-
+        
+        
         foreach ($sale_note_items as $sni) {
             $document_items->push($sni);
         }
-
+        
         $all_items = $document_items;
         $group_items = $all_items->groupBy('item_id');
 
@@ -315,8 +314,7 @@ class DashboardSalePurchase
 
             foreach ($items as $it) {
 
-                if($it->document){
-
+                if(isset($it->document->document_type_id)){
                     if(in_array($it->document->document_type_id,['01','03','08'])){
 
 
@@ -333,7 +331,6 @@ class DashboardSalePurchase
                     }
 
                 }else{
-
                     $totals += $this->calculateTotalCurrency($it->sale_note->currency_type_id, $it->sale_note->exchange_rate_sale, $it->total);
                     // $totals += $this->calculateTotalCurrency($it->sale_note->currency_type_id, $it->sale_note->exchange_rate_sale, $it->sale_note->total);
                     $move_quantity += $it->quantity;
@@ -343,6 +340,8 @@ class DashboardSalePurchase
             }
 
             $difference = $totals - $total_credit_note;
+            // dump($total_credit_note." total_credit_note");
+            // dump($totals." totals");
 
             if($item && $difference > 0){
                 $items_by_sales->push([

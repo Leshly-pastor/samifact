@@ -472,6 +472,7 @@
                                         'bg-secondary':
                                             row.state_type_id === '07',
                                         'bg-dark': row.state_type_id === '09',
+                                        'bg-primary': row.state_type_id === '55',
                                     }"
                                 >
                                     {{ row.state_type_description }}
@@ -519,6 +520,9 @@
                                                             'bg-dark':
                                                                 state.id ===
                                                                 '09',
+                                                                    'bg-primary':
+                                                                state.id ===
+                                                                '55',
                                                         }"
                                                         role="button"
                                                     >
@@ -547,6 +551,8 @@
                                                 row.state_type_id === '07',
                                             'bg-dark':
                                                 row.state_type_id === '09',
+                                                    'bg-primary':
+                                                row.state_type_id === '55',
                                         }"
                                     >
                                         {{ row.state_type_description }}
@@ -567,6 +573,7 @@
                                         'bg-secondary':
                                             row.state_type_id === '07',
                                         'bg-dark': row.state_type_id === '09',
+                                        'bg-primary': row.state_type_id === '55',
                                     }"
                                 >
                                     {{ row.state_type_description }}

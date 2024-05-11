@@ -141,6 +141,8 @@ use App\Models\Tenant\Skin;
 class Configuration extends ModelTenant
 {
     protected $fillable = [
+        'count_unit_sale_note',
+        'discount_unit_document',
         'current_cash_destination_duplicate',
         'sellers_see_history',
         'modify_purchase_unit_price',
@@ -353,6 +355,8 @@ class Configuration extends ModelTenant
     ];
 
     protected $casts = [
+        'count_unit_sale_note' => 'boolean',
+        'discount_unit_document' => 'boolean',
         'current_cash_destination_duplicate' => 'boolean',
         'sellers_see_history' => 'boolean',
         'modify_purchase_unit_price' => 'boolean',
@@ -621,6 +625,8 @@ class Configuration extends ModelTenant
         $currency = CurrencyType::all();
         $skins = Skin::all();
         return [
+            'count_unit_sale_note' => (bool) $this->count_unit_sale_note,
+            'discount_unit_document' => (bool) $this->discount_unit_document,
             'current_cash_destination_duplicate' => (bool) $this->current_cash_destination_duplicate,
             'sellers_see_history' => (bool) $this->sellers_see_history,
             'modify_purchase_unit_price' => (bool) $this->modify_purchase_unit_price,

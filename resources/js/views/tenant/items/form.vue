@@ -2329,7 +2329,7 @@
         </form>
 
         <lots-form
-            :lots="form.lots"
+            :lots.sync="form.lots"
             :recordId="recordId"
             :showDialog.sync="showDialogLots"
             :stock="form.stock"

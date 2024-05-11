@@ -322,6 +322,11 @@ if ($hostname) {
             Route::get('brands', 'Tenant\Api\AppController@brands');
             Route::post('brands', 'Tenant\Api\AppController@brand');
             //guias
+            Route::get('dispatch_carrier_id/{id}', 'Tenant\DispatchCarrierController@record');
+            Route::get('dispatch_carrier/records', 'Tenant\DispatchCarrierController@records');
+
+            Route::get('dispatch_id/{id}', 'Tenant\DispatchController@record');
+            Route::get('dispatch/records', 'Tenant\DispatchController@records');
             Route::get('dispatch/list', 'Tenant\Api\AppController@dispatches_list');
             Route::post('dispatch/create', 'Tenant\Api\AppController@dispatches_create');
             Route::post('dispatch/email', 'Tenant\Api\AppController@dispatches_email');
@@ -329,8 +334,12 @@ if ($hostname) {
             Route::get('dispatch/data', 'Tenant\Api\AppController@dispatches_data');
             Route::get('dispatch/send/{external_id}', 'Tenant\Api\AppController@sendDispatch');
             Route::get('dispatch/{id}', 'Tenant\Api\AppController@dispatches_id');
-
+        
+            
+            Route::post('app/dispatch/create', 'Tenant\DispatchController@store');
+            Route::get('app/dispatch_series', 'Tenant\DispatchController@dispatchSeries');
             //transportistas dispatchers
+            Route::get('dispatcher/records', 'Tenant\Api\AppController@searchDispatcher');
             Route::get('dispatcher/search', 'Tenant\Api\AppController@searchDispatcher');
             Route::post('dispatcher/create', 'Tenant\Api\AppController@storeDispatcher');
             Route::delete('dispatcher/delete/{item}', 'Tenant\Api\AppController@destroyDispatcher');
@@ -356,6 +365,7 @@ if ($hostname) {
 
             //direcciones de partidas  origin_address
             Route::get('origin_address/search', 'Tenant\Api\AppController@searchOriginAddress');
+            Route::get('origin_address', 'Tenant\Api\AppController@getOriginAddress');
             Route::post('origin_address/create', 'Tenant\Api\AppController@storeOriginAddress');
             Route::delete('origin_address/delete/{item}', 'Tenant\Api\AppController@destroyOriginAddress');
 
@@ -416,6 +426,7 @@ if ($hostname) {
             Route::get('items/search-items', 'Tenant\Api\AppController@ItemsSearch');
 
             //anular / eliminar clientes
+            //
             Route::get('customers', 'Tenant\Api\AppController@customersAdmin');
             Route::get('customer/search', 'Tenant\Api\AppController@CustomersSearch');
             Route::get('customer/enabled/{type}/{person}', 'Tenant\Api\AppController@CustomerEnable');

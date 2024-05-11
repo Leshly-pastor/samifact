@@ -111,8 +111,10 @@ class Facturalo
     }
     public function sendPseNew()
     {
-        $new_pse = new PseService($this->document);
-        $this->response = $new_pse->sendToPse();
+        if($this->configuration->send_auto){
+            $new_pse = new PseService($this->document);
+            $this->response = $new_pse->sendToPse();
+        }
     }
 
     public function sendPseNewDispatch()

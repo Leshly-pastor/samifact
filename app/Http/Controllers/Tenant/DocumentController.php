@@ -1129,7 +1129,8 @@ class DocumentController extends Controller
             } else {
                 $facturalo->createXmlUnsigned();
             }
-            if ($company->pse && $company->soap_type_id == '02') {
+            if ($company->pse && $company->soap_type_id == '02' ) {
+                
                 $facturalo->sendPseNew();
             } else {
                 $facturalo->signXmlUnsigned();
@@ -1148,7 +1149,8 @@ class DocumentController extends Controller
                 $facturalo->createPdf();
             }
             //aqui
-            if (!$company->pse || $company->soap_type_id != '02') {
+            $document_result = $result->getDocument();
+            if ((!$company->pse || $company->soap_type_id != '02') && $document_result->state_type_id != '55') {
                 $facturalo->senderXmlSignedBill();
             }
             //hasta aqui

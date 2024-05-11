@@ -239,6 +239,11 @@ $thridLevel = $path[2] ?? null;
                         <i class="fas fa-cogs"></i>&nbsp;&nbsp;<span>Configuracion</span>
                     </a>
                 </li>
+                <li >
+                    <a href="{{route('system.403.index')}}" class="{{ ($path[0] === '403') ? 'active':'' }}">
+                        <i class="fas fa-cogs"></i>&nbsp;&nbsp;<span>Bloqueo</span>
+                    </a>
+                </li>
                 <li>
                     <a href="{{route('system.update')}}" class="{{ ($path[0] === 'auto-update') ? 'active':'' }}">
                         <i class="fas fa-code-branch"></i>&nbsp;&nbsp;<span>Actualización</span>

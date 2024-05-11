@@ -17,6 +17,7 @@ use Illuminate\Support\Str;
 use Modules\Offline\Models\OfflineConfiguration;
 use Html2Text\Html2Text;
 use App\Models\Tenant\Configuration;
+use App\Models\Tenant\Series;
 use Modules\Finance\Helpers\UploadFileHelper;
 
 class DocumentInput
@@ -114,6 +115,11 @@ class DocumentInput
             }
         }
         $company_id = Functions::valueKeyInArray($inputs, 'company_id');
+        $state_type_id = '01';
+        $is_internal = Series::isInternal($series);
+        if ($is_internal) {
+            $state_type_id = '55';
+        }
         return [
             'optometry_service_id' => Functions::valueKeyInArray($inputs, 'optometry_service_id'),
             'alter_company' => $alter_company,
@@ -131,7 +137,7 @@ class DocumentInput
             'quotations_optional_value' => isset($inputs['quotations_optional_value']) ? $inputs['quotations_optional_value'] : "",
             'establishment' => $establishment,
             'soap_type_id' => $soap_type_id,
-            'state_type_id' => '01',
+            'state_type_id' => $state_type_id,
             'ubl_version' => '2.1',
             'no_stock' => Functions::valueKeyInArray($inputs, 'no_stock', false),
             'filename' => '', //$filename,
@@ -304,6 +310,8 @@ class DocumentInput
                         'item_code' => trim($item->item_code),
                         'item_code_gs1' => $item->item_code_gs1,
                         'unit_type_id' => (key_exists('item', $row)) ? $row['item']['unit_type_id'] : $item->unit_type_id,
+                        // ''
+                        'original_quantity' => (isset($row['item']['original_quantity']) ? $row['item']['original_quantity'] : 0),
                         'presentation' => $presentation,
                         'amount_plastic_bag_taxes' => $item->amount_plastic_bag_taxes,
                         'is_set' => $item->is_set,
