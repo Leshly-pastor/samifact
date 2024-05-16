@@ -1,97 +1,158 @@
 <template>
     <div>
-        <el-dialog :title="titleDialog" :visible="showDialog" @open="create"
-                :close-on-click-modal="false"
-                :close-on-press-escape="false"
-                append-to-body
-                width="800px"
-                :show-close="false">
-
+        <el-dialog
+            :title="titleDialog"
+            :visible="showDialog"
+            @open="create"
+            :close-on-click-modal="false"
+            :close-on-press-escape="false"
+            append-to-body
+            width="800px"
+            :show-close="false"
+        >
             <div class="row justify-content-md-center">
                 <div class="col-lg-12 col-md-12 col-sm-12 container-tabs">
                     <el-tabs v-model="activeName">
-                        <template v-if="configuration && configuration.package_handlers">
-                                 <el-tab-pane label="Imprimir recibo" name="first">
-                            <iframe :src="form.print_receipt" type="application/pdf" width="100%" height="400px"/>
-                        </el-tab-pane>
+                        <template
+                            v-if="
+                                configuration && configuration.package_handlers
+                            "
+                        >
+                            <el-tab-pane label="Imprimir recibo" name="first">
+                                <iframe
+                                    :src="form.print_receipt"
+                                    type="application/pdf"
+                                    width="100%"
+                                    height="400px"
+                                />
+                            </el-tab-pane>
                         </template>
                         <template v-else>
-                              <el-tab-pane label="Imprimir A4" name="first">
-                            <iframe :src="form.print_a4" type="application/pdf" width="100%" height="400px"/>
-                        </el-tab-pane>
-                        <el-tab-pane label="Imprimir Ticket" name="fourth" v-if="ShowTicket80">
-                            <iframe :src="form.print_ticket" type="application/pdf" width="100%" height="400px"/>
-                        </el-tab-pane>
-                        <el-tab-pane label="Imprimir Ticket 58MM" name="third" v-if="ShowTicket58">
-                            <iframe :src="form.print_ticket_58" type="application/pdf" width="100%" height="400px"/>
-                        </el-tab-pane>
-                        <el-tab-pane label="Imprimir Ticket 50MM" name="fifth" v-if="ShowTicket50">
-                            <iframe :src="form.print_ticket_50" type="application/pdf" width="100%" height="400px"/>
-                        </el-tab-pane>
-                        <el-tab-pane label="Imprimir A5" name="second">
-                            <iframe :src="form.print_a5" type="application/pdf" width="100%" height="400px"/>
-                        </el-tab-pane>
+                            <el-tab-pane label="Imprimir A4" name="first">
+                                <iframe
+                                    :src="form.print_a4"
+                                    type="application/pdf"
+                                    width="100%"
+                                    height="400px"
+                                />
+                            </el-tab-pane>
+                            <el-tab-pane
+                                label="Imprimir Ticket"
+                                name="fourth"
+                                v-if="ShowTicket80"
+                            >
+                                <iframe
+                                    :src="form.print_ticket"
+                                    type="application/pdf"
+                                    width="100%"
+                                    height="400px"
+                                />
+                            </el-tab-pane>
+                            <el-tab-pane
+                                label="Imprimir Ticket 58MM"
+                                name="third"
+                                v-if="ShowTicket58"
+                            >
+                                <iframe
+                                    :src="form.print_ticket_58"
+                                    type="application/pdf"
+                                    width="100%"
+                                    height="400px"
+                                />
+                            </el-tab-pane>
+                            <el-tab-pane
+                                label="Imprimir Ticket 50MM"
+                                name="fifth"
+                                v-if="ShowTicket50"
+                            >
+                                <iframe
+                                    :src="form.print_ticket_50"
+                                    type="application/pdf"
+                                    width="100%"
+                                    height="400px"
+                                />
+                            </el-tab-pane>
+                            <el-tab-pane label="Imprimir A5" name="second">
+                                <iframe
+                                    :src="form.print_a5"
+                                    type="application/pdf"
+                                    width="100%"
+                                    height="400px"
+                                />
+                            </el-tab-pane>
                         </template>
                     </el-tabs>
-
                 </div>
-               <template v-if="configuration && configuration.package_handlers">
-                 <div class="col-md-2 text-center font-weight-bold mt-3">
-                    <button class="btn btn-info"
+                <template
+                    v-if="configuration && configuration.package_handlers"
+                >
+                    <div class="col-md-2 text-center font-weight-bold mt-3">
+                        <button
+                            class="btn btn-info"
                             type="button"
-                            @click="clickPrint('receipt')">
-                        <i class="fa fa-receipt"></i>
-                    </button>
-                    <p>80MM</p>
-                </div>
-               </template>
-               <template v-else>
-                 <div class="col-md-2 text-center font-weight-bold mt-3">
-                    <button class="btn btn-info"
-                                   type="button"
-                                   @click="clickPrint('a4')">
-                            <i class="fa fa-file-alt"></i>
-                    </button>
-                    <p>A4</p>
-                </div>
-                <div class="col-md-2 text-center font-weight-bold mt-3">
-                    <button class="btn btn-info"
+                            @click="clickPrint('receipt')"
+                        >
+                            <i class="fa fa-receipt"></i>
+                        </button>
+                        <p>80MM</p>
+                    </div>
+                </template>
+                <template v-else>
+                    <div class="col-md-2 text-center font-weight-bold mt-3">
+                        <button
+                            class="btn btn-info"
                             type="button"
-                            @click="clickPrint('ticket')">
-                        <i class="fa fa-receipt"></i>
-                    </button>
-                    <p>80MM</p>
-                </div>
-
-                <div class="col-md-2 text-center font-weight-bold mt-3">
-                    <button class="btn btn-info"
-                            type="button"
-                            @click="clickPrint('ticket_58')">
-                        <i class="fa fa-receipt"></i>
-                    </button>
-                    <p>58MM</p>
-                </div>
-
-                <div class="col-md-2 text-center font-weight-bold mt-3">
-                        <button class="btn btn-info"
-                                type="button"
-                                @click="clickPrint('ticket_50')">
+                            @click="clickPrint('a4')"
+                        >
                             <i class="fa fa-file-alt"></i>
                         </button>
-                        <p>50MM</p>                  
-                </div>
-
-                <div class="col-md-2 text-center font-weight-bold mt-3">
-
-                    <button class="btn btn-info waves-effect waves-light"
+                        <p>A4</p>
+                    </div>
+                    <div class="col-md-2 text-center font-weight-bold mt-3">
+                        <button
+                            class="btn btn-info"
                             type="button"
-                            @click="clickPrint('a5')">
-                        <i class="fa fa-file-alt"></i>
-                    </button>
-                    <p>A5</p>
-                </div>
-               </template>
-<!--                     
+                            @click="clickPrint('ticket')"
+                        >
+                            <i class="fa fa-receipt"></i>
+                        </button>
+                        <p>80MM</p>
+                    </div>
+
+                    <div class="col-md-2 text-center font-weight-bold mt-3">
+                        <button
+                            class="btn btn-info"
+                            type="button"
+                            @click="clickPrint('ticket_58')"
+                        >
+                            <i class="fa fa-receipt"></i>
+                        </button>
+                        <p>58MM</p>
+                    </div>
+
+                    <div class="col-md-2 text-center font-weight-bold mt-3">
+                        <button
+                            class="btn btn-info"
+                            type="button"
+                            @click="clickPrint('ticket_50')"
+                        >
+                            <i class="fa fa-file-alt"></i>
+                        </button>
+                        <p>50MM</p>
+                    </div>
+
+                    <div class="col-md-2 text-center font-weight-bold mt-3">
+                        <button
+                            class="btn btn-info waves-effect waves-light"
+                            type="button"
+                            @click="clickPrint('a5')"
+                        >
+                            <i class="fa fa-file-alt"></i>
+                        </button>
+                        <p>A5</p>
+                    </div>
+                </template>
+                <!--                     
                     <a :href="`https://docs.google.com/viewer?url=${form.print_a4}?format=pdf`" class="btn mx-3 btn-primary btn-lg" target="_BLANK">
                         <i class="far fa-file-pdf"></i>
                         <br>
@@ -121,97 +182,151 @@
             <span slot="footer" class="dialog-footer row">
                 <div class="col-md-12 mt-2">
                     <el-input v-model="form.customer_email">
-                        <el-button slot="append" icon="el-icon-message"   @click="clickSendEmail" :loading="loading">Enviar</el-button>
+                        <el-button
+                            slot="append"
+                            icon="el-icon-message"
+                            @click="clickSendEmail"
+                            :loading="loading"
+                            >Enviar</el-button
+                        >
                     </el-input>
                 </div>
+                <div
+                    class="col-md-12 mt-2"
+                    v-if="configuration && !configuration.show_gekawa_mk"
+                >
+                    <el-input v-model="form.customer_telephone">
+                        <template slot="prepend">+51</template>
+                        <el-button
+                            slot="append"
+                            @click="clickSendWhatsapp"
+                            :loading="loading_Whatsapp"
+                            >Enviar PDF
+                            <i class="fab fa-whatsapp"></i>
+                        </el-button>
+                    </el-input>
+                    <small
+                        v-if="errors.customer_telephone"
+                        class="text-danger"
+                        v-text="errors.customer_telephone[0]"
+                    ></small>
+                </div>
+                <div class="col-md-12 mt-2" v-else>
+                    <el-input
+                        v-model="form.customer_telephone"
+                        id="customerTelephone"
+                        type="text"
+                        placeholder="Número de teléfono"
+                        required
+                    >
+                        <template slot="prepend">+51</template>
+                        <el-button
+                            slot="append"
+                            @click="clickSendWhatsapp3"
+                            :disabled="loading_Whatsapp"
+                            >Enviar PDF
+                            <i class="fab fa-whatsapp"></i>
+                        </el-button>
+                    </el-input>
+                    <small
+                        v-if="errors.customer_telephone"
+                        class="text-danger"
+                        v-text="errors.customer_telephone[0]"
+                    ></small>
+                </div>
+
                 <div class="col-md-12 mt-2">
-                        <el-input v-model="form.customer_telephone">
-                            <template slot="prepend">+51</template>
-                            <el-button slot="append"
-                                       @click="clickSendWhatsapp" :loading="loading_Whatsapp">Enviar PDF
-                                        <i class="fab fa-whatsapp"></i>
-                            </el-button>
-                        </el-input>
-                        <small v-if="errors.customer_telephone"
-                               class="text-danger"
-                               v-text="errors.customer_telephone[0]"></small>
-                    </div>
-                    <div class="col-md-12 mt-2">
-                        <el-input v-model="form.customer_telephone" placeholder="Enviar link por WhatsApp">
-                            <template slot="prepend">+51</template>
-                            <el-button slot="append"
-                                       @click="clickSendWhatsapp2">Enviar URL
-                                <el-tooltip class="item"
-                                            content="Se recomienta tener abierta la sesión de Whatsapp web"
-                                            effect="dark"
-                                            placement="top-start">
-                                    <i class="fab fa-whatsapp"></i>
-                                </el-tooltip>
-                            </el-button>
-                        </el-input>
-                        <small v-if="errors.customer_telephone"
-                               class="text-danger"
-                               v-text="errors.customer_telephone[0]"></small>
-                    </div>
-            <div class="col-md-6 mt-3">&nbsp;</div>
+                    <el-input
+                        v-model="form.customer_telephone"
+                        placeholder="Enviar link por WhatsApp"
+                    >
+                        <template slot="prepend">+51</template>
+                        <el-button slot="append" @click="clickSendWhatsapp2"
+                            >Enviar URL
+                            <el-tooltip
+                                class="item"
+                                content="Se recomienta tener abierta la sesión de Whatsapp web"
+                                effect="dark"
+                                placement="top-start"
+                            >
+                                <i class="fab fa-whatsapp"></i>
+                            </el-tooltip>
+                        </el-button>
+                    </el-input>
+                    <small
+                        v-if="errors.customer_telephone"
+                        class="text-danger"
+                        v-text="errors.customer_telephone[0]"
+                    ></small>
+                </div>
+                <div class="col-md-6 mt-3">&nbsp;</div>
                 <div class="col-md-6 mt-3">
-                <template v-if="showClose">
-                    <el-button @click="clickClose">Cerrar</el-button>
-                </template>
-                <template v-else>
-                    <el-button @click="clickFinalize">Ir al listado</el-button>
-                     <el-popover
-                        :open-delay="1000"
-                         placement="top-start"
-                         width="145"
-                         trigger="hover"
-                         content="Presiona ALT + N">
-                            <el-button slot="reference"
-                                       type="primary"
-                                       ref="new_note"
-                                       @click="clickNewSaleNote"
+                    <template v-if="showClose">
+                        <el-button @click="clickClose">Cerrar</el-button>
+                    </template>
+                    <template v-else>
+                        <el-button @click="clickFinalize"
+                            >Ir al listado</el-button
+                        >
+                        <el-popover
+                            :open-delay="1000"
+                            placement="top-start"
+                            width="145"
+                            trigger="hover"
+                            content="Presiona ALT + N"
+                        >
+                            <el-button
+                                slot="reference"
+                                type="primary"
+                                ref="new_note"
+                                @click="clickNewSaleNote"
                             >
                                 Nueva nota de venta
                             </el-button>
                         </el-popover>
-                </template>
+                    </template>
                 </div>
             </span>
         </el-dialog>
-
     </div>
 </template>
 
 <script>
 export default {
-    props: ['showDialog', 'recordId', 'showClose','configuration'],
+    props: ["showDialog", "recordId", "showClose", "configuration"],
     data() {
         return {
-            serviceUrl:"https://ej2services.syncfusion.com/production/web-services/api/pdfviewer",
+            serviceUrl:
+                "https://ej2services.syncfusion.com/production/web-services/api/pdfviewer",
             titleDialog: null,
             loading: false,
-            resource: 'sale-notes',
-            resource_documents: 'documents',
+            resource: "sale-notes",
+            resource_documents: "documents",
             errors: {},
             form: {},
-            document:{},
+            company: {},
+            document: {},
             document_types: [],
             all_series: [],
             series: [],
-            loading_submit:false,
+            loading_submit: false,
             showDialogOptions: false,
             documentNewId: null,
-            activeName: 'first',
+            activeName: "first",
             isSafari: false,
-            loading_Whatsapp:false
-        }
+            loading_Whatsapp: false,
+        };
     },
     created() {
-        this.initForm()
+        this.initForm();
     },
+
     mounted() {
-        if(navigator.userAgent.indexOf("Safari") != -1) {
-            this.isSafari = true
+        this.initForm();
+        this.getCompanyData();
+
+        if (navigator.userAgent.indexOf("Safari") != -1) {
+            this.isSafari = true;
         }
     },
     computed: {
@@ -222,7 +337,8 @@ export default {
             if (this.configuration.show_ticket_58 == null) return false;
             if (
                 this.configuration.show_ticket_58 !== undefined &&
-                this.configuration.show_ticket_58 !== null) {
+                this.configuration.show_ticket_58 !== null
+            ) {
                 return this.configuration.show_ticket_58;
             }
             return false;
@@ -234,7 +350,8 @@ export default {
             if (this.configuration.show_ticket_80 == null) return false;
             if (
                 this.configuration.show_ticket_80 !== undefined &&
-                this.configuration.show_ticket_80 !== null) {
+                this.configuration.show_ticket_80 !== null
+            ) {
                 return this.configuration.show_ticket_80;
             }
             return false;
@@ -246,121 +363,233 @@ export default {
             if (this.configuration.show_ticket_50 == null) return false;
             if (
                 this.configuration.show_ticket_50 !== undefined &&
-                this.configuration.show_ticket_50 !== null) {
+                this.configuration.show_ticket_50 !== null
+            ) {
                 return this.configuration.show_ticket_50;
             }
             return false;
-        }
+        },
     },
     methods: {
         initForm() {
-            this.errors = {}
+            this.errors = {};
             this.form = {
                 id: null,
-                customer_telephone:null,
+                customer_telephone: null,
                 external_id: null,
                 identifier: null,
-                date_of_issue:null,
+                date_of_issue: null,
                 print_ticket: null,
                 print_ticket_58: null,
                 print_a4: null,
                 print_a5: null,
-                series:null,
-                number:null,
-            }
+                series: null,
+                number: null,
+            };
+            this.company = {
+                gekawa_1: null,
+                gekawa_2: null,
+            };
         },
-        create() {
-            this.$http.get(`/${this.resource}/record/${this.recordId}`)
-                .then(response => {
-                    this.form = response.data.data
-                    this.titleDialog = `Nota de venta registrada:  ${this.form.serie}-${this.form.number}`
-                })
-        },
-        clickFinalize() {
-            location.href = `/${this.resource}`
-        },
-        clickNewSaleNote() {
-            this.clickClose()
-        },
-        clickClose() {
-            this.$emit('update:showDialog', false)
-            this.initForm()
-        },
-        clickDownload(){
-            window.open(`/downloads/saleNote/sale_note/${this.form.external_id}`, '_blank');
-        },
-        clickToPrint(format){
-            window.open(`/${this.resource}/print/${this.form.id}/${format}`, '_blank');
-        },
-        clickSendEmail() {
-            this.loading=true
-            this.$http.post(`/${this.resource}/email`, {
-                customer_email: this.form.customer_email,
-                id: this.form.id
-            })
-                .then(response => {
-                    if (response.data.success) {
-                        this.$message.success('El correo fue enviado satisfactoriamente')
-                    } else {
-                        this.$message.error('Error al enviar el correo')
+        async getCompany() {
+            this.loading = true;
+            await this.$http
+                .get(`/companies/record`)
+                .then((response) => {
+                    if (response.data !== "") {
+                        this.company = response.data.data;
                     }
                 })
-                .catch(error => {
-                    if (error.response.status === 422) {
-                        this.errors = error.response.data.errors
+                .finally(() => (this.loading = false));
+        },
+
+        async getCompanyData() {
+            try {
+                this.loading = true;
+                const response = await this.$http.get(`/companies/record`);
+                if (response.data && response.data.data) {
+                    // Asigna los datos de la empresa a this.company
+                    this.company = response.data.data;
+
+                    // Asigna gekawa_1 y gekawa_2 a sus respectivas propiedades
+                    this.company.gekawa_1 = response.data.data.gekawa_1;
+                    this.company.gekawa_2 = response.data.data.gekawa_2;
+                } else {
+                    console.error(
+                        "Error: No se recibieron datos válidos de la empresa"
+                    );
+                }
+            } catch (error) {
+                console.error("Error al obtener datos de la empresa:", error);
+            } finally {
+                this.loading = false;
+            }
+        },
+
+        create() {
+            this.$http
+                .get(`/${this.resource}/record/${this.recordId}`)
+                .then((response) => {
+                    this.form = response.data.data;
+                    this.titleDialog = `Nota de venta registrada:  ${this.form.serie}-${this.form.number}`;
+                });
+        },
+        clickFinalize() {
+            location.href = `/${this.resource}`;
+        },
+        clickNewSaleNote() {
+            this.clickClose();
+        },
+        clickClose() {
+            this.$emit("update:showDialog", false);
+            this.initForm();
+        },
+        clickDownload() {
+            window.open(
+                `/downloads/saleNote/sale_note/${this.form.external_id}`,
+                "_blank"
+            );
+        },
+        clickToPrint(format) {
+            window.open(
+                `/${this.resource}/print/${this.form.id}/${format}`,
+                "_blank"
+            );
+        },
+        clickSendEmail() {
+            this.loading = true;
+            this.$http
+                .post(`/${this.resource}/email`, {
+                    customer_email: this.form.customer_email,
+                    id: this.form.id,
+                })
+                .then((response) => {
+                    if (response.data.success) {
+                        this.$message.success(
+                            "El correo fue enviado satisfactoriamente"
+                        );
                     } else {
-                        this.$message.error(error.response.data.message)
+                        this.$message.error("Error al enviar el correo");
+                    }
+                })
+                .catch((error) => {
+                    if (error.response.status === 422) {
+                        this.errors = error.response.data.errors;
+                    } else {
+                        this.$message.error(error.response.data.message);
                     }
                 })
                 .then(() => {
-                    this.loading=false
-
-                })
+                    this.loading = false;
+                });
         },
         clickSendWhatsapp2() {
             if (!this.form.customer_telephone) {
-                return this.$message.error('El número es obligatorio')
+                return this.$message.error("El número es obligatorio");
             }
-            window.open(`https://wa.me/51${this.form.customer_telephone}?text=${this.form.message_text}`, '_blank');
-
+            window.open(
+                `https://wa.me/51${this.form.customer_telephone}?text=${this.form.message_text}`,
+                "_blank"
+            );
         },
         clickPrint(format) {
-            if(format== 'receipt'){
-
-                window.open(`/sale-notes/receipt/${this.form.id}`, '_blank');
-            }else{
-
-                window.open(`/sale-notes/print/${this.form.external_id}/${format}`, '_blank');
+            if (format == "receipt") {
+                window.open(`/sale-notes/receipt/${this.form.id}`, "_blank");
+            } else {
+                window.open(
+                    `/sale-notes/print/${this.form.external_id}/${format}`,
+                    "_blank"
+                );
             }
         },
 
         clickSendWhatsapp() {
             if (!this.form.customer_telephone) {
-                return this.$message.error('El número es obligatorio')
+                return this.$message.error("El número es obligatorio");
             }
-            
-            this.loading_Whatsapp = true
+
+            this.loading_Whatsapp = true;
             let form = {
                 id: this.recordId,
-                type_id : "NV",
+                type_id: "NV",
                 customer_telephone: this.form.customer_telephone,
-                mensaje: "La Nota de venta N° " + this.form.serie + this.form.number + " ha sido generado correctamente"
-            }
-            this.$http.post(`/whatsapp`, form)
-            .then(response => {
+                mensaje:
+                    "La Nota de venta N° " +
+                    this.form.serie +
+                    this.form.number +
+                    " ha sido generado correctamente",
+            };
+            this.$http
+                .post(`/whatsapp`, form)
+                .then((response) => {
                     if (response.data.success == true) {
-                        this.$message.success(response.data.message)
-                        this.loading_Whatsapp = false
+                        this.$message.success(response.data.message);
+                        this.loading_Whatsapp = false;
                     }
-                }).catch(error => {
-                    this.loading_Whatsapp = false
+                })
+                .catch((error) => {
+                    this.loading_Whatsapp = false;
                     this.$message.error(error.response.data.message);
-                 })
-            .finally(() => {
-                this.loading_Whatsapp = false
-                this.$message.error(error.response.data.message);
-            });
+                })
+                .finally(() => {
+                    this.loading_Whatsapp = false;
+                    this.$message.error(error.response.data.message);
+                });
         },
-    }
-}
+        getPrintUrl(format) {
+            // Obtén la base dinámicamente, por ejemplo, desde el objeto window.location
+            const baseUrl = window.location.origin;
+            // Luego, forma la URL completa utilizando la base dinámica y la ruta relativa
+            return `${baseUrl}/sale-notes/print/${this.form.external_id}/${format}`;
+        },
+
+        // Reutiliza la función getPrintUrl(format) dentro de clickPrint(format)
+        clickPrint(format) {
+            const printUrl = this.getPrintUrl(format);
+            window.open(printUrl, "_blank");
+            return printUrl; // Devuelve la URL para usarla en otro lugar si es necesario
+        },
+        clickSendWhatsapp3() {
+            var customerTelephone =
+                document.getElementById("customerTelephone").value;
+            var errorsElement = document.getElementById(
+                "errorCustomerTelephone"
+            );
+
+            // Validación del número de teléfono (por ejemplo, longitud mínima)
+            if (customerTelephone.length < 7) {
+                errorsElement.textContent =
+                    "El número de teléfono debe tener al menos 10 dígitos.";
+                return;
+            }
+
+            // Datos para enviar a la API de Gekawa
+            var formData = new FormData();
+            formData.append("appkey", this.company.gekawa_1);
+            formData.append("authkey", this.company.gekawa_2);
+            formData.append("to", "51" + customerTelephone);
+
+            formData.append("message", "Nota de venta generada correctamente "+this.form.serie+"-"+this.form.number);
+
+            const printUrl = this.getPrintUrl("a4");
+
+            formData.append("file", printUrl);
+            // formData.append('file', 'https://demo.facturaperu.com.pe/print/document/12344e92-47d1-4586-adee-a25359031e96/a4');
+
+            // Realizar la solicitud HTTP
+            fetch("https://gekawa.com/api/create-message", {
+                method: "POST",
+                body: formData,
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    // Manejar la respuesta de la API aquí
+                    console.log(data);
+                })
+                .catch((error) => {
+                    console.error("Error al enviar la solicitud:", error);
+                });
+        },
+    },
+};
 </script>

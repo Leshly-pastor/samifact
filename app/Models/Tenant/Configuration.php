@@ -141,6 +141,7 @@ use App\Models\Tenant\Skin;
 class Configuration extends ModelTenant
 {
     protected $fillable = [
+        'show_gekawa_mk',
         'count_unit_sale_note',
         'discount_unit_document',
         'current_cash_destination_duplicate',
@@ -355,6 +356,7 @@ class Configuration extends ModelTenant
     ];
 
     protected $casts = [
+        'show_gekawa_mk' => 'boolean',
         'count_unit_sale_note' => 'boolean',
         'discount_unit_document' => 'boolean',
         'current_cash_destination_duplicate' => 'boolean',
@@ -625,6 +627,7 @@ class Configuration extends ModelTenant
         $currency = CurrencyType::all();
         $skins = Skin::all();
         return [
+            'show_gekawa_mk' => (bool) $this->show_gekawa_mk,
             'count_unit_sale_note' => (bool) $this->count_unit_sale_note,
             'discount_unit_document' => (bool) $this->discount_unit_document,
             'current_cash_destination_duplicate' => (bool) $this->current_cash_destination_duplicate,

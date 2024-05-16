@@ -485,6 +485,12 @@ Vue.component(
     require("../../modules/Inventory/Resources/assets/js/inventory/index.vue")
         .default
 );
+
+Vue.component(
+    "inventory-validate-index",
+    require("../../modules/Inventory/Resources/assets/js/validate/index.vue")
+        .default
+);
 //tenant-inventory-references-index
 
 Vue.component(

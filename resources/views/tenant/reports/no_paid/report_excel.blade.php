@@ -50,6 +50,7 @@
                                 <th>Cliente</th>
                                 <th>Nombre Comercial</th>
                                 <th>Código interno</th>
+                                <th>Zona</th>
                                 <th>Moneda</th>
                                 <th>Plataforma</th>
                                 <th>Orden de compra</th>
@@ -70,6 +71,7 @@
                                         <td class="celda">{{$value['customer_name']}}</td>
                                         <td class="celda">{{$value['customer_trade_name']}}</td>
                                         <td class="celda">{{$value['customer_internal_code']}}</td>
+                                        <td class="celda">{{$value['customer_zone_name']}}</td>
                                         <td class="celda">{{$value['currency_type_id']}}</td>
                                         <td class="celda">
                                             @if(isset($value['web_platforms']))

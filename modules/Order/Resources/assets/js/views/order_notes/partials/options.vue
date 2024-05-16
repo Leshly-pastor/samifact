@@ -70,7 +70,7 @@
                     </el-input>
                     <!--<small class="text-danger" v-if="errors.customer_email" v-text="errors.customer_email[0]"></small> -->
                 </div>
-                <div class="col-md-12 mt-2">
+                <div class="col-md-12 mt-2" v-if="!configuration.show_gekawa_mk">
                     <el-input v-model="form.customer_telephone">
                         <template slot="prepend">+51</template>
                         <el-button
@@ -87,6 +87,28 @@
                         v-text="errors.customer_telephone[0]"
                     ></small>
                 </div>
+
+
+
+                <div class="col-md-12 mt-2" v-else>
+<el-input v-model="form.customer_telephone" id="customerTelephone" type="text"  placeholder="Número de teléfono" required>
+    <template slot="prepend">+51</template>
+    <el-button
+        slot="append"
+        @click="clickSendWhatsapp3"
+        :disabled="loading_Whatsapp"
+        >Enviar PDF
+        <i class="fab fa-whatsapp"></i>
+    </el-button>
+</el-input>
+<small
+    v-if="errors.customer_telephone"
+    class="text-danger"
+    v-text="errors.customer_telephone[0]"
+></small>
+</div>
+
+
                 <div class="col-md-12 mt-2">
                     <el-input
                         v-model="form.customer_telephone"
@@ -527,6 +549,7 @@ export default {
             errors: {},
             form: {},
             document: {},
+            company:{},
             document_types: [],
             all_document_types: [],
             all_series: [],
@@ -551,6 +574,11 @@ export default {
         this.initForm();
         this.initDocument();
         // this.clickAddPayment()
+    },
+
+    mounted() {
+        this.initForm();
+        this.getCompanyData();
     },
     computed: {
         isInvoiceDocument() {
@@ -616,7 +644,46 @@ export default {
                 document_id: null,
                 sale_note_id: null,
             };
+
+            this.company = {
+                gekawa_1:null,
+                gekawa_2:null,
+            };
         },
+
+
+        async getCompany() {
+            this.loading = true;
+            await this.$http
+                .get(`/companies/record`)
+                .then((response) => {
+                    if (response.data !== "") {
+                        this.company = response.data.data;
+                    }
+                })
+                .finally(() => (this.loading = false));
+        },
+        
+        async getCompanyData() {
+    try {
+        this.loading = true;
+        const response = await this.$http.get(`/companies/record`);
+        if (response.data && response.data.data) {
+            // Asigna los datos de la empresa a this.company
+            this.company = response.data.data;
+
+            // Asigna gekawa_1 y gekawa_2 a sus respectivas propiedades
+            this.company.gekawa_1 = response.data.data.gekawa_1;
+            this.company.gekawa_2 = response.data.data.gekawa_2;
+        } else {
+            console.error('Error: No se recibieron datos válidos de la empresa');
+        }
+    } catch (error) {
+        console.error('Error al obtener datos de la empresa:', error);
+    } finally {
+        this.loading = false;
+    }
+},
         getCustomer() {
             this.$http
                 .get(
@@ -629,6 +696,59 @@ export default {
                     this.changeCustomer();
                 });
         },
+        getPrintUrl(format) {
+    // Obtén la base dinámicamente, por ejemplo, desde el objeto window.location
+    const baseUrl = window.location.origin;
+    // Luego, forma la URL completa utilizando la base dinámica y la ruta relativa
+    return `${baseUrl}/${this.resource}/print/${this.form.external_id}/${format}`;
+},
+
+
+// Reutiliza la función getPrintUrl(format) dentro de clickPrint(format)
+clickPrint(format) {
+    const printUrl = this.getPrintUrl(format);
+    window.open(printUrl, "_blank");
+    return printUrl; // Devuelve la URL para usarla en otro lugar si es necesario
+},
+        clickSendWhatsapp3() {
+    var customerTelephone = document.getElementById("customerTelephone").value;
+    var errorsElement = document.getElementById("errorCustomerTelephone");
+
+    // Validación del número de teléfono (por ejemplo, longitud mínima)
+    if (customerTelephone.length < 7) {
+        errorsElement.textContent = "El número de teléfono debe tener al menos 10 dígitos.";
+        return;
+    }
+
+    // Datos para enviar a la API de Gekawa
+    var formData = new FormData();
+    formData.append('appkey', this.company.gekawa_1);
+    formData.append('authkey', this.company.gekawa_2);
+    formData.append('to', '51' + customerTelephone);
+
+    formData.append('message', 'Pedido N° ' + this.form.identifier + ' ha sido generado correctamente');
+    
+    const printUrl = this.getPrintUrl('a4');
+
+    formData.append('file', printUrl);
+    // formData.append('file', 'https://demo.facturaperu.com.pe/print/document/12344e92-47d1-4586-adee-a25359031e96/a4');
+
+    // Realizar la solicitud HTTP
+    fetch('https://gekawa.com/api/create-message', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Manejar la respuesta de la API aquí
+        console.log(data);
+    })
+    .catch(error => {
+        console.error('Error al enviar la solicitud:', error);
+    });
+},  
+
+
         changeCustomer() {
             this.validateIdentityDocumentType();
         },

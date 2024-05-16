@@ -270,6 +270,28 @@
                                             ></el-option>
                                         </el-select>
                                     </div>
+                                        <div class="col-md-2">
+                                        <label class="control-label"
+                                            >Zonas
+                                        
+                                        </label>
+                                        <el-select
+                                        @change="loadUnpaid"
+                                            filterable
+                                            clearable
+                                            v-model="
+                                                form.zone_id
+                                            "
+                                            placeholder="Seleccionar"
+                                        >
+                                            <el-option
+                                                v-for="item in zones"
+                                                :key="item.id"
+                                                :label="item.name"
+                                                :value="item.id"
+                                            ></el-option>
+                                        </el-select>
+                                    </div>
                                 </div>
 
                                 <div class="row" v-loading="loading">
@@ -878,6 +900,7 @@ export default {
     },
     data() {
         return {
+            zones: [],
             showMultiplePay: false,
             showDialogBillOfExchangePayments: false,
             resource: "finances/unpaid",
@@ -1076,6 +1099,7 @@ export default {
                             ? this.establishments[0].id
                             : null;
                     this.users = response.data.users;
+                    this.zones = response.data.zones;
                     this.payment_method_types =
                         response.data.payment_method_types;
                     this.web_platforms = response.data.web_platforms;

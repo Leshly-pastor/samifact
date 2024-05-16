@@ -718,7 +718,12 @@ $thridLevel = $path[2] ?? null;
                                 inventario</span></a>
                     </li>
                     {{-- @endif --}}
-
+                    {{-- <li>
+                        <a class="{{ $firstLevel === 'inventory' && $secondLevel === 'validate' ? 'active' : '' }}"
+                            href="{{ route('inventory.validate.index') }}">
+                            <span class="label">Validar inventario </span>
+                        </a>
+                    </li> --}}
                     <li>
                         <a class="{{ $firstLevel === 'reports' && $secondLevel === 'stock_date' ? 'active' : '' }}"
                             href="{{ route('tenant.stock-date.index') }}">

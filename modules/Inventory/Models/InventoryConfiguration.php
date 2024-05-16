@@ -10,6 +10,8 @@ class InventoryConfiguration extends ModelTenant
 {
 
     protected $fillable = [ 
+        'order_note_with_stock',
+        'confirm_inventory_transaction',
         'stock_control',
         'generate_internal_id',
         'inventory_review',
@@ -18,6 +20,8 @@ class InventoryConfiguration extends ModelTenant
   
 
     protected $casts = [
+        'order_note_with_stock' => 'boolean',
+        'confirm_inventory_transaction' => 'boolean',
         'generate_internal_id' => 'boolean',
         'inventory_review' => 'boolean',
         'validate_stock_add_item' => 'boolean',

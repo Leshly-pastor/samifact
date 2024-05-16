@@ -2,6 +2,7 @@
 
 namespace Modules\Dashboard\Helpers;
 
+use App\CoreFacturalo\Requests\Inputs\Functions;
 use App\Models\Tenant\Document;
 use App\Models\Tenant\DocumentItem;
 use App\Models\Tenant\Establishment;
@@ -243,6 +244,7 @@ class DashboardView
         $user_id = $request['user_id'] ?? null;
         $web_platform_id = $request['web_platform_id'] ?? 0;
         $purchase_order = $request['purchase_order'] ?? null;
+        $zone_id = Functions::valueKeyInArray($request, 'zone_id');
         $payment_method_type_id = $request['payment_method_type_id'] ?? null;
         // Obtendrá todos los establecimientos
         $stablishmentUnpaidAll = $request['stablishmentUnpaidAll'] ?? 0;
@@ -430,6 +432,10 @@ class DashboardView
         if ($customer_id) {
             $sale_notes->where('customer_id', $customer_id);
             $documents->where('customer_id', $customer_id);
+        }
+        if($zone_id){
+            $sale_notes->where('persons.zone_id', $zone_id);
+            $documents->where('persons.zone_id', $zone_id);
         }
         if ($d_start && $d_end) {
             $sale_notes->whereBetween('sale_notes.date_of_issue', [$d_start, $d_end]);

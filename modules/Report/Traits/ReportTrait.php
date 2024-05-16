@@ -66,6 +66,7 @@ trait ReportTrait
         $date_start_transport = FunctionController::InArray($request, 'date_start_transport');
         $time_start_transport = FunctionController::InArray($request, 'time_start_transport');
         $agency_origin_id = FunctionController::InArray($request, 'agency_origin_id');
+        $zone_id = FunctionController::InArray($request, 'zone_id');
         $agency_destination_id = FunctionController::InArray($request, 'agency_destination_id');
         $has_payment = ($has_payment == 'true') ? true : false;
         $d_start = null;
@@ -128,6 +129,13 @@ trait ReportTrait
         if ($transport_dispatch) {
             $records->whereHas('transport_dispatch');
         }
+        if ($zone_id) {
+            $records->whereHas('person', function ($query) use ($zone_id) {
+                $query->where('zone_id', $zone_id);
+            });
+        }
+
+
         if ($transport || $transport_dispatch) {
             if ($agency_origin_id) {
                 $records->whereHas('transport', function ($query) use ($agency_origin_id) {

@@ -21,6 +21,8 @@ use Modules\Finance\Helpers\UploadFileHelper;
  */
 class CompanyController extends Controller
 {
+
+
     public function storePse(Request $request){
         $company = Company::firstOrFail();
         $company->pse = $request->pse ?? false;
@@ -215,11 +217,13 @@ class CompanyController extends Controller
      * @param  CompanyWhatsAppApiRequest $request
      * @return array
      */
-    public function storeWhatsAppApi(CompanyWhatsAppApiRequest $request)
+    public function storeWhatsAppApi(Request $request)
     {
         $company = Company::active();
       //  $company->ws_api_token = $request->ws_api_token;
         $company->ws_api_phone_number_id = $request->ws_api_phone_number_id;
+        $company->gekawa_1 = $request->gekawa_1;
+        $company->gekawa_2 = $request->gekawa_2;
         $company->save();
 
         return [
@@ -239,10 +243,15 @@ class CompanyController extends Controller
     public function recordWhatsAppApi()
     {
         $company = Company::selectDataWhatsAppApi()->firstOrFail();
+    
+    
 
         return [
+            'gekawa_1'=>$company->gekawa_1,
+            'gekawa_2' => $company->gekawa_2,
             'ws_api_token' => $company->ws_api_token,
             'ws_api_phone_number_id' => $company->ws_api_phone_number_id,
+            ''
         ];
     }
 

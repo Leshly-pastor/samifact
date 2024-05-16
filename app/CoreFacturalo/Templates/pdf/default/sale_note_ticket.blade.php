@@ -2,6 +2,7 @@
                                         $establishment = $document->establishment;
                                         $establishment__ = \App\Models\Tenant\Establishment::find($document->establishment_id);
                                         $logo = $establishment__->logo ?? $company->logo;
+                                        $configuration = \App\Models\Tenant\Configuration::first();
                                         
                                         if ($logo === null && !file_exists(public_path("$logo}"))) {
                                             $logo = "{$company->logo}";
@@ -481,7 +482,11 @@
                                                             @else
                                                                 {!! $row->item->description !!}
                                                             @endif
-
+                                                            @if ($configuration->presentation_pdf && isset($row->item->presentation) && isset($row->item->presentation->description))
+                                                            <div>
+                                                                <span >{{ $row->item->presentation->description }}</span>
+                                                            </div>
+                                                        @endif
                                                             @if ($row->attributes)
                                                                 @foreach ($row->attributes as $attr)
                                                                     <br />{!! $attr->description !!} : {{ $attr->value }}
@@ -748,7 +753,6 @@
                                         @endif
                                         <table class="full-width">
                                             @php
-                                                $configuration = \App\Models\Tenant\Configuration::first();
                                                 $establishment_data = \App\Models\Tenant\Establishment::find($document->establishment_id);
                                             @endphp
                                             <tbody>

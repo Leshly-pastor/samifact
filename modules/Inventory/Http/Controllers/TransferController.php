@@ -5,6 +5,7 @@ namespace Modules\Inventory\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\SearchItemController;
 use App\Models\Tenant\Company;
+use App\Models\Tenant\Item;
 use App\Models\Tenant\Series;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
@@ -24,7 +25,9 @@ use Modules\Inventory\Http\Requests\TransferRequest;
 
 use Modules\Item\Models\ItemLot;
 use Exception;
-
+use Modules\Inventory\Models\InventoryConfiguration;
+use Modules\Inventory\Models\InventoryTransferToAccept;
+use Modules\Item\Models\ItemLotsGroup;
 
 class TransferController extends Controller
 {
@@ -32,7 +35,8 @@ class TransferController extends Controller
 
     public function index()
     {
-        return view('inventory::transfers.index');
+        $inventory_configuration = InventoryConfiguration::first();
+        return view('inventory::transfers.index', compact('inventory_configuration'));
     }
 
     public function create()
@@ -81,6 +85,7 @@ class TransferController extends Controller
     public function tables()
     {
         return [
+            'inventory_configuration' => InventoryConfiguration::first(),
             //'items' => $this->optionsItemWareHouse(),
             'warehouses' => $this->optionsWarehouse()
         ];
@@ -92,6 +97,8 @@ class TransferController extends Controller
 
         return $record;
     }
+
+
 
 
     /* public function store(Request $request)
@@ -234,8 +241,210 @@ class TransferController extends Controller
             throw new Exception("No se encontró una serie para el tipo de documento {$document_type_id} - {$document_type_description}, registre la serie en Establecimientos/Series");
         }
     }
+    public function acceptTransfer($id)
+    {
+        DB::connection('tenant')->beginTransaction();
+        try {
+            $this->restoreStockTransfer($id);
+            $transfer_to_accept = InventoryTransferToAccept::where('inventory_transfer_id', $id)->get();
+            $inventory_transfer = InventoryTransfer::findOrFail($id);
+            $warehouse_id = $inventory_transfer->warehouse_id;
+            $warehouse_destination_id = $inventory_transfer->warehouse_destination_id;
+            foreach ($transfer_to_accept as $it) {
+                $inventory = new Inventory();
+                $inventory->type = 2;
+                $inventory->description = 'Traslado';
+                $inventory->item_id = $it->item_id;
+                $inventory->warehouse_id = $warehouse_id;
+                $inventory->warehouse_destination_id = $warehouse_destination_id;
+                $inventory->quantity = $it->quantity;
+                $inventory->inventories_transfer_id = $id;
+                $inventory->save();
+                $series_lots = json_decode($it->series_lots, true);
+
+                if (isset($series_lots['lots'])) {
+                    foreach ($series_lots['lots'] as $lot) {
+                        if ($lot['has_sale']) {
+                            $item_lot = ItemLot::findOrFail($lot['id']);
+                            $item_lot->warehouse_id = $inventory->warehouse_destination_id;
+                            $item_lot->update();
+
+                            // historico de item para traslado
+                            InventoryTransferItem::query()->create([
+                                'inventory_transfer_id' => $id,
+                                'item_lot_id' => $lot['id'],
+                            ]);
+                        }
+                    }
+                }
+
+                if (isset($series_lots['lot_groups'])) {
+                    foreach ($series_lots['lot_groups'] as $lot) {
+                        InventoryTransferItem::query()->create([
+                            'inventory_transfer_id' => $id,
+                            'item_lots_group_id' => $lot['id'],
+                        ]);
+                    }
+                }
+            }
+
+            $inventory_transfer->state = 2;
+            $inventory_transfer->update();
+            InventoryTransferToAccept::where('inventory_transfer_id', $id)->delete();
+            DB::connection('tenant')->commit();
+            return [
+                'success' => true,
+                'message' => 'Traslado aceptado con éxito'
+            ];
+        } catch (\Exception $e) {
+            DB::connection('tenant')->rollBack();
+            return [
+                'success' => false,
+                'message' => $e->getMessage()
+            ];
+        }
+    }
+    public function rejectTransfer($id)
+    {
+        // $transfer_to_accept = InventoryTransferToAccept::where('inventory_transfer_id', $id)->get();
+        $this->restoreStockTransfer($id);
+        InventoryTransferToAccept::where('inventory_transfer_id', $id)->delete();
+        $inventory_transfer = InventoryTransfer::findOrFail($id);
+        $inventory_transfer->state = 3;
+        $inventory_transfer->update();
+        return [
+            'success' => true,
+            'message' => 'Traslado rechazado con éxito'
+        ];
+    }
+
+    function restoreStockTransfer($id)
+    {
+        $transfers_to_accept = InventoryTransferToAccept::where('inventory_transfer_id', $id)->get();
+        foreach ($transfers_to_accept as $transfer_to_accept) {
+            $item_id = $transfer_to_accept->item_id;
+            $series_lots = json_decode($transfer_to_accept->series_lots, true);
+            $item = Item::findOrFail($item_id);
+            $item->stock += $transfer_to_accept->quantity;
+            $item->update();
+            $item_warehouse = ItemWarehouse::where([['item_id', $item_id], ['warehouse_id', $transfer_to_accept->inventory_transfer->warehouse_id]])->first();
+            $item_warehouse->stock += $transfer_to_accept->quantity;
+            $item_warehouse->update();
+
+            if (isset($series_lots['lots'])) {
+                foreach ($series_lots['lots'] as $lot) {
+                    $item_lot = ItemLot::findOrFail($lot['id']);
+                    $item_lot->has_sale = 0;
+                    $item_lot->update();
+                }
+            }
+
+            if (isset($series_lots['lot_groups'])) {
+                foreach ($series_lots['lot_groups'] as $lot_group) {
+                    $item_lots_group = ItemLotsGroup::findOrFail($lot_group['id']);
+                    $item_lots_group->quantity += $lot_group['compromise_quantity'];
+                    $item_lots_group->update();
+                }
+            }
+        }
+    }
+    public function storeToAccept(Request $request)
+    {
+        DB::connection('tenant')->beginTransaction();
+        try {
+            $document_type_id = 'U4';
+            $warehouse_id = $request->input('warehouse_id');
+
+            $warehouse = Warehouse::query()
+                ->select('id', 'establishment_id')
+                ->where('id', $warehouse_id)
+                ->first();
+
+            $series = Series::query()
+                ->select('number')
+                ->where('establishment_id', $warehouse->establishment_id)
+                ->where('document_type_id', 'U4')
+                ->first();
+
+            $this->checkIfExistSerie($series, $document_type_id);
+
+            $row = InventoryTransfer::query()
+                ->create([
+                    'description' => $request->description,
+                    'warehouse_id' => $request->warehouse_id,
+                    'warehouse_destination_id' => $request->warehouse_destination_id,
+                    'quantity' => count($request->items),
+                    'document_type_id' => $document_type_id,
+                    'series' => $series->number,
+                    'number' => '#',
+                    'state' => 1,
+                ]);
+
+            foreach ($request->items as $it) {
+                $inventoryToAccept = new InventoryTransferToAccept();
+                $inventoryToAccept->inventory_transfer_id = $row->id;
+                $inventoryToAccept->item_id = $it['id'];
+                $inventoryToAccept->quantity = $it['quantity'];
+                $series_lots = ['lots' =>  $it['lots']];
+                foreach ($it['lots'] as $lot) {
+                    $item_lot = ItemLot::findOrFail($lot['id']);
+                    $item_lot->has_sale = 1;
+                    $item_lot->update();
+                }
+                $lot_groups = $this->searchLotGroup($request->lot_groups_total, $it['id']);
+                if ($lot_groups) {
+                    $series_lots['lot_groups'] = $lot_groups;
+                }
+                $inventoryToAccept->series_lots = json_encode($series_lots);
+                $inventoryToAccept->save();
+                $this->restStock($it['id'], $warehouse_id, $it['quantity']);
+            }
 
 
+            DB::connection('tenant')->commit();
+
+            return [
+                'success' => true,
+                'message' => 'Traslado por aceptar creado con éxito'
+            ];
+        } catch (\Exception $e) {
+            DB::connection('tenant')->rollBack();
+
+            return [
+                'success' => false,
+                'message' => $e->getMessage()
+            ];
+        }
+    }
+
+    function searchLotGroup($lot_groups, $item_id)
+    {
+        $lot_group_result = [];
+        foreach ($lot_groups as $lot_group) {
+            $lote_group_id = $lot_group['id'];
+            $item_lots_group = ItemLotsGroup::findOrFail($lote_group_id);
+            $lot_group_item_id = $item_lots_group->item_id;
+            if ($lot_group_item_id == $item_id) {
+                $quantity = $lot_group['compromise_quantity'];
+                $item_lots_group->quantity -= $quantity;
+                $item_lots_group->update();
+                $lot_group_result[] = $lot_group;
+            }
+        }
+        if (count($lot_group_result) == 0) {
+            return null;
+        }
+        return  $lot_group_result;
+    }
+    function restStock($item_id, $warehouse_id, $quantity)
+    {
+        $row = ItemWarehouse::where([['item_id', $item_id], ['warehouse_id', $warehouse_id]])->first();
+        $row->stock -= $quantity;
+        $row->update();
+        $item = Item::findOrFail($item_id);
+        $item->stock -= $quantity;
+        $item->update();
+    }
     public function store(TransferRequest $request)
     {
         DB::connection('tenant')->beginTransaction();

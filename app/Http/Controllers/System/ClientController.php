@@ -36,7 +36,8 @@ class ClientController extends Controller
     //constructor
     public function __construct()
     {
-        $this->soap_url = "https://prod.conose.cpe.pe/ol-ti-itcpe/billService?wsdl";
+        // $this->soap_url = "https://prod.conose.cpe.pe/ol-ti-itcpe/billService?wsdl";
+        $this->soap_url = "https://ose.cpe.pe/ol-ti-itcpe/billService?wsdl";
         $this->soap_password = "oJ0Aa8AK";
     }
     public function email(Request $request)

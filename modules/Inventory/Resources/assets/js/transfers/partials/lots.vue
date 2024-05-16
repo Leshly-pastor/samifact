@@ -7,7 +7,7 @@
                     <table width="100%" class="table">
                         <thead>
                             <tr width="100%">
-                                <th class="text-center">Seleccionar</th>
+                                <th class="text-center">Selecciosnar</th>
                                 <th >Cod. Lote</th>
                                 <th>Serie</th>
                                 <th>Fecha</th>

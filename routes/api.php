@@ -327,6 +327,11 @@ if ($hostname) {
 
             Route::get('dispatch_id/{id}', 'Tenant\DispatchController@record');
             Route::get('dispatch/records', 'Tenant\DispatchController@records');
+            Route::get('dispatch_carrier_id/{id}', 'Tenant\DispatchCarrierController@record');
+            Route::get('dispatch_carrier/records', 'Tenant\DispatchCarrierController@records');
+
+          //  Route::get('dispatch_id/{id}', 'Tenant\DispatchController@record');
+           // Route::get('dispatch/records', 'Tenant\DispatchController@records');
             Route::get('dispatch/list', 'Tenant\Api\AppController@dispatches_list');
             Route::post('dispatch/create', 'Tenant\Api\AppController@dispatches_create');
             Route::post('dispatch/email', 'Tenant\Api\AppController@dispatches_email');
@@ -335,8 +340,10 @@ if ($hostname) {
             Route::get('dispatch/send/{external_id}', 'Tenant\Api\AppController@sendDispatch');
             Route::get('dispatch/{id}', 'Tenant\Api\AppController@dispatches_id');
         
+            Route::get('app/get-whatsapp-number', 'Tenant\Api\AppController@getWhatsappNumber');
             
             Route::post('app/dispatch/create', 'Tenant\DispatchController@store');
+            Route::post('app/dispatch_carrier/create', 'Tenant\DispatchCarrierController@store');
             Route::get('app/dispatch_series', 'Tenant\DispatchController@dispatchSeries');
             //transportistas dispatchers
             Route::get('dispatcher/records', 'Tenant\Api\AppController@searchDispatcher');
@@ -356,20 +363,22 @@ if ($hostname) {
             //transportistas drivers
             Route::get('driver/search', 'Tenant\Api\AppController@searchDriver');
             Route::post('driver/create', 'Tenant\Api\AppController@storeDriver');
+            Route::get('driver/records', 'Tenant\Api\AppController@getDrivers');
             Route::delete('driver/delete/{item}', 'Tenant\Api\AppController@destroyDriver');
 
             //vehículos transports
             Route::get('transport/search', 'Tenant\Api\AppController@searchTransport');
             Route::post('transport/create', 'Tenant\Api\AppController@storeTransport');
+            Route::get('transport/records', 'Tenant\Api\AppController@getTransports');
             Route::delete('transport/delete/{item}', 'Tenant\Api\AppController@destroyTransport');
 
             //direcciones de partidas  origin_address
             Route::get('origin_address/search', 'Tenant\Api\AppController@searchOriginAddress');
-            Route::get('origin_address', 'Tenant\Api\AppController@getOriginAddress');
+            Route::get('origin_address/byId/{id}', 'Tenant\Api\AppController@getOriginAddress');
             Route::post('origin_address/create', 'Tenant\Api\AppController@storeOriginAddress');
             Route::delete('origin_address/delete/{item}', 'Tenant\Api\AppController@destroyOriginAddress');
 
-
+            //Modules\ApiPeruDev\Http\Controllers
             //envios de cpe manualmente
             Route::get('documents/send/{document}', 'Tenant\Api\AppController@send');
 
@@ -486,6 +495,11 @@ if ($hostname) {
             Route::post('documents/send', 'Tenant\Api\DocumentController@send');
             Route::post('summaries/status', 'Tenant\Api\SummaryController@status');
             Route::post('voided/status', 'Tenant\Api\VoidedController@status');
+            
+            Route::get('app/voided/records', 'Tenant\VoidedController@records');
+            Route::get('app/voided/status/{voided}', 'Tenant\VoidedController@status');
+            Route::delete('app/voided/{voided}', 'Tenant\VoidedController@destroy');
+
             Route::get('services/ruc/{number}', 'Tenant\Api\ServiceController@ruc');
             Route::get('services/dni/{number}', 'Tenant\Api\ServiceController@dni');
             Route::post('services/consult_cdr_status', 'Tenant\Api\ServiceController@consultCdrStatus');

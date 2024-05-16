@@ -106,11 +106,24 @@
             </div>
         </div>
         <div class="row mt-3">
-            <div class="col-md-12 mt-2">
+                    <div class="col-md-12 mt-2">
                         <el-input v-model="form.customer_telephone">
                             <template slot="prepend">+51</template>
                             <el-button slot="append"
-                                       @click="clickSendWhatsapp" :loading="loading_Whatsapp">Enviar PDF
+                                       @click="clickSendWhatsapp" :loading="loading_Whatsapp">Enviar PDFh
+                                        <i class="fab fa-whatsapp"></i>
+
+                            </el-button>
+                        </el-input>
+                        <small v-if="errors.customer_telephone"
+                               class="text-danger"
+                               v-text="errors.customer_telephone[0]"></small>
+                    </div>
+                    <div class="col-md-12 mt-2">
+                        <el-input v-model="form.customer_telephone">
+                            <template slot="prepend">+51</template>
+                            <el-button slot="append"
+                                       @click="clickSendWhatsapp" :loading="loading_Whatsapp">Enviar PDFh
                                         <i class="fab fa-whatsapp"></i>
 
                             </el-button>

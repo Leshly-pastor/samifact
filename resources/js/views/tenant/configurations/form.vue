@@ -2362,6 +2362,32 @@
                                     ></small>
                                 </div>
                             </div>
+
+                                        <div class="col-md-6 mt-4">
+                                <label class="control-label">
+                                    Servicio de whatsapp
+                                </label>
+
+                                <div
+                                    :class="{
+                                        'has-danger':
+                                            errors.show_gekawa_mk,
+                                    }"
+                                    class="form-group"
+                                >
+                                    <el-switch
+                                        v-model="form.show_gekawa_mk"
+                                        active-text="Gekawa"
+                                        inactive-text="Mkdigital"
+                                        @change="submit"
+                                    ></el-switch>
+                                    <small
+                                        v-if="errors.show_gekawa_mk"
+                                        class="text-danger"
+                                        v-text="errors.show_gekawa_mk[0]"
+                                    ></small>
+                                </div>
+                            </div>
                         </div>
                     </el-tab-pane>
 

@@ -320,6 +320,7 @@
                                         class="series-table-actions text-center"
                                     >
                                         <button
+                                            v-if="canDelete"
                                             type="button"
                                             class="btn waves-effect waves-light btn-sm btn-danger"
                                             @click.prevent="clickCancel(index)"
@@ -504,6 +505,11 @@ export default {
         });
 
         await this.isUpdate();
+    },
+    computed: {
+        canDelete() {
+            return this.form.payments.length > 1;
+        },
     },
     methods: {
         checkExpenseType() {

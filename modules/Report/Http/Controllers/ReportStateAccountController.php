@@ -8,6 +8,7 @@ use App\Models\Tenant\Company;
 use App\Models\Tenant\Document;
 use App\Models\Tenant\Establishment;
 use App\Models\Tenant\SaleNote;
+use App\Models\Tenant\Zone;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -41,7 +42,7 @@ class ReportStateAccountController extends Controller
 
         $persons = $this->getPersons('customers');
         $sellers = $this->getSellers();
-
+        $zones = Zone::all();
         $establishments = Establishment::all()->transform(function ($row) {
             return [
                 'id' => $row->id,
@@ -50,8 +51,9 @@ class ReportStateAccountController extends Controller
         });
         $users = $this->getUsers();
 
-        return compact('document_types', 'establishments', 'persons', 'sellers', 'users');
+        return compact('document_types', 'establishments', 'persons', 'sellers', 'users','zones');
     }
+
 
 
     public function index()

@@ -1306,6 +1306,7 @@
         ></person-form>
 
         <quotation-options
+            :configuration="config"
             :showDialog.sync="showDialogOptions"
             :recordId="quotationNewId"
             :typeUser="typeUser"

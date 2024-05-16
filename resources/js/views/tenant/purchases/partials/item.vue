@@ -820,7 +820,7 @@
 
         <lots-form
             :item_id="form.item_id"
-            :lots="lots"
+            :lots.sync="lots"
             :showDialog.sync="showDialogLots"
             :stock="form.quantity"
             @addRowLot="addRowLot"

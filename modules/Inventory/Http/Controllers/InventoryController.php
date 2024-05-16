@@ -40,7 +40,65 @@ class InventoryController extends Controller
     {
         return view('inventory::inventory.index');
     }
+    public function validateIndex()
+    {
+        return view('inventory::validate.index');
+    }
+    public function searchSeriesValidate(Request $request)
+    {
+        $input = $request->input('input');
+        $warehouse_id = $request->input('warehouse_id');
 
+        $items = Item::whereHas('item_lots', function ($query) use ($warehouse_id, $input) {
+            $query->where('warehouse_id', $warehouse_id)
+                ->where('series', 'like', "%{$input}%");;
+        })
+            ->get()->transform(function ($row) {
+                return [
+                    'id' => $row->id,
+                    'description' => $row->description,
+                    'full_description' => $row->internal_id . ' - ' . $row->description,
+                    'internal_id' => $row->internal_id,
+                    'unit_type_id' => $row->unit_type_id,
+                ];
+            });
+
+        return [
+            'success' => true,
+            'items' => $items
+        ];
+    }
+    public function searchItemsValidate(Request $request)
+    {
+        $input = $request->input('input');
+        $warehouse_id = $request->input('warehouse_id');
+
+        $items = Item::whereDoesntHave('item_lots')->whereHas('warehouses', function ($query) use ($warehouse_id) {
+                $query->where('warehouse_id', $warehouse_id);
+            })
+            ->where('description', 'like', "%{$input}%")
+            ->orWhere('internal_id', 'like', "%{$input}%")
+            ->get()->transform(function ($row) {
+                return [
+                    'id' => $row->id,
+                    'description' => $row->description,
+                    'full_description' => $row->internal_id . ' - ' . $row->description,
+                    'internal_id' => $row->internal_id,
+                    'unit_type_id' => $row->unit_type_id,
+                ];
+            });
+
+        return [
+            'success' => true,
+            'items' => $items
+        ];
+    }
+    public function validateTables()
+    {
+        $warehouses = Warehouse::all();
+
+        return compact('warehouses');
+    }
     public function columns()
     {
         return [

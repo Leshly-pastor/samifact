@@ -38,7 +38,7 @@
                         <el-input v-model="form.customer_telephone">
                             <template slot="prepend">+51</template>
                             <el-button slot="append"
-                                       @click="clickSendWhatsapp" :loading="loading_Whatsapp">Enviar PDF
+                                       @click="clickSendWhatsapp" :loading="loading_Whatsapp">Enviar PDFk
                                         <i class="fab fa-whatsapp"></i>
                             </el-button>
                         </el-input>

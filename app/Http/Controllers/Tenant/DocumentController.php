@@ -134,6 +134,42 @@ class DocumentController extends Controller
             'message' => 'Usuario cambiado'
         ];
     }
+
+    public function checkSeries(Request $request)
+    {
+        $lots = $request->lots;
+        $errors = [];
+        $lots_found = [];
+        foreach ($lots as $lot) {
+            $item_lot = ItemLot::where('series', $lot)->first();
+            if ($item_lot) {
+                if ($item_lot->has_sale == 1) {
+                    $message = 'La serie ' . $lot . ' ya fue vendida.';
+                    $errors[] = $message;
+                } else {
+                    $transformed = [
+                        "date" => $item_lot->date,
+                        "has_sale" => true,
+                        "id" => $item_lot->id,
+                        "item_id" => $item_lot->item_id,
+                        "lot_code" => $item_lot->lot_code,
+                        "series" => $item_lot->series,
+                        "warehouse_id" => $item_lot->warehouse_id,
+                    ];
+                    $lots_found[] = $transformed;
+                }
+            } else {
+                $message = 'La serie ' . $lot . ' no se encuentra registrada.';
+                $errors[] = $message;
+            }
+        }
+        return [
+            'success' => (count($errors) === 0) ? true : false,
+            'message' => (count($errors) === 0) ? 'Series verificadas' : $errors,
+            'lots' => $lots_found,
+
+        ];
+    }
     public function voidedPdf($id)
     {
         $document = Document::find($id);
@@ -178,7 +214,8 @@ class DocumentController extends Controller
             'message' => 'Anexo ' . $appendix . ' cambiado'
         ];
     }
-    private function document_item_restore(DocumentItem $document_item){
+    private function document_item_restore(DocumentItem $document_item)
+    {
         // si es nota credito tipo 13, no se asocia a inventario
         if ($document_item->document->isCreditNoteAndType13()) return;
         if ($document_item->document->no_stock) return;
@@ -296,28 +333,28 @@ class DocumentController extends Controller
                 $lot->save();
             }*/
         }
- }
- function recalculateStock($item_id){
-    $total = 0;
-    $item_warehouses = ItemWarehouse::where('item_id', $item_id)->get();
-    foreach ($item_warehouses as $item_warehouse) {
-        $total += $item_warehouse->stock;
     }
-    $item = Item::find($item_id);
-    $item->stock = $total;
-    $item->save();
- }
+    function recalculateStock($item_id)
+    {
+        $total = 0;
+        $item_warehouses = ItemWarehouse::where('item_id', $item_id)->get();
+        foreach ($item_warehouses as $item_warehouse) {
+            $total += $item_warehouse->stock;
+        }
+        $item = Item::find($item_id);
+        $item->stock = $total;
+        $item->save();
+    }
     public function change_state($state_id,  $document_id)
 
     {
         $document = Document::find($document_id);
         $document->state_type_id = $state_id;
-        if($state_id == '05'){
+        if ($state_id == '05') {
             $document_items = DocumentItem::where('document_id', $document_id)->get();
             foreach ($document_items as $item) {
                 $this->document_item_restore($item);
                 $this->recalculateStock($item->item_id);
-
             }
         }
         $document->auditor_state = 1;
@@ -561,8 +598,8 @@ class DocumentController extends Controller
 
 
     public function tablesCompany($id)
-    {   
-        $company = Company::where('website_id',$id)->first();
+    {
+        $company = Company::where('website_id', $id)->first();
         $company_active = Company::active();
         $document_number = $company->document_number;
         $website_id = $company->website_id;
@@ -570,7 +607,7 @@ class DocumentController extends Controller
         $user_to_save = User::find($user);
         $user_to_save->company_active_id = $website_id;
         $user_to_save->save();
-        $key ="cash_".$user;
+        $key = "cash_" . $user;
         Cache::put($key, $website_id, 60);
         $payment_destinations = $this->getPaymentDestinations();
         if ($website_id && $company->id != $company_active->id) {
@@ -580,17 +617,17 @@ class DocumentController extends Controller
             $tenancy->tenant($client->hostname->website);
         }
         $establishment = Establishment::find(1);
-        $establishment_info =EstablishmentInput::set($establishment->id);
+        $establishment_info = EstablishmentInput::set($establishment->id);
         $series = Series::where('establishment_id', $establishment->id)->get()
-        ->transform(function ($row) {
-            return [
-                'id' => $row->id,
-                'contingency' => (bool)$row->contingency,
-                'document_type_id' => $row->document_type_id,
-                'establishment_id' => $row->establishment_id,
-                'number' => $row->number,
-            ];
-        });
+            ->transform(function ($row) {
+                return [
+                    'id' => $row->id,
+                    'contingency' => (bool)$row->contingency,
+                    'document_type_id' => $row->document_type_id,
+                    'establishment_id' => $row->establishment_id,
+                    'number' => $row->number,
+                ];
+            });
         // $series = Series::FilterSeries(1)
         //     ->get()
         //     ->transform(function ($row)  use ($document_number) {
@@ -602,7 +639,7 @@ class DocumentController extends Controller
             'data' => $company,
             'payment_destinations' => $payment_destinations,
             'series' => $series,
-            'establishment' => $establishment_info, 
+            'establishment' => $establishment_info,
         ];
     }
     public function tables()
@@ -997,10 +1034,10 @@ class DocumentController extends Controller
             $code = $e->getCode();
             $this->generalWriteErrorLog($e);
             Log::error($e->getMessage() . " " . $e->getFile() . " " . $e->getLine());
-            if($code == '23000'){
-                $message ="Debe eliminar los comprobantes de prueba antes de empezar a emitir comprobantes con valor legal.";
+            if ($code == '23000') {
+                $message = "Debe eliminar los comprobantes de prueba antes de empezar a emitir comprobantes con valor legal.";
                 return $this->generalResponse(false, 'Ocurrió un error: ' . $message);
-            }else{
+            } else {
 
                 return $this->generalResponse(false, 'Ocurrió un error: ' . $e->getMessage() . " " . $e->getFile() . " " . $e->getLine());
             }
@@ -1082,7 +1119,8 @@ class DocumentController extends Controller
             if ($company_id) {
                 $company = Company::where(
                     'website_id',
-                    $company_id)->first();
+                    $company_id
+                )->first();
                 $facturalo = new Facturalo($company);
             } else {
                 $facturalo = new Facturalo();
@@ -1129,8 +1167,8 @@ class DocumentController extends Controller
             } else {
                 $facturalo->createXmlUnsigned();
             }
-            if ($company->pse && $company->soap_type_id == '02' ) {
-                
+            if ($company->pse && $company->soap_type_id == '02') {
+
                 $facturalo->sendPseNew();
             } else {
                 $facturalo->signXmlUnsigned();
@@ -1197,7 +1235,7 @@ class DocumentController extends Controller
         $document = Document::find($id);
         $pse = new PseService($document);
         $response = $pse->download_file();
-        
+
         return $response;
     }
     public function jsonPse($id)

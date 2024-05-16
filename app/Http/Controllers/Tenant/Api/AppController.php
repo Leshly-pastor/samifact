@@ -93,9 +93,12 @@ use Modules\Store\Helpers\StorageHelper;
 use Illuminate\Support\Facades\Log;
 use Modules\ApiPeruDev\Helpers\ServiceDispatch;
 use App\CoreFacturalo\Helpers\Template\ReportHelper;
+use App\Models\System\Configuration as SystemConfiguration;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Collection;
 use Modules\Dispatch\Http\Controllers\DispatchAddressController;
+use Modules\Dispatch\Http\Resources\DriverCollection;
+use Modules\Dispatch\Http\Resources\TransportCollection;
 use Modules\Item\Http\Requests\BrandRequest;
 use Modules\Item\Models\Brand;
 use Modules\Pos\Http\Controllers\CashController;
@@ -447,7 +450,8 @@ class AppController extends Controller
         ];
     }
 
-    public function getDispatcher(Request $request){
+    public function getDispatcher(Request $request)
+    {
         $dispatchers = Dispatcher::get()->transform(function ($row) {
             return [
                 'id' => $row->id,
@@ -535,6 +539,20 @@ class AppController extends Controller
         }
     }
 
+    public function getDriver(Request $request)
+    {
+        $input = $request->input;
+        $drivers = Driver::query();
+        if ($input) {
+            $drivers = $drivers->where('name', 'like', "%{$input}%")
+                ->orWhere('number', 'like', "%{$input}%")
+                ->orWhere('license', 'like', "%{$input}%");
+        }
+
+        $drivers = $drivers->orderBy('id');
+
+        return new DriverCollection($drivers->paginate(config('tenant.items_per_page')));
+    }
     public function searchDriver(Request $request)
     {
         if ($request->byid != 'true') {
@@ -608,6 +626,20 @@ class AppController extends Controller
     }
 
 
+    public function getTransports(Request $request)
+    {
+        $input = $request->input;
+        $transport = Transport::query();
+        if ($input) {
+            $transport = $transport->where('plate_number', 'like', "%{$input}%")
+                ->orWhere('model', 'like', "%{$input}%")
+                ->orWhere('brand', 'like', "%{$input}%");
+        }
+
+        $transport = $transport->orderBy('id');
+
+        return new TransportCollection($transport->paginate(config('tenant.items_per_page')));
+    }
     public function searchTransport(Request $request)
     {
         if ($request->byid != 'true') {
@@ -677,19 +709,34 @@ class AppController extends Controller
         }
     }
 
-    public function getOriginAddress()
+    public function getOriginAddress($id)
     {
-        $originaddresses = OriginAddress::orderBy('id')->get()->transform(function ($row) {
-            return [
+
+        $records = [];
+        $record = Establishment::query()
+            ->find($id);
+        $records[] = [
+            'id' => 0,
+            'location_id' => [
+                $record->department_id,
+                $record->province_id,
+                $record->district_id,
+            ],
+            'address' => $record->address,
+        ];
+        $origin_addresses = OriginAddress::query()
+            ->where('is_active', true)
+            ->get();
+        foreach ($origin_addresses as $row) {
+            $records[] = [
                 'id' => $row->id,
                 'address' => $row->address,
                 'location_id' => $row->location_id,
-                // 'model' => $row->model,
             ];
-        });
+        }
         return [
             'success' => true,
-            'data' => array('originaddresses' => $originaddresses)
+            'data' => array('originaddresses' => $records)
         ];
     }
     public function searchOriginAddress(Request $request)
@@ -4891,8 +4938,68 @@ class AppController extends Controller
             ];
         }
     }
+    public function getWhatsappNumber()
+    {
+        $configuration_system = SystemConfiguration::first();
+        $company = Company::first();
+        $number = $company->ws_api_phone_number_id;
+        $token =  null;
+        if ($number == null) {
+            $number = $configuration_system->whatsapp;
+        }
 
+        if ($number == null) {
+            return [
+                'success' => false,
+                'message' => 'No se ha configurado el número de whatsapp'
+            ];
+        } else {
+            $response = $this->getTokenWhatsapp($number);
+            if ($response == null) {
+                return [
+                    'success' => false,
+                    'message' => 'No se pudo obtener el token de whatsapp'
+                ];
+            }
+            $success = $response['success'];
+            if (!$success) {
+                return [
+                    'success' => false,
+                    'message' => 'No se pudo obtener el token de whatsapp'
+                ];
+            }
+            $data = $response['data'];
+            $token = $data['token'];
 
+            return [
+                'success' => true,
+                'token' => $token,
+                'number' => $number
+            ];
+        }
+    }
+
+    function getTokenWhatsapp($number)
+    {
+        //hacer una petición post a un endpoint mandar el número de whatsapp en el body 
+        //y retornar el token, usa la librería guzzle
+
+        $client = new Client();
+        $response = $client->request(
+            'POST',
+            'https://api.mkdigital.pe/api/get-token',
+
+            [
+                'form_params' => [
+                    'number' => $number
+                ]
+            ]
+        );
+
+        $response = $response->getBody()->getContents();
+        $response = json_decode($response, true);
+        return $response;
+    }
     // imprimir codigo de barra
     public function printBarCode(Request $request)
     {
@@ -4961,18 +5068,22 @@ class AppController extends Controller
         $number = $request->number;
         $series = $request->series;
         $customer_id = $request->customer_id;
-
+        $input = $request->input;
+        $emission_date = $request->emission_date;
+        $query = Dispatch::query();
         if ($d_start && $d_end) {
-            $query = Dispatch::query()
+            $query = $query
                 ->where('document_type_id', '31')
                 ->where('series', 'like', '%' . $series . '%')
                 ->whereBetween('date_of_issue', [$d_start, $d_end]);
         } else {
-            $query = Dispatch::query()
+            $query = $query
                 ->where('document_type_id', '31')
                 ->where('series', 'like', '%' . $series . '%');
         }
-
+        if ($emission_date) {
+            $query->where('date_of_issue', $emission_date);
+        }
         if ($number) {
             $query->where('number', $number);
         }
@@ -4980,7 +5091,12 @@ class AppController extends Controller
         if ($customer_id) {
             $query->where('customer_id', $customer_id);
         }
-
+        if ($input && $input != 'null' && $input != 'undefined' && $input != '') {
+            $query->whereHas('person', function ($query) use ($input) {
+                $query->where('name', 'like', "%{$input}%")
+                    ->orWhere('number', 'like', "%{$input}%");
+            });
+        }
         return $query->latest();
     }
 

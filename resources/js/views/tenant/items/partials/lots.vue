@@ -171,9 +171,7 @@ export default {
             if (this.start_range == "" || this.end_range == "") {
                 return this.$message.error("Ingrese el rango de series");
             }
-            if (this.start_range.length != this.end_range.length) {
-                return this.$message.error("El rango de series no es valido");
-            }
+    
             if (this.start_range > this.end_range) {
                 return this.$message.error("El rango de series no es valido");
             }

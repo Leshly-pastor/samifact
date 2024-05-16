@@ -392,6 +392,7 @@ class DocumentController extends Controller
                 ->where('warehouse_id', $warehouse_id)
                 ->latest();
         }
+        $query = $query->orderBy('series', 'desc');
 
         return new ItemLotCollection($query->paginate(config('tenant.items_per_page')));
     }

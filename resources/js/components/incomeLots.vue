@@ -13,7 +13,32 @@
         loading-text="Verificando series..."
     >
         <div class="form-body">
-            <div class="row" v-loading="loading">
+            <div class="row">
+                <div class="col-md-4">
+                    <label class="control-label">Inicio de rango</label>
+                    <el-input
+                        v-model="start_range"
+                        placeholder="Inicio del rango"
+                    ></el-input>
+                </div>
+                <div class="col-md-4">
+                    <label class="control-label">Fin de rango</label>
+                    <el-input
+                        v-model="end_range"
+                        placeholder="Fin del rango"
+                    ></el-input>
+                </div>
+                <div class="col-md-4 d-flex align-items-end">
+                    <el-button
+                        type="primary"
+                        @click.prevent="addRange"
+                        class="mt-4"
+                    >
+                        Ingresar
+                    </el-button>
+                </div>
+            </div>
+            <div class="row mt-2" v-loading="loading">
                 <div class="col-md-12">
                     <el-button type="primary" @click.prevent="clickAddLot()"
                         >Agregar</el-button
@@ -39,13 +64,11 @@
                         <el-table-column prop="series" label="Series">
                             <template slot-scope="scope">
                                 <el-input
-                                    :class="
-                                        `${
-                                            scope.row.isDuplicate
-                                                ? 'is-invalid'
-                                                : ''
-                                        }`
-                                    "
+                                    :class="`${
+                                        scope.row.isDuplicate
+                                            ? 'is-invalid'
+                                            : ''
+                                    }`"
                                     @blur="
                                         duplicateSerie(
                                             scope.row.series,
@@ -54,7 +77,12 @@
                                     "
                                     v-model="scope.row.series"
                                     :ref="`ref_series_${scope.row.index}`"
-                                    @input="clearDuplicate(scope.row.index,scope.row.series)"
+                                    @input="
+                                        clearDuplicate(
+                                            scope.row.index,
+                                            scope.row.series
+                                        )
+                                    "
                                     @keyup.enter.native="
                                         keyupEnterSeries(
                                             scope.row.series,
@@ -95,7 +123,16 @@
                             label="Acciones"
                         >
                             <template slot-scope="scope">
-                                <el-button
+                                <button
+                                    type="button"
+                                    class="btn waves-effect waves-light btn-sm btn-danger"
+                                    @click.prevent="
+                                        clickCancel(scope.row.index)
+                                    "
+                                >
+                                    <i class="fa fa-trash"></i>
+                                </button>
+                                <!-- <el-button
                                     size="mini"
                                     type="danger"
                                     icon="el-icon-delete"
@@ -103,7 +140,7 @@
                                     @click.prevent="
                                         clickCancel(scope.row.index)
                                     "
-                                ></el-button>
+                                ></el-button> -->
                             </template>
                         </el-table-column>
                     </data-tables>
@@ -132,11 +169,13 @@ import SeriesImport from "@views/purchases/partials/import_series.vue";
 export default {
     components: {
         DataTables,
-        SeriesImport
+        SeriesImport,
     },
     props: ["showDialog", "lots", "stock", "recordId", "item_id"],
     data() {
         return {
+            start_range: "",
+            end_range: "",
             hasDuplicate: false,
             loadingVerify: false,
             titleDialog: "Series",
@@ -146,18 +185,60 @@ export default {
             form: {},
             states: ["Activo", "Inactivo", "Desactivado", "Voz", "M2m"],
             tableProps: {
-                border: true
+                border: true,
             },
             currentPage: 1,
-            per_page: 20
+            per_page: 20,
         };
     },
     async created() {
-        this.$eventHub.$on("responseImportSeries", response => {
+        this.$eventHub.$on("responseImportSeries", (response) => {
             this.responseImportSeries(response);
         });
     },
+    computed: {
+        
+    },
     methods: {
+        addRange() {
+            //verificar si el rango es valido
+            if (this.start_range == "" || this.end_range == "") {
+                return this.$message.error("Ingrese el rango de series");
+            }
+            
+            if (this.start_range > this.end_range) {
+                return this.$message.error("El inicio del rango no puede ser mayor al final del rango");
+            }
+            let start = parseInt(this.start_range);
+            let end = parseInt(this.end_range);
+            let quantity = end - start + 1;
+
+            if (quantity != this.stock) {
+                return this.$message.error(
+                    "La cantidad de series no coincide con el stock"
+                );
+            }
+            let localLots = [];
+
+            for (let i = 0; i < quantity; i++) {
+                localLots.push({
+                    id: null,
+                    item_id: null,
+                    series: start + i,
+                    date: moment().format("YYYY-MM-DD"),
+                    state: "Activo",
+                    index: i,
+                });
+            }
+            this.$emit("update:lots", localLots);
+            this.opened();
+            this.start_range = "";
+            this.end_range = "";
+
+            // this.paginatedLots = localLots;
+            this.currentPage = 1;
+            console.log("🚀 ~ addRange ~ lots:", this.lots);
+        },
         async responseImportSeries(response) {
             // console.log(response.data.news_rows)
             let lots_import = response.data.news_rows;
@@ -176,7 +257,7 @@ export default {
                     message:
                         "La cantidad de registros del archivo importado, es diferente a la cantidad ingresada",
                     type: "error",
-                    duration: 4000
+                    duration: 4000,
                 });
             }
 
@@ -195,7 +276,6 @@ export default {
         async keyupEnterSeries(series, index) {
             // console.log(series, index, this.getIndex())
             // console.log(this.$refs)
-          
 
             if (index == this.getIndex() - 1) {
                 return;
@@ -264,7 +344,7 @@ export default {
         async validateLots() {
             let error = 0;
 
-            await this.lots.forEach(element => {
+            await this.lots.forEach((element) => {
                 if (element.series == null) {
                     error++;
                 }
@@ -273,16 +353,16 @@ export default {
             if (error > 0)
                 return {
                     success: false,
-                    message: "El campo serie es obligatorio"
+                    message: "El campo serie es obligatorio",
                 };
 
             return { success: true };
         },
-        clearDuplicate(index,series){
-          let lot = this.lots[index];
+        clearDuplicate(index, series) {
+            let lot = this.lots[index];
             if (lot.isDuplicate) {
                 let lot_find = this.lots.find(
-                    lot_find => lot_find.series == series
+                    (lot_find) => lot_find.series == series
                 );
                 if (lot_find) {
                     lot_find.isDuplicate = false;
@@ -297,7 +377,7 @@ export default {
                 this.loadingVerify = true;
                 const response = await this.$http.post("/item-lots/check", {
                     lots: this.lots,
-                    item_id: this.item_id
+                    item_id: this.item_id,
                 });
                 const { data } = response;
                 if (data.length > 0) {
@@ -305,9 +385,9 @@ export default {
                         "Se encontraron series duplicadas, por favor verifique"
                     );
                     pass = false;
-                    let lots = this.lots.map(lot => {
+                    let lots = this.lots.map((lot) => {
                         let lot_find = data.find(
-                            lot_find => lot_find == lot.series
+                            (lot_find) => lot_find == lot.series
                         );
                         if (lot_find) {
                             lot.isDuplicate = true;
@@ -326,7 +406,7 @@ export default {
         },
         async submit() {
             let pass = await this.check();
-            if(!pass) return;
+            if (!pass) return;
             let val_lots = await this.validateLots();
             if (!val_lots.success) return this.$message.error(val_lots.message);
 
@@ -350,7 +430,7 @@ export default {
                 isDuplicate: false,
                 date: moment().format("YYYY-MM-DD"),
                 state: "Activo",
-                index: this.getIndex()
+                index: this.getIndex(),
             });
 
             this.$emit("addRowLot", this.lots);
@@ -378,7 +458,7 @@ export default {
         },
         close() {
             this.$emit("update:showDialog", false);
-        }
-    }
+        },
+    },
 };
 </script>

@@ -19,6 +19,7 @@ use Modules\Item\Models\ItemLot;
 use Modules\Inventory\Models\DevolutionItem;
 use App\Models\Tenant\DispatchItem;
 use App\Models\Tenant\ItemSizeStock;
+use App\Models\Tenant\ItemWarehouse;
 use App\Models\Tenant\NoStockDocument;
 use Modules\Inventory\Models\InventoryConfiguration;
 
@@ -419,8 +420,20 @@ class InventoryKardexServiceProvider extends ServiceProvider
             /** @todo bloque repetido, buscar colocar en funcion */
             $item = $order_note_item->item;
             $configuration = Configuration::first();
-            $document = $order_note_item->order_note;
+            $configuration_inventory = InventoryConfiguration::first();
             $warehouse_id = $order_note_item->warehouse_id;
+            $warehouse = ($warehouse_id) ?
+            $this->findWarehouse($this->findWarehouseById($warehouse_id)->establishment_id) :
+            $this->findWarehouse();
+            if($configuration_inventory->order_note_with_stock){
+                $itemW = ItemWarehouse::where('item_id', $item->id)->where('warehouse_id', $warehouse->id)->first();
+                if($itemW){
+                    if($itemW->stock < $order_note_item->quantity){
+                        throw new Exception("El stock del item {$item->description} es insuficiente.");
+                    }
+                }
+            }
+            $document = $order_note_item->order_note;
 
             $presentationQuantity = $item->presentation->quantity_unit ?? 1;
             // $warehouse = $this->findWarehouse($order_note_item->order_note->establishment_id);

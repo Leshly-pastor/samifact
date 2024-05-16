@@ -43,6 +43,7 @@ use App\Http\Requests\Tenant\DocumentPaymentRequest;
 use App\Http\Requests\Tenant\SaleNotePaymentRequest;
 use App\Models\Tenant\CashDocumentCredit;
 use App\Models\Tenant\DocumentPayment;
+use App\Models\Tenant\Zone;
 use Illuminate\Support\Facades\DB;
 
 class UnpaidController extends Controller
@@ -80,7 +81,7 @@ class UnpaidController extends Controller
             'identity_document_type_id' => '',
         ];
         $customers = array_merge($customer, $customer_temp->toArray());
-
+        $zones =  Zone::all();
         $establishments = DashboardView::getEstablishments();
 
         $users = [];
@@ -92,7 +93,7 @@ class UnpaidController extends Controller
         $payment_method_types = PaymentMethodType::whereIn('id', ['05', '08', '09'])->get();
         $web_platforms = WebPlatform::all();
 
-        return compact('customers', 'establishments', 'users', 'payment_method_types', 'web_platforms');
+        return compact('customers', 'establishments', 'users', 'payment_method_types', 'web_platforms','zones');
     }
 
     public function multiplePay(Request $request)

@@ -172,7 +172,7 @@
                 </div>
             </div>
             <div class="row mt-3">
-                <div class="col-md-12 mt-2">
+                <div class="col-md-12 mt-2"  v-if="configuration && !configuration.show_gekawa_mk">
                     <el-input v-model="form.customer_telephone">
                         <template slot="prepend">+51</template>
                         <el-button
@@ -189,6 +189,65 @@
                         v-text="errors.customer_telephone[0]"
                     ></small>
                 </div>
+
+                <div class="col-md-12 mt-2" v-else>
+                    <el-input
+                        v-model="form.customer_telephone"
+                        id="customerTelephone"
+                        type="text"
+                        placeholder="Número de teléfono"
+                        required
+                    >
+                        <template slot="prepend">+51</template>
+                        <el-button
+                            slot="append"
+                            @click="clickSendWhatsapp3"
+                            :disabled="loading_Whatsapp"
+                            >Enviar PDF
+                            <i class="fab fa-whatsapp"></i>
+                        </el-button>
+                    </el-input>
+                    <small
+                        v-if="errors.customer_telephone"
+                        class="text-danger"
+                        v-text="errors.customer_telephone[0]"
+                    ></small>
+                </div>
+
+                <!-- <div class="col-md-12 mt-2">
+    <div class="input-group">
+        
+        <div class="input-group-prepend" style="border-radius: 0;">
+            <span class="input-group-text">+51</span>
+        </div>
+        
+        
+        <input v-model="form.customer_telephone" id="customerTelephone" type="text" class="form-control" placeholder="Número de teléfono" required>
+        
+        <
+        <div class="input-group-append" style="border-radius: 0;">
+            <button id="sendWhatsappButton" class="btn btn-primary" @click="clickSendWhatsapp3" :disabled="loading_Whatsapp">
+                Enviar PDF por gekawa <i class="fab fa-whatsapp"></i>
+            </button>
+        </div>
+    </div>
+    
+    <small id="errorCustomerTelephone" class="text-danger"></small>
+</div> -->
+
+                <!-- <div class="col-md-12">
+    <input id="customerTelephone" type="text" class="form-control" placeholder="Número de teléfono" required>
+    <small id="errorCustomerTelephone" class="text-danger"></small>
+</div>
+
+<div class="row mt-2">
+    <div class="col-md-12">
+        <button id="sendWhatsappButton" class="btn btn-primary" @click="clickSendWhatsapp3" :disabled="loading_Whatsapp">
+            Enviar PDF por gekawa <i class="fab fa-whatsapp"></i>
+        </button>
+    </div>
+</div> -->
+
                 <div class="col-md-12 mt-2">
                     <el-input
                         v-model="form.customer_telephone"
@@ -315,6 +374,7 @@ export default {
             // config:{}
         };
     },
+
     created() {
         this.loadConfiguration(this.$store);
         this.$store.commit("setConfiguration", this.configuration);
@@ -413,6 +473,61 @@ export default {
                     this.loading_Whatsapp = false;
                 });
         },
+        getPrintUrl(format) {
+            // Obtén la base dinámicamente, por ejemplo, desde el objeto window.location
+            const baseUrl = window.location.origin;
+            // Luego, forma la URL completa utilizando la base dinámica y la ruta relativa
+            return `${baseUrl}/print/document/${this.form.external_id}/${format}`;
+        },
+
+        // Reutiliza la función getPrintUrl(format) dentro de clickPrint(format)
+        clickPrint(format) {
+            const printUrl = this.getPrintUrl(format);
+            window.open(printUrl, "_blank");
+            return printUrl; // Devuelve la URL para usarla en otro lugar si es necesario
+        },
+        clickSendWhatsapp3() {
+            var customerTelephone =
+                document.getElementById("customerTelephone").value;
+            var errorsElement = document.getElementById(
+                "errorCustomerTelephone"
+            );
+
+            // Validación del número de teléfono (por ejemplo, longitud mínima)
+            if (customerTelephone.length < 7) {
+                errorsElement.textContent =
+                    "El número de teléfono debe tener al menos 10 dígitos.";
+                return;
+            }
+
+            // Datos para enviar a la API de Gekawa
+            var formData = new FormData();
+            formData.append("appkey", this.company.gekawa_1);
+            formData.append("authkey", this.company.gekawa_2);
+            formData.append("to", "51" + customerTelephone);
+
+            formData.append("message", "Comprobante de pago electrónico " + this.form.number);
+
+            const printUrl = this.getPrintUrl("a4");
+
+            formData.append("file", printUrl);
+            // formData.append('file', 'https://demo.facturaperu.com.pe/print/document/12344e92-47d1-4586-adee-a25359031e96/a4');
+
+            // Realizar la solicitud HTTP
+            fetch("https://gekawa.com/api/create-message", {
+                method: "POST",
+                body: formData,
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    // Manejar la respuesta de la API aquí
+                    console.log(data);
+                })
+                .catch((error) => {
+                    console.error("Error al enviar la solicitud:", error);
+                });
+        },
+
         initForm() {
             this.errors = {};
             this.form = {
@@ -437,6 +552,8 @@ export default {
             };
             this.company = {
                 soap_type_id: null,
+                gekawa_1: null,
+                gekawa_2: null,
             };
         },
         async create() {

@@ -38,8 +38,13 @@ class TransferCollection extends ResourceCollection
                     ];
                 }
             });
-
+            $establishment = auth()->user()->establishment;
+            $warehouse = Warehouse::where('establishment_id', $establishment->id)->first();
+            $warehouse_id = $warehouse->id;
+            $can_confirm = $warehouse_id === $row->warehouse_destination_id;
             return [
+                'can_confirm' => $can_confirm,
+                'state' => $row->state,
                 'id' => $row->id,
                 'description' => $row->description,
                 'quantity' => round($row->quantity, 1),

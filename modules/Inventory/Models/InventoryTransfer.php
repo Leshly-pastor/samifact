@@ -46,6 +46,8 @@ class InventoryTransfer extends ModelTenant
     use UsesTenantConnection;
 
     protected $fillable = [
+
+        'state',
         'external_id',
         'user_id',
         'soap_type_id',

@@ -252,6 +252,25 @@
                                 </el-select>
                             </div>
                         </template>
+                        <template v-if="resource == 'reports/state-account'"
+                        >
+                        <div class="col-md-2 form-group">
+                                <label class="control-label">Zona
+                                </label>
+                                <el-select
+                                    v-model="form.zone_id"
+                                    clearable
+                                    filterable
+                                >
+                                    <el-option
+                                        v-for="user in zones"
+                                        :key="user.id"
+                                        :label="user.name"
+                                        :value="user.id"
+                                    ></el-option>
+                                </el-select>
+                            </div>
+                        </template>
                     </template>
 
                     <div
@@ -640,6 +659,7 @@ export default {
     },
     data() {
         return {
+            zones:[],
             loading_submit: false,
             persons: [],
             licenses: [],
@@ -706,6 +726,7 @@ export default {
             this.sellers = response.data.sellers;
             this.state_types = response.data.state_types;
             this.web_platforms = response.data.web_platforms;
+            this.zones = response.data.zones;
             // this.form.establishment_id = (this.establishments.length > 0)?this.establishments[0].id:null;
             if (response.data.users !== undefined) {
                 this.users = response.data.users;

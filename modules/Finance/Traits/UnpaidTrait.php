@@ -10,6 +10,7 @@ use App\Models\Tenant\DocumentPayment;
 use App\Models\Tenant\SaleNote;
 use App\Models\Tenant\SaleNotePayment;
 use App\Models\Tenant\Invoice;
+use App\Models\Tenant\Person;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
@@ -81,15 +82,22 @@ trait UnpaidTrait
             }
             $customer_internal_code = null;
             $customer_trade_name  = null;
+            $customer_zone_name = null;
             if ($document) {
                 $customer_internal_code = $document->customer->internal_code;
                 $customer_trade_name  = $document->customer->trade_name;
+                $customer_id = $document->customer_id;
+                $zone = Person::find($customer_id)->getZone();
+                if ($zone) {
+                    $customer_zone_name = $zone->name;
+                }
             }
             return [
                 'id' => $row->id,
                 'date_of_issue' => $row->date_of_issue,
                 'customer_name' => $row->customer_name,
                 'customer_internal_code' => $customer_internal_code,
+                'customer_zone_name' => $customer_zone_name,
                 'customer_trade_name' => $customer_trade_name,
                 'customer_id' => $row->customer_id,
                 'number_full' => $row->number_full,

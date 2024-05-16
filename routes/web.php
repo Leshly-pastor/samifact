@@ -202,7 +202,7 @@ if ($hostname) {
             Route::get('companies/record-send-pse', 'Tenant\CompanyController@recordSendPse');
             Route::post('companies/pse', 'Tenant\CompanyController@storePse');
             Route::get('companies/pse', 'Tenant\CompanyController@recordPse');
-
+            
             //configuracion WhatsApp Api
             Route::post('companies/store-whatsapp-api', 'Tenant\CompanyController@storeWhatsAppApi');
             Route::get('companies/record-whatsapp-api', 'Tenant\CompanyController@recordWhatsAppApi');
@@ -384,6 +384,9 @@ if ($hostname) {
                 Route::get('accumulated-points/{id}', 'Tenant\PersonController@getAccumulatedPoints');
             });
             //Documents
+
+            Route::post('documents/check-series', 'Tenant\DocumentController@checkSeries');
+
             Route::get('documents/tables-company/{company_id}', 'Tenant\DocumentController@tablesCompany');
             Route::get('documents/update-user/{user_id}/{document_id}', 'Tenant\DocumentController@updateUser');
             Route::get('documents/change_sire/{id}/{appendix}', 'Tenant\DocumentController@changeSire');

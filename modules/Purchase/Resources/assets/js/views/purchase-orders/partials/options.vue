@@ -33,15 +33,16 @@
             <div class="col-md-12 mt-2">
                 <el-input v-model="form.customer_telephone">
                     <template slot="prepend">+51</template>
-                    <el-button slot="append" @click="clickSendWhatsapp" :loading="loading_Whatsapp">Enviar PDF
+                    <el-button slot="append" @click="clickSendWhatsapp" :loading="loading_Whatsapp">Enviar PDFf
                         <i class="fab fa-whatsapp"></i>
                     </el-button>
                 </el-input>
                 <small v-if="errors.customer_telephone" class="text-danger"
                     v-text="errors.customer_telephone[0]"></small>
             </div>
+            
             <div class="col-md-12 mt-2">
-                <el-input v-model="form.customer_telephone" placeholder="Enviar link por WhatsApp">
+                <el-input v-model="form.customer_telephone" placeholder="Enviar link por WhatsApps">
                     <template slot="prepend">+51</template>
                     <el-button slot="append" @click="clickSendWhatsapp2">Enviar URL
                         <el-tooltip class="item" content="Se recomienta tener abierta la sesión de Whatsapp web"

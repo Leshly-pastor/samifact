@@ -111,7 +111,7 @@ class Facturalo
     }
     public function sendPseNew()
     {
-        if($this->configuration->send_auto){
+        if ($this->configuration->send_auto) {
             $new_pse = new PseService($this->document);
             $this->response = $new_pse->sendToPse();
         }
@@ -1302,6 +1302,11 @@ class Facturalo
             throw new Exception("Code: {$res->getError()->getCode()}; Description: {$res->getError()->getMessage()}", 511); //custom exception code
         } else {
             $cdrResponse = $res->getCdrResponse();
+            $description = $cdrResponse->getDescription();
+            $description_to_lower = strtolower($description);
+            if (strpos($description_to_lower, 'error') !== false) {
+                throw new Exception("Code: {$cdrResponse->getCode()}; Description: {$description}", 511); //custom exception code
+            }
             $this->uploadFile($res->getCdrZip(), 'cdr');
             $this->response = [
                 'sent' => true,
@@ -1380,7 +1385,7 @@ class Facturalo
             $this->response = [
                 'sent' => true,
                 'code' => $cdrResponse->getCode(),
-            // para carga de voucher
+                // para carga de voucher
                 'description' => $cdrResponse->getDescription(),
                 'notes' => $cdrResponse->getNotes()
             ];
@@ -1583,7 +1588,7 @@ class Facturalo
                     $global_payment = GlobalPayment::where('payment_id', $row['id'])
                         ->where('payment_type', DocumentPayment::class)
                         ->first();
-                    if($global_payment){
+                    if ($global_payment) {
                         $global_payment_replicate = $global_payment->replicate();
                         $global_payment_replicate->payment_id = $record->id;
                         $global_payment_replicate->save();
@@ -1638,7 +1643,7 @@ class Facturalo
             }
             $record = $document->payments()->create($row);
             $this->saveFilesFromPayments($row, $record, 'documents');
-            
+
             // $customer_id = $document->customer_id;
             // $row['person_id'] = $customer_id;
             if (isset($row['payment_destination_id'])) {

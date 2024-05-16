@@ -46,7 +46,7 @@
                             <div
                                 class="form-group"
                                 :class="{
-                                    'has-danger': errors.generate_internal_id
+                                    'has-danger': errors.generate_internal_id,
                                 }"
                             >
                                 <el-switch
@@ -78,7 +78,7 @@
                             <div
                                 class="form-group"
                                 :class="{
-                                    'has-danger': errors.inventory_review
+                                    'has-danger': errors.inventory_review,
                                 }"
                             >
                                 <el-switch
@@ -110,7 +110,8 @@
                             <div
                                 class="form-group"
                                 :class="{
-                                    'has-danger': errors.validate_stock_add_item
+                                    'has-danger':
+                                        errors.validate_stock_add_item,
                                 }"
                             >
                                 <el-switch
@@ -141,6 +142,47 @@
                                 >
                             </div>
                         </div>
+
+                        <div class="col-md-6 mt-2">
+                            <label class="control-label">
+                                Confirmar / Rechazar traslados
+                            </label>
+                            <div class="form-group">
+                                <el-switch
+                                    v-model="form.confirm_inventory_transaction"
+                                    active-text="Si"
+                                    inactive-text="No"
+                                    @change="submit"
+                                ></el-switch>
+                                <small
+                                    class="text-danger"
+                                    v-if="errors.confirm_inventory_transaction"
+                                    v-text="
+                                        errors.confirm_inventory_transaction[0]
+                                    "
+                                ></small>
+                            </div>
+                        </div>
+                            <div class="col-md-6 mt-2">
+                            <label class="control-label">
+                                Realizar pedidos solo con stock disponible
+                            </label>
+                            <div class="form-group">
+                                <el-switch
+                                    v-model="form.order_note_with_stock"
+                                    active-text="Si"
+                                    inactive-text="No"
+                                    @change="submit"
+                                ></el-switch>
+                                <small
+                                    class="text-danger"
+                                    v-if="errors.order_note_with_stock"
+                                    v-text="
+                                        errors.order_note_with_stock[0]
+                                    "
+                                ></small>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </form>
@@ -156,7 +198,7 @@ export default {
             resource: "inventories/configuration",
             errors: {},
             loading_generate: false,
-            form: {}
+            form: {},
         };
     },
     async created() {
@@ -188,13 +230,15 @@ export default {
                 id: null,
                 stock_control: false,
                 inventory_review: false,
-                validate_stock_add_item: false
+                validate_stock_add_item: false,
             };
         },
         async getRecord() {
-            await this.$http.get(`/${this.resource}/record`).then(response => {
-                if (response.data !== "") this.form = response.data.data;
-            });
+            await this.$http
+                .get(`/${this.resource}/record`)
+                .then((response) => {
+                    if (response.data !== "") this.form = response.data.data;
+                });
         },
         changeStockControl() {
             if (!this.form.stock_control) {
@@ -208,7 +252,7 @@ export default {
 
             this.$http
                 .post(`/${this.resource}`, this.form)
-                .then(response => {
+                .then((response) => {
                     if (response.data.success) {
                         this.$message.success(response.data.message);
                     } else {
@@ -216,7 +260,7 @@ export default {
                         this.getRecord();
                     }
                 })
-                .catch(error => {
+                .catch((error) => {
                     if (error.response.status === 422) {
                         this.errors = error.response.data.errors;
                     } else {
@@ -226,7 +270,7 @@ export default {
                 .then(() => {
                     this.loading_submit = false;
                 });
-        }
-    }
+        },
+    },
 };
 </script>

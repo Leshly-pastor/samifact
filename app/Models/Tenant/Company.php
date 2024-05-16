@@ -16,6 +16,8 @@ class Company extends ModelTenant
 {
     protected $with = ['identity_document_type'];
     protected $fillable = [
+        'gekawa_1',
+        'gekawa_2',
         'document_number',
         'not_principal',
         'choose',
@@ -196,7 +198,7 @@ class Company extends ModelTenant
      */
     public function scopeSelectDataWhatsAppApi($query)
     {
-        return $query->select('ws_api_token', 'ws_api_phone_number_id');
+        return $query->select('ws_api_token', 'ws_api_phone_number_id','gekawa_1','gekawa_2');
     }
 
 

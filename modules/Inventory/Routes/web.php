@@ -126,6 +126,14 @@ if ($hostname) {
             });
 
             Route::prefix('inventory')->group(function () {
+
+
+                Route::prefix('validate')->group(function () {
+                    Route::get('/', 'InventoryController@validateIndex')->name('inventory.validate.index');
+                    Route::get('/tables', 'InventoryController@validateTables');
+                    Route::get('/search-items-validate', 'InventoryController@searchItemsValidate');
+                    Route::get('/search-series-validate', 'InventoryController@searchSeriesValidate');
+                });
                 /**
                  * inventory/
                  * inventory/records
@@ -302,12 +310,15 @@ if ($hostname) {
                 Route::get('tables', 'TransferController@tables');
                 Route::get('record/{inventory}', 'TransferController@record');
                 Route::post('/', 'TransferController@store');
+                Route::post('/to-accept', 'TransferController@storeToAccept');
                 Route::delete('{inventory}', 'TransferController@destroy');
                 Route::get('create', 'TransferController@create')->name('transfer.create');
                 Route::get('stock/{item_id}/{warehouse_id}', 'TransferController@stock');
                 Route::get('items/{warehouse_id}', 'TransferController@items');
+                Route::get('accept-transfer/{id}', 'TransferController@acceptTransfer');
+                Route::get('reject-transfer/{id}', 'TransferController@rejectTransfer');
                 Route::post('search-items', 'TransferController@searchItems');
-
+                
                 Route::get('/download/pdf/{inventoryTransfer}', 'TransferController@getPdf');
                 // Route::get('info/{inventoryTransfer}', 'TransferController@getInventoryTransferData');
 

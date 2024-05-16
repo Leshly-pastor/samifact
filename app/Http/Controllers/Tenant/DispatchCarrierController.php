@@ -90,25 +90,35 @@ class DispatchCarrierController extends Controller
         $d_start = $request->d_start;
         $number = $request->number;
         $series = $request->series;
+        $input = $request->input;
+        $emission_date = $request->emission_date;
         $customer_id = $request->customer_id;
-
+        $query = Dispatch::query();
         if ($d_start && $d_end) {
-            $query = Dispatch::query()
+            $query = $query
                 ->where('document_type_id', '31')
                 ->where('series', 'like', '%' . $series . '%')
                 ->whereBetween('date_of_issue', [$d_start, $d_end]);
         } else {
-            $query = Dispatch::query()
+            $query = $query
                 ->where('document_type_id', '31')
                 ->where('series', 'like', '%' . $series . '%');
         }
-
+        if ($emission_date) {
+            $query->where('date_of_issue', $emission_date);
+        }
         if ($number) {
             $query->where('number', $number);
         }
 
         if ($customer_id) {
             $query->where('customer_id', $customer_id);
+        }
+        if ($input && $input != 'null' && $input != 'undefined' && $input != '') {
+            $query->whereHas('person', function ($query) use ($input) {
+                $query->where('name', 'like', "%{$input}%")
+                    ->orWhere('number', 'like', "%{$input}%");
+            });
         }
 
         return $query->latest();
@@ -350,7 +360,8 @@ class DispatchCarrierController extends Controller
             'message' => $message,
             'data' => [
                 'id' => $document->id,
-                'send_sunat' => $configuration->auto_send_dispatchs_to_sunat
+                'send_sunat' => $configuration->auto_send_dispatchs_to_sunat,
+                'external_id' => $document->external_id,
             ],
         ];
     }

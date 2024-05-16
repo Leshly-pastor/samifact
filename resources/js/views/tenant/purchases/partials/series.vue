@@ -7,7 +7,7 @@
                     <table width="100%">
                         <thead>
                             <tr width="100%">
-                                <th v-if="lots.length>0">Serie</th>
+                                <th v-if="lots.length>0">Seriae</th>
                                 <th v-if="lots.length>0">Estado</th>
                                 <th v-if="lots.length>0">Fecha</th>
                                 <th width="15%"></th>

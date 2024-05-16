@@ -55,7 +55,9 @@ class VoidedController extends Controller
             if(!$summary) {
                 throw new Exception("El ticket {$ticket} es inválido, no se encontró anulación relacionada");
             }
-        } else {
+        } 
+        
+        else {
             throw new Exception('Es requerido el código externo o ticket');
         }
 

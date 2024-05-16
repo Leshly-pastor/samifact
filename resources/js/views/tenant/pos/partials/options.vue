@@ -8,7 +8,6 @@
         :close-on-press-escape="false"
         :show-close="false"
     >
-        
         <span slot="title">
             <div class="widget-summary widget-summary-xs pl-3 p-2">
                 <div class="widget-summary-col widget-summary-col-icon">
@@ -188,11 +187,12 @@
                         <!-- <small class="text-danger" v-if="errors.customer_email" v-text="errors.customer_email[0]"></small> -->
                     </div>
 
-                    <div class="col-md-12 mt-2">
+                    <div
+                        class="col-md-12 mt-2"
+                        v-if="!configuration.show_gekawa_mk"
+                    >
                         <el-input v-model="form.customer_telephone">
-                            <template slot="prepend"
-                                >+51</template
-                            >
+                            <template slot="prepend">+51</template>
                             <el-button
                                 slot="append"
                                 @click="clickSendWhatsapp"
@@ -207,14 +207,37 @@
                             v-text="errors.customer_telephone[0]"
                         ></small>
                     </div>
+
+                    <div class="col-md-12 mt-2" v-else>
+                        <el-input
+                            v-model="form.customer_telephone"
+                            id="customerTelephone"
+                            type="text"
+                            placeholder="Número de teléfono"
+                            required
+                        >
+                            <template slot="prepend">+51</template>
+                            <el-button
+                                slot="append"
+                                @click="clickSendWhatsapp3"
+                                :disabled="loading_Whatsapp"
+                                >Enviar PDF
+                                <i class="fab fa-whatsapp"></i>
+                            </el-button>
+                        </el-input>
+                        <small
+                            v-if="errors.customer_telephone"
+                            class="text-danger"
+                            v-text="errors.customer_telephone[0]"
+                        ></small>
+                    </div>
+
                     <div class="col-md-12 mt-2">
                         <el-input
                             v-model="form.customer_telephone"
                             placeholder="Enviar link por WhatsApp"
                         >
-                            <template slot="prepend"
-                                >+51</template
-                            >
+                            <template slot="prepend">+51</template>
                             <el-button slot="append" @click="clickSendWhatsapp2"
                                 >Enviar URL
                                 <el-tooltip
@@ -272,10 +295,17 @@ import Keypress from "vue-keypress";
 import SaleNoteGenerate from "@views/sale_notes/partials/option_documents.vue";
 
 export default {
-    props: ["showDialog", "recordId", "statusDocument", "resource", "fromPos","type_id"],
+    props: [
+        "showDialog",
+        "recordId",
+        "statusDocument",
+        "resource",
+        "fromPos",
+        "type_id",
+    ],
     components: {
         Keypress,
-        SaleNoteGenerate
+        SaleNoteGenerate,
     },
     data() {
         return {
@@ -289,16 +319,17 @@ export default {
             activeName: "first",
             showDialogGenerate: false,
             button_convert_cpe_pos: true,
-            isOpen:false,
+            isOpen: false,
         };
     },
     created() {
         this.initForm();
         this.loadConfiguration();
-       // window.addEventListener("keydown", this.clickNewSale);
-        
+        // window.addEventListener("keydown", this.clickNewSale);
     },
-   mounted() {
+    mounted() {
+        this.initForm();
+        this.getCompanyData();
         document.addEventListener("keydown", this.handleKeydown);
     },
     beforeUnmount() {
@@ -321,12 +352,15 @@ export default {
         },
         isFromPos() {
             return this.fromPos != undefined && this.fromPos;
-        }
+        },
     },
     methods: {
         handleKeydown(event) {
-            if ((event.keyCode === 13 || event.key === "Enter") && this.isOpen) {
-                this.isOpen=false;
+            if (
+                (event.keyCode === 13 || event.key === "Enter") &&
+                this.isOpen
+            ) {
+                this.isOpen = false;
                 this.clickNewSale();
             }
         },
@@ -342,9 +376,7 @@ export default {
                 return this.$message.error("El número es obligatorio");
             }
             window.open(
-                `https://wa.me/51${this.form.customer_telephone}?text=${
-                    this.form.message_text
-                }`,
+                `https://wa.me/51${this.form.customer_telephone}?text=${this.form.message_text}`,
                 "_blank"
             );
         },
@@ -353,31 +385,69 @@ export default {
             if (!this.form.customer_telephone) {
                 return this.$message.error("El número es obligatorio");
             }
-             this.loading_Whatsapp = true;
+            this.loading_Whatsapp = true;
             let form = {
                 id: this.recordId,
                 customer_telephone: this.form.customer_telephone,
-                type_id : this.resource == 'sale-notes' ? "NV" : "FACT",
-                mensaje:"Su comprobante de Pago  N° " + this.form.identifier||this.form.number +
-                    " ha sido generado correctamente"
+                type_id: this.resource == "sale-notes" ? "NV" : "FACT",
+                mensaje:
+                    "Su comprobante de Pago  N° " + this.form.identifier ||
+                    this.form.number + " ha sido generado correctamente",
             };
-            this.$http.post(`/whatsapp`, form).then(response => {
-                if (response.data.success == true) {
-                        this.$message.success(response.data.message)
-                        this.loading_Whatsapp = false
-                }else{
-                    this.$message.error(response.data.message)
-                    this.loading_Whatsapp = false
-                }
-            }).catch(error => {
-                    this.loading_Whatsapp = false
+            this.$http
+                .post(`/whatsapp`, form)
+                .then((response) => {
+                    if (response.data.success == true) {
+                        this.$message.success(response.data.message);
+                        this.loading_Whatsapp = false;
+                    } else {
+                        this.$message.error(response.data.message);
+                        this.loading_Whatsapp = false;
+                    }
+                })
+                .catch((error) => {
+                    this.loading_Whatsapp = false;
                     this.$message.error(error.response.data.message);
-                 })
-            .finally(() => {
-                this.loading_Whatsapp = false
-                this.$message.error(error.response.data.message);
-            });
+                })
+                .finally(() => {
+                    this.loading_Whatsapp = false;
+                    this.$message.error(error.response.data.message);
+                });
         },
+
+        clickSendWhatsapp3() {
+            // Obtén la URL del archivo PDF
+            // const printUrl = this.getPrintUrl('a4');
+
+            // Crear un objeto FormData
+            var formData = new FormData();
+            formData.append("appkey", this.company.gekawa_1);
+            formData.append("authkey", this.company.gekawa_2);
+            formData.append("to", "51" + this.form.customer_telephone);
+            formData.append(
+                "message",
+                "Comprobante de pago adjunto " + this.form.identifier ||
+                    this.form.number
+            );
+
+            // Agregar la URL del archivo PDF al formulario
+            formData.append("file", this.form.print_a4);
+
+            // Realizar la solicitud HTTP
+            fetch("https://gekawa.com/api/create-message", {
+                method: "POST",
+                body: formData,
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    // Manejar la respuesta de la API aquí
+                    console.log(data);
+                })
+                .catch((error) => {
+                    console.error("Error al enviar la solicitud:", error);
+                });
+        },
+
         someMethod(response) {
             if (!this.showDialog) {
                 return;
@@ -460,23 +530,63 @@ export default {
                 number: null,
                 customer_telephone: null,
                 message_text: null,
-                id: null
+                id: null,
+            };
+            this.company = {
+                gekawa_1: null,
+                gekawa_2: null,
             };
 
             this.changeActiveName();
 
             this.button_convert_cpe_pos = true;
         },
+
+        async getCompany() {
+            this.loading = true;
+            await this.$http
+                .get(`/companies/record`)
+                .then((response) => {
+                    if (response.data !== "") {
+                        this.company = response.data.data;
+                    }
+                })
+                .finally(() => (this.loading = false));
+        },
+
+        async getCompanyData() {
+            try {
+                this.loading = true;
+                const response = await this.$http.get(`/companies/record`);
+                if (response.data && response.data.data) {
+                    // Asigna los datos de la empresa a this.company
+                    this.company = response.data.data;
+
+                    // Asigna gekawa_1 y gekawa_2 a sus respectivas propiedades
+                    this.company.gekawa_1 = response.data.data.gekawa_1;
+                    this.company.gekawa_2 = response.data.data.gekawa_2;
+                } else {
+                    console.error(
+                        "Error: No se recibieron datos válidos de la empresa"
+                    );
+                }
+            } catch (error) {
+                console.error("Error al obtener datos de la empresa:", error);
+            } finally {
+                this.loading = false;
+            }
+        },
+
         create() {
-            this.isOpen=true;
+            this.isOpen = true;
             this.$http
                 .get(`/${this.resource}/record/${this.recordId}`)
-                .then(response => {
+                .then((response) => {
                     this.form = response.data.data;
                     this.titleDialog = "Comprobante: " + this.form.number;
                 });
 
-            this.$http.get(`/pos/status_configuration`).then(response => {
+            this.$http.get(`/pos/status_configuration`).then((response) => {
                 this.configuration = response.data;
             });
         },
@@ -493,9 +603,9 @@ export default {
             this.$http
                 .post(`/${this.resource}/email`, {
                     customer_email: this.form.customer_email,
-                    id: this.form.id
+                    id: this.form.id,
                 })
-                .then(response => {
+                .then((response) => {
                     if (response.data.success) {
                         this.$message.success(
                             "El correo fue enviado satisfactoriamente"
@@ -504,7 +614,7 @@ export default {
                         this.$message.error("Error al enviar el correo");
                     }
                 })
-                .catch(error => {
+                .catch((error) => {
                     if (error.response.status === 422) {
                         this.errors = error.response.data.errors;
                     } else {
@@ -539,7 +649,7 @@ export default {
                         ? "third"
                         : "quarter";
             }
-        }
+        },
         // clickConsultCdr(document_id) {
         //     this.$http.get(`/${this.resource}/consult_cdr/${document_id}`)
         //         .then(response => {
@@ -564,6 +674,6 @@ export default {
         //     this.$emit('update:showDialog', false)
         //     this.initForm()
         // },
-    }
+    },
 };
 </script>

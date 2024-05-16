@@ -118,21 +118,25 @@ class DispatchController extends Controller
         $d_end = $request->d_end;
         $d_start = $request->d_start;
         $number = $request->number;
+        $emission_date = $request->emission_date;
         $series = $request->series;
+        $input = $request->input;
         $customer_id = $request->customer_id;
         $inventory_reference_id = $request->inventory_reference_id;
-
+        $query = Dispatch::query();
         if ($d_start && $d_end) {
-            $query = Dispatch::query()
-                ->where('document_type_id', '09')
+
+            $query = $query->where('document_type_id', '09')
                 ->where('series', 'like', '%' . $series . '%')
                 ->whereBetween('date_of_issue', [$d_start, $d_end]);
         } else {
-            $query = Dispatch::query()
-                ->where('document_type_id', '09')
+
+            $query = $query->where('document_type_id', '09')
                 ->where('series', 'like', '%' . $series . '%');
         }
-
+        if ($emission_date) {
+            $query->where('date_of_issue', $emission_date);
+        }
         if ($number) {
             $query->where('number', $number);
         }
@@ -143,6 +147,13 @@ class DispatchController extends Controller
 
         if ($customer_id) {
             $query->where('customer_id', $customer_id);
+        }
+
+        if ($input && $input != 'null' && $input != 'undefined' && $input != '') {
+            $query->whereHas('person', function ($query) use ($input) {
+                $query->where('name', 'like', "%{$input}%")
+                    ->orWhere('number', 'like', "%{$input}%");
+            });
         }
 
         return $query->latest();
@@ -468,6 +479,7 @@ class DispatchController extends Controller
             'message' => $message,
             'data' => [
                 'id' => $document->id,
+                'external_id' => $document->external_id,
                 'send_sunat' => $configuration->auto_send_dispatchs_to_sunat
             ],
         ];
@@ -730,17 +742,18 @@ class DispatchController extends Controller
             'itemsFromSummary'
         );
     }
-    public function dispatchSeries(){
+    public function dispatchSeries()
+    {
         $series = Series::whereIn('document_type_id', ['09', '31'])->get()
-        ->transform(function ($row) {
-            return [
-                'id' => $row->id,
-                'contingency' => $row->contingency,
-                'document_type_id' => $row->document_type_id,
-                'establishment_id' => $row->establishment_id,
-                'number' => $row->number,
-            ];
-        });
+            ->transform(function ($row) {
+                return [
+                    'id' => $row->id,
+                    'contingency' => $row->contingency,
+                    'document_type_id' => $row->document_type_id,
+                    'establishment_id' => $row->establishment_id,
+                    'number' => $row->number,
+                ];
+            });
 
         return [
             'success' => true,
