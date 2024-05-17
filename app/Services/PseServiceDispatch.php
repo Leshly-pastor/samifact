@@ -26,6 +26,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use SimpleXMLElement;
 use Illuminate\Support\Str;
+use Modules\Dispatch\Models\Dispatcher;
 
 class PseServiceDispatch
 {
@@ -999,22 +1000,41 @@ class PseServiceDispatch
     }
     function  setTransporterInfo($xml)
     {
-
-        $xml->addChild('tidotr', '6');
-        $xml->addChild('nudotr', $this->company->number);
-        $xml->addChild('dedotr', 'RUC');
-        //codigo transportista
-        // $xml->addChild('codtrp', '01');
-        //es posible company->name tenga tildes y eso no es permitido
-        $name = $this->company->name;
-        //a mayusculas
-        $name = strtoupper($name);
-        //quitar tildes
-        $name = $this->removeAccentMark($name);
-        $xml->addChild('nombtr', $name);
-        //dirección
-        // $xml->addChild('dirtrp', '01');
-
+        if (isset($this->document->dispatcher)) {
+            $dispatcher = $this->document->dispatcher;
+            $number = $dispatcher->number;
+            $dispatcher_db = Dispatcher::where('number', $number)->first();
+            if ($dispatcher_db) {
+                $xml->addChild('tidotr', $dispatcher_db->identity_document_type_id);
+                $xml->addChild('nudotr', $dispatcher_db->number);
+                $xml->addChild('dedotr', $dispatcher_db->identity_document_type->description);
+                // $xml->addChild('nombtr', $dispatcher_db->name);
+                $name = $dispatcher_db->name;
+                $name = strtoupper($name);
+                $name = $this->removeAccentMark($name);
+                $xml->addChild('nombtr', $name);
+                $address = $dispatcher_db->address; 
+                if($address){
+                    $remove_accent_address = $this->removeAccentMark($address);
+                    $xml->addChild('dirtrp', $remove_accent_address);
+                }
+            }
+        } else {
+            $xml->addChild('tidotr', '6');
+            $xml->addChild('nudotr', $this->company->number);
+            $xml->addChild('dedotr', 'RUC');
+            //codigo transportista
+            // $xml->addChild('codtrp', '01');
+            //es posible company->name tenga tildes y eso no es permitido
+            $name = $this->company->name;
+            //a mayusculas
+            $name = strtoupper($name);
+            //quitar tildes
+            $name = $this->removeAccentMark($name);
+            $xml->addChild('nombtr', $name);
+            //dirección
+            $xml->addChild('dirtrp', '');
+        }
     }
     function removeAccentMark($word)
     {
@@ -1033,7 +1053,7 @@ class PseServiceDispatch
     function setVehicleInfo($xml)
     {
         $transport_data = $this->document->transport_data;
-        if($transport_data){
+        if ($transport_data) {
             $brand = $transport_data["brand"];
             $plate_number = $transport_data["plate_number"];
             $xml->addChild('plaveh', $plate_number);
@@ -1060,19 +1080,19 @@ class PseServiceDispatch
     function setDriverInfo($xml)
     {
         $driver = $this->document->driver;
-        if($driver!=null){
+        if ($driver != null) {
             $xml->addChild('tidoco', $driver->identity_document_type_id);
-        $xml->addChild('nudocu', $driver->number);
-        $identity_document_type_id = $driver->identity_document_type_id;
-        $identity_document_type = IdentityDocumentType::find($identity_document_type_id);
-        $xml->addChild('dedocu', $identity_document_type->description);
-        //codigo de coductor
-        // $xml->addChild('codcho', $brand);
-        $xml->addChild('tipcho', "Principal");
-        $full_name = $this->getNameAndLastName($driver->name);
-        $xml->addChild('nomcho', $full_name['name']);
-        $xml->addChild('apecho', $full_name['last_name']);
-        $xml->addChild('licveh', $driver->license);
+            $xml->addChild('nudocu', $driver->number);
+            $identity_document_type_id = $driver->identity_document_type_id;
+            $identity_document_type = IdentityDocumentType::find($identity_document_type_id);
+            $xml->addChild('dedocu', $identity_document_type->description);
+            //codigo de coductor
+            // $xml->addChild('codcho', $brand);
+            $xml->addChild('tipcho', "Principal");
+            $full_name = $this->getNameAndLastName($driver->name);
+            $xml->addChild('nomcho', $full_name['name']);
+            $xml->addChild('apecho', $full_name['last_name']);
+            $xml->addChild('licveh', $driver->license);
         }
     }
 
