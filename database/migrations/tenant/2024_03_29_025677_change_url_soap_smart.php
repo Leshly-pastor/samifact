@@ -15,10 +15,13 @@ class ChangeUrlSoapSmart extends Migration
     public function up()
     {
         $company = DB::connection('tenant')->table('companies')->first();
-        if($company->soap_url == "https://prod.conose.cpe.pe/ol-ti-itcpe/billService?wsdl"){
-            DB::connection('tenant')->table('companies')->update(['soap_url' => 'https://ose.cpe.pe/ol-ti-itcpe/billService?wsdl']);
-        }
+        //si existe soap_url y es igual a la url de smart
 
+        if ($company) {
+            if ($company->soap_url && $company->soap_url == "https://prod.conose.cpe.pe/ol-ti-itcpe/billService?wsdl") {
+                DB::connection('tenant')->table('companies')->update(['soap_url' => 'https://ose.cpe.pe/ol-ti-itcpe/billService?wsdl']);
+            }
+        }
     }
 
     /**
@@ -28,8 +31,5 @@ class ChangeUrlSoapSmart extends Migration
      */
     public function down()
     {
-    
-    
-        
     }
 }

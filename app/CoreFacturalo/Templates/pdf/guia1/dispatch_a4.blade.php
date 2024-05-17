@@ -413,6 +413,22 @@ if ($logo) {
         <td width="50%">
             <table class="full-width font-bold align-top">
                 @if ($document->transport_mode_type_id === '01')
+                <tr>
+                    <td class="pl-2 align-top" width="130px">Marca Vehiculo</td>
+                    <td class="pl-2 align-top" width="2px">:</td>
+                    <td class="pl-2 align-top" width="">@isset ( $document->transport_data['brand']) {{ $document->transport_data['brand'] }} @endif </td>
+                </tr>
+                <tr>
+                    <td class="pl-2 align-top">Modelo</td>
+                    <td class="pl-2 align-top">:</td>
+                    <td class="pl-2 align-top">@isset ($document->transport_data['model'] ) {{ $document->transport_data['model'] }} @endif</td>
+                </tr>
+                <tr>
+                    <td class="pl-2 align-top">No.de Placa</td>
+                    <td class="pl-2 align-top">:</td>
+                    <td class="pl-2 align-top">@isset ($document->transport_data['plate_number'] ) {{ $document->transport_data['plate_number'] }} @endif</td>
+                </tr>
+
                 @else
                     <tr>
                         <td class="pl-2 align-top" width="130px">Marca Vehiculo</td>
