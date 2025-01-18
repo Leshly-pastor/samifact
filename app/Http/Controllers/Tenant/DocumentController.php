@@ -1033,6 +1033,7 @@ class DocumentController extends Controller
         } catch (Exception $e) {
             $code = $e->getCode();
             $this->generalWriteErrorLog($e);
+            dd($e->getMessage());
             Log::error($e->getMessage() . " " . $e->getFile() . " " . $e->getLine());
             if ($code == '23000') {
                 $message = "Debe eliminar los comprobantes de prueba antes de empezar a emitir comprobantes con valor legal.";
@@ -1127,6 +1128,7 @@ class DocumentController extends Controller
                 $company = Company::active();
             }
             $result = $facturalo->save($data, $duplicate);
+
             if ($company_id) {
 
                 $document_number = $company->document_number;
@@ -1162,7 +1164,9 @@ class DocumentController extends Controller
                 }
             }
             //aqui
+
             if (isset($result->id) == true) {
+
                 $facturalo->createXmlUnsigned($result->id);
             } else {
                 $facturalo->createXmlUnsigned();

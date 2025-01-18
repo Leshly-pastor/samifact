@@ -6,7 +6,7 @@ use App\CoreFacturalo\Requests\Api\Transform\Common\EstablishmentTransform;
 use App\CoreFacturalo\Requests\Api\Transform\Common\PersonTransform;
 use App\CoreFacturalo\Requests\Api\Transform\Common\ActionTransform;
 use App\CoreFacturalo\Requests\Api\Transform\Common\LegendTransform;
-
+use Illuminate\Support\Facades\Log;
 class DocumentTransform
 {
     public static function transform($inputs)
@@ -89,6 +89,7 @@ class DocumentTransform
     {
         if(key_exists('items', $inputs)) {
             $items = [];
+            Log::info('Items Input:', $inputs);
             foreach ($inputs['items'] as $row) {
                 $items[] = [
                     'internal_id' => isset($row['codigo_interno']) ? $row['codigo_interno']:'',
@@ -103,7 +104,7 @@ class DocumentTransform
 
                     'quantity' => Functions::valueKeyInArray($row, 'cantidad'),
                     'unit_value' => Functions::valueKeyInArray($row, 'valor_unitario'),
-                    'price_type_id' => Functions::valueKeyInArray($row, 'codigo_tipo_precio'),
+                    'price_type_id' => Functions::valueKeyInArray($row, 'codigo_tipo_precio','01'),
                     'unit_price' => Functions::valueKeyInArray($row, 'precio_unitario'),
 
                     'affectation_igv_type_id' => Functions::valueKeyInArray($row, 'codigo_tipo_afectacion_igv'),

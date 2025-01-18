@@ -196,13 +196,13 @@ if ($hostname) {
             Route::post('companies', 'Tenant\CompanyController@store');
             Route::post('companies/uploads', 'Tenant\CompanyController@uploadFile');
 
-            //configuracion envio documento a 
+            //configuracion envio documento a
 
             Route::post('companies/store-send-pse', 'Tenant\CompanyController@storeSendPse');
             Route::get('companies/record-send-pse', 'Tenant\CompanyController@recordSendPse');
             Route::post('companies/pse', 'Tenant\CompanyController@storePse');
             Route::get('companies/pse', 'Tenant\CompanyController@recordPse');
-            
+
             //configuracion WhatsApp Api
             Route::post('companies/store-whatsapp-api', 'Tenant\CompanyController@storeWhatsAppApi');
             Route::get('companies/record-whatsapp-api', 'Tenant\CompanyController@recordWhatsAppApi');
@@ -653,7 +653,7 @@ if ($hostname) {
             Route::get('currency_types/record/{currency_type}', 'Tenant\CurrencyTypeController@record');
             Route::post('currency_types', 'Tenant\CurrencyTypeController@store');
             Route::delete('currency_types/{currency_type}', 'Tenant\CurrencyTypeController@destroy');
-            
+
             //Perceptions
             Route::get('perceptions', 'Tenant\PerceptionController@index')->name('tenant.perceptions.index');
             Route::get('perceptions/columns', 'Tenant\PerceptionController@columns');

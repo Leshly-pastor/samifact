@@ -40,6 +40,7 @@ class Template
 
     public function xml($template, $company, $document)
     {
+        //dd($template,$company,$document);
         return self::render('xml.'.$template, $company, $document);
     }
 

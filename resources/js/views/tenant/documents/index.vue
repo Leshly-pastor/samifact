@@ -7,7 +7,7 @@
             <ol class="breadcrumbs">
                 <li class="active"><span>Comprobantes</span></li>
                 <li>
-                    <span class="text-muted">Facturas - Boletas</span>
+                    <span class="text-muted">Facturas - Boletas1</span>
                 </li>
             </ol>
             <div

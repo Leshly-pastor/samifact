@@ -86,7 +86,7 @@ class DocumentResource extends JsonResource
             'send_to_pse' => $document->send_to_pse,
             'response_signature_pse' => optional($document->response_signature_pse)->message,
             'response_send_cdr_pse' => optional($document->response_send_cdr_pse)->message,
-            
+
         ];
         return $data;
     }
